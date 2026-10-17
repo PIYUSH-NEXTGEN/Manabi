@@ -75,6 +75,47 @@ describe('ChatWidget', () => {
     expect(screen.getByText(/data-engineering · beginner/i)).toBeInTheDocument();
   });
 
+  it('renders markdown replies as formatted elements with inline problem links', async () => {
+    server.use(
+      http.post('*/api/chat', () =>
+        HttpResponse.json({
+          reply:
+            'Prefer **PR-AUC** over accuracy for rare events:\n\n- Drop standard accuracy\n- Tune the decision threshold\n\nStart with [P17].',
+          problems: [
+            {
+              id: 17,
+              title: 'Sepsis early-warning from ICU vitals',
+              field: 'ml',
+              difficulty: 'advanced',
+            },
+          ],
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<ChatWidget />);
+
+    await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
+    await user.type(
+      screen.getByPlaceholderText(/What do you want to build/i),
+      'imbalanced classification',
+    );
+    await user.click(screen.getByRole('button', { name: 'Send' }));
+
+    expect((await screen.findByText('PR-AUC')).tagName).toBe('STRONG');
+    expect(screen.getByText('Drop standard accuracy')).toBeInTheDocument();
+    expect(screen.getByText('Tune the decision threshold')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'P17' })).toHaveAttribute(
+      'href',
+      '/problems/17',
+    );
+    expect(screen.getByText('Sepsis early-warning from ICU vitals')).toHaveAttribute(
+      'href',
+      '/problems/17',
+    );
+    expect(screen.queryByText(/\*\*/)).toBeNull();
+  });
+
   it('shows honest errors when the chat API is rate limited', async () => {
     server.use(
       http.post('*/api/chat', () =>

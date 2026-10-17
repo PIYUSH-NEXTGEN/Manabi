@@ -10,10 +10,11 @@ import {
   type ChatOut,
   type ChatProblemItem,
 } from '@/api/client';
+import { Markdown } from '@/components/markdown/Markdown';
 
 const OPEN_CHAT_EVENT = 'manabi:open-chat';
-const MAX_HISTORY = 12;
-const MAX_MESSAGE_LENGTH = 1000;
+const MAX_HISTORY = 6;
+const MAX_MESSAGE_LENGTH = 500;
 
 export function openChatWidget() {
   window.dispatchEvent(new CustomEvent(OPEN_CHAT_EVENT));
@@ -168,7 +169,13 @@ export function ChatWidget() {
                     : 'bg-white',
                 )}
               >
-                <p>{entry.message.content}</p>
+                {entry.message.role === 'assistant' ? (
+                  <Markdown problemsAsLinks>
+                    {entry.message.content}
+                  </Markdown>
+                ) : (
+                  <p>{entry.message.content}</p>
+                )}
                 {entry.problems && entry.problems.length > 0 ? (
                   <ReplyProblems problems={entry.problems} />
                 ) : null}

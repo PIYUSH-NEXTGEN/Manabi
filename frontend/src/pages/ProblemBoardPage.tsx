@@ -118,18 +118,12 @@ export function ProblemBoardPage() {
               onChange={(event) => setParam('q', event.target.value)}
             />
           </form>
-          <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
             <FilterSelect
               label="Field"
               value={field}
               onChange={(value) => setParam('field', value)}
               options={facets.data?.fields ?? []}
-            />
-            <FilterSelect
-              label="Domain"
-              value={domain}
-              onChange={(value) => setParam('domain', value)}
-              options={facets.data?.domains ?? []}
             />
             <FilterSelect
               label="Difficulty"
@@ -138,10 +132,10 @@ export function ProblemBoardPage() {
               options={facets.data?.difficulties ?? []}
             />
             <FilterSelect
-              label="Source"
-              value={source}
-              onChange={(value) => setParam('source', value)}
-              options={facets.data?.sources ?? []}
+              label="Domain"
+              value={domain}
+              onChange={(value) => setParam('domain', value)}
+              options={facets.data?.domains ?? []}
             />
           </div>
           <div className="mt-4 flex flex-col gap-2">
@@ -149,7 +143,7 @@ export function ProblemBoardPage() {
               Filter by tech
             </span>
             <TechChips
-              options={facets.data?.tech_tags ?? []}
+              options={(facets.data?.tech_tags ?? []).slice(0, 8)}
               selected={tech}
               onToggle={toggleTech}
             />
@@ -204,9 +198,9 @@ export function ProblemBoardPage() {
         ) : null}
 
         {problems.length > 0 ? (
-          <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-6 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
             {problems.map((problem) => (
-              <ProblemCard key={problem.id} problem={problem} />
+              <ProblemCard key={problem.id} problem={problem} className="h-full" />
             ))}
           </div>
         ) : null}

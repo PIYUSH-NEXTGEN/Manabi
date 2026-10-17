@@ -38,12 +38,12 @@ describe('MlQuestionsPage', () => {
     ).toBeInTheDocument();
     expect(
       await screen.findByRole('heading', {
-        name: 'Metrics lie after the launch',
+        name: 'Train or test first? Splitting a tiny dataset',
         level: 2,
       }),
     ).toBeInTheDocument();
-    expect(await screen.findByText(/train-serving-skew/i)).toBeInTheDocument();
-    expect(await screen.findAllByText('Not attempted yet')).toHaveLength(2);
+    expect(await screen.findByText(/train-test-split/i)).toBeInTheDocument();
+    expect(await screen.findAllByText('Not attempted yet')).toHaveLength(5);
   });
 
   it('marks attempted questions via the attempts/me API when logged in', async () => {
@@ -77,7 +77,7 @@ describe('MlQuestionsPage', () => {
       await screen.findByText('The model works offline, fails online'),
     ).toBeInTheDocument();
     expect(await screen.findAllByText('Attempted')).toHaveLength(1);
-    expect(await screen.findByText('Not attempted yet')).toBeInTheDocument();
+    expect(await screen.findAllByText('Not attempted yet')).toHaveLength(4);
   });
 });
 
@@ -87,14 +87,14 @@ describe('MlQuestionPage', () => {
 
     expect(
       await screen.findByRole('heading', {
-        name: 'Metrics lie after the launch',
+        name: 'Train or test first? Splitting a tiny dataset',
         level: 1,
       }),
     ).toBeInTheDocument();
     const scenario = await screen.findByRole('region', {
       name: 'Scenario',
     });
-    expect(scenario).toHaveTextContent('0.93 AUC');
+    expect(scenario).toHaveTextContent('800 labeled customer reviews');
     expect(screen.queryByLabelText('Attempt area')).not.toBeInTheDocument();
     expect(screen.getByText(/Log in with GitHub to submit/i)).toBeInTheDocument();
   });
@@ -144,7 +144,7 @@ describe('MlQuestionPage', () => {
     expect(
       screen.getByText(/Pull the served predictions and bucket by day-of-week/i),
     ).toHaveTextContent(
-      '1. Pull the served predictions and bucket by day-of-week before anything else.',
+      'Pull the served predictions and bucket by day-of-week before anything else.',
     );
   });
 

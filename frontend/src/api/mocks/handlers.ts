@@ -189,18 +189,21 @@ const facets = {
 };
 
 const mlQuestions = [
-  { id: 1, title: 'Metrics lie after the launch', difficulty: 'beginner', topic: 'bad-eval-split', attempted: false },
-  { id: 2, title: 'The model works offline, fails online', difficulty: 'intermediate', topic: 'train-serving-skew', attempted: false },
+  { id: 1, title: 'Train or test first? Splitting a tiny dataset', difficulty: 'beginner', topic: 'train-test-split', attempted: false },
+  { id: 2, title: 'Accuracy says 98% but the model catches nothing', difficulty: 'beginner', topic: 'imbalanced-metrics', attempted: false },
+  { id: 3, title: 'The model memorized the training set', difficulty: 'beginner', topic: 'overfitting-basics', attempted: false },
+  { id: 4, title: 'Metrics lie after the launch', difficulty: 'beginner', topic: 'bad-eval-split', attempted: false },
+  { id: 5, title: 'The model works offline, fails online', difficulty: 'intermediate', topic: 'train-serving-skew', attempted: false },
 ];
 
 const mlQuestionDetail = {
   id: 1,
-  title: 'Metrics lie after the launch',
+  title: 'Train or test first? Splitting a tiny dataset',
   difficulty: 'beginner',
-  topic: 'bad-eval-split',
+  topic: 'train-test-split',
   attempted: false,
   scenario:
-    '## Monday morning\nYour churn model shipped Friday at 0.93 AUC on the holdout set. On Monday the product dashboard shows retention predictions that are almost constant: 91%, 92%, 91%. The training job sampled rows randomly from a table where each customer appears once per week for a year.\n\nList what broke and what you would check first.',
+    '## Split first\nYou have 800 labeled customer reviews. One teammate says: train on all 800, check accuracy on the same 800. Another says: split 80/20 first.\n\nList what broke and what you would check first.',
 };
 
 const sampleProject = {

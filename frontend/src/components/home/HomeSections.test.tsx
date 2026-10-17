@@ -18,10 +18,12 @@ describe('MlTeaser', () => {
     renderWithProviders(<MlTeaser />);
 
     expect(
-      await screen.findByText(/0\.93 AUC on the holdout set/),
+      await screen.findByText(/800 labeled customer reviews/),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Metrics lie after the launch · bad-eval-split'),
+      screen.getByText(
+        /Train or test first\? Splitting a tiny dataset · train-test-split/,
+      ),
     ).toBeInTheDocument();
     expect(
       screen.getByRole('link', { name: 'Start practicing' }),

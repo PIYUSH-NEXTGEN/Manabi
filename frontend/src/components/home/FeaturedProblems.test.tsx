@@ -8,12 +8,12 @@ import { FeaturedProblems } from './FeaturedProblems';
 import { renderWithProviders } from '@/test/renderWithProviders';
 
 function FeaturedHarness() {
-  const query = useProblems({ sort: 'newest', limit: 6 });
+  const query = useProblems({ sort: 'newest', limit: 3 });
   return <FeaturedProblems query={query} />;
 }
 
 describe('FeaturedProblems', () => {
-  it('renders six index cards from the API', async () => {
+  it('renders three index cards from the API', async () => {
     renderWithProviders(<FeaturedHarness />);
 
     expect(
@@ -24,7 +24,7 @@ describe('FeaturedProblems', () => {
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole('heading', { level: 3 }),
-    ).toHaveLength(6);
+    ).toHaveLength(3);
   });
 
   it('shows the API error detail with a working retry', async () => {

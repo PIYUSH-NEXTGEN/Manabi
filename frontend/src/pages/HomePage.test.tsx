@@ -42,8 +42,8 @@ describe('HomePage', () => {
     expect(cropHeadings.length).toBeGreaterThanOrEqual(2);
 
     expect(
-      screen.getByRole('heading', { name: 'Pharmacy stock-out early warning' }),
-    ).toBeInTheDocument();
+      screen.getAllByRole('heading', { name: 'Streetlight outage tracker' }).length,
+    ).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText('SIH26017').length).toBeGreaterThanOrEqual(2);
   });
 
@@ -70,12 +70,9 @@ describe('HomePage', () => {
     ).toBeGreaterThan(0);
   });
 
-  it('renders the how-it-works numerals and the ML teaser excerpt', async () => {
+  it('renders the ML teaser excerpt', async () => {
     renderWithProviders(<HomePage />, { route: '/' });
-
-    expect(screen.getByText('01')).toBeInTheDocument();
-    expect(screen.getByText('04')).toBeInTheDocument();
-    expect(await screen.findByText(/0\.93 AUC/)).toBeInTheDocument();
+    expect(await screen.findByText(/800 labeled customer reviews/)).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: 'Production bugs, not puzzles' }),
     ).toBeInTheDocument();

@@ -37,16 +37,16 @@ export function IndexCard({
 
   return (
     <article
-      className={cx('border-[3px] border-ink bg-white shadow-hard', className)}
+      className={cx('flex h-full flex-col border-[3px] border-ink bg-white shadow-hard', className)}
     >
       <header className="flex items-center justify-between gap-3 border-b-[3px] border-ink bg-ink px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-paper">
         <span>{sourceId ?? 'NO-ID'}</span>
         <span>{field}</span>
       </header>
-      <div className="flex flex-col gap-2 p-4">
+      <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="font-display text-lg uppercase leading-tight">{title}</h3>
-        {summary ? <p className="text-sm leading-snug">{summary}</p> : null}
-        <div className="mt-1 flex items-center justify-between gap-3 font-mono text-[11px] font-bold uppercase tracking-widest">
+        {summary ? <p className="line-clamp-3 text-sm leading-snug">{summary}</p> : null}
+        <div className="mt-auto flex items-center justify-between gap-3 pt-2 font-mono text-[11px] font-bold uppercase tracking-widest">
           <span>
             <span aria-hidden>{squares}</span>
             <span className="sr-only">{difficulty}</span>

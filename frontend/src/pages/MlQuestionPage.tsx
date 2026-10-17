@@ -13,6 +13,7 @@ import { useMlQuestion } from '@/hooks/useMlQuestion';
 import { useMlQuestionAttempt } from '@/hooks/useMlQuestionAttempt';
 import { useMe } from '@/hooks/useMe';
 import { ApiError, postAttempt, type AttemptOut } from '@/api/client';
+import { Markdown } from '@/components/markdown/Markdown';
 
 const panelHeading = 'font-mono text-xs font-bold uppercase tracking-widest';
 const smallMono = 'font-mono text-[10px] font-bold uppercase tracking-widest';
@@ -29,9 +30,7 @@ function ScenarioSlab({ markdown }: { markdown: string }) {
       className="border-[3px] border-ink bg-white p-4 shadow-hard"
     >
       <h2 className={panelHeading}>Original scenario</h2>
-      <div className="mt-2 whitespace-pre-wrap text-sm leading-relaxed">
-        {markdown}
-      </div>
+      <Markdown className="mt-2 leading-relaxed">{markdown}</Markdown>
     </section>
   );
 }
@@ -73,9 +72,7 @@ function FeedbackPanel({ attempt }: { attempt: AttemptOut }) {
         {feedback.summary}
       </p>
       <h3 className={cx(panelHeading, 'mt-4')}>Explanation</h3>
-      <div className="mt-1 whitespace-pre-wrap text-sm leading-relaxed">
-        {explanation}
-      </div>
+      <Markdown className="mt-1 leading-relaxed">{explanation}</Markdown>
     </section>
   );
 }

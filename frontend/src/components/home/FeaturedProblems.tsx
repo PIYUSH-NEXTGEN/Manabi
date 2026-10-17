@@ -5,9 +5,6 @@ import type { ApiError, ProblemsListOut } from '@/api/client';
 import { buttonClasses, IndexCard, Skeleton, type Difficulty } from '@/design';
 import { slideUpReveal } from '@/design/motion';
 
-const CARD_OFFSETS = ['md:col-span-7', 'md:col-span-5', 'md:col-span-5', 'md:col-span-7', 'md:col-span-6', 'md:col-span-6'];
-const CARD_NUDGES = ['md:translate-y-0', 'md:translate-y-6', 'md:translate-y-0', 'md:translate-y-6', 'md:translate-y-0', 'md:translate-y-6'];
-
 export function FeaturedProblems({
   query,
 }: {
@@ -16,9 +13,9 @@ export function FeaturedProblems({
   if (query.isLoading) {
     return (
       <section className="border-b-[3px] border-ink">
-        <div className="mx-auto grid w-[min(1200px,96vw)] gap-6 py-12 md:grid-cols-2">
-          {Array.from({ length: 6 }, (_, index) => (
-            <Skeleton key={index} className="h-44" />
+        <div className="mx-auto grid w-[min(1200px,96vw)] gap-6 py-12 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }, (_, index) => (
+            <Skeleton key={index} className="h-64" />
           ))}
         </div>
       </section>
@@ -51,7 +48,7 @@ export function FeaturedProblems({
     return null;
   }
 
-  const items = query.data.items;
+  const items = query.data.items.slice(0, 3);
 
   if (items.length === 0) {
     return (
@@ -81,7 +78,7 @@ export function FeaturedProblems({
           </Link>
         </div>
 
-        <div className="grid gap-x-6 gap-y-10 md:grid-cols-12">
+        <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((problem, index) => (
             <motion.div
               key={problem.id}
@@ -89,15 +86,12 @@ export function FeaturedProblems({
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, amount: 0.2 }}
-              transition={{ delay: (index % 2) * 0.06 }}
-              className={[
-                CARD_OFFSETS[index % CARD_OFFSETS.length],
-                CARD_NUDGES[index % CARD_NUDGES.length],
-              ].join(' ')}
+              transition={{ delay: index * 0.06 }}
+              className="h-full min-w-0"
             >
               <Link
                 to={`/problems/${problem.id}`}
-                className="block transition-transform duration-150 hover:-translate-y-1"
+                className="block h-full transition-transform duration-150 hover:-translate-y-1"
               >
                 <IndexCard
                   sourceId={problem.source_id}
@@ -107,6 +101,7 @@ export function FeaturedProblems({
                   difficulty={problem.difficulty as Difficulty}
                   domain={problem.domain}
                   estHours={problem.est_hours}
+                  className="flex h-full min-h-64 flex-col"
                 />
               </Link>
             </motion.div>
@@ -122,3 +117,4 @@ export function FeaturedProblems({
     </section>
   );
 }
+

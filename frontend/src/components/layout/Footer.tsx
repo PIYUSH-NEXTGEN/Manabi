@@ -43,8 +43,8 @@ export const FOOTER_COLUMNS: { heading: string; links: FooterLink[] }[] = [
 
 export function Footer() {
   return (
-    <footer className="overflow-hidden border-t-[3px] border-ink bg-ink text-paper">
-      <div className="mx-auto w-[min(1200px,96vw)] pb-40 pt-10">
+    <footer className="border-t-[3px] border-ink bg-ink text-paper">
+      <div className="mx-auto w-[min(1200px,96vw)] py-10">
         <nav aria-label="Footer" className="grid gap-8 md:grid-cols-4">
           {FOOTER_COLUMNS.map((column) => (
             <div key={column.heading} className="flex flex-col gap-3">
@@ -75,18 +75,6 @@ export function Footer() {
           </p>
         </div>
       </div>
-
-      <p
-        aria-hidden
-        className="pointer-events-none select-none whitespace-nowrap text-center font-display leading-none text-yellow"
-        style={{
-          fontSize: 'clamp(6rem, 18vw, 17rem)',
-          transform: 'translateY(32%)',
-          marginTop: '-2rem',
-        }}
-      >
-        MANABI
-      </p>
     </footer>
   );
 }
