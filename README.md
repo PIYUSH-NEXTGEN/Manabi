@@ -27,9 +27,7 @@ MANABI/
 └── render.yaml         # one-click Render blueprint
 ```
 
-Internal working notes (`TASKS.md`, `docs/REQUESTS.md`, `frontend/agent.md`) and
-the private dataset (`frontend/projects.txt`) are intentionally **not committed**
-— see `.gitignore` and `DEPLOY.md §3`.
+
 
 ## Quick start (local dev)
 
