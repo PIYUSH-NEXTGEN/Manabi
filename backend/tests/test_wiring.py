@@ -119,10 +119,10 @@ def fake_dist(tmp_path, monkeypatch):
 
 
 def test_spa_serves_index_for_unknown_paths(client, fake_dist):
-    res = client.get("/problems/17")
+    res = client.get("/problems/17", headers={"accept": "text/html"})
     assert res.status_code == 200
     assert "MANABI-SPA" in res.text
-    res = client.get("/")
+    res = client.get("/", headers={"accept": "text/html"})
     assert res.status_code == 200 and "MANABI-SPA" in res.text
 
 
@@ -148,9 +148,9 @@ def test_spa_blocks_path_escape(client, fake_dist):
 
     for evil in ["../secret.txt", "assets/../../etc/passwd", "..\\secret.txt", "//evil.com/share/x"]:
         with pytest.raises(HTTPException) as exc:
-            _spa_response(fake_dist, evil)
+            _spa_response(fake_dist, evil, "text/html")
         assert exc.value.status_code == 404, evil
-    assert _spa_response(fake_dist, "index.html").status_code in (200, None)  # own file ok (starlette returns response)
+    assert _spa_response(fake_dist, "index.html", "text/html").status_code in (200, None)  # own file ok (starlette returns response)
 
 
 def test_problem_create_rejects_oversize_fields(client, db_session, user):

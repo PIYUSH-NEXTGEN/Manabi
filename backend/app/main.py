@@ -59,9 +59,9 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     @app.middleware("http")
-    def basic_security_headers(request: Request, call_next):
+    async def basic_security_headers(request: Request, call_next):
         # Platform TLS/load balancer owns HSTS; these are process-level and free.
-        response = call_next(request)
+        response = await call_next(request)
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         return response
