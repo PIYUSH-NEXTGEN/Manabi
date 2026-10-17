@@ -1,0 +1,6 @@
+# Keep shell scripts + deploy files on LF so Render/Railway sh works
+*.sh text eol=lf
+Procfile text eol=lf
+render.yaml text eol=lf
+build.sh text eol=lf
+*.py text eol=lf

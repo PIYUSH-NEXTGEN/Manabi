@@ -1,0 +1,2379 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MANABI API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health",
+        "operationId": "health_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health Api Health Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/problems": {
+      "get": {
+        "tags": [
+          "problems"
+        ],
+        "summary": "List Problems",
+        "operationId": "list_problems_api_problems_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "field",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "ml",
+                    "computer-vision",
+                    "nlp-llm",
+                    "cybersecurity",
+                    "web-fullstack",
+                    "mobile",
+                    "data-engineering",
+                    "geospatial",
+                    "optimization",
+                    "iot-embedded",
+                    "distributed-systems",
+                    "blockchain",
+                    "devops-cloud",
+                    "other"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Field"
+            }
+          },
+          {
+            "name": "domain",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "healthcare",
+                    "education",
+                    "agriculture",
+                    "fintech",
+                    "climate",
+                    "governance",
+                    "transport",
+                    "disaster-management",
+                    "industry",
+                    "social-impact",
+                    "developer-tools",
+                    "other"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Domain"
+            }
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "beginner",
+                    "intermediate",
+                    "advanced"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Difficulty"
+            }
+          },
+          {
+            "name": "tech",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "title": "Tech"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "newest",
+                "popular"
+              ],
+              "type": "string",
+              "default": "newest",
+              "title": "Sort"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemsListOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "problems"
+        ],
+        "summary": "Create Problem",
+        "operationId": "create_problem_api_problems_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProblemIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/problems/facets": {
+      "get": {
+        "tags": [
+          "problems"
+        ],
+        "summary": "Facets",
+        "operationId": "facets_api_problems_facets_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FacetsOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/problems/{problem_id}": {
+      "get": {
+        "tags": [
+          "problems"
+        ],
+        "summary": "Get Problem",
+        "operationId": "get_problem_api_problems__problem_id__get",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/stats": {
+      "get": {
+        "tags": [
+          "stats"
+        ],
+        "summary": "Stats",
+        "operationId": "stats_api_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatsOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/problems/{problem_id}/projects": {
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Submit Project",
+        "operationId": "submit_project_api_problems__problem_id__projects_post",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get Project",
+        "operationId": "get_project_api_projects__project_id__get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/projects/{project_id}/progress": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Get Project Progress",
+        "operationId": "get_project_progress_api_projects__project_id__progress_get",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          },
+          {
+            "name": "refresh",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Refresh"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Progress"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/me/projects": {
+      "get": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "My Projects",
+        "operationId": "my_projects_api_me_projects_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectOut"
+                  },
+                  "type": "array",
+                  "title": "Response My Projects Api Me Projects Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/github/login": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Github Login",
+        "operationId": "github_login_api_auth_github_login_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/github/callback": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Github Callback",
+        "operationId": "github_callback_api_auth_github_callback_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Me",
+        "operationId": "me_api_auth_me_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Logout",
+        "operationId": "logout_api_auth_logout_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ingest": {
+      "post": {
+        "tags": [
+          "ingest"
+        ],
+        "summary": "Ingest",
+        "operationId": "ingest_api_ingest_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IngestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IngestOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ml/questions": {
+      "get": {
+        "tags": [
+          "ml"
+        ],
+        "summary": "List Questions",
+        "operationId": "list_questions_api_ml_questions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MLQuestionListItem"
+                  },
+                  "type": "array",
+                  "title": "Response List Questions Api Ml Questions Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ml/questions/{question_id}": {
+      "get": {
+        "tags": [
+          "ml"
+        ],
+        "summary": "Get Question",
+        "operationId": "get_question_api_ml_questions__question_id__get",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MLQuestionDetail"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ml/questions/{question_id}/attempts": {
+      "post": {
+        "tags": [
+          "ml"
+        ],
+        "summary": "Create Attempt",
+        "operationId": "create_attempt_api_ml_questions__question_id__attempts_post",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttemptIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ml/questions/{question_id}/attempts/me": {
+      "get": {
+        "tags": [
+          "ml"
+        ],
+        "summary": "My Latest Attempt",
+        "operationId": "my_latest_attempt_api_ml_questions__question_id__attempts_me_get",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Question Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttemptOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/chat": {
+      "post": {
+        "tags": [
+          "chat"
+        ],
+        "summary": "Chat",
+        "operationId": "chat_api_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/recommendations": {
+      "get": {
+        "tags": [
+          "recommendations"
+        ],
+        "summary": "Recommendations",
+        "operationId": "recommendations_api_recommendations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendationsOut"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/u/{username}": {
+      "get": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Public Profile",
+        "operationId": "public_profile_api_u__username__get",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Username"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AttemptIn": {
+        "properties": {
+          "answer": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 20,
+            "title": "Answer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answer"
+        ],
+        "title": "AttemptIn"
+      },
+      "AttemptOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "answer": {
+            "type": "string",
+            "title": "Answer"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "feedback": {
+            "$ref": "#/components/schemas/Feedback"
+          },
+          "explanation": {
+            "type": "string",
+            "title": "Explanation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "answer",
+          "created_at",
+          "feedback",
+          "explanation"
+        ],
+        "title": "AttemptOut"
+      },
+      "ChatIn": {
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            },
+            "type": "array",
+            "maxItems": 12,
+            "minItems": 1,
+            "title": "Messages"
+          },
+          "page_context": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChatPageContext"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "messages"
+        ],
+        "title": "ChatIn"
+      },
+      "ChatMessage": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "assistant"
+            ],
+            "title": "Role"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "title": "ChatMessage"
+      },
+      "ChatOut": {
+        "properties": {
+          "reply": {
+            "type": "string",
+            "title": "Reply"
+          },
+          "problems": {
+            "items": {
+              "$ref": "#/components/schemas/ChatProblemItem"
+            },
+            "type": "array",
+            "title": "Problems"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reply",
+          "problems"
+        ],
+        "title": "ChatOut"
+      },
+      "ChatPageContext": {
+        "properties": {
+          "problem_id": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Problem Id"
+          }
+        },
+        "type": "object",
+        "title": "ChatPageContext"
+      },
+      "ChatProblemItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "ml",
+              "computer-vision",
+              "nlp-llm",
+              "cybersecurity",
+              "web-fullstack",
+              "mobile",
+              "data-engineering",
+              "geospatial",
+              "optimization",
+              "iot-embedded",
+              "distributed-systems",
+              "blockchain",
+              "devops-cloud",
+              "other"
+            ],
+            "title": "Field"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Difficulty"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "field",
+          "difficulty"
+        ],
+        "title": "ChatProblemItem"
+      },
+      "Facet": {
+        "properties": {
+          "value": {
+            "type": "string",
+            "title": "Value"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "value",
+          "count"
+        ],
+        "title": "Facet"
+      },
+      "FacetsOut": {
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array",
+            "title": "Fields"
+          },
+          "domains": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array",
+            "title": "Domains"
+          },
+          "difficulties": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array",
+            "title": "Difficulties"
+          },
+          "tech_tags": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array",
+            "title": "Tech Tags"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array",
+            "title": "Sources"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fields",
+          "domains",
+          "difficulties",
+          "tech_tags",
+          "sources"
+        ],
+        "title": "FacetsOut"
+      },
+      "Feedback": {
+        "properties": {
+          "covered_count": {
+            "type": "integer",
+            "title": "Covered Count"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/FeedbackItem"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          }
+        },
+        "type": "object",
+        "required": [
+          "covered_count",
+          "total",
+          "items",
+          "summary"
+        ],
+        "title": "Feedback"
+      },
+      "FeedbackItem": {
+        "properties": {
+          "point": {
+            "type": "string",
+            "title": "Point"
+          },
+          "covered": {
+            "type": "boolean",
+            "title": "Covered"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          }
+        },
+        "type": "object",
+        "required": [
+          "point",
+          "covered"
+        ],
+        "title": "FeedbackItem"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "IngestOut": {
+        "properties": {
+          "draft": {
+            "$ref": "#/components/schemas/ProblemCard"
+          },
+          "evidence": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Evidence"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          }
+        },
+        "type": "object",
+        "required": [
+          "draft",
+          "evidence",
+          "source_url"
+        ],
+        "title": "IngestOut"
+      },
+      "IngestRequest": {
+        "properties": {
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "title": "IngestRequest"
+      },
+      "MLQuestionDetail": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "scenario": {
+            "type": "string",
+            "title": "Scenario"
+          },
+          "difficulty": {
+            "type": "string",
+            "title": "Difficulty"
+          },
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "attempted": {
+            "type": "boolean",
+            "title": "Attempted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "scenario",
+          "difficulty",
+          "topic",
+          "attempted"
+        ],
+        "title": "MLQuestionDetail"
+      },
+      "MLQuestionListItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "difficulty": {
+            "type": "string",
+            "title": "Difficulty"
+          },
+          "topic": {
+            "type": "string",
+            "title": "Topic"
+          },
+          "attempted": {
+            "type": "boolean",
+            "title": "Attempted"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "difficulty",
+          "topic",
+          "attempted"
+        ],
+        "title": "MLQuestionListItem"
+      },
+      "ProblemCard": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "who_affected": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Who Affected"
+          },
+          "why_matters": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Why Matters"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "ml",
+              "computer-vision",
+              "nlp-llm",
+              "cybersecurity",
+              "web-fullstack",
+              "mobile",
+              "data-engineering",
+              "geospatial",
+              "optimization",
+              "iot-embedded",
+              "distributed-systems",
+              "blockchain",
+              "devops-cloud",
+              "other"
+            ],
+            "title": "Field"
+          },
+          "domain": {
+            "type": "string",
+            "enum": [
+              "healthcare",
+              "education",
+              "agriculture",
+              "fintech",
+              "climate",
+              "governance",
+              "transport",
+              "disaster-management",
+              "industry",
+              "social-impact",
+              "developer-tools",
+              "other"
+            ],
+            "title": "Domain"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Difficulty"
+          },
+          "est_hours": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Est Hours"
+          },
+          "tech_tags": {
+            "items": {
+              "type": "string",
+              "maxLength": 40,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 25,
+            "title": "Tech Tags"
+          },
+          "datasets": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 15,
+            "title": "Datasets"
+          },
+          "approaches": {
+            "items": {
+              "type": "string",
+              "maxLength": 800,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Approaches"
+          },
+          "source_name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Source Name"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "source_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "summary",
+          "who_affected",
+          "why_matters",
+          "field",
+          "domain",
+          "difficulty",
+          "est_hours",
+          "tech_tags",
+          "datasets",
+          "approaches",
+          "source_name"
+        ],
+        "title": "ProblemCard"
+      },
+      "ProblemDetail": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "who_affected": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Who Affected"
+          },
+          "why_matters": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Why Matters"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "ml",
+              "computer-vision",
+              "nlp-llm",
+              "cybersecurity",
+              "web-fullstack",
+              "mobile",
+              "data-engineering",
+              "geospatial",
+              "optimization",
+              "iot-embedded",
+              "distributed-systems",
+              "blockchain",
+              "devops-cloud",
+              "other"
+            ],
+            "title": "Field"
+          },
+          "domain": {
+            "type": "string",
+            "enum": [
+              "healthcare",
+              "education",
+              "agriculture",
+              "fintech",
+              "climate",
+              "governance",
+              "transport",
+              "disaster-management",
+              "industry",
+              "social-impact",
+              "developer-tools",
+              "other"
+            ],
+            "title": "Domain"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Difficulty"
+          },
+          "est_hours": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Est Hours"
+          },
+          "tech_tags": {
+            "items": {
+              "type": "string",
+              "maxLength": 40,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 25,
+            "title": "Tech Tags"
+          },
+          "datasets": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 15,
+            "title": "Datasets"
+          },
+          "approaches": {
+            "items": {
+              "type": "string",
+              "maxLength": 800,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Approaches"
+          },
+          "source_name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Source Name"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "source_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Note"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "project_count": {
+            "type": "integer",
+            "title": "Project Count"
+          },
+          "ai_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ai Fields"
+          },
+          "original_text": {
+            "type": "string",
+            "title": "Original Text"
+          },
+          "projects": {
+            "items": {
+              "$ref": "#/components/schemas/ProjectOut"
+            },
+            "type": "array",
+            "title": "Projects"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "summary",
+          "who_affected",
+          "why_matters",
+          "field",
+          "domain",
+          "difficulty",
+          "est_hours",
+          "tech_tags",
+          "datasets",
+          "approaches",
+          "source_name",
+          "id",
+          "project_count",
+          "ai_fields",
+          "original_text",
+          "projects"
+        ],
+        "title": "ProblemDetail"
+      },
+      "ProblemIn": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "who_affected": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Who Affected"
+          },
+          "why_matters": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Why Matters"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "ml",
+              "computer-vision",
+              "nlp-llm",
+              "cybersecurity",
+              "web-fullstack",
+              "mobile",
+              "data-engineering",
+              "geospatial",
+              "optimization",
+              "iot-embedded",
+              "distributed-systems",
+              "blockchain",
+              "devops-cloud",
+              "other"
+            ],
+            "title": "Field"
+          },
+          "domain": {
+            "type": "string",
+            "enum": [
+              "healthcare",
+              "education",
+              "agriculture",
+              "fintech",
+              "climate",
+              "governance",
+              "transport",
+              "disaster-management",
+              "industry",
+              "social-impact",
+              "developer-tools",
+              "other"
+            ],
+            "title": "Domain"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Difficulty"
+          },
+          "est_hours": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Est Hours"
+          },
+          "tech_tags": {
+            "items": {
+              "type": "string",
+              "maxLength": 40,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 25,
+            "title": "Tech Tags"
+          },
+          "datasets": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 15,
+            "title": "Datasets"
+          },
+          "approaches": {
+            "items": {
+              "type": "string",
+              "maxLength": 800,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Approaches"
+          },
+          "source_name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Source Name"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "source_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Note"
+          },
+          "ai_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ai Fields",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "summary",
+          "who_affected",
+          "why_matters",
+          "field",
+          "domain",
+          "difficulty",
+          "est_hours",
+          "tech_tags",
+          "datasets",
+          "approaches",
+          "source_name"
+        ],
+        "title": "ProblemIn",
+        "description": "POST /api/problems body: ProblemCard per contract, plus optional ai_fields (see docs/REQUESTS.md)."
+      },
+      "ProblemOut": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "who_affected": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Who Affected"
+          },
+          "why_matters": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Why Matters"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "ml",
+              "computer-vision",
+              "nlp-llm",
+              "cybersecurity",
+              "web-fullstack",
+              "mobile",
+              "data-engineering",
+              "geospatial",
+              "optimization",
+              "iot-embedded",
+              "distributed-systems",
+              "blockchain",
+              "devops-cloud",
+              "other"
+            ],
+            "title": "Field"
+          },
+          "domain": {
+            "type": "string",
+            "enum": [
+              "healthcare",
+              "education",
+              "agriculture",
+              "fintech",
+              "climate",
+              "governance",
+              "transport",
+              "disaster-management",
+              "industry",
+              "social-impact",
+              "developer-tools",
+              "other"
+            ],
+            "title": "Domain"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Difficulty"
+          },
+          "est_hours": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Est Hours"
+          },
+          "tech_tags": {
+            "items": {
+              "type": "string",
+              "maxLength": 40,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 25,
+            "title": "Tech Tags"
+          },
+          "datasets": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 15,
+            "title": "Datasets"
+          },
+          "approaches": {
+            "items": {
+              "type": "string",
+              "maxLength": 800,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Approaches"
+          },
+          "source_name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Source Name"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "source_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Note"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "project_count": {
+            "type": "integer",
+            "title": "Project Count"
+          },
+          "ai_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ai Fields"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "summary",
+          "who_affected",
+          "why_matters",
+          "field",
+          "domain",
+          "difficulty",
+          "est_hours",
+          "tech_tags",
+          "datasets",
+          "approaches",
+          "source_name",
+          "id",
+          "project_count",
+          "ai_fields"
+        ],
+        "title": "ProblemOut"
+      },
+      "ProblemsListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ProblemOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "ProblemsListOut"
+      },
+      "Progress": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "active",
+              "stale"
+            ],
+            "title": "Status"
+          },
+          "commit_count": {
+            "type": "integer",
+            "title": "Commit Count"
+          },
+          "last_commit_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Commit At"
+          },
+          "has_readme": {
+            "type": "boolean",
+            "title": "Has Readme"
+          },
+          "recent_commits": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Recent Commits"
+          },
+          "open_issues": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Open Issues"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "commit_count",
+          "last_commit_at",
+          "has_readme",
+          "recent_commits",
+          "open_issues"
+        ],
+        "title": "Progress"
+      },
+      "ProjectCreate": {
+        "properties": {
+          "repo_url": {
+            "type": "string",
+            "title": "Repo Url"
+          },
+          "open_for_contributors": {
+            "type": "boolean",
+            "title": "Open For Contributors",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "repo_url"
+        ],
+        "title": "ProjectCreate"
+      },
+      "ProjectOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "problem_id": {
+            "type": "integer",
+            "title": "Problem Id"
+          },
+          "problem_title": {
+            "type": "string",
+            "title": "Problem Title"
+          },
+          "repo_url": {
+            "type": "string",
+            "title": "Repo Url"
+          },
+          "repo_owner": {
+            "type": "string",
+            "title": "Repo Owner"
+          },
+          "repo_name": {
+            "type": "string",
+            "title": "Repo Name"
+          },
+          "open_for_contributors": {
+            "type": "boolean",
+            "title": "Open For Contributors"
+          },
+          "owner": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Owner"
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Progress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "progress_updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Progress Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "problem_id",
+          "problem_title",
+          "repo_url",
+          "repo_owner",
+          "repo_name",
+          "open_for_contributors",
+          "owner",
+          "progress",
+          "progress_updated_at"
+        ],
+        "title": "ProjectOut"
+      },
+      "RecommendationItem": {
+        "properties": {
+          "problem": {
+            "$ref": "#/components/schemas/ProblemOut"
+          },
+          "score": {
+            "type": "integer",
+            "title": "Score"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Reasons"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problem",
+          "score",
+          "reasons"
+        ],
+        "title": "RecommendationItem"
+      },
+      "RecommendationsOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendationItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "RecommendationsOut"
+      },
+      "StatsOut": {
+        "properties": {
+          "problems": {
+            "type": "integer",
+            "title": "Problems"
+          },
+          "sources": {
+            "type": "integer",
+            "title": "Sources"
+          },
+          "fields": {
+            "type": "integer",
+            "title": "Fields"
+          },
+          "projects": {
+            "type": "integer",
+            "title": "Projects"
+          },
+          "ml_questions": {
+            "type": "integer",
+            "title": "Ml Questions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "problems",
+          "sources",
+          "fields",
+          "projects",
+          "ml_questions"
+        ],
+        "title": "StatsOut"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

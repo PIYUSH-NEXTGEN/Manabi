@@ -1,0 +1,11 @@
+# Files the deploy context never needs (also see .gitignore for git).
+.git/
+.github/
+backend/.venv/
+backend/__pycache__/
+backend/.pytest_cache/
+frontend/node_modules/
+frontend/dist/
+*.db
+*.log
+.env
