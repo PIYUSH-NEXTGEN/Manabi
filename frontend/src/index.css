@@ -1,0 +1,128 @@
+@import "tailwindcss";
+@import "./design/tokens.css";
+
+@theme {
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-white: var(--white);
+  --color-yellow: var(--yellow);
+  --color-red: var(--red);
+  --color-blue: var(--blue);
+  --font-display: var(--ff-display);
+  --font-body: var(--ff-body);
+  --font-mono: var(--ff-mono);
+  --shadow-hard: var(--hard-shadow);
+  --shadow-hard-lg: var(--hard-shadow-lg);
+  --shadow-hard-sm: var(--hard-shadow-sm);
+}
+
+*,
+*::before,
+*::after {
+  border-radius: 0;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--ff-body);
+}
+
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.press {
+  transition:
+    transform var(--dur-press) var(--ease-snap),
+    box-shadow var(--dur-press) var(--ease-snap);
+}
+
+.press:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--hard-shadow-press);
+}
+
+.press:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 0 var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .press {
+    transition: none;
+  }
+
+  .press:hover,
+  .press:active {
+    transform: none;
+  }
+}
+
+.field {
+  border: var(--border-w) solid var(--ink);
+  background: var(--white);
+  padding: 0.5rem 0.75rem;
+  font-family: var(--ff-body);
+  font-size: 0.95rem;
+  color: var(--ink);
+}
+
+.field::placeholder {
+  opacity: 0.45;
+}
+
+.field:focus {
+  outline: none;
+  background: var(--yellow);
+  box-shadow: var(--hard-shadow);
+}
+
+.field[aria-invalid="true"] {
+  border-color: var(--red);
+}
+
+.skeleton {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--ink) 0 8px,
+    var(--paper) 8px 16px
+  );
+}
+
+.bg-stripes {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--ink) 0 10px,
+    var(--yellow) 10px 20px
+  );
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll var(--marquee-duration, 30s) linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
