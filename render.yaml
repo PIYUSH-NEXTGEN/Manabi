@@ -1,0 +1,37 @@
+# MANABI — one-service deploy (FastAPI serves frontend/dist + /api).
+# Blueprint: https://render.com/docs/blueprint-spec
+# After "New → Blueprint", set the SECRET env vars in the dashboard
+# (GITHUB_CLIENT_SECRET, GEMINI_API_KEY, SESSION_SECRET if not auto-generated).
+services:
+  - type: web
+    name: manabi
+    runtime: python
+    plan: free
+    buildCommand: sh build.sh
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.7
+      - key: NODE_VERSION
+        value: 20.18.1
+      - key: BASE_URL
+        sync: false # set to https://<your-service>.onrender.com after first deploy
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        value: sqlite:///./app.db
+      - key: LLM_PROVIDER
+        value: mock # flip to gemini once GEMINI_API_KEY is set
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: AI_RATE_LIMIT_PER_HOUR
+        value: 15
+      - key: CHAT_RATE_LIMIT_ANON_PER_HOUR
+        value: 10
+      - key: CHAT_RATE_LIMIT_USER_PER_HOUR
+        value: 30
