@@ -1,4 +1,4 @@
-# MANABI — Real problems → structured briefs → proof of work on GitHub
+# MANABI 
 
 MANABI helps students and developers find **real-world problems to build** (from
 governments, companies, and hackathons), claim them, link a GitHub repo for
