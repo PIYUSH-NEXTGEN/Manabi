@@ -1,0 +1,13 @@
+projects 4
+
+Predicting Land Acquisition Delays Before They Happen (ML, tabular + explainable AI · Governance). SIH26017, Ministry of Rural Development. Infrastructure projects stall on approvals, legal disputes, and late compensation, and nobody flags them early. Build a model that gives each project a delay-risk score per stage.
+
+Cybersecurity
+
+Forecasting Network Attacks Before the Breach Completes (Cybersecurity · ML). SIH26153, NTRO. Learn how network state evolves over time. It must beat a logistic-regression baseline and run offline on a PCAP or CSV. The brief lists public datasets (CIC-IDS, UNSW-NB15, CTU-13).
+
+Onion Quality Grading from a Phone Photo (Computer vision · Agriculture). TCOE PS12, Consumer Affairs. Grading at procurement centres is subjective and causes disputes.
+
+Farm Produce Procurement Slot Booking and Queue Management (Full-stack web · Agri governance). SIH26032, Consumer Affairs. Farmer registration, slot booking, live queue management. Small scope with a clear demo.
+
+Emergency Connectivity When Networks Fail (Distributed systems · Emergency communications). TCOE PS14. Simulate fallback links such as mesh, drone relay, and satellite.

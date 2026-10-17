@@ -1,0 +1,86 @@
+[
+  {
+    "title": "The model looks great in staging, terrible on Monday mornings",
+    "scenario": "You built a churn model for a telecom app. Offline AUC is 0.91. In production, every Monday morning between 6 and 9 the app serves a suspended feature flag and traffic drops 70%. Last quarter, live AUC on served predictions is 0.72, and the gap grows each week. The data pipeline pulls features from the app's production database: some features are computed **after** the churn decision is made (e.g. `days_since_final_push_notification`, `csat_after_agent_call`). Retraining weekly does not close the gap. Debug this: list the likely causes you would check first, how you would confirm each one, and what you would change.",
+    "difficulty": "intermediate",
+    "topic": "train-serving-skew",
+    "rubric": [
+      {"id": "r1", "point": "Identifies label or feature leakage from post-decision features (features computed after the churn event) as a likely cause"},
+      {"id": "r2", "point": "Identifies train-serving skew: features computed differently offline vs online, or missing/timeout features online filled with defaults"},
+      {"id": "r3", "point": "Proposes a concrete way to confirm each cause, e.g. comparing offline vs online feature distributions, backfilling historical features chronologically, or shadow scoring"},
+      {"id": "r4", "point": "Notes the Monday traffic/feature pattern as a distribution-shift or data-availability signal worth correlating with the degradation"},
+      {"id": "r5", "point": "Mentions time-based train/val split or point-in-time correct joins as part of the retraining fix"}
+    ],
+    "explanation": "Three separate problems are stacked here. (1) **Leakage**: features like `days_since_final_push_notification` are computed after the label window ends, so they encode the outcome. Drop them or compute them point-in-time. (2) **Train-serving skew**: features joined from a production DB at serve time need to match exactly what was available at training time; the standard fix is a feature store or point-in-time correct historical snapshots. (3) **Distribution shift**: the Monday pattern (low traffic, suspended flags) changes the feature distribution, and staleness grows week to week. Confirm with distribution comparisons, chronological backtests and shadow scoring. Weekly retraining cannot fix leakage or skew because both survive retraining."
+  },
+  {
+    "title": "Passenger forecast never fails loudly, it just drifts to useless",
+    "scenario": "A transit agency predicts hourly passenger flow to staff counters. The pipeline recomputes predictions hourly and has run for 18 months. Accuracy dashboards show MAPE creeping from 8% to 22% over the year. Nobody changed the model. Inputs include weather (an external API), calendar, and lagged counts. There is also a single Super Bowl rerun incident; a holiday calendar change went in last March and half the new holiday dates were wrong for the first 3 weeks. Explain the sources of the creep you would prioritize, and how you would separate model aging from data-quality causes from truly-irreducible drift.",
+    "difficulty": "advanced",
+    "topic": "concept-drift",
+    "rubric": [
+      {"id": "r1", "point": "Frames slow MAPE creep as concept drift or covariate drift, and distinguishes the two"},
+      {"id": "r2", "point": "Flags the external weather API as a drift/silent-failure vector (schema changes, unit changes, stale cache, wrong values served)"},
+      {"id": "r3", "point": "Names the holiday calendar corruption as a data-quality incident that must be segmented out before blame is assigned to the model"},
+      {"id": "r4", "point": "References rolling retraining windows or scheduled recalibration as the standard response to gradual drift"},
+      {"id": "r5", "point": "Proposes monitoring inputs and residual slices over time rather than a single MAPE line, to localize where accuracy is lost"}
+    ],
+    "explanation": "Gradual degradation with no model change almost always means either (a) concept drift (the world changed: ridership patterns post-event), (b) covariate shift (the input distributions moved: weather API changes, calendar changes), or (c) silent data breakage, which Incident A is a hint for. Wrong holiday dates for three weeks is data quality, not drift; it must be isolated (time-bounded residual spike). The correct posture is slice-wise monitoring (by hour, holiday flag, weather bucket), drift detectors on inputs, and rolling retraining or recalibration with a validation window that matches serving conditions. One global MAPE number cannot distinguish any of these causes."
+  },
+  {
+    "title": "Fraud model saves money on paper, detects nobody in practice",
+    "scenario": "A payments team trains a fraud classifier on 2.1M historical transactions. Fraud rate is 0.4%. They train on the raw data, split randomly into train/test, and report recall 34% and precision 62% on the held-out set. In a two-week live shadow trial the model caught 5 of 40 confirmed fraud cases, and 3 of those 5 were also caught by the old rule engine. Precision did hold up. What went wrong between the offline report and the shadow trial? Be specific about the split and about any metric claims you would not trust.",
+    "difficulty": "intermediate",
+    "topic": "bad-eval-split",
+    "rubric": [
+      {"id": "r1", "point": "Identifies random splitting of temporal transaction data as the core flaw (leakage across time / train-serving mismatch)"},
+      {"id": "r2", "point": "Explains that a chronological (time-based) split is required so the test set looks like the future"},
+      {"id": "r3", "point": "Notes that fraud patterns drift, so an old test period can be easier and inflate recall"},
+      {"id": "r4", "point": "Avoids over-trusting a single aggregate recall: proposes stratified or cost-based metrics (precision-recall curves, catch-rate at fixed review budget)"},
+      {"id": "r5", "point": "Respects the 0.4% base rate: recognizes that 'precision 62%' on a small, randomly-sampled test slice can be misleading without volume context"}
+    ],
+    "explanation": "A random split over a time-ordered transaction stream lets the model see 'tomorrow' during training: autocorrelated fraud rings, repeated customers, and leaked aggregates survive the split. After the split, the test no longer represents the deployment task (score the future), so recall is inflated. Fraud patterns also shift month to month, so a stale hold-out is easy. The right evaluation uses a chronological split (train on the past, test on the future) or rolling-origin evaluation, with metrics reported at operationally meaningful thresholds (e.g. catch rate under a fixed reviewer budget), plus confidence intervals because 40 confirmations is a tiny sample."
+  },
+  {
+    "title": "The recommendation pipeline runs 40 minutes late every night and nobody noticed for a month",
+    "scenario": "An e-tenant recommendation batch job has a hard SLA of 01:00. On three separate occasions, the upstream order ingest hiccupped; retries were forced; the job then succeeded at 01:40 for two weeks straight. Every report replies on the recommendations from 01:40 until the next correct run. No alert fired. Design the monitoring that would have caught this in the first day, without adding a second heavy job. Also say what you would do about the three two-week periods where served recommendations were stale.",
+    "difficulty": "beginner",
+    "topic": "silent-pipeline-failure",
+    "rubric": [
+      {"id": "r1", "point": "Proposes a freshness check: alert if the recommendation table's write timestamp has not advanced by the expected time (SLA + margin)"},
+      {"id": "r2", "point": "Proposes a data-volume / row-count check rather than job success alone, since 'success' on partial output is silent failure"},
+      {"id": "r3", "point": "Separates job success from data correctness: monitors both, and alerts on late-success specifically"},
+      {"id": "r4", "point": "Proposes that the consumer side detect stale recommendations (serving reads a manifest or minimum-version) rather than serving whatever is present"},
+      {"id": "r5", "point": "For retrograde handling: label the stale period, note the analysis is still useful, and add a backfill or versioned manifest so analysis can exclude that period"}
+    ],
+    "explanation": "This is the classic silent-failure shape: the job pages 'green', the data is served anyway, and both the producer and the consumer assume the other is checking. The fix needs no second job. It needs three cheap checks: (1) freshness — the recommendation manifest version or last-written timestamp must advance by the SLA plus a margin; (2) volume — row counts (or hashes of key windows) must be in the expected band; (3) late-success alerting — the job completing at 01:40 is itself an SLA breach to alert on. On the consumer side, serve only from a versioned manifest; if the version does not roll over, stop serving or serve a fallback with a visible banner. For the historical two-week periods: annotate them, and prefer time-partitioned output so affected windows can be re-analyzed or excluded rather than silently blended."
+  },
+  {
+    "title": "Anomaly detector that flags the same zones for three years",
+    "scenario": "A city water utility has a leak-detection pipeline. Every night it computes per-zone flow signatures; an ML anomaly detector ranks 'most unusual zones'. Ops teams have complained for a year that the same 12 zones appear weekly, and after inspection about a third of them are structural facts of those zones (an old district meter, a fountain, a school). Zone A is a fountain that is unusual every summer and treated as a leak each time. When a real leak appeared (burst main), it ranked 7th, below the known recurring zones. Diagnose why recurrence crowds out true novelty, and propose a fix that preserves the strength of the anomaly detector without annoying ops into ignoring it.",
+    "difficulty": "advanced",
+    "topic": "concept-drift",
+    "rubric": [
+      {"id": "r1", "point": "Identifies that recurring 'anomalies' are unusual-but-known zones, i.e. the detector never models seasonality or long-running normal-unusual patterns"},
+      {"id": "r2", "point": "Explains that novelty should be judged relative to a baseline for that zone and time of year/context, not globally"},
+      {"id": "r3", "point": "Proposes suppressing or down-weighting known-recurring zones via per-zone baselines, feedback from ops dispositions, or persistence/suppression lists"},
+      {"id": "r4", "point": "Distinguishes detection score magnitude from rank; explains the burst main ranked low because known zones soak up the score"},
+      {"id": "r5", "point": "Proposes an evaluation for alerts that includes operator feedback (lack of fatigue, precision@k, time-to-detect) rather than a fixed score cutoff"}
+    ],
+    "explanation": "The detector learned to score 'how unusual is this zone overall' and surprise is persistent in a place, tools like an old district meter are always a bit weird. That is a seasonality and per-zone baseline problem: an anomaly must be measured against what that zone does in July, not what all zones do on average year-round. Once ops dispositions are captured, you can learn a per-zone (and per-season) baseline and suppress or down-rank known recurring signatures. Rank is what people act on; do not let persistent quick wins (recurring zones) crowd out genuine novelty — reserve some budget for 'different from its own history'. Evaluate the detector on usefulness to ops: precision at review capacity, novelty share of true positives, and declining time-to-detect, rather than a raw score threshold."
+  },
+  {
+    "title": "Tests pass, model 'improves', nightly batch quietly eats the future",
+    "scenario": "A team ships a nightly-retrained demand model. Code review was clean and unit tests pass. A sharp reviewer notices the feature engineering builds a `dow_week_hour_mean_of_orders` variable using the **entire** order table, including the day being predicted, and reference to two days after the split in a leaky rolling window. Offline MAE improved 4% when this feature was added. Nobody in the room can say whether the improvement is real. What do you do before the next deploy, in what order, and what change to the test suite prevents recurrence?",
+    "difficulty": "intermediate",
+ "topic": "data-leakage",
+    "rubric": [
+      {"id": "r1", "point": "Names the bug: aggregates computed over data that includes the prediction target window leak the future"},
+      {"id": "r2", "point": "Says the 4% offline gain cannot be trusted until re-evaluated with point-in-time correct features"},
+      {"id": "r3", "point": "Blocks the deploy (freezes the change) and re-runs evaluation with a chronological split before comparing"},
+      {"id": "r4", "point": "Proposes a pipeline-level test that checks for temporal leakage, e.g. asserting no used feature is computed from data after the cutoff for each row"},
+      {"id": "r5", "point": "Notes that leakage shows up as too-good gains on aggregates that fail to reproduce on truly unseen time slices"}
+    ],
+    "explanation": "Aggregating over the full table including rows after the prediction cutoff is textbook leakage: the 'improvement' is the model reading the answer. You cannot quantify the true effect without re-evaluating with point-in-time correct features on a chronological split — the current 4% is not evidence of anything except leakage. Concretely: freeze the change (do not deploy), rewrite the aggregator to be cutoff-aware (a running/expanding or pre-cutoff-window aggregate for each historical row), re-run the same evaluation, and only then compare. Long-term: add a leak test to the suite that asserts for every feature the data used is strictly before each row's cutoff, and a date-line invariant ('the model at time T never sees any row with timestamp > T'). Tests passing means nothing here because nothing in the unit suite verifies point-in-time correctness — that invariant must be encoded."
+  }
+]
