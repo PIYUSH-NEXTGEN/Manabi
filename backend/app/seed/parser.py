@@ -1,15 +1,15 @@
 import re
 from dataclasses import dataclass, field
 
-SOURCE_ID_RE = re.compile(r"(SIH\d{5}|TCOE PS\d{2}|RWML\d{2})")
+SOURCE_ID_RE = re.compile(r"(SIH\d{5}|TCOE PS\d{2}|KAG\d{2})")
 ENTRY_RE = re.compile(
     r"^(?P<title>.+?)\s*\((?P<paren>[^)]*)\)\."
-    r"\s*(?P<src>SIH\d{5}|TCOE PS\d{2}|RWML\d{2})(?:,\s*(?P<org>[^.]+?))?\.\s*(?P<body>.+)$"
+    r"\s*(?P<src>SIH\d{5}|TCOE PS\d{2}|KAG\d{2})(?:,\s*(?P<org>[^.]+?))?\.\s*(?P<body>.+)$"
 )
 DATASETS_RE = re.compile(r"datasets?\s*\(([^)]+)\)", re.IGNORECASE)
 SENTENCE_SPLIT_RE = re.compile(r"(?<=\.)\s+")
 
-SOURCE_NAME_BY_PREFIX = {"SIH": "Smart India Hackathon 2026", "TCOE PS": "TCOE", "RWML": "Real-World ML"}
+SOURCE_NAME_BY_PREFIX = {"SIH": "Smart India Hackathon 2026", "TCOE PS": "TCOE", "KAG": "Kaggle"}
 DEFAULT_EST_HOURS = 40
 
 FIELD_KEYWORDS = [

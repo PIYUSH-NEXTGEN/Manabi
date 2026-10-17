@@ -172,23 +172,23 @@ def test_entry_to_problem_maps_all_columns(fixture_text):
     assert problem.original_text == entry.original_text
 
 
-def test_rwml_real_world_entries_parse():
+def test_kaggle_entries_parse():
     from app.seed.parser import parse_blocks
 
     lines = (
         "projects 33\n\n"
         "Real-world ML additions\n\n"
-        "Wheat Leaf Disease Grading from a Smartphone Photo (Computer vision · Agriculture). RWML01, "
+        "Wheat Leaf Disease Grading from a Smartphone Photo (Computer vision · Agriculture). KAG01, "
         "ICAR research network. Detect rust severity per leaf for extension officers. "
         "Datasets (PlantVillage, Global Wheat Rust monitoring open sets).\n\n"
-        "Fraud Detection for Real-Time Digital Payments (ML · Fintech). RWML08, Unified banks. "
+        "Fraud Detection for Real-Time Digital Payments (ML · Fintech). KAG08, Unified banks. "
         "Score each payment under the authorisation budget across merchant categories. "
         "Datasets (IEEE-CIS Fraud Detection, PaySim simulated payments).\n"
     )
     entries = parse_blocks(lines)
     assert len(entries) == 2
     wheat, fraud = entries
-    assert wheat.source_id == "RWML01" and wheat.source_name == "Real-World ML"
+    assert wheat.source_id == "KAG01" and wheat.source_name == "Kaggle"
     assert wheat.field == "computer-vision" and wheat.domain == "agriculture"
     assert wheat.tech_tags == ["computer-vision"]
     assert wheat.datasets == [{"name": "PlantVillage", "url": None}, {"name": "Global Wheat Rust monitoring open sets", "url": None}]

@@ -198,3 +198,45 @@ def test_chat_without_key_503(monkeypatch):
     set_provider(monkeypatch, "gemini", GEMINI_API_KEY="")
     with pytest.raises(LLMConfigError):
         chat("Sys", [{"role": "user", "content": "hi"}])
+
+
+def test_gemini_transport_error_maps_to_response_error(monkeypatch):
+    """SDK/transport failures must surface as LLMResponseError (502), never a raw 500."""
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEY="k")
+
+    class OfflineClient:
+        class models:
+            @staticmethod
+            def generate_content(**_kwargs):
+                raise ConnectionError("network down")
+
+    monkeypatch.setattr("app.services.llm._gemini", lambda api_key: OfflineClient())
+    with pytest.raises(LLMResponseError):
+        chat("Sys", [{"role": "user", "content": "hi"}])
+
+
+def test_gemini_api_error_maps_to_response_error(monkeypatch):
+    from google.genai import errors as genai_errors
+
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEY="k")
+    quota = genai_errors.APIError(429, {"error": {"message": "quota exceeded"}})
+
+    class LimitedClient:
+        class models:
+            @staticmethod
+            def generate_content(**_kwargs):
+                raise quota
+
+    monkeypatch.setattr("app.services.llm._gemini", lambda api_key: LimitedClient())
+    with pytest.raises(LLMResponseError):
+        chat("Sys", [{"role": "user", "content": "hi"}])
+
+
+def test_anthropic_transport_error_maps_to_response_error(monkeypatch):
+    set_provider(monkeypatch, "anthropic", ANTHROPIC_API_KEY="key")
+    with respx.mock() as mock:
+        mock.post("https://api.anthropic.com/v1/messages").mock(
+            side_effect=httpx.ConnectError("connection refused")
+        )
+        with pytest.raises(LLMResponseError):
+            generate_json("s", "u", Nice)

@@ -1,5 +1,47 @@
 [
   {
+    "title": "Train or test first? Splitting a tiny dataset without fooling yourself",
+    "scenario": "You have 800 labeled customer reviews and want to train a sentiment classifier. A teammate says: train on all 800, then check accuracy on the same 800. Another says: split 80/20 first, train on 640, test on 160. Explain which approach is honest, why testing on training data lies, and what goes wrong when the test set leaks into decisions (like tuning on it repeatedly).",
+    "difficulty": "beginner",
+    "topic": "train-test-split",
+    "rubric": [
+      {"id": "r1", "point": "Says to split before training and evaluate on held-out data the model never saw"},
+      {"id": "r2", "point": "Explains that testing on training data overstates accuracy because the model memorized those rows"},
+      {"id": "r3", "point": "Mentions that repeatedly tuning on the same test set leaks information and a separate validation split or cross-validation fixes it"},
+      {"id": "r4", "point": "Notes the split should preserve class balance (stratify) or at least be random, not first-640 vs last-160"},
+      {"id": "r5", "point": "Gives a concrete check, e.g. compare train vs test accuracy and expect test to be lower"}
+    ],
+    "explanation": "Always split BEFORE training: fit on the train slice, measure once on the held-out test slice. Accuracy on training rows is memorization, not learning, so it reads too high. If you tune hyperparameters against the same test set over and over, the test set quietly becomes training data — keep a separate validation split (or cross-validate) and touch the final test set once. Split randomly and stratify by label so both slices have the same class mix; a large train/test gap is the smell of overfitting."
+  },
+  {
+    "title": "Accuracy says 98% but the model catches nothing",
+    "scenario": "A fraud team has 10,000 transactions, only 150 are fraud. A junior ships a model with 98.5% accuracy that predicts 'not fraud' for everything, catching zero fraud cases. Explain why accuracy lies here, which two metrics you would report instead, and what one-line baseline every fraud model must beat.",
+    "difficulty": "beginner",
+    "topic": "imbalanced-metrics",
+    "rubric": [
+      {"id": "r1", "point": "Identifies the class imbalance (150/10000) and that predicting the majority class gives fake high accuracy"},
+      {"id": "r2", "point": "Names precision and recall (or F1) as the honest metrics for the rare class"},
+      {"id": "r3", "point": "States the trivial baseline: a model that always predicts not-fraud scores ~98.5%, so any real model must beat that on recall"},
+      {"id": "r4", "point": "Explains the tradeoff: catching more fraud (recall) usually costs more false alarms (precision)"},
+      {"id": "r5", "point": "Proposes a concrete fix direction, e.g. threshold tuning, class weights, or resampling"}
+    ],
+    "explanation": "With 1.5% fraud, 'always predict legit' scores 98.5% accuracy while catching nothing — accuracy measures the majority class here. Report precision (of flagged transactions, how many are real fraud) and recall (of real fraud, how much you catch), or F1 to combine them. Any model must beat the do-nothing baseline on recall, not accuracy. Then trade precision against recall with the decision threshold, class weights, or resampling — there is no free lunch, only the tradeoff the business prefers."
+  },
+  {
+    "title": "The model memorized the training set and flopped on new customers",
+    "scenario": "A churn model hits 99% accuracy on training data but 71% on new customers. The model is a deep decision tree with no depth limit and 200 features for 2,000 rows. Name the problem, explain why the train/test gap is the diagnosis, and list two specific fixes you would try first.",
+    "difficulty": "beginner",
+    "topic": "overfitting-basics",
+    "rubric": [
+      {"id": "r1", "point": "Names overfitting: the model memorized training noise instead of learning general patterns"},
+      {"id": "r2", "point": "Explains the train/test gap (99% vs 71%) as the signature symptom of overfitting"},
+      {"id": "r3", "point": "Proposes limiting model capacity, e.g. max depth, min samples per leaf, or pruning"},
+      {"id": "r4", "point": "Proposes a second fix: fewer/better features, more data, regularization, or cross-validation"},
+      {"id": "r5", "point": "Says how to confirm the fix worked: gap shrinks and test accuracy rises on unseen data"}
+    ],
+    "explanation": "This is textbook overfitting: unlimited tree depth plus 200 features on 2,000 rows lets the model memorize. The 28-point train/test gap is the diagnosis — a healthy model has a small gap. First fixes: cap capacity (max_depth, min_samples_leaf) and validate with cross-validation; then cut weak features, add data, or regularize. You know it worked when the gap shrinks AND held-out accuracy goes up — train accuracy alone dropping means nothing."
+  },
+  {
     "title": "The model looks great in staging, terrible on Monday mornings",
     "scenario": "You built a churn model for a telecom app. Offline AUC is 0.91. In production, every Monday morning between 6 and 9 the app serves a suspended feature flag and traffic drops 70%. Last quarter, live AUC on served predictions is 0.72, and the gap grows each week. The data pipeline pulls features from the app's production database: some features are computed **after** the churn decision is made (e.g. `days_since_final_push_notification`, `csat_after_agent_call`). Retraining weekly does not close the gap. Debug this: list the likely causes you would check first, how you would confirm each one, and what you would change.",
     "difficulty": "intermediate",

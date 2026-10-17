@@ -154,6 +154,15 @@ def test_chat_invalid_reference_stripped(client, db_session, anon, monkeypatch):
     assert "[P4242]" not in data["reply"] and "[P1]" in data["reply"]
 
 
+def test_chat_strips_inline_latex_but_keeps_money(client, db_session, anon, monkeypatch):
+    patch_reply(monkeypatch, "Score with $F_2$ or $F_\\beta$; budget stays $5 and $10.")
+    data = client.post("/api/chat", json={"messages": [msg()]}).json()
+    reply = data["reply"]
+    assert "F2" in reply and "Fβ" in reply
+    assert "$F_2$" not in reply and "$F_\\beta$" not in reply
+    assert "$5 and $10" in reply
+
+
 def test_chat_catalog_in_system_prompt(client, db_session, anon, monkeypatch):
     captured = {}
 
@@ -165,6 +174,19 @@ def test_chat_catalog_in_system_prompt(client, db_session, anon, monkeypatch):
     client.post("/api/chat", json={"messages": [msg(content="flood rainfall villages")]})
     assert "[P1] Flood alert dashboard" in captured["system"]
     assert "CATALOG" in captured["system"]
+
+
+def test_chat_system_prompt_requests_readable_markdown(client, db_session, anon, monkeypatch):
+    captured = {}
+
+    def fake(system, messages):
+        captured["system"] = system
+        return "re"
+
+    monkeypatch.setattr("app.routers.chat.llm_chat", fake, raising=False)
+    client.post("/api/chat", json={"messages": [msg()]})
+    assert "own line" in captured["system"]
+    assert "No LaTeX" in captured["system"]
 
 
 def test_chat_page_context_included(client, db_session, anon, monkeypatch):
@@ -246,3 +268,21 @@ def test_chat_provider_error_502(client, db_session, anon, monkeypatch):
     monkeypatch.setattr("app.routers.chat.llm_chat", boom, raising=False)
     res = client.post("/api/chat", json={"messages": [msg()]})
     assert res.status_code == 502
+
+
+def test_chat_unexpected_exception_maps_to_502(client, db_session, anon, monkeypatch):
+    """Any non-LLM crash must still answer JSON with 502 — never a bare 500."""
+    def boom(system, messages):
+        raise RuntimeError("unexpected provider crash")
+
+    monkeypatch.setattr("app.routers.chat.llm_chat", boom, raising=False)
+    res = client.post("/api/chat", json={"messages": [msg()]})
+    assert res.status_code == 502
+    assert res.json()["detail"]
+
+
+def test_chat_empty_reply_gets_fallback_message(client, db_session, anon, monkeypatch):
+    patch_reply(monkeypatch, "")
+    res = client.post("/api/chat", json={"messages": [msg()]})
+    assert res.status_code == 200
+    assert res.json()["reply"].strip()

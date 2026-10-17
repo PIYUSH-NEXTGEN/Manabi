@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 
 import httpx
@@ -6,12 +7,14 @@ from pydantic import BaseModel, ValidationError
 
 from app.config import get_settings
 
+logger = logging.getLogger(__name__)
+
 ANTHROPIC_API_BASE = "https://api.anthropic.com/v1"
 ANTHROPIC_VERSION = "2023-06-01"
 DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-5"
 MAX_TOKENS_JSON = 4096
-MAX_TOKENS_CHAT = 1024
+MAX_TOKENS_CHAT = 512
 
 
 class LLMConfigError(Exception):
@@ -213,7 +216,6 @@ def _call_gemini(system: str, user: str, json_mode: bool, model: str | None) -> 
     settings = get_settings()
     if not settings.GEMINI_API_KEY:
         raise LLMConfigError("AI is not configured yet")
-    client = _gemini(settings.GEMINI_API_KEY)
     model_name = model or settings.GEMINI_MODEL or DEFAULT_GEMINI_MODEL
     config = {
         "temperature": 0,
@@ -221,8 +223,13 @@ def _call_gemini(system: str, user: str, json_mode: bool, model: str | None) -> 
         "response_mime_type": "application/json" if json_mode else "text/plain",
     }
     prompt = f"{system}\n\n{user}" if user else system
-    response = client.models.generate_content(model=model_name, contents=[prompt], config=config)
-    return response.text or ""
+    try:
+        client = _gemini(settings.GEMINI_API_KEY)
+        response = client.models.generate_content(model=model_name, contents=[prompt], config=config)
+        return response.text or ""
+    except Exception as exc:  # SDK (quota/safety/model) and transport errors must not leak as 500s
+        logger.exception("Gemini call failed (model=%s)", model_name)
+        raise LLMResponseError(f"Gemini request failed: {exc}") from exc
 
 
 def _call_anthropic(system: str, user: str, json_mode: bool, model: str | None) -> str:
@@ -240,19 +247,25 @@ def _call_anthropic(system: str, user: str, json_mode: bool, model: str | None) 
         "system": final_system,
         "messages": [{"role": "user", "content": user or final_system}],
     }
-    response = _anthropic_http(settings.ANTHROPIC_API_KEY).post(
-        f"{ANTHROPIC_API_BASE}/messages",
-        headers={
-            "x-api-key": settings.ANTHROPIC_API_KEY,
-            "anthropic-version": ANTHROPIC_VERSION,
-            "content-type": "application/json",
-        },
-        json=body,
-        timeout=60.0,
-    )
-    if response.status_code in (401, 403):
-        raise LLMConfigError("AI is not configured yet (invalid API key)")
-    if response.status_code >= 400:
-        raise LLMResponseError(f"Anthropic error {response.status_code}")
-    content = response.json().get("content") or []
-    return "".join(part.get("text", "") for part in content if isinstance(part, dict))
+    try:
+        response = _anthropic_http(settings.ANTHROPIC_API_KEY).post(
+            f"{ANTHROPIC_API_BASE}/messages",
+            headers={
+                "x-api-key": settings.ANTHROPIC_API_KEY,
+                "anthropic-version": ANTHROPIC_VERSION,
+                "content-type": "application/json",
+            },
+            json=body,
+            timeout=60.0,
+        )
+        if response.status_code in (401, 403):
+            raise LLMConfigError("AI is not configured yet (invalid API key)")
+        if response.status_code >= 400:
+            raise LLMResponseError(f"Anthropic error {response.status_code}")
+        content = response.json().get("content") or []
+        return "".join(part.get("text") or "" for part in content if isinstance(part, dict))
+    except (LLMConfigError, LLMResponseError):
+        raise
+    except Exception as exc:  # transport failures and unreadable bodies must not leak as 500s
+        logger.exception("Anthropic call failed (model=%s)", model_name)
+        raise LLMResponseError(f"Anthropic request failed: {exc}") from exc

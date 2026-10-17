@@ -12,7 +12,7 @@ def _keywords(text: str) -> set[str]:
     return set(_KEYWORD_RE.findall(text.lower()))
 
 
-def search_catalog(db: Session, query: str, limit: int = 5) -> list[tuple[Problem, int]]:
+def search_catalog(db: Session, query: str, limit: int = 3) -> list[tuple[Problem, int]]:
     """Keyword match on title, summary, tech_tags, field, source_id. Top (problem, score)."""
     keywords = _keywords(query)
     if not keywords:
