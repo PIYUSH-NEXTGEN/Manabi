@@ -141,16 +141,33 @@ def test_api_404_stays_json_not_spa(client, fake_dist):
 
 # ---------------- security/perf fixes ----------------
 
-def test_spa_blocks_path_escape(client, fake_dist):
+@pytest.fixture
+def _escape_probe_dist(tmp_path, monkeypatch):
+    """A clean, isolated dist tree for the path-escape probes.
+
+    Use a dedicated sub-folder of tmp_path rather than relying on the
+    generic 'dist' fixture so this test cannot be affected by another
+    test's tmp_path teardown or by a shared mutable distribution tree.
+    """
+    dist = tmp_path / "spa_escape_probe" / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("<html>MANABI-SPA</html>")
+    (dist / "favicon.svg").write_text("<svg/>")
+    (dist / "assets" / "app.js").write_text("console.log(1)")
+    monkeypatch.setattr("app.main.frontend_dist", lambda: dist)
+    return dist
+
+
+def test_spa_blocks_path_escape(_escape_probe_dist):
     from fastapi import HTTPException
 
     from app.main import _spa_response
 
     for evil in ["../secret.txt", "assets/../../etc/passwd", "..\\secret.txt", "//evil.com/share/x"]:
         with pytest.raises(HTTPException) as exc:
-            _spa_response(fake_dist, evil, "text/html")
+            _spa_response(_escape_probe_dist, evil, "text/html")
         assert exc.value.status_code == 404, evil
-    assert _spa_response(fake_dist, "index.html", "text/html").status_code in (200, None)  # own file ok (starlette returns response)
+    assert _spa_response(_escape_probe_dist, "index.html", "text/html").status_code in (200, None)  # own file ok (starlette returns response)
 
 
 def test_problem_create_rejects_oversize_fields(client, db_session, user):
