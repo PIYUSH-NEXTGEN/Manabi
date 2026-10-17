@@ -159,14 +159,32 @@ def _escape_probe_dist(tmp_path, monkeypatch):
 
 
 def test_spa_blocks_path_escape(_escape_probe_dist):
+    import os
+
     from fastapi import HTTPException
 
     from app.main import _spa_response
 
-    for evil in ["../secret.txt", "assets/../../etc/passwd", "..\\secret.txt", "//evil.com/share/x"]:
+    # Genuine traversal escapes on every platform -> must 404.
+    for evil in ["../secret.txt", "assets/../../etc/passwd", "//evil.com/share/x"]:
         with pytest.raises(HTTPException) as exc:
             _spa_response(_escape_probe_dist, evil, "text/html")
         assert exc.value.status_code == 404, evil
+
+    # Backslash traversal: on Windows "\" is a path separator, so this escapes
+    # dist and must 404. On POSIX a backslash is an ordinary filename byte, so
+    # the candidate resolves to a literal "..\\secret.txt" file *inside* dist
+    # (not an escape) and the SPA correctly falls back to index.html instead
+    # of a 404.
+    evil_bs = "..\\secret.txt"
+    if os.name == "nt":
+        with pytest.raises(HTTPException) as exc:
+            _spa_response(_escape_probe_dist, evil_bs, "text/html")
+        assert exc.value.status_code == 404, evil_bs
+    else:
+        resp = _spa_response(_escape_probe_dist, evil_bs, "text/html")
+        assert resp.status_code in (200, None)  # literal filename inside dist -> index fallback
+
     assert _spa_response(_escape_probe_dist, "index.html", "text/html").status_code in (200, None)  # own file ok (starlette returns response)
 
 
