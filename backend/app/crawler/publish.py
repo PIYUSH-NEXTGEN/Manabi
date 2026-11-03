@@ -35,6 +35,11 @@ def source_display_name(source: Source, year: int | None) -> str:
     return f"{source.name} {year}" if year else source.name
 
 
+def deterministic_source_id(item: DiscoveredItem, title: str | None = None) -> str:
+    """Real source ID when present, else a stable hash of title + organisation."""
+    return item.source_id or source_id_for(title or item.title or "", item.organisation)
+
+
 def _source_status(item: DiscoveredItem) -> str:
     if item.deadline is None:
         return "unknown"
@@ -63,7 +68,7 @@ def _apply_fields(problem: Problem, source: Source, item: DiscoveredItem, extrac
     problem.datasets = [dataset.model_dump() for dataset in fields.datasets]
     problem.approaches = fields.approaches
     problem.source_name = source_display_name(source, item.year)
-    problem.source_id = item.source_id or source_id_for(fields.title, item.organisation)
+    problem.source_id = deterministic_source_id(item, fields.title)
     problem.source_url = item.url
     problem.source_note = item.extra.get("dataset_file") if item.extra else None
     # §5: never republish crawled source text. The detail API returns the
@@ -91,12 +96,13 @@ def upsert_problem(
     dry_run: bool = False,
 ) -> PublishOutcome:
     source_name = source_display_name(source, item.year)
+    identity = deterministic_source_id(item)
     existing = db.scalar(
         select(Problem).where(
             Problem.source_name == source_name,
-            Problem.source_id == (item.source_id or ""),
+            Problem.source_id == identity,
         )
-    ) if item.source_id else None
+    )
 
     if existing is not None and existing.content_hash == digest:
         # Same content means no LLM call and no field writes (§6.5).
@@ -130,7 +136,12 @@ def upsert_problem(
     target_status = STATUS_PUBLISHED if publish_ok else STATUS_PENDING_REVIEW
     if human_touched and review_note is None:
         review_note = "source changed after a human edit; pending re-review"
-    notes = "; ".join(filter(None, [review_note, *extraction.quality_notes])) or None
+    evidence_note = (
+        "verified evidence: " + ", ".join(sorted(extraction.verified_evidence))
+        if extraction.verified_evidence
+        else "no verified evidence"
+    )
+    notes = "; ".join(filter(None, [review_note, evidence_note, *extraction.quality_notes])) or None
 
     if dry_run:
         return PublishOutcome("new" if existing is None else "updated", existing.id if existing else None, target_status, notes)
@@ -149,7 +160,7 @@ def upsert_problem(
             datasets=[],
             approaches=[],
             source_name=source_name,
-            source_id=item.source_id or source_id_for(extraction.fields.title, item.organisation),
+            source_id=deterministic_source_id(item, extraction.fields.title),
             original_text="",
             first_seen_at=utcnow(),
             last_seen_at=utcnow(),

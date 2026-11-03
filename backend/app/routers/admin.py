@@ -164,8 +164,10 @@ def unpublish_source(source_key: str, db: DB, admin: AdminUser):
 def trigger_crawl(source_key: str, background: BackgroundTasks, _admin: AdminUser):
     if not crawler_config.enabled():
         raise HTTPException(status_code=409, detail="CRAWLER_ENABLED is false")
-    if not crawler_config.user_agent():
-        raise HTTPException(status_code=409, detail="CRAWLER_CONTACT is not configured")
+    try:
+        crawler_config.user_agent()
+    except RuntimeError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
     def _job() -> None:
         with session_scope() as db:

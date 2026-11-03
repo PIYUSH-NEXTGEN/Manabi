@@ -37,7 +37,12 @@ def is_configured() -> bool:
     return False
 
 
-def chat(system: str, messages: list[dict], model: str | None = None) -> str:
+def chat(
+    system: str,
+    messages: list[dict],
+    model: str | None = None,
+    max_tokens: int | None = None,
+) -> str:
     """Chat reply. Deterministic for the mock provider. Raises LLMConfigError -> 503."""
     if not is_configured():
         raise LLMConfigError("AI is not configured yet")
@@ -47,9 +52,9 @@ def chat(system: str, messages: list[dict], model: str | None = None) -> str:
     if provider == "mock":
         return f"MOCK-CHAT-REPLY: saw: {last_user_text[:200]}".strip()
     if provider == "gemini":
-        return _call_gemini(system, last_user_text, model=model).strip()
+        return _call_gemini(system, last_user_text, model=model, max_tokens=max_tokens).strip()
     if provider == "anthropic":
-        return _call_anthropic(system, last_user_text, model=model).strip()
+        return _call_anthropic(system, last_user_text, model=model, max_tokens=max_tokens).strip()
     raise LLMConfigError(f"Unknown LLM_PROVIDER: {provider}")
 
 
@@ -64,8 +69,13 @@ def _gemini(api_key: str):
     global _gemini_client, _gemini_client_key
     if _gemini_client is None or _gemini_client_key != api_key:
         from google import genai
+        from google.genai import types
 
-        _gemini_client = genai.Client(api_key=api_key)
+        # Without an explicit timeout the SDK can block a crawler run forever.
+        _gemini_client = genai.Client(
+            api_key=api_key,
+            http_options=types.HttpOptions(timeout=60_000),
+        )
         _gemini_client_key = api_key
     return _gemini_client
 
@@ -79,14 +89,14 @@ def _anthropic_http(api_key: str) -> httpx.Client:
     return _anthropic_client
 
 
-def _call_gemini(system: str, user: str, model: str | None) -> str:
+def _call_gemini(system: str, user: str, model: str | None, max_tokens: int | None = None) -> str:
     settings = get_settings()
     if not settings.GEMINI_API_KEY:
         raise LLMConfigError("AI is not configured yet")
     model_name = model or settings.GEMINI_MODEL or DEFAULT_GEMINI_MODEL
     config = {
         "temperature": 0,
-        "max_output_tokens": MAX_TOKENS_CHAT,
+        "max_output_tokens": max_tokens or MAX_TOKENS_CHAT,
     }
     prompt = f"{system}\n\n{user}" if user else system
     try:
@@ -98,14 +108,14 @@ def _call_gemini(system: str, user: str, model: str | None) -> str:
         raise LLMResponseError(f"Gemini request failed: {exc}") from exc
 
 
-def _call_anthropic(system: str, user: str, model: str | None) -> str:
+def _call_anthropic(system: str, user: str, model: str | None, max_tokens: int | None = None) -> str:
     settings = get_settings()
     if not settings.ANTHROPIC_API_KEY:
         raise LLMConfigError("AI is not configured yet")
     model_name = model or settings.LLM_MODEL_FAST or DEFAULT_ANTHROPIC_MODEL
     body = {
         "model": model_name,
-        "max_tokens": MAX_TOKENS_CHAT,
+        "max_tokens": max_tokens or MAX_TOKENS_CHAT,
         "temperature": 0,
         "system": system,
         "messages": [{"role": "user", "content": user or system}],

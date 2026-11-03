@@ -125,7 +125,8 @@ def _parse_json(raw: str) -> dict:
 
 
 def _default_call(system: str, messages: list[dict]) -> str:
-    return llm.chat(system, messages)
+    # Extraction needs more room than a chat reply: one full problem per call.
+    return llm.chat(system, messages, max_tokens=1500)
 
 
 def verify_evidence(source_text: str, evidence: dict[str, str]) -> dict[str, str]:

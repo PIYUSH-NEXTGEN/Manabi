@@ -1,0 +1,67 @@
+name: crawl
+
+on:
+  schedule:
+    # Daily, off-peak UTC. Disabled until the repo variable
+    # CRAWLER_SCHEDULE_ENABLED=true is set (manual dispatch still works).
+    - cron: "17 2 * * *"
+  workflow_dispatch:
+    inputs:
+      source:
+        description: Registry key to crawl (e.g. sih-2026, sih)
+        required: true
+        default: sih-2026
+        type: string
+      dry_run:
+        description: Fetch and extract without writing to the database
+        required: true
+        default: true
+        type: boolean
+
+concurrency:
+  group: manabi-crawler
+  cancel-in-progress: false
+
+jobs:
+  crawl:
+    if: ${{ github.event_name == 'workflow_dispatch' || vars.CRAWLER_SCHEDULE_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      CRAWLER_CONTACT: ${{ secrets.CRAWLER_CONTACT }}
+      SITE_URL: ${{ vars.SITE_URL || 'https://github.com/PIYUSH-NEXTGEN/Manabi' }}
+      LLM_PROVIDER: gemini
+      CRAWLER_ENABLED: "true"
+      CRAWLER_REQUIRE_POSTGRES: "true"
+      CRAWLER_MAX_REQUESTS_PER_RUN: "400"
+      CRAWLER_MAX_LLM_CALLS: "200"
+      SOURCE: ${{ inputs.source || 'sih-2026' }}
+      DRY_RUN: ${{ inputs.dry_run || 'false' }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend deps
+        run: pip install -r backend/requirements.txt
+
+      - name: Migrate production database
+        working-directory: backend
+        run: python -m alembic upgrade head
+
+      - name: Run crawler
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          args=(--source "$SOURCE" --env prod)
+          if [ "$DRY_RUN" = "true" ]; then
+            args+=(--dry-run)
+          fi
+          python -m app.crawler.run "${args[@]}"

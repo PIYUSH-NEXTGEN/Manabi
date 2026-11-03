@@ -19,7 +19,7 @@ from app.crawler.dedupe import content_hash
 from app.crawler.discovery import CrawlContext, DiscoveredItem, RobotsDisallowed, discover
 from app.crawler.extract import Budget, BudgetExhausted, ExtractionError, NoClearProblem, extract_draft
 from app.crawler.fetcher import FetchError, HostThrottle, safe_fetch
-from app.crawler.publish import source_display_name, upsert_problem
+from app.crawler.publish import deterministic_source_id, source_display_name, upsert_problem
 from app.crawler.registry import Source, load_source
 from app.crawler.report import CrawlReport
 from app.db import normalized_database_url, session_scope
@@ -30,17 +30,16 @@ from app.models import (
     STATUS_PUBLISHED,
     utcnow,
 )
+from app.services.llm import LLMConfigError, LLMResponseError
 
 MISSING_RUNS_BEFORE_CLOSED = 3
 
 
 def _existing(db: Session, source: Source, item: DiscoveredItem) -> Problem | None:
-    if not item.source_id:
-        return None
     return db.scalar(
         select(Problem).where(
             Problem.source_name == source_display_name(source, item.year),
-            Problem.source_id == item.source_id,
+            Problem.source_id == deterministic_source_id(item),
         )
     )
 
@@ -240,7 +239,7 @@ async def run_source(
             report.cover(item.year, "not_a_problem", item.source_id)
             report.log("skipped_not_a_problem", url=item.url, source_id=item.source_id)
             continue
-        except (ExtractionError, RuntimeError) as exc:
+        except (ExtractionError, LLMConfigError, LLMResponseError, RuntimeError) as exc:
             report.cover(item.year, "failed_extraction", item.source_id)
             report.fail(item.url, str(exc))
             continue

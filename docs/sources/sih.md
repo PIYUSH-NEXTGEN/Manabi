@@ -113,11 +113,13 @@ Disallow:
 - **User-Agent**: `ManabiBot/1.0 (+<SITE_URL>/about; contact: <CRAWLER_CONTACT>)`
 - **Contact email**: from env `CRAWLER_CONTACT` (**required before any run**; owner must
   supply — see §9-Q3).
-- **Discovery method / throttle config** (to be encoded in `backend/app/crawler/sources/sih.yaml`):
-  - `2026`: `listing_html`, URL `https://sih.gov.in/sih2026PS`, `min_delay_seconds: 3`,
-    `max_pages_per_run: 200` (single page in practice), `max_concurrency: 1`.
-  - `2024`: `file_table`, URL `https://sih.gov.in/letters/SIH_PS_2024.xlsx`
-    (XLSX via explicit adapter, size/page caps), same throttle.
+- **Discovery method / throttle config** is encoded in the registry:
+  - `2026`: `backend/app/crawler/sources/sih-2026.yaml` — `listing_html`, URL
+    `https://sih.gov.in/sih2026PS`, `min_delay_seconds: 3`, 200 pages/run, one
+    connection per host, 5 MB cap for the 3.1 MB server-rendered page.
+  - `2024`: `backend/app/crawler/sources/sih.yaml` — `file_table`, URL
+    `https://sih.gov.in/letters/SIH_PS_2024.xlsx` (XLSX via the explicit `sih_xlsx`
+    adapter), same throttle.
 - **Display policy**: `summary_only` (§5 above).
 - **Conditional requests**: honour `ETag`/`Last-Modified` when returned; hash content so
   unchanged pages cost nothing.
