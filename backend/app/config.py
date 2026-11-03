@@ -19,6 +19,16 @@ class Settings(BaseSettings):
     CHAT_RATE_LIMIT_ANON_PER_HOUR: int = 10
     CHAT_RATE_LIMIT_USER_PER_HOUR: int = 30
 
+    # Crawler (§7). CRAWLER_ENABLED is the kill switch: every entry point exits
+    # immediately while it is false.
+    CRAWLER_ENABLED: bool = False
+    CRAWLER_CONTACT: str = ""
+    CRAWLER_REQUIRE_POSTGRES: bool = False
+    CRAWLER_MAX_REQUESTS_PER_RUN: int = 400
+    CRAWLER_MAX_LLM_CALLS: int = 200
+    SITE_URL: str = "https://github.com/PIYUSH-NEXTGEN/Manabi"
+    ADMIN_GITHUB_USERNAMES: str = ""
+
 
 @lru_cache
 def get_settings() -> Settings:
