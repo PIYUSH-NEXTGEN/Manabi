@@ -205,6 +205,54 @@ describe('ProblemDetailPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('offers a single-statement XLSX for a bulk official source', async () => {
+    server.use(
+      http.get('*/api/problems/1', () =>
+        HttpResponse.json({
+          id: 1,
+          title: 'Landslide warning system',
+          summary: 'A generated summary.',
+          who_affected: 'District teams',
+          why_matters: 'Warnings save lives.',
+          field: 'geospatial',
+          domain: 'disaster-management',
+          difficulty: 'intermediate',
+          est_hours: 40,
+          tech_tags: ['python'],
+          datasets: [],
+          approaches: [],
+          source_name: 'Smart India Hackathon 2024',
+          source_id: 'SIH26001',
+          source_url: 'https://sih.gov.in/letters/SIH_PS_2024.xlsx',
+          source_note: null,
+          ai_fields: [],
+          project_count: 0,
+          origin: 'crawler',
+          source_year: 2024,
+          edition: '2024',
+          organisation: 'MDoNER',
+          source_status: 'open',
+          deadline: null,
+          original_text: 'A generated summary.',
+          display_policy: 'summary_only',
+          projects: [],
+        }),
+      ),
+    );
+
+    renderDetail('/problems/1');
+
+    expect(
+      await screen.findByRole('link', { name: 'Download this statement (XLSX)' }),
+    ).toHaveAttribute('href', '/api/problems/1/export.xlsx');
+    expect(
+      screen.getByRole('link', { name: /Official release \(all statements\)/ }),
+    ).toHaveAttribute('href', 'https://sih.gov.in/letters/SIH_PS_2024.xlsx');
+    expect(
+      screen.queryByRole('region', { name: 'Original statement' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('renders the 404 page for a missing problem', async () => {
     renderDetail('/problems/999');
 

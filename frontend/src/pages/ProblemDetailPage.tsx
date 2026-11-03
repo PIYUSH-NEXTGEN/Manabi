@@ -19,6 +19,10 @@ const DIFFICULTY_FILL: Record<Difficulty, number> = {
 const sectionHeading =
   'font-mono text-[11px] font-bold uppercase tracking-widest';
 
+function isBulkSource(url: string | null | undefined): boolean {
+  return /\.(xlsx|xls|csv|pdf)(\?|$)/i.test(url ?? '');
+}
+
 function DetailSkeleton() {
   return (
     <div className="mx-auto w-[min(1100px,96vw)] animate-pulse space-y-4 py-16">
@@ -107,7 +111,26 @@ function DetailView({ problemId }: { problemId: number }) {
                   {data.source_status === 'open' ? ' · open' : ''}
                 </p>
                 <div className="mt-3 flex flex-wrap gap-4">
-                  {safeExternalUrl(data.source_url) ? (
+                  {isBulkSource(data.source_url) ? (
+                    <>
+                      <a
+                        href={`/api/problems/${data.id}/export.xlsx`}
+                        className="font-mono text-[11px] font-bold uppercase tracking-widest text-blue underline underline-offset-4"
+                      >
+                        Download this statement (XLSX)
+                      </a>
+                      {safeExternalUrl(data.source_url) ? (
+                        <a
+                          href={safeExternalUrl(data.source_url) ?? undefined}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="font-mono text-[11px] font-bold uppercase tracking-widest text-blue underline underline-offset-4"
+                        >
+                          Official release (all statements) ↗
+                        </a>
+                      ) : null}
+                    </>
+                  ) : safeExternalUrl(data.source_url) ? (
                     <a
                       href={safeExternalUrl(data.source_url) ?? undefined}
                       target="_blank"
@@ -122,6 +145,12 @@ function DetailView({ problemId }: { problemId: number }) {
                     sourceId={data.source_id}
                   />
                 </div>
+                {isBulkSource(data.source_url) ? (
+                  <p className="mt-3 text-xs leading-snug">
+                    The official source is a bulk workbook. The XLSX download above
+                    contains only this statement&apos;s MANABI summary and attribution.
+                  </p>
+                ) : null}
               </section>
             ) : null}
           </article>

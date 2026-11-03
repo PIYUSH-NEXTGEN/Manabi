@@ -131,6 +131,9 @@ crawler remains the source of truth for production.
 - Crawled pages show source, year, organiser, "View original", the generated-summary
   notice and a "Report / request removal" link. Full verbatim crawled text is never
   returned by the API.
+- When the official source is a bulk file (SIH 2024 XLSX, PDFs), the page offers
+  `GET /api/problems/{id}/export.xlsx` — a one-statement workbook built from the
+  MANABI summary + attribution — and links the bulk official release separately.
 
 ## Troubleshooting
 
