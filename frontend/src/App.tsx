@@ -26,24 +26,11 @@ const HowItWorksPage = lazy(() =>
     default: m.HowItWorksPage,
   })),
 );
-const IngestPage = lazy(() =>
-  import('@/pages/IngestPage').then((m) => ({ default: m.IngestPage })),
-);
 const KitPage = lazy(() =>
   import('@/pages/KitPage').then((m) => ({ default: m.KitPage })),
 );
-const MlQuestionPage = lazy(() =>
-  import('@/pages/MlQuestionPage').then((m) => ({
-    default: m.MlQuestionPage,
-  })),
-);
 const DashboardPage = lazy(() =>
   import('@/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
-);
-const MlQuestionsPage = lazy(() =>
-  import('@/pages/MlQuestionsPage').then((m) => ({
-    default: m.MlQuestionsPage,
-  })),
 );
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
@@ -110,9 +97,6 @@ export function App() {
                     path="/projects/:id"
                     element={<ProjectDetailPage />}
                   />
-                  <Route path="/ingest" element={<IngestPage />} />
-                  <Route path="/ml" element={<MlQuestionsPage />} />
-                  <Route path="/ml/:id" element={<MlQuestionPage />} />
                   <Route
                     path="/me"
                     element={

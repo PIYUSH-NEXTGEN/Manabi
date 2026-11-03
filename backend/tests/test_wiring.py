@@ -7,7 +7,7 @@ from sqlalchemy.pool import StaticPool
 from app import config
 from app.db import Base, get_db
 from app.main import app
-from app.models import MLAttempt, MLQuestion, Problem, Project, User
+from app.models import Problem, Project, User
 
 
 @pytest.fixture(autouse=True)
@@ -68,16 +68,6 @@ def seeded(db_session):
             repo_url="https://github.com/jane/flood", open_for_contributors=True,
         )
     )
-    question = MLQuestion(
-        title="Q", scenario="s", difficulty="beginner", topic="class-imbalance",
-        rubric_json=[], explanation="e",
-    )
-    db_session.add(question)
-    db_session.commit()
-    db_session.add_all(
-        [MLAttempt(question_id=question.id, user_id=jane.id, answer="a", feedback_json={})
-         for _ in range(2)]  # two attempts -> still one distinct question
-    )
     db_session.commit()
     return jane
 
@@ -95,14 +85,13 @@ def test_profile_shape(client, db_session, seeded):
     assert "github_token" not in data["user"]
     assert len(data["projects"]) == 1
     assert data["projects"][0]["repo_url"] == "https://github.com/jane/flood"
-    assert data["solved_ml_count"] == 1  # distinct questions, not attempt count
 
 
 def test_profile_empty_counts(client, db_session):
     db_session.add(User(github_id=12, username="empty", name="E"))
     db_session.commit()
     data = client.get("/api/u/empty").json()
-    assert data["projects"] == [] and data["solved_ml_count"] == 0
+    assert data["projects"] == []
 
 
 # ---------------- static / SPA (B11) ----------------
@@ -140,6 +129,48 @@ def test_api_404_stays_json_not_spa(client, fake_dist):
 
 
 # ---------------- security/perf fixes ----------------
+
+def draft_card_factory(**overrides):
+    card = {
+        "title": "Valid title",
+        "summary": "A summary that is long enough.",
+        "who_affected": "Someone affected",
+        "why_matters": "It matters somehow",
+        "field": "other",
+        "domain": "other",
+        "difficulty": "beginner",
+        "est_hours": 10,
+        "tech_tags": [],
+        "datasets": [],
+        "approaches": [],
+        "source_name": "Test source",
+        "source_id": None,
+        "source_url": None,
+        "source_note": None,
+    }
+    card.update(overrides)
+    return card
+
+
+def test_problem_create_rejects_oversize_fields(client, db_session, user):
+    res = client.post("/api/problems", json=draft_card_factory(title="x" * 301))
+    assert res.status_code == 422
+    res = client.post("/api/problems", json=draft_card_factory(summary="x" * 8001))
+    assert res.status_code == 422
+    res = client.post("/api/problems", json=draft_card_factory(est_hours=0))
+    assert res.status_code == 422
+    res = client.post("/api/problems", json=draft_card_factory(est_hours=1001))
+    assert res.status_code == 422
+    res = client.post("/api/problems", json=draft_card_factory(tech_tags=["x" * 41]))
+    assert res.status_code == 422
+
+
+def test_problem_create_accepts_boundary_sizes(client, db_session, user):
+    res = client.post(
+        "/api/problems",
+        json=draft_card_factory(title="x" * 300, summary="y" * 8000, est_hours=1)
+    )
+    assert res.status_code == 201, res.json()
 
 @pytest.fixture
 def _escape_probe_dist(tmp_path, monkeypatch):
@@ -187,43 +218,3 @@ def test_spa_blocks_path_escape(_escape_probe_dist):
 
     assert _spa_response(_escape_probe_dist, "index.html", "text/html").status_code in (200, None)  # own file ok (starlette returns response)
 
-
-def test_problem_create_rejects_oversize_fields(client, db_session, user):
-    from tests.test_ingest import draft_card_factory
-
-    res = client.post("/api/problems", json=draft_card_factory(title="x" * 301))
-    assert res.status_code == 422
-    res = client.post("/api/problems", json=draft_card_factory(summary="x" * 8001))
-    assert res.status_code == 422
-    res = client.post("/api/problems", json=draft_card_factory(est_hours=0))
-    assert res.status_code == 422
-    res = client.post("/api/problems", json=draft_card_factory(est_hours=1001))
-    assert res.status_code == 422
-    res = client.post("/api/problems", json=draft_card_factory(tech_tags=["x" * 41]))
-    assert res.status_code == 422
-
-
-def test_problem_create_accepts_boundary_sizes(client, db_session, user):
-    from tests.test_ingest import draft_card_factory
-
-    res = client.post(
-        "/api/problems",
-        json=draft_card_factory(title="x" * 300, summary="y" * 8000, est_hours=1)
-    )
-    assert res.status_code == 201, res.json()
-
-
-def test_ingest_clamps_est_hours(client, db_session, user, monkeypatch):
-    from app.services.ratelimit import INGEST_LIMITER
-    from tests.test_ingest import canned_llm
-
-    INGEST_LIMITER._hits.clear()
-    canned_llm(
-        monkeypatch,
-        '{"is_problem": true, "title": "T", "summary": "S", "who_affected": "W", "why_matters": "Y",'
-        '"field": "other", "domain": "other", "difficulty": "beginner", "est_hours": 999999, "tech_tags": [],'
-        '"datasets": [], "approaches": [], "source_note": null, "evidence": {}, "inferred_fields": []}',
-    )
-    res = client.post("/api/ingest", json={"text": "A clean problem description goes here."})
-    assert res.status_code == 200
-    assert res.json()["draft"]["est_hours"] == 1000

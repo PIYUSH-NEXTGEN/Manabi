@@ -3,7 +3,6 @@ import { StaticShell } from './StaticShell';
 const WE_STORE = [
   'Your GitHub username, display name, and avatar — shown on projects you submit.',
   'Links to the public repos you submit, plus automatically tracked progress (commits, README, open issues).',
-  'Your ML practice answers and the feedback they got.',
   'A GitHub token on the server side. It is never returned to any browser.',
 ];
 

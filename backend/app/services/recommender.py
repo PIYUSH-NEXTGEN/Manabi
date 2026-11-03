@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Problem, User
+from app.models import STATUS_PUBLISHED, Problem, User
 
 REC_LIMIT = 8
 DIFFICULTY_BONUS = 1
@@ -35,7 +35,11 @@ def _score_problem(problem: Problem, languages: set[str], topics: set[str]) -> t
 
 
 def newest_problems(db: Session, limit: int = REC_LIMIT) -> list[Problem]:
-    return list(db.scalars(select(Problem).order_by(Problem.id.desc()).limit(limit)).all())
+    return list(
+        db.scalars(
+            select(Problem).where(Problem.status == STATUS_PUBLISHED).order_by(Problem.id.desc()).limit(limit)
+        ).all()
+    )
 
 
 def recommendations_for_user(db: Session, user: User, limit: int = REC_LIMIT) -> list[tuple[Problem, int, list[str]]]:
@@ -43,7 +47,7 @@ def recommendations_for_user(db: Session, user: User, limit: int = REC_LIMIT) ->
     signals = user.signals_json or {}
     languages = {str(k).lower() for k in (signals.get("languages") or {})}
     topics = {str(t).lower() for t in (signals.get("topics") or [])}
-    problems = list(db.scalars(select(Problem)).all())
+    problems = list(db.scalars(select(Problem).where(Problem.status == STATUS_PUBLISHED)).all())
     if not languages and not topics:
         return [(problem, 0, [_FALLBACK_REASON]) for problem in newest_problems(db, limit)]
     scored: list[tuple[Problem, int, list[str]]] = []

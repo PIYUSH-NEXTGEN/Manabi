@@ -7,7 +7,8 @@
 | Date checked | 2026-11-03 |
 | Checked by | agent (Phase 0, MANABI crawler task) |
 | Compliance record | `docs/sources/sih.md` (this file) |
-| Verdict | **allowed** — with open items in §9 that need the owner's decision |
+| Verdict | **allowed** (owner approved 2026-11-03) |
+| Owner decisions (2026-11-03) | Scope for now: **SIH 2026 pages + official 2024 XLSX only**; owner emails sih@aicte-india.org about historical exports (2022/2023/2025); Internet Archive snapshots **NOT approved**; third-party mirrors remain **excluded** as data origin; `CRAWLER_CONTACT` site URL = `https://github.com/PIYUSH-NEXTGEN/Manabi` |
 
 ## 1. What SIH is
 
@@ -20,9 +21,11 @@ does not claim ownership of the content.
 
 ## 2. Terms of Service / Privacy Policy check
 
-- No Terms of Service, Terms & Conditions, Acceptable Use, copyright, or Privacy Policy
-  page exists on the portal. Directly probed (all returned HTTP 404):
-  `/terms-and-conditions`, `/termsconditions`, `/terms`, `/privacy-policy`.
+**Recorded explicitly: sih.gov.in publishes NO Terms of Service, Terms & Conditions,
+Acceptable Use or Privacy Policy document.** This was verified by direct probing
+(all returned HTTP 404):
+
+- `/terms-and-conditions`, `/termsconditions`, `/terms`, `/privacy-policy`
 - The page footers contain no such links; the only footer notices are:
   - `"© 2025-26 Smart India Hackathon. All rights reserved"`
   - Contact: `sih@aicte-india.org`, phone numbers +91-11-29581222..29581319.
@@ -64,9 +67,21 @@ Disallow:
   PSU, company, NGO). The portal publishes them openly and without login to enable
   participation — their purpose is public dissemination.
 - Because the texts are all-rights-reserved, MANABI's display policy for this source is
-  **`summary_only`**: we show our own LLM-generated structured summary + deterministic
-  fields (ID, title, organisation, theme, year) with attribution and a "View original"
-  link, and do **not** republish the verbatim source text for crawled problems.
+  **`summary_only`** (decided by the owner): we show our own LLM-generated structured
+  summary + deterministic fields (ID, title, organisation, theme, year) with attribution
+  and a "View original" link (`source_url` always points to the official sih.gov.in page
+  or the official XLSX), and do **not** republish the verbatim source text for crawled
+  problems.
+
+## 6b. Takedown / contact path (required by the owner)
+
+- Problems from this source carry a visible **"Report / request removal"** link and the
+  generated-summary attribution notice on MANABI's problem pages.
+- Takedown: admin `POST /api/admin/sources/<key>/unpublish-all` unpublishes everything
+  from this source at once; individual problems can also be unpublished/deleted by id.
+- Escalation channel to the source owner: `sih@aicte-india.org` (published on the portal
+  footer) — used if the organiser/owner of an individual problem statement contacts us
+  and MANABI must remove or correct content.
 
 ## 6. Access model
 
@@ -119,16 +134,17 @@ verbatim all-rights-reserved text, which is the main residual right to respect.
 
 Open items that need the owner before Phase 4 proceeds for those pieces:
 
-- **Q1 — Missing years (2025, 2023, 2022).** The live portal no longer publishes their PS
-  data. Options: (a) ingest only 2026 + 2024 now; (b) allow crawling **Internet Archive
-  snapshots** (`web.archive.org`, a domain not listed in §14) for `/sih2025PS`, `/sih2023PS`,
-  `/sih2022PS`; (c) ask sih@aicte-india.org for official historical exports. Owner must pick.
-- **Q2 — Third-party mirrors** (e.g. sihone.pages.dev, which even publishes `llms.txt` and
-  an XML sitemap, and whose terms state it is not affiliated with MIC/AICTE) exist, but
-  they are unofficial, off-§14, and their copy provenance/quality is unverified. Not
-  approved; not used. Owner must opt in explicitly if ever wanted.
-- **Q3 — `CRAWLER_CONTACT`** email/site URL for the bot User-Agent must be supplied
-  (`<fill in>` in §14).
+- **Q1 — Missing years (2025, 2023, 2022) — DECIDED (2026-11-03): proceed with option (a).
+  Ingest **only SIH 2026 pages + the official 2024 XLSX** for now. The owner will email
+  sih@aicte-india.org to request official historical exports for 2022/2023/2025. Internet
+  Archive snapshots (`web.archive.org`) remain **NOT approved**; the owner will be asked
+  again only after option (a) is delivered.
+- **Q2 — Third-party mirrors — DECIDED (2026-11-03): stay excluded** as data origin or
+  stored `source_url`. A mirror may be consulted only for cross-checking IDs/counts
+  (never stored as origin).
+- **Q3 — `CRAWLER_CONTACT` — DECIDED (2026-11-03):** site URL
+  `https://github.com/PIYUSH-NEXTGEN/Manabi` (from `SITE_URL`); a contact email may still
+  be added to env later and must win over the URL when present.
 - **Re-check date:** verify this record again **by 2027-03-03** (180 days), and after any
   portal relayout (registration changes, new ToS link appearing, robots.txt change).
 

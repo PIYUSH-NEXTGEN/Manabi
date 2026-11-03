@@ -16,7 +16,6 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = ""
     ANTHROPIC_API_KEY: str = ""
     LLM_MODEL_FAST: str = ""
-    AI_RATE_LIMIT_PER_HOUR: int = 15
     CHAT_RATE_LIMIT_ANON_PER_HOUR: int = 10
     CHAT_RATE_LIMIT_USER_PER_HOUR: int = 30
 

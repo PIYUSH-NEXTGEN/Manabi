@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('home hero, board, problem detail, and ML practice render with zero console errors', async ({
+test('home hero, board, and problem detail render with zero console errors', async ({
   page,
 }) => {
   const consoleErrors: string[] = [];
@@ -23,14 +23,6 @@ test('home hero, board, problem detail, and ML practice render with zero console
   await firstCard.click();
   await expect(
     page.getByRole('heading', { name: 'Crop disease triage for small farms' }),
-  ).toBeVisible();
-
-  await page.getByRole('link', { name: 'ML Practice' }).first().click();
-  await expect(
-    page.getByRole('heading', { name: 'ML Practice', level: 1 }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('heading', { name: 'Metrics lie after the launch' }).first(),
   ).toBeVisible();
 
   const unexpectedErrors = consoleErrors.filter(

@@ -38,7 +38,6 @@ python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt     # macOS/Linux: .venv/bin/pip
 copy .env.example .env                            # then edit secrets (never commit .env)
 .venv/Scripts/python -m app.seed.import_projects --file ../frontend/projects.txt
-.venv/Scripts/python -m app.seed.seed             # ML practice questions (idempotent)
 .venv/Scripts/python -m uvicorn app.main:app --port 8000
 
 # Terminal 2 — frontend
@@ -75,7 +74,6 @@ Health check: `GET /api/health` → `{"status":"ok"}`.
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app for login |
 | `LLM_PROVIDER` | `gemini` \| `mock` (mock = offline dev/tests) |
 | `GEMINI_API_KEY` / `GEMINI_MODEL` | Gemini key + optional model override |
-| `AI_RATE_LIMIT_PER_HOUR` | Ingest + graded ML attempts (default 15) |
 | `CHAT_RATE_LIMIT_ANON_PER_HOUR` / `CHAT_RATE_LIMIT_USER_PER_HOUR` | Chat limits (10 / 30) |
 
 Without an LLM key, AI endpoints return `503 {"detail": "AI is not configured yet"}` —

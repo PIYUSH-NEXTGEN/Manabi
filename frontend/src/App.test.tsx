@@ -22,7 +22,6 @@ const PLACEHOLDER_ROUTE_TARGETS: Array<[string, string]> = [];
 const DEAD_TARGETS = [
   '/nope',
   '/problems/1/extra',
-  '/ingest/none',
 ];
 
 describe('Route table (no dead links)', () => {

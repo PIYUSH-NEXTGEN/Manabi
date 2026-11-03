@@ -7,7 +7,6 @@ const STAT_ENTRIES: Array<{ key: keyof StatsOut; label: string }> = [
   { key: 'sources', label: 'Sources' },
   { key: 'fields', label: 'Fields' },
   { key: 'projects', label: 'Projects' },
-  { key: 'ml_questions', label: 'ML questions' },
 ];
 
 export function StatsStrip({
@@ -47,7 +46,7 @@ export function StatsStrip({
       aria-label="Platform stats"
       className="border-b-[3px] border-ink bg-ink text-paper"
     >
-      <dl className="mx-auto grid w-[min(1200px,96vw)] grid-cols-2 gap-6 py-8 md:grid-cols-5">
+      <dl className="mx-auto grid w-[min(1200px,96vw)] grid-cols-2 gap-6 py-8 md:grid-cols-4">
         {STAT_ENTRIES.map((entry) => (
           <div key={entry.key} className="flex flex-col-reverse gap-1">
             <dt className="font-mono text-[11px] font-bold uppercase tracking-widest">

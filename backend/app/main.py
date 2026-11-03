@@ -33,9 +33,17 @@ def guard_deploy_secrets(settings) -> None:
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     from app import models  # noqa: F401  (ensures tables are registered)
-    from app.db import Base
+    from app.db import Base, normalized_database_url
 
-    Base.metadata.create_all(get_engine())
+    database_url = normalized_database_url(get_settings().DATABASE_URL)
+    if database_url.startswith("sqlite"):
+        # Local dev / tests keep the create-all convenience. Production
+        # (Postgres) must never silently diverge from migrations (§6.1).
+        Base.metadata.create_all(get_engine())
+    else:
+        from app.migrations import upgrade_to_head
+
+        upgrade_to_head()
     yield
     get_engine().dispose()
 
@@ -66,15 +74,13 @@ def create_app() -> FastAPI:
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         return response
 
-    from app.routers import auth, chat, ingest, ml, problems, profiles, projects, recommendations, stats
+    from app.routers import auth, chat, problems, profiles, projects, recommendations, stats
 
     auth.setup_oauth(app)
     app.include_router(problems.router)
     app.include_router(stats.router)
     app.include_router(projects.router)
     app.include_router(auth.router)
-    app.include_router(ingest.router)
-    app.include_router(ml.router)
     app.include_router(chat.router)
     app.include_router(recommendations.router)
     app.include_router(profiles.router)

@@ -30,7 +30,6 @@ describe('HomePage', () => {
 
     const ctas = screen.getAllByRole('link');
     expect(ctas.some((link) => link.textContent === 'Browse problems')).toBe(true);
-    expect(ctas.some((link) => link.textContent === 'Practice ML')).toBe(true);
   });
 
   it('shows real problem cards in the hero stack and featured grid', async () => {
@@ -55,8 +54,7 @@ describe('HomePage', () => {
     expect(await within(strip).findByText('6')).toBeInTheDocument();
     expect(within(strip).getByText('3')).toBeInTheDocument();
     expect(within(strip).getByText('5')).toBeInTheDocument();
-    expect(within(strip).getAllByText('2')).toHaveLength(2);
-    expect(within(strip).getByText('ML questions')).toBeInTheDocument();
+    expect(within(strip).getByText('2')).toBeInTheDocument();
   });
 
   it('marquees only the sources returned by /api/problems/facets', async () => {
@@ -68,14 +66,6 @@ describe('HomePage', () => {
     expect(
       within(tape).getAllByText('OpenGov Data Challenge').length,
     ).toBeGreaterThan(0);
-  });
-
-  it('renders the ML teaser excerpt', async () => {
-    renderWithProviders(<HomePage />, { route: '/' });
-    expect(await screen.findByText(/800 labeled customer reviews/)).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: 'Production bugs, not puzzles' }),
-    ).toBeInTheDocument();
   });
 
   it('shows the sample project progress panel with an ACTIVE stamp', async () => {

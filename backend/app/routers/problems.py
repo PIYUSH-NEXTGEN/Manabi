@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 
 from app import schemas
 from app.deps import DB, CurrentUser
-from app.models import Problem, Project
+from app.models import Problem, Project, STATUS_PUBLISHED
 
 router = APIRouter(prefix="/api/problems", tags=["problems"])
 
@@ -53,7 +53,8 @@ def project_to_out(project: Project) -> schemas.ProjectOut:
 
 
 def _counts_by_column(db, column) -> list[tuple[str, int]]:
-    rows = db.execute(select(column, func.count(Problem.id)).group_by(column)).all()
+    query = select(column, func.count(Problem.id)).where(Problem.status == STATUS_PUBLISHED).group_by(column)
+    rows = db.execute(query).all()
     return [(str(value), int(count)) for value, count in rows if value is not None]
 
 
@@ -70,7 +71,7 @@ def list_problems(
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ):
-    query = select(Problem)
+    query = select(Problem).where(Problem.status == STATUS_PUBLISHED)
 
     if q:
         needle = f"%{q.lower()}%"
@@ -116,13 +117,17 @@ def list_problems(
 
 @router.get("/facets", response_model=schemas.FacetsOut)
 def facets(db: DB):
-    tech_rows = db.scalars(select(Problem.tech_tags)).all()
+    tech_rows = db.scalars(
+        select(Problem.tech_tags).where(Problem.status == STATUS_PUBLISHED)
+    ).all()
     tech_counter: dict[str, int] = {}
     for tags in tech_rows:
         for tag in tags:
             tech_counter[tag.lower()] = tech_counter.get(tag.lower(), 0) + 1
     source_rows = db.execute(
-        select(Problem.source_name, func.count(Problem.id)).group_by(Problem.source_name)
+        select(Problem.source_name, func.count(Problem.id))
+        .where(Problem.status == STATUS_PUBLISHED)
+        .group_by(Problem.source_name)
     ).all()
     return schemas.FacetsOut(
         fields=[schemas.Facet(value=v, count=c) for v, c in _counts_by_column(db, Problem.field)],
@@ -141,7 +146,7 @@ def get_problem(problem_id: int, db: DB):
     problem = db.scalar(
         select(Problem)
         .options(joinedload(Problem.projects).joinedload(Project.user))
-        .where(Problem.id == problem_id)
+        .where(Problem.id == problem_id, Problem.status == STATUS_PUBLISHED)
     )
     if problem is None:
         raise HTTPException(status_code=404, detail="Problem not found")

@@ -1,9 +1,6 @@
-import json
 import logging
-import re
 
 import httpx
-from pydantic import BaseModel, ValidationError
 
 from app.config import get_settings
 
@@ -13,7 +10,6 @@ ANTHROPIC_API_BASE = "https://api.anthropic.com/v1"
 ANTHROPIC_VERSION = "2023-06-01"
 DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-5"
-MAX_TOKENS_JSON = 4096
 MAX_TOKENS_CHAT = 512
 
 
@@ -51,139 +47,10 @@ def chat(system: str, messages: list[dict], model: str | None = None) -> str:
     if provider == "mock":
         return f"MOCK-CHAT-REPLY: saw: {last_user_text[:200]}".strip()
     if provider == "gemini":
-        raw = _call_gemini(system, last_user_text, json_mode=False, model=model)
-    elif provider == "anthropic":
-        raw = _call_anthropic(system, last_user_text, json_mode=False, model=model)
-    else:
-        raise LLMConfigError(f"Unknown LLM_PROVIDER: {provider}")
-    return raw.strip()
-
-
-def generate_raw_json(system: str, user: str, model: str | None = None) -> dict:
-    """Raw JSON object without schema validation. Two tries. For early-exit flows."""
-    if not is_configured():
-        raise LLMConfigError("AI is not configured yet")
-    provider = provider_name()
-    if provider == "mock":
-        if model == "early-exit-empty":
-            return {"is_problem": False}
-        model = None
-    last_error: str = ""
-    for _ in range(2):
-        raw = _provider_raw_json(system, user, None, model)
-        try:
-            return _parse_json_object(raw)
-        except _JsonParseFailure as exc:
-            last_error = str(exc)
-    raise LLMResponseError(f"The AI response could not be parsed: {last_error}")
-
-
-def prepare_json(system: str, user: str, schema: type[BaseModel], data: dict, model: str | None = None):
-    """Validate an already-fetched dict against a schema (shared prompt flow)."""
-    return _parse_json_model(json.dumps(data), schema)
-
-
-def generate_json(system: str, user: str, schema: type[BaseModel], model: str | None = None):
-    """Generate + validate JSON. Two tries. Raises LLMConfigError (503) or LLMResponseError (502)."""
-    if not is_configured():
-        raise LLMConfigError("AI is not configured yet")
-    last_error: str = ""
-    for _ in range(2):
-        raw = _provider_raw_json(system, user, schema, model)
-        try:
-            return _parse_json_model(raw, schema)
-        except _JsonParseFailure as exc:
-            last_error = str(exc)
-    raise LLMResponseError(f"The AI response could not be parsed: {last_error}")
-
-
-def _provider_raw_json(system: str, user: str, schema: type[BaseModel], model: str | None) -> str:
-    provider = provider_name()
-    if provider == "mock":
-        if schema is None:
-            return '{"is_problem": false}'
-        return json.dumps(_model_default_json(schema), separators=(",", ":"))
-    if provider == "gemini":
-        return _call_gemini(system, user, json_mode=True, model=model)
+        return _call_gemini(system, last_user_text, model=model).strip()
     if provider == "anthropic":
-        return _call_anthropic(system, user, json_mode=True, model=model)
+        return _call_anthropic(system, last_user_text, model=model).strip()
     raise LLMConfigError(f"Unknown LLM_PROVIDER: {provider}")
-
-
-class _JsonParseFailure(Exception):
-    pass
-
-
-_FENCE_RE = re.compile(r"^```[a-zA-Z]*\s*|\s*```$")
-JSON_BLOCK_RE = re.compile(r"\{.*\}|\[.*\]", re.DOTALL)
-
-
-def _strip_fences(raw: str) -> str:
-    text = raw.strip()
-    text = _FENCE_RE.sub("", text)
-    return text.strip()
-
-
-def _parse_json_object(raw: str) -> dict:
-    text = _strip_fences(raw)
-    match = JSON_BLOCK_RE.search(text)
-    if not match:
-        raise _JsonParseFailure("no JSON object in response")
-    try:
-        data = json.loads(match.group(0))
-    except json.JSONDecodeError as exc:
-        raise _JsonParseFailure(f"invalid JSON: {exc}")
-    if not isinstance(data, dict):
-        raise _JsonParseFailure("response was not a JSON object")
-    return data
-
-
-def _parse_json_model(raw: str, schema: type[BaseModel]):
-    text = _strip_fences(raw)
-    match = JSON_BLOCK_RE.search(text)
-    if not match:
-        raise _JsonParseFailure("no JSON object in response")
-    try:
-        data = json.loads(match.group(0))
-    except json.JSONDecodeError as exc:
-        raise _JsonParseFailure(f"invalid JSON: {exc}")
-    try:
-        return schema.model_validate(data)
-    except ValidationError as exc:
-        raise _JsonParseFailure(f"schema validation failed: {exc}")
-
-
-def _model_default_json(schema: type[BaseModel]) -> dict:
-    """Deterministic canned JSON for the mock provider: minimal but schema-valid."""
-    schema_json = schema.model_json_schema()
-    defs = schema_json.get("$defs", {})
-    filled = _fill_schema(defs, schema_json)
-    return filled if isinstance(filled, dict) else {}
-
-
-def _fill_schema(defs: dict, node: dict):
-    if "enum" in node:
-        return node["enum"][0]
-    if "const" in node:
-        return node["const"]
-    if ref := node.get("$ref"):
-        return _fill_schema(defs, defs.get(ref.split("/")[-1], {}))
-    if any_of := node.get("anyOf"):
-        return _fill_schema(defs, any_of[0])
-    type_name = node.get("type")
-    if type_name == "object":
-        return {name: _fill_schema(defs, prop) for name, prop in node.get("properties", {}).items()}
-    if type_name == "array":
-        return [_fill_schema(defs, node.get("items", {}))][:0]
-    if type_name == "string":
-        return ""
-    if type_name == "integer":
-        return 0
-    if type_name == "number":
-        return 0.0
-    if type_name == "boolean":
-        return False
-    return None
 
 
 _gemini_client = None
@@ -212,15 +79,14 @@ def _anthropic_http(api_key: str) -> httpx.Client:
     return _anthropic_client
 
 
-def _call_gemini(system: str, user: str, json_mode: bool, model: str | None) -> str:
+def _call_gemini(system: str, user: str, model: str | None) -> str:
     settings = get_settings()
     if not settings.GEMINI_API_KEY:
         raise LLMConfigError("AI is not configured yet")
     model_name = model or settings.GEMINI_MODEL or DEFAULT_GEMINI_MODEL
     config = {
         "temperature": 0,
-        "max_output_tokens": MAX_TOKENS_JSON if json_mode else MAX_TOKENS_CHAT,
-        "response_mime_type": "application/json" if json_mode else "text/plain",
+        "max_output_tokens": MAX_TOKENS_CHAT,
     }
     prompt = f"{system}\n\n{user}" if user else system
     try:
@@ -232,20 +98,17 @@ def _call_gemini(system: str, user: str, json_mode: bool, model: str | None) -> 
         raise LLMResponseError(f"Gemini request failed: {exc}") from exc
 
 
-def _call_anthropic(system: str, user: str, json_mode: bool, model: str | None) -> str:
+def _call_anthropic(system: str, user: str, model: str | None) -> str:
     settings = get_settings()
     if not settings.ANTHROPIC_API_KEY:
         raise LLMConfigError("AI is not configured yet")
     model_name = model or settings.LLM_MODEL_FAST or DEFAULT_ANTHROPIC_MODEL
-    final_system = system
-    if json_mode:
-        final_system = f"{system}\n\nRespond with ONLY raw JSON matching the requested shape. No markdown fences."
     body = {
         "model": model_name,
-        "max_tokens": MAX_TOKENS_JSON if json_mode else MAX_TOKENS_CHAT,
+        "max_tokens": MAX_TOKENS_CHAT,
         "temperature": 0,
-        "system": final_system,
-        "messages": [{"role": "user", "content": user or final_system}],
+        "system": system,
+        "messages": [{"role": "user", "content": user or system}],
     }
     try:
         response = _anthropic_http(settings.ANTHROPIC_API_KEY).post(

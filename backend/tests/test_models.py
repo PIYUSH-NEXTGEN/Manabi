@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app.db import Base
-from app.models import MLAttempt, MLQuestion, Problem, Project, User
+from app.models import Problem, Project, User
 
 
 def make_session() -> Session:
@@ -137,39 +137,4 @@ def test_project_relationships():
     assert len(loaded_problem.projects) == 1
     assert loaded_user.projects[0].problem.title == "Flood alert app"
     assert loaded_user.projects[0].user.github_id == 1
-    session.close()
-
-
-def test_ml_question_and_attempt_roundtrip():
-    session = make_session()
-    user = make_user(session)
-    rubric = [
-        {"id": "r1", "point": "Identifies data leakage"},
-        {"id": "r2", "point": "Proposes a fix"},
-    ]
-    question = MLQuestion(
-        title="Why did the model collapse?",
-        scenario="## Logs\nprecision dropped after launch",
-        difficulty="intermediate",
-        topic="data-leakage",
-        rubric_json=rubric,
-        explanation="Because of leakage.",
-    )
-    session.add(question)
-    session.commit()
-    session.add(
-        MLAttempt(
-            question_id=question.id,
-            user_id=user.id,
-            answer="The pipeline leaked future data.",
-            feedback_json={"covered_count": 1, "total": 2},
-        )
-    )
-    session.commit()
-    loaded_q = session.scalar(select(MLQuestion))
-    loaded_a = session.scalar(select(MLAttempt))
-    assert loaded_q.rubric_json == rubric
-    assert loaded_a.question.topic == "data-leakage"
-    assert loaded_a.user.username == "octocat"
-    assert loaded_a.feedback_json["covered_count"] == 1
     session.close()

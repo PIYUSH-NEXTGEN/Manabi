@@ -26,14 +26,6 @@ describe('Nav', () => {
       'href',
       '/problems',
     );
-    expect(screen.getAllByRole('link', { name: 'ML Practice' })[0]).toHaveAttribute(
-      'href',
-      '/ml',
-    );
-    expect(screen.getAllByRole('link', { name: 'Ingest' })[0]).toHaveAttribute(
-      'href',
-      '/ingest',
-    );
     expect(
       screen.getAllByRole('link', { name: 'How it works' })[0],
     ).toHaveAttribute('href', '/how-it-works');

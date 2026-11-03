@@ -10,8 +10,6 @@ export const FOOTER_COLUMNS: { heading: string; links: FooterLink[] }[] = [
     heading: 'Explore',
     links: [
       { label: 'Problems', to: '/problems' },
-      { label: 'ML Practice', to: '/ml' },
-      { label: 'Ingest', to: '/ingest' },
       { label: 'Sources', to: '/sources' },
     ],
   },

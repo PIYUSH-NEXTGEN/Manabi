@@ -114,37 +114,11 @@ export function logout(): Promise<void> {
   return apiFetch<void>('/api/auth/logout', { method: 'POST' });
 }
 
-export interface MlQuestionCard extends MLQuestionListItem {}
-export interface MlQuestionDetail extends MLQuestionDetail {}
-
-export function ingestStatement(body: IngestRequest): Promise<IngestOut> {
-  return apiFetch<IngestOut>('/api/ingest', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-}
-
 export function createProblem(body: ProblemIn): Promise<ProblemOut> {
   return apiFetch<ProblemOut>('/api/problems', {
     method: 'POST',
     body: JSON.stringify(body),
   });
-}
-
-export function postAttempt(
-  questionId: number,
-  body: AttemptIn,
-): Promise<AttemptOut> {
-  return apiFetch<AttemptOut>(`/api/ml/questions/${questionId}/attempts`, {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-}
-
-export function getMyAttempt(questionId: number): Promise<AttemptOut> {
-  return apiFetch<AttemptOut>(
-    `/api/ml/questions/${questionId}/attempts/me`,
-  );
 }
 
 export function postChat(body: ChatIn): Promise<ChatOut> {
@@ -162,26 +136,10 @@ export function getMyProjects(): Promise<ProjectOut[]> {
   return apiFetch<ProjectOut[]>('/api/me/projects');
 }
 
-export function getMlQuestions(): Promise<MlQuestionCard[]> {
-  return apiFetch<MlQuestionCard[]>('/api/ml/questions');
-}
-
-export function getMlQuestion(id: number): Promise<MlQuestionDetail> {
-  return apiFetch<MlQuestionDetail>(`/api/ml/questions/${id}`);
-}
-
 export type Progress = NonNullable<Schemas['ProjectOut']['progress']>;
 export type ProjectOut = Schemas['ProjectOut'];
 export type ProjectCreate = Schemas['ProjectCreate'];
-export type ProblemCardDraft = Schemas['ProblemCard'];
 export type ProblemIn = Schemas['ProblemIn'];
-export type IngestRequest = Schemas['IngestRequest'];
-export type IngestOut = Schemas['IngestOut'];
-export type MLQuestionListItem = Schemas['MLQuestionListItem'];
-export type MLQuestionDetail = Schemas['MLQuestionDetail'];
-export type AttemptIn = Schemas['AttemptIn'];
-export type AttemptOut = Schemas['AttemptOut'];
-export type AttemptFeedback = Schemas['Feedback'];
 export type ChatIn = Schemas['ChatIn'];
 export type ChatMessage = Schemas['ChatMessage'];
 export type ChatOut = Schemas['ChatOut'];

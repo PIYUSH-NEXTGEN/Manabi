@@ -15,8 +15,8 @@ const PRINCIPLES = [
   },
   {
     number: '03',
-    title: 'Production-style ML practice',
-    copy: 'Real debugging scenarios, graded against a hidden rubric — not puzzles.',
+    title: 'Proof of work',
+    copy: 'Your GitHub becomes the record: commits, README, and open issues.',
   },
 ];
 

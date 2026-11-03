@@ -4,7 +4,6 @@ import { describe, expect, it } from 'vitest';
 import { server } from '@/api/mocks/server';
 import { BuildInPublic } from './BuildInPublic';
 import { MarqueeTape } from './MarqueeTape';
-import { MlTeaser } from './MlTeaser';
 import { useFacets } from '@/hooks/useFacets';
 import { renderWithProviders } from '@/test/renderWithProviders';
 
@@ -12,24 +11,6 @@ function TapeHarness() {
   const query = useFacets();
   return <MarqueeTape query={query} />;
 }
-
-describe('MlTeaser', () => {
-  it('shows a real scenario excerpt and topic from the ML API', async () => {
-    renderWithProviders(<MlTeaser />);
-
-    expect(
-      await screen.findByText(/800 labeled customer reviews/),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /Train or test first\? Splitting a tiny dataset · train-test-split/,
-      ),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: 'Start practicing' }),
-    ).toHaveAttribute('href', '/ml');
-  });
-});
 
 describe('BuildInPublic', () => {
   it('renders the sample project progress panel from the API', async () => {

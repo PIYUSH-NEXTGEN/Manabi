@@ -85,75 +85,10 @@ class DatasetIn(BaseModel):
     url: str | None = None
 
 
-class IngestRequest(BaseModel):
-    url: str | None = None
-    text: str | None = None
-
-
-class IngestOut(BaseModel):
-    draft: ProblemCard
-    evidence: dict[str, str]
-    source_url: str | None
-
-
 class ProblemIn(ProblemCard):
     """POST /api/problems body: ProblemCard per contract, plus optional ai_fields (see docs/REQUESTS.md)."""
 
     ai_fields: list[str] = []
-
-
-class MLQuestionListItem(BaseModel):
-    id: int
-    title: str
-    difficulty: str
-    topic: str
-    attempted: bool
-
-
-class MLQuestionDetail(BaseModel):
-    id: int
-    title: str
-    scenario: str
-    difficulty: str
-    topic: str
-    attempted: bool
-
-
-class AttemptIn(BaseModel):
-    answer: str = Field(min_length=20, max_length=4000)
-
-
-class FeedbackItem(BaseModel):
-    point: str
-    covered: bool
-    evidence: str | None = None
-
-
-class Feedback(BaseModel):
-    covered_count: int
-    total: int
-    items: list[FeedbackItem]
-    summary: str
-
-
-class AttemptOut(BaseModel):
-    id: int
-    answer: str
-    created_at: datetime
-    feedback: Feedback
-    explanation: str
-
-
-class GradedRubricItem(BaseModel):
-    """LLM output for one rubric point."""
-    id: str
-    covered: bool
-    evidence: str | None = None
-
-
-class GradingOut(BaseModel):
-    items: list[GradedRubricItem]
-    summary: str
 
 
 class RecommendationItem(BaseModel):
@@ -210,7 +145,6 @@ class StatsOut(BaseModel):
     sources: int
     fields: int
     projects: int
-    ml_questions: int
 
 
 class ProblemsListOut(BaseModel):

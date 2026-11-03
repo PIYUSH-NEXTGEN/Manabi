@@ -57,7 +57,6 @@ describe('apiFetch', () => {
       sources: 3,
       fields: 5,
       projects: 2,
-      ml_questions: 2,
     });
   });
 

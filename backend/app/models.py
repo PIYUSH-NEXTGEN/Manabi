@@ -1,6 +1,6 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -8,6 +8,17 @@ from app.db import Base
 
 def utcnow() -> datetime:
     return datetime.now(timezone.utc)
+
+
+# Review-lifecycle values for Problem.status (§6.2). Public read paths only
+# ever surface PUBLISHED rows; everything else lives in the review queue.
+STATUS_PUBLISHED = "published"
+STATUS_PENDING_REVIEW = "pending_review"
+STATUS_REJECTED = "rejected"
+STATUS_REMOVED = "removed"
+
+ORIGIN_MANUAL = "manual"
+ORIGIN_CRAWLER = "crawler"
 
 
 class User(Base):
@@ -24,7 +35,6 @@ class User(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
 
     projects: Mapped[list["Project"]] = relationship(back_populates="user")
-    attempts: Mapped[list["MLAttempt"]] = relationship(back_populates="user")
 
 
 class Problem(Base):
@@ -52,6 +62,23 @@ class Problem(Base):
     created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
 
+    # Crawler/review pipeline (§6.2). Existing rows default to published so the
+    # migration never makes already-visible content disappear.
+    status: Mapped[str] = mapped_column(String(20), default=STATUS_PUBLISHED, nullable=False)
+    origin: Mapped[str] = mapped_column(String(20), default=ORIGIN_MANUAL, nullable=False)
+    content_hash: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
+    source_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    edition: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    organisation: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
+    source_status: Mapped[str] = mapped_column(String(20), default="unknown", nullable=False)
+    first_seen_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_crawled_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    extraction_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
+    review_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    crawl_source_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
     creator: Mapped[User | None] = relationship()
     projects: Mapped[list["Project"]] = relationship(back_populates="problem")
 
@@ -77,30 +104,31 @@ class Project(Base):
     user: Mapped[User] = relationship(back_populates="projects")
 
 
-class MLQuestion(Base):
-    __tablename__ = "ml_questions"
+class CrawlRun(Base):
+    __tablename__ = "crawl_runs"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    title: Mapped[str] = mapped_column(String(500), nullable=False)
-    scenario: Mapped[str] = mapped_column(Text, nullable=False)
-    difficulty: Mapped[str] = mapped_column(String(20), nullable=False)
-    topic: Mapped[str] = mapped_column(String(50), index=True, nullable=False)
-    rubric_json: Mapped[list] = mapped_column(JSON, nullable=False)
-    explanation: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    source_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    started_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="running", nullable=False)
+    counts: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    llm_calls: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    error_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+    triggered_by: Mapped[str] = mapped_column(String(10), default="manual", nullable=False)
 
-    attempts: Mapped[list["MLAttempt"]] = relationship(back_populates="question")
 
-
-class MLAttempt(Base):
-    __tablename__ = "ml_attempts"
+class CrawlItem(Base):
+    __tablename__ = "crawl_items"
+    __table_args__ = (UniqueConstraint("url", name="uq_crawl_items_url"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    question_id: Mapped[int] = mapped_column(ForeignKey("ml_questions.id"), nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
-    answer: Mapped[str] = mapped_column(Text, nullable=False)
-    feedback_json: Mapped[dict] = mapped_column(JSON, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
-
-    question: Mapped[MLQuestion] = relationship(back_populates="attempts")
-    user: Mapped[User] = relationship(back_populates="attempts")
+    source_key: Mapped[str] = mapped_column(String(64), nullable=False)
+    url: Mapped[str] = mapped_column(String(1000), nullable=False)
+    problem_id: Mapped[int | None] = mapped_column(ForeignKey("problems.id"), nullable=True)
+    last_status: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    etag: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    last_modified: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)

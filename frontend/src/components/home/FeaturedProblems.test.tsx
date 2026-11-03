@@ -57,8 +57,6 @@ describe('FeaturedProblems', () => {
 
     renderWithProviders(<FeaturedHarness />);
 
-    expect(
-      await screen.findByText(/Import one from a real source on the Ingest page/),
-    ).toBeInTheDocument();
+    expect(await screen.findByText(/No problems on the board yet/)).toBeInTheDocument();
   });
 });

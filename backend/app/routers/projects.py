@@ -6,7 +6,7 @@ from sqlalchemy.orm import joinedload
 
 from app import schemas
 from app.deps import DB, CurrentUser, get_optional_user
-from app.models import Problem, Project
+from app.models import STATUS_PUBLISHED, Problem, Project
 from app.routers.problems import project_to_out
 from app.services import github
 from app.services.github import GitHubError
@@ -22,7 +22,9 @@ def _aware(dt: datetime) -> datetime:
 
 @router.post("/api/problems/{problem_id}/projects", response_model=schemas.ProjectOut)
 async def submit_project(problem_id: int, body: schemas.ProjectCreate, user: CurrentUser, db: DB):
-    problem = db.scalar(select(Problem).where(Problem.id == problem_id))
+    problem = db.scalar(
+        select(Problem).where(Problem.id == problem_id, Problem.status == STATUS_PUBLISHED)
+    )
     if problem is None:
         raise HTTPException(status_code=404, detail="Problem not found")
 

@@ -54,10 +54,7 @@ export function FeaturedProblems({
     return (
       <section className="border-b-[3px] border-ink">
         <div className="mx-auto my-12 w-[min(1200px,96vw)] border-[3px] border-ink bg-white p-6 shadow-hard">
-          <p className="text-sm">
-            No problems on the board yet. Import one from a real source on the
-            Ingest page.
-          </p>
+          <p className="text-sm">No problems on the board yet.</p>
         </div>
       </section>
     );

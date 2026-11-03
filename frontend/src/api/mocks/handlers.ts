@@ -5,7 +5,6 @@ const stats = {
   sources: 3,
   fields: 5,
   projects: 2,
-  ml_questions: 2,
 };
 
 const problems = [
@@ -188,24 +187,6 @@ const facets = {
   ],
 };
 
-const mlQuestions = [
-  { id: 1, title: 'Train or test first? Splitting a tiny dataset', difficulty: 'beginner', topic: 'train-test-split', attempted: false },
-  { id: 2, title: 'Accuracy says 98% but the model catches nothing', difficulty: 'beginner', topic: 'imbalanced-metrics', attempted: false },
-  { id: 3, title: 'The model memorized the training set', difficulty: 'beginner', topic: 'overfitting-basics', attempted: false },
-  { id: 4, title: 'Metrics lie after the launch', difficulty: 'beginner', topic: 'bad-eval-split', attempted: false },
-  { id: 5, title: 'The model works offline, fails online', difficulty: 'intermediate', topic: 'train-serving-skew', attempted: false },
-];
-
-const mlQuestionDetail = {
-  id: 1,
-  title: 'Train or test first? Splitting a tiny dataset',
-  difficulty: 'beginner',
-  topic: 'train-test-split',
-  attempted: false,
-  scenario:
-    '## Split first\nYou have 800 labeled customer reviews. One teammate says: train on all 800, check accuracy on the same 800. Another says: split 80/20 first.\n\nList what broke and what you would check first.',
-};
-
 const sampleProject = {
   id: 1,
   problem_id: 1,
@@ -358,59 +339,6 @@ export const handlers = [
       progress_updated_at: null,
     });
   }),
-  http.get('*/api/ml/questions', () => HttpResponse.json(mlQuestions)),
-  http.get('*/api/ml/questions/:id', ({ params }) => {
-    if (Number(params.id) !== mlQuestionDetail.id) {
-      return HttpResponse.json({ detail: 'Question not found' }, { status: 404 });
-    }
-    return HttpResponse.json(mlQuestionDetail);
-  }),
-  http.get('*/api/ml/questions/:id/attempts/me', () =>
-    HttpResponse.json({ detail: 'No attempt yet' }, { status: 404 }),
-  ),
-  http.post('*/api/ml/questions/:id/attempts', async ({ params, request }) => {
-    const id = Number(params.id);
-    if (Number.isNaN(id) || !mlQuestions.some((q) => q.id === id)) {
-      return HttpResponse.json({ detail: 'Question not found' }, { status: 404 });
-    }
-    const body = (await request.json()) as { answer?: unknown };
-    const answer = typeof body.answer === 'string' ? body.answer : '';
-    if (answer.trim().length < 20) {
-      return HttpResponse.json(
-        { detail: 'Answer must be at least 20 characters' },
-        { status: 422 },
-      );
-    }
-    return HttpResponse.json({
-      id: 1,
-      answer,
-      created_at: '2026-10-17T09:00:00Z',
-      feedback: {
-        covered_count: 2,
-        total: 4,
-        items: [
-          {
-            point: 'Check the Monday-morning traffic pattern and seasonality split',
-            covered: true,
-          },
-          {
-            point: 'Audit the feature table for post-decision (leaked) columns',
-            covered: true,
-            evidence: 'You named days_since_final_push_notification as a suspect.',
-          },
-          { point: 'Compare offline AUC vs served AUC on a weekly rollup', covered: false },
-          {
-            point: 'Set up a monitoring alert on prediction variance',
-            covered: false,
-          },
-        ],
-        summary:
-          'You caught the core skew points but missed the monitoring angle.',
-      },
-      explanation:
-        '1. Pull the served predictions and bucket by day-of-week before anything else.\n2. Diff the feature snapshot used for training vs at serving time.',
-    });
-  }),
   http.post('*/api/chat', async ({ request }) => {
     const body = (await request.json()) as {
       messages?: Array<{ role: string; content: string }>;
@@ -455,48 +383,6 @@ export const handlers = [
   http.get('*/api/me/projects', () =>
     HttpResponse.json({ detail: 'Not logged in' }, { status: 401 }),
   ),
-  http.post('*/api/ingest', async ({ request }) => {
-    const body = (await request.json()) as {
-      text?: string;
-      url?: string;
-    };
-    if (!body.text?.trim() && !body.url?.trim()) {
-      return HttpResponse.json(
-        { detail: 'Either text or url is required' },
-        { status: 422 },
-      );
-    }
-    return HttpResponse.json({
-      draft: {
-        title: 'Crop disease triage for small farms',
-        summary:
-          'Farmers photograph leaf blight; a phone-first triage flow routes cases to the right extension officer.',
-        who_affected: 'Smallholder farmers across three districts',
-        why_matters: 'Late detection destroys a season of income.',
-        field: 'computer-vision',
-        domain: 'agriculture',
-        difficulty: 'beginner',
-        est_hours: 20,
-        tech_tags: ['python', 'pytorch', 'mobile'],
-        datasets: [],
-        approaches: [
-          'Fine-tune a small CNN on public leaf datasets',
-          'Build an offline-first mobile capture flow',
-        ],
-        source_name: 'Pasted statement',
-        source_id: null,
-        source_url: body.url ?? null,
-        source_note: null,
-      },
-      evidence: {
-        who_affected:
-          'The statement says "farmers with <2 hectares in district 4/5/8".',
-        why_matters: 'The statement says "yield loss up to 40% when spraying misses first signs".',
-        approaches: 'The statement lists "photo upload flow" as the planned method.',
-      },
-      source_url: body.url ?? null,
-    });
-  }),
   http.post('*/api/problems', async ({ request }) => {
     const body = (await request.json()) as { title?: string };
     const title = typeof body.title === 'string' ? body.title : 'Pasted problem';

@@ -4,7 +4,6 @@ import { FeaturedProblems } from '@/components/home/FeaturedProblems';
 import { FinalCta } from '@/components/home/FinalCta';
 import { Hero } from '@/components/home/Hero';
 import { MarqueeTape } from '@/components/home/MarqueeTape';
-import { MlTeaser } from '@/components/home/MlTeaser';
 import { StatsStrip } from '@/components/home/StatsStrip';
 import { useFacets } from '@/hooks/useFacets';
 import { useProblems } from '@/hooks/useProblems';
@@ -21,7 +20,6 @@ export function HomePage() {
       <MarqueeTape query={facets} />
       <StatsStrip query={stats} />
       <FeaturedProblems query={problems} />
-      <MlTeaser />
       <BuildInPublic />
       <AskManabi />
       <FinalCta />

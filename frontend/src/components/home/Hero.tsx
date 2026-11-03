@@ -88,9 +88,6 @@ export function Hero() {
             <Link to="/problems" className={buttonClasses('primary')}>
               Browse problems
             </Link>
-            <Link to="/ml" className={buttonClasses('secondary')}>
-              Practice ML
-            </Link>
           </div>
 
           <p className="font-mono text-xs font-bold uppercase tracking-widest">

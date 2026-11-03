@@ -3,7 +3,7 @@ import re
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Problem
+from app.models import STATUS_PUBLISHED, Problem
 
 _KEYWORD_RE = re.compile(r"[a-z0-9]+")
 
@@ -18,7 +18,9 @@ def search_catalog(db: Session, query: str, limit: int = 3) -> list[tuple[Proble
     if not keywords:
         return []
     problems: list[tuple[Problem, int]] = []
-    problem_rows = db.scalars(select(Problem).order_by(Problem.id)).all()
+    problem_rows = db.scalars(
+        select(Problem).where(Problem.status == STATUS_PUBLISHED).order_by(Problem.id)
+    ).all()
     for problem in problem_rows:
         haystack = " ".join(
             [problem.title, problem.summary, problem.field, problem.domain, " ".join(problem.tech_tags)]

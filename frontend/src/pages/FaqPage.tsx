@@ -9,15 +9,11 @@ const FAQS = [
   },
   {
     q: 'Do I need an account?',
-    a: 'Browsing is open. Claiming a problem, submitting a project, and getting ML answers graded need a GitHub login.',
+    a: 'Browsing is open. Claiming a problem and submitting a project need a GitHub login.'
   },
   {
     q: 'How does progress tracking work?',
     a: 'After you link a repo, MANABI reads commits, README, and good-first-issues through the GitHub API and caches the result for 10 minutes. You can refresh manually.',
-  },
-  {
-    q: 'Who grades my ML answers?',
-    a: 'An AI model grades your answer against a hidden rubric. You see which points you covered — never a raw pass/fail.',
   },
   {
     q: 'What does it cost?',

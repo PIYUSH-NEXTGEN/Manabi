@@ -5,8 +5,6 @@ import { useMe } from '@/hooks/useMe';
 
 const NAV_LINKS = [
   { to: '/problems', label: 'Problems' },
-  { to: '/ml', label: 'ML Practice' },
-  { to: '/ingest', label: 'Ingest' },
   { to: '/how-it-works', label: 'How it works' },
 ];
 

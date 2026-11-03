@@ -215,4 +215,3 @@ def test_stats_counts(client, seed):
     assert data["sources"] == 2
     assert data["fields"] == 2
     assert data["projects"] == 1
-    assert data["ml_questions"] == 0

@@ -40,17 +40,25 @@ Notes:
 - The app refuses to boot with the placeholder `SESSION_SECRET` when `BASE_URL` is not localhost — fail fast beats an impersonatable session cookie.
 - Health endpoint for uptime checks: `GET /api/health` (touches the DB, returns `{"status":"ok"}`).
 
-## 3. Seed data
+## 3. Migrations + seed data
 
-Run these ONCE locally, pointed at the production database (the import script talks straight to `DATABASE_URL`):
+Run these ONCE locally (or from a GitHub Action), pointed at the production database (`DATABASE_URL`):
 
 ```
 cd backend
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt          # + requirements-dev.txt for tests only
+.venv/bin/python -m alembic upgrade head           # schema; idempotent (§6.1)
 .venv/bin/python -m app.seed.import_projects --file ../frontend/projects.txt
-.venv/bin/python -m app.seed.seed                  # ML practice questions — idempotent
 ```
+
+- **Migrations are the source of truth for Postgres.** Run `alembic upgrade head` before
+  every deploy (on Render: prepend it to the start command, e.g.
+  `.venv/bin/python -m alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`;
+  the GitHub Action crawler workflow runs it before crawling). As a safety net the app
+  itself also runs `upgrade head` on startup when `DATABASE_URL` is Postgres.
+- SQLite (local dev) keeps `create_all` on startup; do not rely on that in production.
+- Seeding the ML question bank was removed with the ML feature.
 
 `projects.txt` is deliberately not in git (per AGENTS.md). Keep it locally; do not commit or upload it.
 
@@ -70,10 +78,8 @@ On Render/Railway a `Procfile` is included (`web: uvicorn app.main:app --host 0.
 3. `curl https://<domain>/problems` → the SPA HTML with `<title>MANABI</title>`
 4. `curl -I https://<domain>/assets/<asset from dist>` → `200` + correct `content-type`
 5. Log in with GitHub in the browser → redirected home, username in the nav
-6. Paste a statement in `/ingest` while logged in (costs 1 of your hourly AI quota) → draft card appears
-7. `/ml` → answer a question → rubric feedback comes back
-8. Chat dock → ask → reply links point at real catalog problems
+6. Chat dock → ask → reply links point at real catalog problems
 
 ## Rate limits (env-tunable)
 
-`AI_RATE_LIMIT_PER_HOUR=15`, `CHAT_RATE_LIMIT_ANON_PER_HOUR=10`, `CHAT_RATE_LIMIT_USER_PER_HOUR=30`. The UI shows the backend's raw limit messages honestly when they trip.
+`CHAT_RATE_LIMIT_ANON_PER_HOUR=10`, `CHAT_RATE_LIMIT_USER_PER_HOUR=30`. The UI shows the backend's raw limit messages honestly when they trip.

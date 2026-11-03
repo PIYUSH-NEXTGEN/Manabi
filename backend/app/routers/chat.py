@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Request
 
 from app import schemas
 from app.deps import DB, CurrentUser, OptionalUser
-from app.models import Problem
+from app.models import STATUS_PUBLISHED, Problem
 from app.services.catalog_search import search_catalog
 from app.services.llm import LLMConfigError, LLMResponseError
 from app.services.llm import chat as llm_chat
@@ -71,6 +71,11 @@ def _last_user_text(messages: list[schemas.ChatMessage]) -> str:
     return ""
 
 
+def _visible_problem(db: DB, problem_id: int) -> Problem | None:
+    problem = db.get(Problem, problem_id)
+    return problem if problem is not None and problem.status == STATUS_PUBLISHED else None
+
+
 def build_system(db: DB, messages: list[schemas.ChatMessage], problem_id: int | None) -> str:
     blocks = ["CATALOG (only these ids exist):"]
     for problem, _score in search_catalog(db, _last_user_text(messages)):
@@ -79,7 +84,7 @@ def build_system(db: DB, messages: list[schemas.ChatMessage], problem_id: int | 
             f"[P{problem.id}] {problem.title} | field={problem.field} | difficulty={problem.difficulty} | {summary}"
         )
     if problem_id is not None:
-        page_problem = db.get(Problem, problem_id)
+        page_problem = _visible_problem(db, problem_id)
         if page_problem is not None:
             summary = page_problem.summary[:200]
             blocks.append(
@@ -98,7 +103,7 @@ def postprocess_reply(db: DB, reply: str) -> tuple[str, list[schemas.ChatProblem
             mentioned.append(problem_id)
     items: list[schemas.ChatProblemItem] = []
     for problem_id in mentioned:
-        problem = db.get(Problem, problem_id)
+        problem = _visible_problem(db, problem_id)
         token = f"[P{problem_id}]"
         if problem is None:
             reply = reply.replace(token, "")
