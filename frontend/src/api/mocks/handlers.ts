@@ -383,6 +383,24 @@ export const handlers = [
   http.get('*/api/me/projects', () =>
     HttpResponse.json({ detail: 'Not logged in' }, { status: 401 }),
   ),
+  http.get('*/api/admin/review', () =>
+    HttpResponse.json({ items: [], total: 0 }),
+  ),
+  http.get('*/api/admin/crawl-runs', () => HttpResponse.json([])),
+  http.post('*/api/admin/problems/:id/:action', ({ params }) =>
+    HttpResponse.json({
+      ok: true,
+      problem_id: Number(params.id),
+      status: params.action === 'approve' ? 'published' : 'rejected',
+    }),
+  ),
+  http.patch('*/api/admin/problems/:id', ({ params }) =>
+    HttpResponse.json({
+      ok: true,
+      problem_id: Number(params.id),
+      status: 'pending_review',
+    }),
+  ),
   http.post('*/api/problems', async ({ request }) => {
     const body = (await request.json()) as { title?: string };
     const title = typeof body.title === 'string' ? body.title : 'Pasted problem';

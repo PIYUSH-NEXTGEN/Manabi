@@ -101,7 +101,13 @@ def test_full_oauth_flow_upserts_token_and_session(client, db_session, mock_gith
 
     me_res = client.get("/api/auth/me")
     assert me_res.status_code == 200
-    assert me_res.json() == {"id": user.id, "username": "octocat", "name": "Octo Cat", "avatar_url": GH_USER["avatar_url"]}
+    assert me_res.json() == {
+        "id": user.id,
+        "username": "octocat",
+        "name": "Octo Cat",
+        "avatar_url": GH_USER["avatar_url"],
+        "is_admin": False,
+    }
 
 
 def test_callback_reuses_existing_user_and_updates_token(client, db_session, mock_github):

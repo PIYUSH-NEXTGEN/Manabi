@@ -13,6 +13,7 @@ interface SourceRow {
   count: number;
   url: string | null;
   note: string | null;
+  lastUpdated: string | null;
 }
 
 function mergeSources(
@@ -38,6 +39,7 @@ function mergeSources(
     count: facet.count,
     url: urlNotes.get(facet.value)?.url ?? null,
     note: urlNotes.get(facet.value)?.note ?? null,
+    lastUpdated: facet.last_updated ?? null,
   }));
 }
 
@@ -89,6 +91,11 @@ function SourceList({
               {row.name}
             </dt>
             {row.note ? <dd className="mt-1 text-xs">{row.note}</dd> : null}
+            {row.lastUpdated ? (
+              <dd className="mt-1 font-mono text-[10px] uppercase tracking-widest text-ink/60">
+                Last updated {new Date(row.lastUpdated).toLocaleDateString()}
+              </dd>
+            ) : null}
             {safeExternalUrl(row.url) ? (
               <dd className="mt-1 text-xs">
                 <a

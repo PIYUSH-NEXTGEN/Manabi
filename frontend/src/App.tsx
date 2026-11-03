@@ -9,6 +9,11 @@ import { ToastProvider } from '@/design/primitives';
 const AboutPage = lazy(() =>
   import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })),
 );
+const AdminReviewPage = lazy(() =>
+  import('@/pages/AdminReviewPage').then((m) => ({
+    default: m.AdminReviewPage,
+  })),
+);
 const ContributePage = lazy(() =>
   import('@/pages/ContributePage').then((m) => ({ default: m.ContributePage })),
 );
@@ -106,6 +111,14 @@ export function App() {
                     }
                   />
 
+                  <Route
+                    path="/admin/review"
+                    element={
+                      <RequireAuth>
+                        <AdminReviewPage />
+                      </RequireAuth>
+                    }
+                  />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/how-it-works" element={<HowItWorksPage />} />
                   <Route path="/sources" element={<SourcesPage />} />

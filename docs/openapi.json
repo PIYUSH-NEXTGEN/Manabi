@@ -696,10 +696,829 @@
           }
         }
       }
+    },
+    "/api/admin/review": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Review Queue",
+        "operationId": "review_queue_api_admin_review_get",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "pending_review",
+              "title": "Status"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 200,
+              "minimum": 1,
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminReviewOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/problems/{problem_id}/approve": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Approve",
+        "operationId": "approve_api_admin_problems__problem_id__approve_post",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminActionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/problems/{problem_id}/reject": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Reject",
+        "operationId": "reject_api_admin_problems__problem_id__reject_post",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminActionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/problems/{problem_id}/unpublish": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Unpublish",
+        "operationId": "unpublish_api_admin_problems__problem_id__unpublish_post",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminActionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/problems/{problem_id}": {
+      "patch": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Edit Problem",
+        "operationId": "edit_problem_api_admin_problems__problem_id__patch",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProblemPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminActionOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Admin Problem",
+        "operationId": "admin_problem_api_admin_problems__problem_id__get",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminProblemOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/crawl-runs": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Crawl Runs",
+        "operationId": "crawl_runs_api_admin_crawl_runs_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CrawlRunOut"
+                  },
+                  "title": "Response Crawl Runs Api Admin Crawl Runs Get"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/crawl-runs/{run_id}": {
+      "get": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Crawl Run",
+        "operationId": "crawl_run_api_admin_crawl_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CrawlRunOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/sources/{source_key}/unpublish-all": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Unpublish Source",
+        "operationId": "unpublish_source_api_admin_sources__source_key__unpublish_all_post",
+        "parameters": [
+          {
+            "name": "source_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Source Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TakedownOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/crawl/{source_key}": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Trigger Crawl",
+        "operationId": "trigger_crawl_api_admin_crawl__source_key__post",
+        "parameters": [
+          {
+            "name": "source_key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Source Key"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AdminActionOut": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "problem_id": {
+            "type": "integer",
+            "title": "Problem Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "problem_id",
+          "status"
+        ],
+        "title": "AdminActionOut"
+      },
+      "AdminProblemOut": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 8000,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "who_affected": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Who Affected"
+          },
+          "why_matters": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Why Matters"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "ml",
+              "computer-vision",
+              "nlp-llm",
+              "cybersecurity",
+              "web-fullstack",
+              "mobile",
+              "data-engineering",
+              "geospatial",
+              "optimization",
+              "iot-embedded",
+              "distributed-systems",
+              "blockchain",
+              "devops-cloud",
+              "other"
+            ],
+            "title": "Field"
+          },
+          "domain": {
+            "type": "string",
+            "enum": [
+              "healthcare",
+              "education",
+              "agriculture",
+              "fintech",
+              "climate",
+              "governance",
+              "transport",
+              "disaster-management",
+              "industry",
+              "social-impact",
+              "developer-tools",
+              "other"
+            ],
+            "title": "Domain"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Difficulty"
+          },
+          "est_hours": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "minimum": 1.0,
+            "title": "Est Hours"
+          },
+          "tech_tags": {
+            "items": {
+              "type": "string",
+              "maxLength": 40,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 25,
+            "title": "Tech Tags"
+          },
+          "datasets": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "maxItems": 15,
+            "title": "Datasets"
+          },
+          "approaches": {
+            "items": {
+              "type": "string",
+              "maxLength": 800,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Approaches"
+          },
+          "source_name": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Source Name"
+          },
+          "source_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Id"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "source_note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Note"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "project_count": {
+            "type": "integer",
+            "title": "Project Count"
+          },
+          "ai_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Ai Fields"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin"
+          },
+          "source_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Year"
+          },
+          "edition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edition"
+          },
+          "organisation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organisation"
+          },
+          "source_status": {
+            "type": "string",
+            "title": "Source Status"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "extraction_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Extraction Confidence"
+          },
+          "review_notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Notes"
+          },
+          "crawl_source_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Crawl Source Key"
+          },
+          "first_seen_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Seen At"
+          },
+          "last_seen_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Seen At"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "summary",
+          "who_affected",
+          "why_matters",
+          "field",
+          "domain",
+          "difficulty",
+          "est_hours",
+          "tech_tags",
+          "datasets",
+          "approaches",
+          "source_name",
+          "id",
+          "project_count",
+          "ai_fields",
+          "origin",
+          "source_year",
+          "edition",
+          "organisation",
+          "source_status",
+          "deadline",
+          "status",
+          "extraction_confidence",
+          "review_notes",
+          "crawl_source_key",
+          "first_seen_at",
+          "last_seen_at",
+          "created_at"
+        ],
+        "title": "AdminProblemOut"
+      },
+      "AdminReviewOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminProblemOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "AdminReviewOut"
+      },
       "ChatIn": {
         "properties": {
           "messages": {
@@ -840,6 +1659,78 @@
         ],
         "title": "ChatProblemItem"
       },
+      "CrawlRunOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "source_key": {
+            "type": "string",
+            "title": "Source Key"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Counts"
+          },
+          "llm_calls": {
+            "type": "integer",
+            "title": "Llm Calls"
+          },
+          "error_summary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Summary"
+          },
+          "triggered_by": {
+            "type": "string",
+            "title": "Triggered By"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "source_key",
+          "started_at",
+          "finished_at",
+          "status",
+          "counts",
+          "llm_calls",
+          "error_summary",
+          "triggered_by"
+        ],
+        "title": "CrawlRunOut"
+      },
       "Facet": {
         "properties": {
           "value": {
@@ -849,6 +1740,18 @@
           "count": {
             "type": "integer",
             "title": "Count"
+          },
+          "last_updated": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Updated"
           }
         },
         "type": "object",
@@ -1084,6 +1987,61 @@
             "type": "array",
             "title": "Ai Fields"
           },
+          "origin": {
+            "type": "string",
+            "title": "Origin",
+            "default": "manual"
+          },
+          "source_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Year"
+          },
+          "edition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edition"
+          },
+          "organisation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organisation"
+          },
+          "source_status": {
+            "type": "string",
+            "title": "Source Status",
+            "default": "unknown"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
+          },
           "original_text": {
             "type": "string",
             "title": "Original Text"
@@ -1094,6 +2052,15 @@
             },
             "type": "array",
             "title": "Projects"
+          },
+          "display_policy": {
+            "type": "string",
+            "enum": [
+              "summary_only",
+              "summary_plus_excerpt"
+            ],
+            "title": "Display Policy",
+            "default": "summary_plus_excerpt"
           }
         },
         "type": "object",
@@ -1459,6 +2426,61 @@
             },
             "type": "array",
             "title": "Ai Fields"
+          },
+          "origin": {
+            "type": "string",
+            "title": "Origin",
+            "default": "manual"
+          },
+          "source_year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Year"
+          },
+          "edition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Edition"
+          },
+          "organisation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organisation"
+          },
+          "source_status": {
+            "type": "string",
+            "title": "Source Status",
+            "default": "unknown"
+          },
+          "deadline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadline"
           }
         },
         "type": "object",
@@ -1480,6 +2502,191 @@
           "ai_fields"
         ],
         "title": "ProblemOut"
+      },
+      "ProblemPatch": {
+        "properties": {
+          "title": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          },
+          "summary": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary"
+          },
+          "who_affected": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Who Affected"
+          },
+          "why_matters": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Why Matters"
+          },
+          "field": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ml",
+                  "computer-vision",
+                  "nlp-llm",
+                  "cybersecurity",
+                  "web-fullstack",
+                  "mobile",
+                  "data-engineering",
+                  "geospatial",
+                  "optimization",
+                  "iot-embedded",
+                  "distributed-systems",
+                  "blockchain",
+                  "devops-cloud",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Field"
+          },
+          "domain": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "healthcare",
+                  "education",
+                  "agriculture",
+                  "fintech",
+                  "climate",
+                  "governance",
+                  "transport",
+                  "disaster-management",
+                  "industry",
+                  "social-impact",
+                  "developer-tools",
+                  "other"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain"
+          },
+          "difficulty": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "beginner",
+                  "intermediate",
+                  "advanced"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Difficulty"
+          },
+          "est_hours": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 1000.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Est Hours"
+          },
+          "tech_tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "maxLength": 40,
+                  "minLength": 1
+                },
+                "type": "array",
+                "maxItems": 25
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tech Tags"
+          },
+          "approaches": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "maxLength": 800,
+                  "minLength": 1
+                },
+                "type": "array",
+                "maxItems": 8
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approaches"
+          },
+          "review_notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Notes"
+          }
+        },
+        "type": "object",
+        "title": "ProblemPatch"
       },
       "ProblemsListOut": {
         "properties": {
@@ -1719,6 +2926,29 @@
           "projects"
         ],
         "title": "StatsOut"
+      },
+      "TakedownOut": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "source_key": {
+            "type": "string",
+            "title": "Source Key"
+          },
+          "unpublished": {
+            "type": "integer",
+            "title": "Unpublished"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "source_key",
+          "unpublished"
+        ],
+        "title": "TakedownOut"
       },
       "ValidationError": {
         "properties": {

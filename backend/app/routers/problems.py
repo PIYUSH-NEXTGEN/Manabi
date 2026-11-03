@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 
 from app import schemas
 from app.deps import DB, CurrentUser
-from app.models import Problem, Project, STATUS_PUBLISHED
+from app.models import ORIGIN_CRAWLER, Problem, Project, STATUS_PUBLISHED
 
 router = APIRouter(prefix="/api/problems", tags=["problems"])
 
@@ -34,6 +34,12 @@ def problem_to_out(problem: Problem, project_count: int) -> schemas.ProblemOut:
         source_note=problem.source_note,
         ai_fields=problem.ai_fields,
         project_count=project_count,
+        origin=problem.origin,
+        source_year=problem.source_year,
+        edition=problem.edition,
+        organisation=problem.organisation,
+        source_status=problem.source_status,
+        deadline=problem.deadline,
     )
 
 
@@ -115,7 +121,7 @@ def list_problems(
     return schemas.ProblemsListOut(items=items, total=total)
 
 
-@router.get("/facets", response_model=schemas.FacetsOut)
+@router.get("/facets", response_model=schemas.FacetsOut, response_model_exclude_none=True)
 def facets(db: DB):
     tech_rows = db.scalars(
         select(Problem.tech_tags).where(Problem.status == STATUS_PUBLISHED)
@@ -125,7 +131,11 @@ def facets(db: DB):
         for tag in tags:
             tech_counter[tag.lower()] = tech_counter.get(tag.lower(), 0) + 1
     source_rows = db.execute(
-        select(Problem.source_name, func.count(Problem.id))
+        select(
+            Problem.source_name,
+            func.count(Problem.id),
+            func.max(func.coalesce(Problem.last_seen_at, Problem.created_at)),
+        )
         .where(Problem.status == STATUS_PUBLISHED)
         .group_by(Problem.source_name)
     ).all()
@@ -137,7 +147,10 @@ def facets(db: DB):
             schemas.Facet(value=v, count=c)
             for v, c in sorted(tech_counter.items(), key=lambda kv: (-kv[1], kv[0]))
         ],
-        sources=[schemas.Facet(value=name, count=count) for name, count in source_rows],
+        sources=[
+            schemas.Facet(value=name, count=count, last_updated=updated)
+            for name, count, updated in source_rows
+        ],
     )
 
 
@@ -152,7 +165,14 @@ def get_problem(problem_id: int, db: DB):
         raise HTTPException(status_code=404, detail="Problem not found")
     base = problem_to_out(problem, len(problem.projects))
     detail = base.model_dump()
-    detail["original_text"] = problem.original_text
+    if problem.origin == ORIGIN_CRAWLER:
+        # §5: never expose full verbatim crawled text. The generated summary is
+        # what the page shows; summary_plus_excerpt sources may add 300 chars.
+        detail["original_text"] = problem.summary
+        detail["display_policy"] = "summary_only"
+    else:
+        detail["original_text"] = problem.original_text
+        detail["display_policy"] = "summary_plus_excerpt"
     detail["projects"] = [project_to_out(p).model_dump() for p in problem.projects]
     return schemas.ProblemDetail(**detail)
 

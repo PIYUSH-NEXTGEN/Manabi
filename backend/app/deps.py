@@ -27,11 +27,29 @@ def get_optional_user(request: Request, db: DB) -> User | None:
     return db.scalar(select(User).where(User.id == user_id))
 
 
+def get_current_admin(user: CurrentUser) -> User:
+    from app.crawler.config import admin_usernames
+
+    if user.username.lower() not in admin_usernames():
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+
 def public_user(user: User) -> dict:
     return {"id": user.id, "username": user.username, "name": user.name, "avatar_url": user.avatar_url}
 
 
 CurrentUser = Annotated[User, Depends(get_current_user)]
 OptionalUser = Annotated[User | None, Depends(get_optional_user)]
+AdminUser = Annotated[User, Depends(get_current_admin)]
 
-__all__ = ["get_current_user", "get_optional_user", "public_user", "get_db", "DB", "CurrentUser"]
+__all__ = [
+    "get_current_user",
+    "get_optional_user",
+    "get_current_admin",
+    "public_user",
+    "get_db",
+    "DB",
+    "CurrentUser",
+    "AdminUser",
+]

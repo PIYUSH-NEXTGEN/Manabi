@@ -91,7 +91,7 @@ def test_facets_only_published(client, db_session, mixed):
     assert facets["domains"] == [{"value": "other", "count": 1}]
     assert facets["difficulties"] == [{"value": "beginner", "count": 1}]
     assert facets["tech_tags"] == [{"value": "python", "count": 1}]
-    assert facets["sources"] == [{"value": "S", "count": 1}]
+    assert [(f["value"], f["count"]) for f in facets["sources"]] == [("S", 1)]
 
 
 # ---------------- detail ----------------

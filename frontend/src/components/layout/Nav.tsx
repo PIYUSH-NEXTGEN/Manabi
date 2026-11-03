@@ -13,6 +13,9 @@ export function Nav() {
   const logoutMutation = useLogout();
   const navigate = useNavigate();
   const toast = useToast();
+  const links = me.data?.is_admin
+    ? [...NAV_LINKS, { to: '/admin/review', label: 'Review' }]
+    : NAV_LINKS;
 
   function handleLogout() {
     logoutMutation.mutate(undefined, {
@@ -40,7 +43,7 @@ export function Nav() {
         </Link>
 
         <ul className="hidden items-center gap-5 md:flex">
-          {NAV_LINKS.map((link) => (
+          {links.map((link) => (
             <li key={link.to}>
               <Link
                 to={link.to}
@@ -91,7 +94,7 @@ export function Nav() {
         </div>
 
         <ul className="order-last flex w-full items-center gap-4 overflow-x-auto pb-1 md:hidden">
-          {NAV_LINKS.map((link) => (
+          {links.map((link) => (
             <li key={link.to} className="shrink-0">
               <Link
                 to={link.to}

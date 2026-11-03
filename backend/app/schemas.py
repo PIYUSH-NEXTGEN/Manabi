@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
@@ -46,6 +46,12 @@ class ProblemOut(ProblemCard):
     id: int
     project_count: int
     ai_fields: list[str]
+    origin: str = "manual"
+    source_year: int | None = None
+    edition: str | None = None
+    organisation: str | None = None
+    source_status: str = "unknown"
+    deadline: date | None = None
 
 
 class ProjectCreate(BaseModel):
@@ -78,6 +84,66 @@ class ProjectOut(BaseModel):
 class ProblemDetail(ProblemOut):
     original_text: str
     projects: list[ProjectOut]
+    display_policy: Literal["summary_only", "summary_plus_excerpt"] = "summary_plus_excerpt"
+
+
+class AdminProblemOut(ProblemOut):
+    status: str
+    origin: str
+    source_year: int | None
+    edition: str | None
+    organisation: str | None
+    deadline: date | None
+    source_status: str
+    extraction_confidence: float | None
+    review_notes: str | None
+    crawl_source_key: str | None
+    first_seen_at: datetime | None
+    last_seen_at: datetime | None
+    created_at: datetime
+
+
+class AdminReviewOut(BaseModel):
+    items: list[AdminProblemOut]
+    total: int
+
+
+class ProblemPatch(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=MAX_TITLE)
+    summary: str | None = Field(default=None, min_length=1, max_length=MAX_SUMMARY)
+    who_affected: str | None = Field(default=None, min_length=1, max_length=MAX_SHORT)
+    why_matters: str | None = Field(default=None, min_length=1, max_length=MAX_SHORT)
+    field: FieldEnum | None = None
+    domain: DomainEnum | None = None
+    difficulty: Difficulty | None = None
+    est_hours: int | None = Field(default=None, ge=1, le=1000)
+    tech_tags: list[_problem_tag_item] | None = Field(default=None, max_length=25)
+    approaches: list[Annotated[str, Field(min_length=1, max_length=800)]] | None = Field(default=None, max_length=8)
+    review_notes: str | None = Field(default=None, max_length=4000)
+
+
+class AdminActionOut(BaseModel):
+    ok: bool
+    problem_id: int
+    status: str
+
+
+class CrawlRunOut(BaseModel):
+    id: int
+    source_key: str
+    started_at: datetime
+    finished_at: datetime | None
+    status: str
+    counts: dict[str, int]
+    llm_calls: int
+    error_summary: str | None
+    triggered_by: str
+
+
+class TakedownOut(BaseModel):
+    ok: bool
+    source_key: str
+    unpublished: int
 
 
 class DatasetIn(BaseModel):
@@ -130,6 +196,7 @@ class ChatOut(BaseModel):
 class Facet(BaseModel):
     value: str
     count: int
+    last_updated: datetime | None = None
 
 
 class FacetsOut(BaseModel):

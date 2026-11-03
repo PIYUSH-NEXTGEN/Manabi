@@ -101,11 +101,14 @@ async def github_callback(request: Request, db: DB):
 
 @router.get("/me")
 def me(user: CurrentUser):
+    from app.crawler.config import admin_usernames
+
     return {
         "id": user.id,
         "username": user.username,
         "name": user.name,
         "avatar_url": user.avatar_url,
+        "is_admin": user.username.lower() in admin_usernames(),
     }
 
 

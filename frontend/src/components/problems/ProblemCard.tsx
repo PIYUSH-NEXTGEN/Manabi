@@ -31,7 +31,11 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
         estHours={problem.est_hours}
         className="border-0 shadow-none"
       />
-      <div className="flex items-center justify-between gap-2 border-t-[3px] border-ink px-3 py-2">
+      <p className="border-t-[3px] border-ink px-3 pt-2 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">
+        {problem.source_name}
+        {problem.source_year ? ` · ${problem.source_year}` : ''}
+      </p>
+      <div className="flex items-center justify-between gap-2 px-3 py-2">
         {tags.length > 0 ? (
           <div className="flex min-w-0 flex-wrap gap-1.5">
             {tags.map((tag) => (
