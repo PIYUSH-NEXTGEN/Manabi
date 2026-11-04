@@ -10,7 +10,7 @@ export function PrivacyPage() {
   return (
     <StaticShell kicker="Legal" title="Privacy, in plain English">
       <dl className="flex flex-col gap-4">
-        <div className="border-t-[3px] border-ink pt-3">
+        <div className="border-t border-ink pt-3">
           <dt className="font-mono text-xs font-bold uppercase tracking-widest">
             What we store
           </dt>
@@ -26,7 +26,7 @@ export function PrivacyPage() {
           </dd>
         </div>
 
-        <div className="border-t-[3px] border-ink pt-3">
+        <div className="border-t border-ink pt-3">
           <dt className="font-mono text-xs font-bold uppercase tracking-widest">
             What we do not do
           </dt>
@@ -37,7 +37,7 @@ export function PrivacyPage() {
           </dd>
         </div>
 
-        <div className="border-t-[3px] border-ink pt-3">
+        <div className="border-t border-ink pt-3">
           <dt className="font-mono text-xs font-bold uppercase tracking-widest">
             The honest part
           </dt>

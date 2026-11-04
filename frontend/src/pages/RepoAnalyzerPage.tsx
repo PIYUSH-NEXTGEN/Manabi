@@ -43,7 +43,7 @@ export function RepoAnalyzerPage() {
         {error ? (
           <p
             role="alert"
-            className="font-mono text-[11px] font-bold uppercase tracking-widest text-red"
+            className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
           >
             {error}
           </p>
@@ -59,7 +59,7 @@ export function RepoAnalyzerPage() {
 
       <p className="mt-8 text-sm leading-relaxed text-ink/60">
         This tool is being built. In the meantime, browse{' '}
-        <Link to="/problems" className="text-blue underline underline-offset-4">
+        <Link to="/problems" className="text-accent underline underline-offset-4">
           project ideas
         </Link>{' '}
         and link your own repository from a problem page.

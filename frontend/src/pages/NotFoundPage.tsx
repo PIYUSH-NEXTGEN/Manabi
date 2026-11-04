@@ -3,11 +3,11 @@ import { buttonClasses } from '@/design/primitives';
 
 export function NotFoundPage() {
   return (
-    <main className="border-b-[3px] border-ink">
+    <main className="border-b border-ink">
       <div className="mx-auto flex w-[min(760px,96vw)] flex-col gap-6 py-16">
         <h1
           aria-label="404 — page not found"
-          className="font-display uppercase leading-none text-red"
+          className="font-display uppercase leading-none text-danger"
           style={{ fontSize: 'clamp(5rem, 18vw, 12rem)' }}
         >
           <span aria-hidden>4</span>

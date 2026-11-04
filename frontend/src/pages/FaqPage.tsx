@@ -32,7 +32,7 @@ export function FaqPage() {
         {FAQS.map((entry) => (
           <div
             key={entry.q}
-            className="flex flex-col gap-2 border-[3px] border-ink bg-white p-4 shadow-hard-sm"
+            className="flex flex-col gap-2 border border-ink bg-sheet p-4"
           >
             <dt className="font-mono text-xs font-bold uppercase tracking-widest">
               {entry.q}

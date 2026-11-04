@@ -4,7 +4,7 @@ export function TermsPage() {
   return (
     <StaticShell kicker="Legal" title="Terms, in plain English" wide>
       <dl className="flex flex-col gap-4">
-        <div className="border-t-[3px] border-ink pt-3">
+        <div className="border-t border-ink pt-3">
           <dt className="font-mono text-xs font-bold uppercase tracking-widest">
             01 — What this is
           </dt>
@@ -15,7 +15,7 @@ export function TermsPage() {
           </dd>
         </div>
 
-        <div className="border-t-[3px] border-ink pt-3">
+        <div className="border-t border-ink pt-3">
           <dt className="font-mono text-xs font-bold uppercase tracking-widest">
             02 — Who owns what
           </dt>
@@ -27,7 +27,7 @@ export function TermsPage() {
           </dd>
         </div>
 
-        <div className="border-t-[3px] border-ink pt-3">
+        <div className="border-t border-ink pt-3">
           <dt className="font-mono text-xs font-bold uppercase tracking-widest">
             03 — Your account
           </dt>
@@ -37,7 +37,7 @@ export function TermsPage() {
           </dd>
         </div>
 
-        <div className="border-t-[3px] border-ink pt-3">
+        <div className="border-t border-ink pt-3">
           <dt className="font-mono text-xs font-bold uppercase tracking-widest">
             04 — Data
           </dt>

@@ -62,7 +62,7 @@ function SourceList({
 
   if (facets.isError) {
     return (
-      <p role="alert" className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+      <p role="alert" className="border border-ink bg-sheet p-4">
         Could not load sources — {facets.error.detail}
       </p>
     );
@@ -72,7 +72,7 @@ function SourceList({
 
   if (rows.length === 0) {
     return (
-      <p className="border-[3px] border-ink bg-white p-4">
+      <p className="border border-ink bg-sheet p-4">
         No sources yet. Once problems are imported from a source, it shows up
         here with its own entry.
       </p>
@@ -84,7 +84,7 @@ function SourceList({
       {rows.map((row) => (
         <div
           key={row.name}
-          className="flex flex-col gap-1 border-[3px] border-ink bg-white p-4 shadow-hard-sm md:flex-row md:items-start md:justify-between"
+          className="flex flex-col gap-1 border border-ink bg-sheet p-4 md:flex-row md:items-start md:justify-between"
         >
           <div>
             <dt className="font-mono text-sm font-bold uppercase tracking-widest">
@@ -102,7 +102,7 @@ function SourceList({
                   href={safeExternalUrl(row.url) ?? undefined}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-blue underline underline-offset-4"
+                  className="text-accent underline underline-offset-4"
                 >
                   {row.url} ↗
                 </a>
@@ -141,7 +141,7 @@ export function SourcesPage() {
 
       <section
         id="credits"
-        className="border-[3px] border-ink bg-yellow p-5 shadow-hard"
+        className="border border-ink bg-accent p-5"
       >
         <h2 className="font-display text-xl uppercase">Data &amp; credits</h2>
         <p className="mt-2">

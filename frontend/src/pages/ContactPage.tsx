@@ -14,7 +14,7 @@ export function ContactPage() {
       {GITHUB_ISSUES_URL || CONTACT_EMAIL ? (
         <ul className="flex flex-col gap-3">
           {GITHUB_ISSUES_URL ? (
-            <li className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+            <li className="border border-ink bg-sheet p-4">
               <p className="font-mono text-[11px] font-bold uppercase tracking-widest">
                 GitHub issues
               </p>
@@ -22,20 +22,20 @@ export function ContactPage() {
                 href={GITHUB_ISSUES_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="mt-1 inline-block text-blue underline underline-offset-4"
+                className="mt-1 inline-block text-accent underline underline-offset-4"
               >
                 {GITHUB_ISSUES_URL} ↗
               </a>
             </li>
           ) : null}
           {CONTACT_EMAIL ? (
-            <li className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+            <li className="border border-ink bg-sheet p-4">
               <p className="font-mono text-[11px] font-bold uppercase tracking-widest">
                 Email
               </p>
               <a
                 href={`mailto:${CONTACT_EMAIL}`}
-                className="mt-1 inline-block text-blue underline underline-offset-4"
+                className="mt-1 inline-block text-accent underline underline-offset-4"
               >
                 {CONTACT_EMAIL}
               </a>
@@ -45,7 +45,7 @@ export function ContactPage() {
       ) : (
         <p
           role="status"
-          className="border-[3px] border-ink bg-white p-4 shadow-hard-sm font-mono text-[11px] font-bold uppercase tracking-widest"
+          className="border border-ink bg-sheet p-4 font-mono text-[11px] font-bold uppercase tracking-widest"
         >
           Contact details are not configured yet — no fake form here.
         </p>

@@ -34,7 +34,7 @@ function Section({
 }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="border-b-[3px] border-ink pb-1 font-mono text-sm font-bold uppercase tracking-widest">
+      <h2 className="border-b border-ink pb-1 font-mono text-sm font-bold uppercase tracking-widest">
         {title}
       </h2>
       {children}
@@ -169,7 +169,7 @@ export function KitPage() {
       </Section>
 
       <Section title="Divider stripes">
-        <div className="bg-stripes h-8 border-[3px] border-ink" />
+        <div className="bg-stripes h-8 border border-ink" />
       </Section>
     </main>
   );

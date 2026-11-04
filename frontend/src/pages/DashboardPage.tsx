@@ -69,13 +69,13 @@ export function DashboardPage() {
         {projects.isLoading ? (
           <p className="mt-2 text-sm">Loading projects…</p>
         ) : projects.data && projects.data.length > 0 ? (
-          <ul className="mt-3 divide-y-[3px] divide-ink border-[3px] border-ink bg-white">
+          <ul className="mt-3 divide-y-[3px] divide-ink border border-ink bg-sheet">
             {projects.data.map((project) => (
               <MyProjectRow key={project.id} project={project} />
             ))}
           </ul>
         ) : (
-          <p className="mt-3 border-[3px] border-ink bg-white p-4 text-sm leading-snug">
+          <p className="mt-3 border border-ink bg-sheet p-4 text-sm leading-snug">
             No projects yet.{' '}
             <Link to="/problems" className="underline underline-offset-4">
               Pick a problem
@@ -84,7 +84,7 @@ export function DashboardPage() {
           </p>
         )}
         {projects.error ? (
-          <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-red">
+          <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
             {projects.error.detail}
           </p>
         ) : null}
@@ -96,12 +96,12 @@ export function DashboardPage() {
           <p className="mt-2 text-sm">Loading recommendations…</p>
         ) : null}
         {recommendations.error ? (
-          <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-red">
+          <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
             {recommendations.error.detail}
           </p>
         ) : null}
         {recommendations.data && recommendations.data.items.length === 0 ? (
-          <p className="mt-3 border-[3px] border-ink bg-white p-4 text-sm leading-snug">
+          <p className="mt-3 border border-ink bg-sheet p-4 text-sm leading-snug">
             Nothing matched yet — try more problems and projects, and this
             fills up.
           </p>

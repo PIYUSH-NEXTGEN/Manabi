@@ -38,7 +38,7 @@ export function AdminReviewPage() {
     return (
       <main className="mx-auto w-[min(760px,96vw)] py-16">
         <h1 className="font-display text-4xl uppercase">Review queue</h1>
-        <p className="mt-4 border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <p className="mt-4 border border-ink bg-sheet p-4">
           Admin access required. Add your GitHub username to
           {' '}
           <code>ADMIN_GITHUB_USERNAMES</code> to use this page.
@@ -85,7 +85,7 @@ export function AdminReviewPage() {
 
   return (
     <main className="mx-auto w-[min(1200px,96vw)] py-12">
-      <p className="font-mono text-xs font-bold uppercase tracking-widest text-blue">
+      <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
         Admin
       </p>
       <h1 className="mt-2 font-display text-4xl uppercase">Review queue</h1>
@@ -95,13 +95,13 @@ export function AdminReviewPage() {
       </p>
 
       {review.isError ? (
-        <p role="alert" className="mt-6 border-[3px] border-ink bg-white p-4">
+        <p role="alert" className="mt-6 border border-ink bg-sheet p-4">
           Could not load the queue — {review.error.detail}
         </p>
       ) : review.isPending ? (
         <Skeleton className="mt-6 h-48" />
       ) : review.data.items.length === 0 ? (
-        <p className="mt-6 border-[3px] border-ink bg-white p-4">
+        <p className="mt-6 border border-ink bg-sheet p-4">
           Nothing waiting for review.
         </p>
       ) : (
@@ -111,7 +111,7 @@ export function AdminReviewPage() {
             return (
               <li
                 key={problem.id}
-                className="border-[3px] border-ink bg-white p-4 shadow-hard"
+                className="border border-ink bg-sheet p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
@@ -141,13 +141,13 @@ export function AdminReviewPage() {
                     href={sourceUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-sm text-blue underline underline-offset-4"
+                    className="text-sm text-accent underline underline-offset-4"
                   >
                     View original ↗
                   </a>
                 ) : null}
                 {problem.review_notes ? (
-                  <p className="mt-2 border-l-[4px] border-yellow pl-3 text-sm">
+                  <p className="mt-2 border-l-[4px] border-accent pl-3 text-sm">
                     {problem.review_notes}
                   </p>
                 ) : null}
@@ -181,7 +181,7 @@ export function AdminReviewPage() {
                 {editingId === problem.id ? (
                   <form
                     onSubmit={saveEdit}
-                    className="mt-4 flex flex-col gap-2 border-t-[3px] border-ink pt-4"
+                    className="mt-4 flex flex-col gap-2 border-t border-ink pt-4"
                   >
                     <label className={`${sectionHeading}`} htmlFor={`title-${problem.id}`}>
                       Title
@@ -190,7 +190,7 @@ export function AdminReviewPage() {
                       id={`title-${problem.id}`}
                       value={draftTitle}
                       onChange={(event) => setDraftTitle(event.target.value)}
-                      className="border-[3px] border-ink bg-paper px-3 py-2"
+                      className="border border-ink bg-paper px-3 py-2"
                     />
                     <label className={`${sectionHeading}`} htmlFor={`summary-${problem.id}`}>
                       Summary
@@ -200,7 +200,7 @@ export function AdminReviewPage() {
                       value={draftSummary}
                       onChange={(event) => setDraftSummary(event.target.value)}
                       rows={4}
-                      className="border-[3px] border-ink bg-paper px-3 py-2"
+                      className="border border-ink bg-paper px-3 py-2"
                     />
                     <div className="flex gap-2">
                       <Button type="submit">Save edit</Button>
@@ -222,19 +222,19 @@ export function AdminReviewPage() {
       <section className="mt-12">
         <h2 className="font-display text-2xl uppercase">Crawl runs</h2>
         {runs.isError ? (
-          <p role="alert" className="mt-3 border-[3px] border-ink bg-white p-4">
+          <p role="alert" className="mt-3 border border-ink bg-sheet p-4">
             Could not load runs — {runs.error.detail}
           </p>
         ) : runs.isPending ? (
           <Skeleton className="mt-3 h-24" />
         ) : runs.data.length === 0 ? (
-          <p className="mt-3 border-[3px] border-ink bg-white p-4">
+          <p className="mt-3 border border-ink bg-sheet p-4">
             No crawl runs recorded yet.
           </p>
         ) : (
-          <div className="mt-3 overflow-x-auto border-[3px] border-ink bg-white shadow-hard">
+          <div className="mt-3 overflow-x-auto border border-ink bg-sheet">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="border-b-[3px] border-ink">
+              <thead className="border-b border-ink">
                 <tr>
                   {['Source', 'Status', 'New', 'Review', 'LLM calls', 'Trigger'].map(
                     (heading) => (

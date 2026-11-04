@@ -33,9 +33,9 @@ export function AboutPage() {
         {PRINCIPLES.map((principle) => (
           <div
             key={principle.number}
-            className="flex flex-col gap-2 border-[3px] border-ink bg-white p-4 shadow-hard-sm"
+            className="flex flex-col gap-2 border border-ink bg-sheet p-4"
           >
-            <span aria-hidden className="font-display text-4xl leading-none text-blue">
+            <span aria-hidden className="font-display text-4xl leading-none text-accent">
               {principle.number}
             </span>
             <h2 className="font-mono text-[11px] font-bold uppercase tracking-widest">
@@ -46,7 +46,7 @@ export function AboutPage() {
         ))}
       </div>
 
-      <p className="border-l-[6px] border-yellow pl-4">
+      <p className="border-l-[6px] border-accent pl-4">
         Prototype built at a hackathon. The problems are real and credited;
         everything else is still landing step by step.
       </p>
