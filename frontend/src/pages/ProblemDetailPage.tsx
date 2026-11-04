@@ -1,10 +1,20 @@
 import type { ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { motion } from 'motion/react';
+import {
+  ArrowRight,
+  ArrowUpRight,
+  BookOpen,
+  Clock,
+  GitBranch,
+} from 'lucide-react';
 import { cx } from '@/lib/cx';
-import { Button, Skeleton, Tag } from '@/design/primitives';
+import { EASE_SNAP, slideUpReveal } from '@/design/motion';
+import { buttonClasses, Skeleton, Tag } from '@/design/primitives';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
 import { SubmitProjectPanel } from '@/components/problems/SubmitProjectPanel';
+import { GithubMark } from '@/components/icons/GithubMark';
 import { useProblem } from '@/hooks/useProblem';
 import { projectOwnerUsername } from '@/api/client';
 import { safeExternalUrl } from '@/lib/url';
@@ -14,7 +24,7 @@ const microLabel = 'font-mono text-[9px] font-bold uppercase tracking-[0.16em] t
 
 function ProjectSkeleton() {
   return (
-    <div className="mx-auto w-[min(1000px,96vw)] space-y-4 py-16">
+    <div className="mx-auto w-[min(1240px,96vw)] space-y-4 py-16">
       <Skeleton className="h-3 w-40" />
       <Skeleton className="h-16 w-2/3" />
       <Skeleton className="h-40 w-full" />
@@ -50,15 +60,21 @@ function Section({
   children: ReactNode;
 }) {
   return (
-    <section className="border-t border-ink py-7 first:border-t-0 first:pt-0">
+    <motion.section
+      variants={slideUpReveal}
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.2 }}
+      className="border-t border-ink py-8 first:border-t-0 first:pt-0"
+    >
       <div className="flex items-baseline gap-3">
         <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-accent">
           {number}
         </span>
         <h2 className={panelHeading}>{title}</h2>
       </div>
-      <div className="mt-3">{children}</div>
-    </section>
+      <div className="mt-4">{children}</div>
+    </motion.section>
   );
 }
 
@@ -118,15 +134,16 @@ function DetailView({ problemId }: { problemId: number }) {
   const ideas = futureIdeas(data.original_text);
   const description = fullDescription(data.summary, data.who_affected, data.why_matters);
   const sourceUrl = safeExternalUrl(data.source_url);
+  const projectCount = data.projects.length;
 
   return (
     <main className="border-b border-ink bg-paper">
-      <div className="mx-auto w-[min(1240px,96vw)] py-10">
+      <div className="mx-auto w-[min(1240px,96vw)] py-8 md:py-10">
         <nav
           aria-label="Breadcrumb"
           className="flex flex-wrap items-center gap-2 border-b border-line pb-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted"
         >
-          <Link to="/problems" className="hover:text-accent">
+          <Link to="/problems" className="transition-colors hover:text-accent">
             Problem archive
           </Link>
           <span aria-hidden>/</span>
@@ -135,34 +152,56 @@ function DetailView({ problemId }: { problemId: number }) {
           <span>{data.field.replace(/-/g, ' ')}</span>
         </nav>
 
-        <header className="grid gap-8 border-b border-ink py-8 md:grid-cols-[minmax(0,1fr)_300px]">
+        <motion.header
+          variants={slideUpReveal}
+          initial="hidden"
+          animate="show"
+          transition={{ duration: 0.35, ease: EASE_SNAP }}
+          className="grid gap-8 border-b border-ink py-9 md:grid-cols-[minmax(0,1fr)_290px] md:gap-12"
+        >
           <div>
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-accent">
+            <p className="flex flex-wrap items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-accent">
+              <span aria-hidden className="block size-2 bg-accent" />
               Problem brief / {data.source_id ?? `NO. ${data.id}`}
             </p>
-            <h1 className="mt-3 font-display uppercase leading-[0.92] tracking-[-0.02em]" style={{ fontSize: 'clamp(2.25rem, 5vw, 4rem)' }}>
+            <h1
+              className="mt-4 font-display uppercase leading-[0.9] tracking-[-0.02em]"
+              style={{ fontSize: 'clamp(2.25rem, 5vw, 4rem)' }}
+            >
               {data.title}
             </h1>
-            <p className="mt-5 max-w-3xl text-base leading-relaxed text-ink-soft md:text-lg">
+
+            <p className="mt-6 max-w-3xl border-l-2 border-accent/50 pl-5 text-base leading-relaxed text-ink-soft md:text-lg">
               {description}
             </p>
-            {data.source_name ? (
-              <p className="mt-4 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-                Source /{' '}
-                {sourceUrl ? (
-                  <a
-                    href={sourceUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
-                  >
-                    {data.source_name} ↗
-                  </a>
-                ) : (
-                  data.source_name
-                )}
-              </p>
-            ) : null}
+
+            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+              <span className="flex items-center gap-1.5">
+                <Clock aria-hidden size={12} strokeWidth={2.4} />
+                {data.est_hours} h estimate
+              </span>
+              <span className="flex items-center gap-1.5">
+                <GitBranch aria-hidden size={12} strokeWidth={2.4} />
+                {projectCount === 1 ? '1 project' : `${projectCount} projects`}
+              </span>
+              {data.source_name ? (
+                <span className="flex items-center gap-1.5">
+                  Source /
+                  {sourceUrl ? (
+                    <a
+                      href={sourceUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
+                    >
+                      {data.source_name} ↗
+                    </a>
+                  ) : (
+                    <span className="text-ink-soft">{data.source_name}</span>
+                  )}
+                </span>
+              ) : null}
+            </div>
           </div>
 
           <dl className="self-start border border-ink bg-sheet px-4 py-3">
@@ -176,16 +215,17 @@ function DetailView({ problemId }: { problemId: number }) {
             <SpecRow label="Domain">{data.domain.replace(/-/g, ' ')}</SpecRow>
             <SpecRow label="Difficulty">{data.difficulty}</SpecRow>
             <SpecRow label="Est. time">{data.est_hours} h</SpecRow>
-            <SpecRow label="Source">{data.source_id ?? '—'}</SpecRow>
+            <SpecRow label="Source">{data.source_id ?? 'Not listed'}</SpecRow>
           </dl>
-        </header>
+        </motion.header>
 
-        <div className="mt-8 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-14">
+        <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
           <article>
             <Section number="01" title="Why it matters">
-              <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+              <p className="max-w-3xl border-l-2 border-line pl-5 text-base leading-relaxed text-ink-soft">
                 {data.why_matters}
               </p>
+
             </Section>
 
             <Section number="02" title="Tech stack">
@@ -224,14 +264,40 @@ function DetailView({ problemId }: { problemId: number }) {
               )}
             </Section>
 
-            <div className="mt-2 border-t border-ink pt-6">
-              <Link to={`/problems/${data.id}/guide`}>
-                <Button variant="primary">Build guide</Button>
+            <motion.section
+              variants={slideUpReveal}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.2 }}
+              className="mt-2 flex flex-wrap items-center justify-between gap-5 border border-ink bg-sheet p-5 sm:p-6"
+            >
+              <div className="max-w-md">
+                <p className={cx(microLabel, 'flex items-center gap-2')}>
+                  <BookOpen aria-hidden size={12} strokeWidth={2.4} className="text-accent" />
+                  Field manual
+                </p>
+                <h2 className={cx(panelHeading, 'mt-2')}>Three phases to ship</h2>
+                <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                  Start, implement, ship. The approaches above become your
+                  checklist, with a place to stop at each phase.
+                </p>
+              </div>
+              <Link
+                to={`/problems/${data.id}/guide`}
+                className={buttonClasses('primary', 'group shrink-0')}
+              >
+                Build guide
+                <ArrowRight
+                  aria-hidden
+                  size={14}
+                  strokeWidth={2.6}
+                  className="transition-transform group-hover:translate-x-0.5"
+                />
               </Link>
-            </div>
+            </motion.section>
           </article>
 
-          <aside className="flex flex-col gap-9">
+          <aside className="flex flex-col gap-9 lg:sticky lg:top-24 lg:self-start">
             <SubmitProjectPanel problemId={data.id} />
 
             <section>
@@ -244,11 +310,14 @@ function DetailView({ problemId }: { problemId: number }) {
                   return (
                     <li
                       key={project.id}
-                      className="flex flex-col gap-1.5 border-b border-line py-3"
+                      className="flex flex-col gap-2 border-b border-line py-3.5"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-xs font-bold">
-                          {project.repo_name}
+                        <span className="flex min-w-0 items-center gap-2">
+                          <GithubMark size={13} className="shrink-0 text-muted" />
+                          <span className="truncate font-mono text-xs font-bold">
+                            {project.repo_name}
+                          </span>
                         </span>
                         <ProjectProgressBadge progress={project.progress} />
                       </div>
@@ -262,9 +331,15 @@ function DetailView({ problemId }: { problemId: number }) {
                       ) : null}
                       <Link
                         to={`/projects/${project.id}`}
-                        className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
+                        className="group inline-flex w-fit items-center gap-1 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
                       >
-                        Open project →
+                        Open project
+                        <ArrowUpRight
+                          aria-hidden
+                          size={11}
+                          strokeWidth={2.6}
+                          className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                        />
                       </Link>
                     </li>
                   );

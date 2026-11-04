@@ -37,7 +37,7 @@ describe('Nav', () => {
     renderNav();
 
     expect(
-      await screen.findByRole('button', { name: 'GitHub' }),
+      await screen.findByRole('button', { name: 'GitHub login' }),
     ).toBeInTheDocument();
     expect(screen.queryByText('demo-farmer')).not.toBeInTheDocument();
   });
@@ -63,7 +63,7 @@ describe('Nav', () => {
     const userLink = await screen.findByRole('link', { name: 'demo-farmer' });
     expect(userLink).toHaveAttribute('href', '/me');
     expect(
-      screen.queryByRole('button', { name: 'GitHub' }),
+      screen.queryByRole('button', { name: 'GitHub login' }),
     ).not.toBeInTheDocument();
   });
 });
