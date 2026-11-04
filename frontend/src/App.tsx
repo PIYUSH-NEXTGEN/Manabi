@@ -45,6 +45,16 @@ const ProblemBoardPage = lazy(() =>
     default: m.ProblemBoardPage,
   })),
 );
+const RepoAnalyzerPage = lazy(() =>
+  import('@/pages/RepoAnalyzerPage').then((m) => ({
+    default: m.RepoAnalyzerPage,
+  })),
+);
+const ProblemGuidePage = lazy(() =>
+  import('@/pages/ProblemGuidePage').then((m) => ({
+    default: m.ProblemGuidePage,
+  })),
+);
 const ProblemDetailPage = lazy(() =>
   import('@/pages/ProblemDetailPage').then((m) => ({
     default: m.ProblemDetailPage,
@@ -153,6 +163,10 @@ export function App() {
 
                   <Route path="/problems" element={<ProblemBoardPage />} />
                   <Route path="/problems/:id" element={<ProblemDetailPage />} />
+                  <Route path="/problems/:id/guide"
+                    element={<ProblemGuidePage />}
+                  />
+                  <Route path="/repo-analyzer" element={<RepoAnalyzerPage />} />
                   <Route
                     path="/projects/:id"
                     element={<ProjectDetailPage />}
