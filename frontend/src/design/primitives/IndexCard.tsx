@@ -13,7 +13,7 @@ interface IndexCardProps {
   field: string;
   title: string;
   summary?: string | null;
-  difficulty: Difficulty;
+  difficulty?: Difficulty | null;
   domain?: string | null;
   estHours?: number | null;
   className?: string;
@@ -29,7 +29,7 @@ export function IndexCard({
   estHours,
   className,
 }: IndexCardProps) {
-  const filled = DIFFICULTY_FILL[difficulty];
+  const filled = difficulty ? DIFFICULTY_FILL[difficulty] : 0;
   const squares = `${'■'.repeat(filled)}${'□'.repeat(3 - filled)}`;
   const meta = [domain, estHours != null ? `${estHours}h` : null]
     .filter(Boolean)
@@ -47,11 +47,13 @@ export function IndexCard({
         <h3 className="font-display text-lg uppercase leading-tight">{title}</h3>
         {summary ? <p className="line-clamp-3 text-sm leading-snug">{summary}</p> : null}
         <div className="mt-auto flex items-center justify-between gap-3 pt-2 font-mono text-[11px] font-bold uppercase tracking-widest">
-          <span>
-            <span aria-hidden>{squares}</span>
-            <span className="sr-only">{difficulty}</span>
-          </span>
-          <span>{meta}</span>
+          {difficulty ? (
+            <span>
+              <span aria-hidden>{squares}</span>
+              <span className="sr-only">{difficulty}</span>
+            </span>
+          ) : null}
+          {meta.length > 0 ? <span>{meta}</span> : null}
         </div>
       </div>
     </article>

@@ -1,10 +1,44 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { cx } from '@/lib/cx';
-import { IndexCard, Tag, type Difficulty } from '@/design/primitives';
 import type { ProblemOut } from '@/api/client';
 
-const MAX_SHOWED_TAGS = 3;
+const ALLOWED_DOMAINS: Record<string, string> = {
+  'web-fullstack': 'web dev',
+  mobile: 'app dev',
+  ml: 'ml/data sci',
+  'computer-vision': 'ml/data sci',
+  'nlp-llm': 'ml/data sci',
+  ai: 'ai',
+  blockchain: 'blockchain',
+  web3: 'blockchain',
+  cybersecurity: 'cybersecurity',
+  'devops-cloud': 'devops/cloud',
+  cloud: 'devops/cloud',
+  'data-engineering': 'data engineering',
+  databases: 'data engineering',
+  'iot-embedded': 'system programming',
+  'distributed-systems': 'system programming',
+  systems: 'system programming',
+  healthcare: 'web dev',
+  education: 'web dev',
+  agriculture: 'web dev',
+  fintech: 'web dev',
+  climate: 'web dev',
+  governance: 'web dev',
+  transport: 'web dev',
+  'disaster-management': 'web dev',
+  industry: 'web dev',
+  'social-impact': 'web dev',
+  'developer-tools': 'web dev',
+  other: 'web dev',
+};
+
+const DIFFICULTY_LABEL: Record<ProblemOut['difficulty'], string> = {
+  beginner: 'beginner',
+  intermediate: 'intermediate',
+  advanced: 'advanced',
+};
 
 interface ProblemCardProps {
   problem: ProblemOut;
@@ -12,46 +46,49 @@ interface ProblemCardProps {
 }
 
 function ProblemCardComponent({ problem, className }: ProblemCardProps) {
-  const tags = problem.tech_tags.slice(0, MAX_SHOWED_TAGS);
+  const rawDomains = String(problem.domain ?? '')
+    .split(',')
+    .map((d) => d.trim())
+    .filter(Boolean);
+  let domains = Array.from(
+    new Set(rawDomains.map((d) => ALLOWED_DOMAINS[d]).filter(Boolean)),
+  ).slice(0, 4);
+  if (domains.length === 0) {
+    domains = ['web dev'];
+  }
+
   return (
     <Link
       to={`/problems/${problem.id}`}
       className={cx(
-        'group block h-full border-[3px] border-ink bg-white shadow-hard transition-transform duration-100 hover:-translate-y-0.5',
+        'group block border-[3px] border-ink bg-white shadow-hard transition-transform duration-100 hover:-translate-y-0.5',
         className,
       )}
     >
-      <IndexCard
-        sourceId={problem.source_id}
-        field={problem.field}
-        title={problem.title}
-        summary={problem.summary}
-        difficulty={problem.difficulty as Difficulty}
-        domain={problem.domain}
-        estHours={problem.est_hours}
-        className="border-0 shadow-none"
-      />
-      <p className="border-t-[3px] border-ink px-3 pt-2 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">
-        {problem.source_name}
-        {problem.source_year ? ` · ${problem.source_year}` : ''}
-      </p>
-      <div className="flex items-center justify-between gap-2 px-3 py-2">
-        {tags.length > 0 ? (
-          <div className="flex min-w-0 flex-wrap gap-1.5">
-            {tags.map((tag) => (
-              <Tag key={tag}>{tag}</Tag>
-            ))}
-          </div>
-        ) : (
-          <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">
-            No stack listed
+      <div className="flex h-[360px] w-full flex-col">
+        <header className="p-4 flex flex-wrap items-center justify-between gap-2">
+          {domains.map((domain) => (
+            <span
+              key={domain}
+              className="font-mono text-[10px] font-bold uppercase tracking-widest border-b-2 border-ink pb-0.5 text-ink/60"
+            >
+              {domain}
+            </span>
+          ))}
+          <span
+            className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink"
+          >
+            {DIFFICULTY_LABEL[problem.difficulty]}
           </span>
-        )}
-        <p className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/60">
-          {problem.project_count === 1
-            ? '1 project'
-            : `${problem.project_count} projects`}
-        </p>
+        </header>
+        <div className="flex-1 p-4">
+          <h3 className="font-display text-xl uppercase leading-tight">
+            {problem.title}
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed line-clamp-4">
+            {problem.summary}
+          </p>
+        </div>
       </div>
     </Link>
   );
