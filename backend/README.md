@@ -11,9 +11,8 @@ python -m venv .venv                    # Windows:  .venv\Scripts\python
 .venv\Scripts\pip install -r requirements.txt
 copy .env.example .env                  # then edit (session secret, GitHub OAuth, LLM key)
 .venv\Scripts\python -m alembic upgrade head
-# Optional: populate from the approved SIH sources (needs CRAWLER_CONTACT + an LLM key)
-CRAWLER_ENABLED=true CRAWLER_CONTACT=you@example.com \
-  .venv\Scripts\python -m app.crawler.run --source sih-2026 --limit 10
+# Optional: populate from the saved official SIH fixtures (no network/LLM):
+.venv\Scripts\python scripts/seed_sih_demo.py --limit 40
 .venv\Scripts\python -m uvicorn app.main:app --port 8000
 ```
 
@@ -54,33 +53,13 @@ against Postgres it runs `alembic upgrade head` itself, so prod never silently d
 | `SESSION_SECRET` | Session cookie signing key — set a long random string |
 | `BASE_URL` | Used for OAuth callback routing (localhost or deployed domain) |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app for login |
-| `LLM_PROVIDER` | `gemini` \| `anthropic` \| `mock` |
+| `LLM_PROVIDER` | `gemini` | `anthropic` | `mock` |
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | Gemini (default model in code: `gemini-3.8-flash`) |
 | `ANTHROPIC_API_KEY`, `LLM_MODEL_FAST` | Optional Anthropic provider |
 | `CHAT_RATE_LIMIT_ANON_PER_HOUR` / `CHAT_RATE_LIMIT_USER_PER_HOUR` | Chat limits |
-| `CRAWLER_ENABLED` | Kill switch; every crawler entry point exits while `false` |
-| `CRAWLER_CONTACT` | Required contact in the crawler User-Agent |
-| `CRAWLER_REQUIRE_POSTGRES` | Refuse to crawl a SQLite database |
-| `CRAWLER_MAX_REQUESTS_PER_RUN` / `CRAWLER_MAX_LLM_CALLS` | Per-run caps |
-| `SITE_URL` | Site URL in the crawler User-Agent |
-| `ADMIN_GITHUB_USERNAMES` | Comma-separated GitHub logins for `/api/admin/*` |
+| `SITE_URL` | Site URL in the crawler User-Agent (legacy; unused without the crawler) |
 
 Without an LLM key the AI endpoints return `503 {"detail": "AI is not configured yet"}`.
-
-## Crawler
-
-The compliance-first crawler lives in `app/crawler/` (see `../docs/crawler.md`). It
-refuses any source without a recent `allowed`/`api_only` compliance record, enforces
-robots.txt and throttling, and only publishes through the quality gate or review queue.
-
-```
-CRAWLER_ENABLED=true CRAWLER_CONTACT=you@example.com \
-  .venv\Scripts\python -m app.crawler.run --source sih-2026 --dry-run --limit 5
-```
-
-Sources are YAML files in `app/crawler/sources/`; each needs a record in
-`../docs/sources/`. Crawled problems keep `origin='crawler'`; the detail API returns
-only the generated summary, never full verbatim source text.
 
 ## API surface
 
@@ -91,7 +70,6 @@ only the generated summary, never full verbatim source text.
 - **Chat:** `POST /api/chat` (public; [P<id>] references resolved against the DB, fake ids stripped)
 - **Recommendations:** `GET /api/recommendations` (auth; GitHub signals cached 10 min)
 - **Stats:** `GET /api/stats`
-- **Admin (admin only):** `GET /api/admin/review`, `POST /api/admin/problems/{id}/approve|reject|unpublish`, `PATCH /api/admin/problems/{id}`, `GET /api/admin/crawl-runs`, `POST /api/admin/sources/{key}/unpublish-all`, `POST /api/admin/crawl/{key}`
 - **Stretch:** `GET /api/u/{username}` — public profile
 
 Full machine-readable contract: `docs/openapi.json` (regenerate with

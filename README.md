@@ -1,9 +1,10 @@
-# MANABI 
+# MANABI
 
 MANABI helps students and developers find **real-world problems to build** (from
 governments, companies, and hackathons), claim them, link a GitHub repo for
 auto-tracked progress, and talk to a catalog chatbot. Public problem statements are
-discovered by a compliance-first crawler and reviewed before they go live.
+populated today from the saved official SIH fixtures; live-source ingestion is a
+separate planned effort.
 
 **One service:** FastAPI serves the built React app from `frontend/dist` at `/`
 (with SPA fallback) and keeps every API route under `/api`. No nginx needed —
@@ -14,22 +15,20 @@ put your platform's TLS / load balancer in front of uvicorn.
 ```
 MANABI/
 ├── backend/            # FastAPI API (serves the built frontend too)
-│   ├── app/            # routers, services, crawler, models, config
-│   ├── scripts/        # export_openapi.py
+│   ├── app/            # routers, services, models, config
+│   ├── scripts/        # seed_sih_demo.py, export_openapi.py
 │   ├── requirements.txt
 │   ├── start.sh        # prod entrypoint (pip install + uvicorn)
 │   └── Procfile        # Render / Railway / Heroku-style
 ├── frontend/           # Vite + React + TS (calls relative /api/...)
 │   └── dist/           # build output — NEVER committed, built on deploy
 ├── docs/
-│   ├── crawler.md      # crawler architecture, add-a-source checklist, ops
-│   ├── sources/        # per-source compliance records
+│   ├── crawler.md      # historical crawler archive (removed modules)
+│   ├── sources/        # per-source compliance records (historical)
 │   └── openapi.json    # machine-readable API contract
 ├── DEPLOY.md           # full production runbook (read this to deploy)
 └── render.yaml         # one-click Render blueprint
 ```
-
-
 
 ## Quick start (local dev)
 
@@ -76,29 +75,23 @@ Health check: `GET /api/health` → `{"status":"ok"}`.
 | `SESSION_SECRET` | Long random string — app refuses to boot non-local with the placeholder |
 | `BASE_URL` | Public origin; drives OAuth callback + cookie Secure/HttpOnly flags |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app for login |
-| `LLM_PROVIDER` | `gemini` \| `mock` (mock = offline dev/tests) |
+| `LLM_PROVIDER` | `gemini` | `mock` (mock = offline dev/tests) |
 | `GEMINI_API_KEY` / `GEMINI_MODEL` | Gemini key + optional model override |
 | `CHAT_RATE_LIMIT_ANON_PER_HOUR` / `CHAT_RATE_LIMIT_USER_PER_HOUR` | Chat limits (10 / 30) |
-| `CRAWLER_ENABLED` | Kill switch — crawler exits while `false` (default) |
-| `CRAWLER_CONTACT` | Required contact in the crawler User-Agent |
-| `CRAWLER_REQUIRE_POSTGRES` | Refuse to crawl a SQLite database |
-| `CRAWLER_MAX_REQUESTS_PER_RUN` / `CRAWLER_MAX_LLM_CALLS` | Per-run caps (400 / 200) |
-| `SITE_URL` | Site URL shown in the crawler User-Agent |
-| `ADMIN_GITHUB_USERNAMES` | Comma-separated logins allowed into `/admin/review` |
+| `SITE_URL` | Site URL shown in the legacy crawler User-Agent (unused without the crawler) |
 
 Without an LLM key, AI endpoints return `503 {"detail": "AI is not configured yet"}` —
 everything else works.
 
-## Crawler
+## Offline demo seed
+
+When an LLM key is unavailable (or the provider is returning 5xx), populate a local
+database from the saved official SIH fixtures with no network or LLM call:
 
 ```sh
 cd backend
-CRAWLER_ENABLED=true CRAWLER_CONTACT=you@example.com \
-  .venv/Scripts/python -m app.crawler.run --source sih-2026 --dry-run --limit 5
+.venv/Scripts/python scripts/seed_sih_demo.py --limit 40 --reset
 ```
 
-Every source needs a compliance record in `docs/sources/` and a registry entry in
-`backend/app/crawler/sources/`. The crawler enforces robots.txt, throttling, a
-contact User-Agent, SSRF protections and a kill switch. Low-confidence or duplicate
-items go to the admin review queue at `/admin/review`. Full guide:
-[`docs/crawler.md`](docs/crawler.md).
+The script parses the stored SIH HTML/XLSX archives and writes clearly generated
+summaries — never verbatim source text. It is a demo fallback only.

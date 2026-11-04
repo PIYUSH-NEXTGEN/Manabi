@@ -12,3 +12,4 @@ itsdangerous==2.2.0
 google-genai==2.31.0
 alembic==1.16.5
 PyYAML==6.0.3
+openpyxl==3.1.5

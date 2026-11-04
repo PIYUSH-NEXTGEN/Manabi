@@ -31,8 +31,7 @@ GITHUB_CLIENT_ID=<deployed OAuth app id>
 GITHUB_CLIENT_SECRET=<secret>
 LLM_PROVIDER=gemini            # or mock to start
 GEMINI_API_KEY=<key>
-SITE_URL=https://<your-domain>  # shown in the crawler User-Agent
-ADMIN_GITHUB_USERNAMES=<github-login>   # comma-separated; enables /admin/review
+SITE_URL=https://<your-domain>  # site URL
 ```
 
 Notes:
@@ -50,20 +49,18 @@ Run these ONCE locally (or from a GitHub Action), pointed at the production data
 cd backend
 python -m venv .venv
 .venv/bin/pip install -r requirements.txt          # + requirements-dev.txt for tests only
-.venv/bin/python -m alembic upgrade head           # schema; idempotent (§6.1)
+.venv/bin/python -m alembic upgrade head           # schema; idempotent
 ```
 
 - **Migrations are the source of truth for Postgres.** Run `alembic upgrade head` before
   every deploy (on Render: prepend it to the start command, e.g.
-  `.venv/bin/python -m alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`;
-  the GitHub Action crawler workflow runs it before crawling). As a safety net the app
-  itself also runs `upgrade head` on startup when `DATABASE_URL` is Postgres.
+  `.venv/bin/python -m alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`).
+  As a safety net the app itself also runs `upgrade head` on startup when `DATABASE_URL` is Postgres.
 - SQLite (local dev) keeps `create_all` on startup; do not rely on that in production.
-- The catalog is populated by the crawler, not by a manual seed file. See
-  `docs/crawler.md` and the `crawl` GitHub Actions workflow. Run a dry run first:
-  `CRAWLER_ENABLED=true CRAWLER_CONTACT=<contact> python -m app.crawler.run --source sih-2026 --dry-run --limit 5`.
-- `python -m app.seed.import_projects` remains for ad-hoc local imports only; the
-  repository no longer ships a `projects.txt` seed.
+- The catalog is populated from the saved official SIH fixtures when you run
+  `.venv/bin/python scripts/seed_sih_demo.py --limit 40 --reset` pointed at the
+  production database. Live-source ingestion (the old crawler and admin review queue)
+  was removed; re-adding it is a separate planned effort.
 
 ## 4. Start the service
 
@@ -82,7 +79,6 @@ On Render/Railway a `Procfile` is included (`web: uvicorn app.main:app --host 0.
 4. `curl -I https://<domain>/assets/<asset from dist>` → `200` + correct `content-type`
 5. Log in with GitHub in the browser → redirected home, username in the nav
 6. Chat dock → ask → reply links point at real catalog problems
-7. `/admin/review` (as an `ADMIN_GITHUB_USERNAMES` user) lists pending crawler items
 
 ## Rate limits (env-tunable)
 
