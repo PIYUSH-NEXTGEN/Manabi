@@ -1,4 +1,6 @@
 :root {
+  color-scheme: light;
+
   /* Surfaces */
   --ink: #17150f;
   --ink-soft: #2d2a22;
@@ -23,4 +25,26 @@
   /* Motion */
   --dur-press: 120ms;
   --ease-snap: cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+/*
+ * Night mode: the same warm print palette with paper and ink swapped, so every
+ * component that pairs bg-ink/text-paper or bg-olive/text-paper inverts cleanly.
+ */
+.dark {
+  color-scheme: dark;
+
+  --ink: #efe9dd;
+  --ink-soft: #cbc3b3;
+  --paper: #12100c;
+  --sheet: #1a1713;
+  --tint: #2a251e;
+  --olive: #b9b49b;
+
+  --accent: #ec6a34;
+  --accent-soft: #33241a;
+  --danger: #ff8a68;
+  --muted: #a39c8d;
+  --line: rgba(239, 233, 221, 0.22);
+  --line-strong: var(--ink);
 }

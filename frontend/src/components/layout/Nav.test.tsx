@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { server } from '@/api/mocks/server';
 import { ToastProvider } from '@/design/primitives';
 import { Nav } from './Nav';
@@ -13,6 +14,12 @@ function renderNav() {
     </ToastProvider>,
   );
 }
+
+afterEach(() => {
+  document.documentElement.classList.remove('dark');
+  document.documentElement.style.colorScheme = '';
+  window.localStorage.clear();
+});
 
 describe('Nav', () => {
   it('renders the wordmark and every section link', () => {
@@ -31,6 +38,22 @@ describe('Nav', () => {
     expect(
       screen.getAllByRole('link', { name: 'How it works' })[0],
     ).toHaveAttribute('href', '/how-it-works');
+  });
+
+  it('switches between day and night mode', async () => {
+    renderNav();
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: 'Switch to dark theme' }),
+    );
+    expect(document.documentElement).toHaveClass('dark');
+    expect(window.localStorage.getItem('manabi-theme')).toBe('dark');
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Switch to light theme' }),
+    );
+    expect(document.documentElement).not.toHaveClass('dark');
+    expect(window.localStorage.getItem('manabi-theme')).toBe('light');
   });
 
   it('shows the GitHub button when nobody is logged in', async () => {

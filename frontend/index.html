@@ -10,6 +10,17 @@
       content="MANABI — real problem statements, from hackathons and public briefings, in one index. Build the repo, publish honestly."
     />
     <title>MANABI</title>
+    <script>
+      // Resolve the theme before first paint so a dark reload never flashes light.
+      try {
+        var stored = localStorage.getItem('manabi-theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (stored === 'dark' || (stored !== 'light' && prefersDark)) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+        }
+      } catch (error) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

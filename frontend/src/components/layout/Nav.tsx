@@ -2,13 +2,16 @@ import { NavLink, Link } from 'react-router-dom';
 import {
   FolderKanban,
   ListOrdered,
+  Moon,
   ScanSearch,
   ShieldCheck,
+  Sun,
 } from 'lucide-react';
 import { GithubMark } from '@/components/icons/GithubMark';
 import { Button } from '@/design/primitives';
 import { Logo } from './Logo';
 import { useMe } from '@/hooks/useMe';
+import { useTheme } from '@/lib/useTheme';
 import { cx } from '@/lib/cx';
 
 const NAV_LINKS = [
@@ -33,7 +36,9 @@ const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
 
 export function Nav() {
   const me = useMe();
+  const { theme, toggleTheme } = useTheme();
   const links = me.data?.is_admin ? [...NAV_LINKS, ADMIN_LINK] : NAV_LINKS;
+  const themeLabel = theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
 
   return (
     <header className="sticky top-0 z-30 border-b border-ink bg-paper">
@@ -90,6 +95,20 @@ export function Nav() {
               GitHub login
             </Button>
           )}
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={themeLabel}
+            title={themeLabel}
+            className="press flex size-8 shrink-0 items-center justify-center border border-ink bg-sheet text-ink hover:bg-ink hover:text-paper"
+          >
+            {theme === 'dark' ? (
+              <Sun aria-hidden size={15} strokeWidth={2.2} />
+            ) : (
+              <Moon aria-hidden size={15} strokeWidth={2.2} />
+            )}
+          </button>
         </div>
 
         <ul className="order-last flex w-full items-center gap-5 overflow-x-auto border-t border-line pt-2 md:hidden">
