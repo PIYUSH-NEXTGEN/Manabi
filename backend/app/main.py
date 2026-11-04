@@ -74,7 +74,7 @@ def create_app() -> FastAPI:
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         return response
 
-    from app.routers import admin, auth, chat, problems, profiles, projects, recommendations, stats
+    from app.routers import auth, chat, problems, profiles, projects, recommendations, stats, webhooks, api_contracts, tenant_security, incidents, ingestion, analytics, accessibility, inventory, sync, workflows
 
     auth.setup_oauth(app)
     app.include_router(problems.router)
@@ -84,7 +84,16 @@ def create_app() -> FastAPI:
     app.include_router(chat.router)
     app.include_router(recommendations.router)
     app.include_router(profiles.router)
-    app.include_router(admin.router)
+    app.include_router(webhooks.router)
+    app.include_router(api_contracts.router)
+    app.include_router(tenant_security.router)
+    app.include_router(incidents.router)
+    app.include_router(ingestion.router)
+    app.include_router(analytics.router)
+    app.include_router(accessibility.router)
+    app.include_router(inventory.router)
+    app.include_router(sync.router)
+    app.include_router(workflows.router)
 
     @app.get("/{full_path:path}", include_in_schema=False)
     def spa(request: Request, full_path: str):

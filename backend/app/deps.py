@@ -4,10 +4,16 @@ from fastapi import Depends, HTTPException, Request
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.config import get_settings
 from app.db import get_db
 from app.models import User
 
 DB = Annotated[Session, Depends(get_db)]
+
+
+def admin_usernames() -> set[str]:
+    raw = get_settings().ADMIN_GITHUB_USERNAMES
+    return {name.strip().lower() for name in raw.split(",") if name.strip()}
 
 
 def get_current_user(request: Request, db: DB) -> User:
@@ -28,8 +34,6 @@ def get_optional_user(request: Request, db: DB) -> User | None:
 
 
 def get_current_admin(user: CurrentUser) -> User:
-    from app.crawler.config import admin_usernames
-
     if user.username.lower() not in admin_usernames():
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
