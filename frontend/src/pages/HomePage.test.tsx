@@ -25,25 +25,27 @@ describe('HomePage', () => {
       screen.getByRole('heading', { name: 'MANABI', level: 1 }),
     ).toBeInTheDocument();
     expect(
-      await screen.findByText('6 problems on the board'),
+      await screen.findByText(/briefs indexed/i),
     ).toBeInTheDocument();
+    expect(screen.getByText(/sources credited/i)).toBeInTheDocument();
 
-    const ctas = screen.getAllByRole('link');
-    expect(ctas.some((link) => link.textContent === 'Browse problems')).toBe(true);
+    expect(
+      screen.getByRole('button', { name: 'Browse projects' }),
+    ).toBeInTheDocument();
   });
 
-  it('shows real problem cards in the hero stack and featured grid', async () => {
+  it('shows real problem cards in the featured grid', async () => {
     renderWithProviders(<HomePage />, { route: '/' });
 
     const cropHeadings = await screen.findAllByRole('heading', {
       name: 'Crop disease triage for small farms',
     });
-    expect(cropHeadings.length).toBeGreaterThanOrEqual(2);
+    expect(cropHeadings.length).toBeGreaterThanOrEqual(1);
 
     expect(
       screen.getAllByRole('heading', { name: 'Streetlight outage tracker' }).length,
     ).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('SIH26017').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText('SIH26017').length).toBeGreaterThanOrEqual(1);
   });
 
   it('counts up the stats strip to the values from /api/stats', async () => {
