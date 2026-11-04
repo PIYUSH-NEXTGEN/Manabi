@@ -44,7 +44,7 @@ function ProjectView({ projectId }: { projectId: number }) {
 
   if (project.isPending) {
     return (
-      <main className="border-b-[3px] border-ink bg-paper">
+      <main className="border-b border-ink bg-paper">
         <ProjectSkeleton />
       </main>
     );
@@ -55,7 +55,7 @@ function ProjectView({ projectId }: { projectId: number }) {
       return <NotFoundPage />;
     }
     return (
-      <main className="border-b-[3px] border-ink">
+      <main className="border-b border-ink">
         <div className="mx-auto w-[min(760px,96vw)] space-y-4 py-16">
           <h1 className="font-display text-3xl uppercase">
             Could not load this project
@@ -94,7 +94,7 @@ function ProjectView({ projectId }: { projectId: number }) {
   }
 
   return (
-    <main className="border-b-[3px] border-ink">
+    <main className="border-b border-ink">
       <div className="mx-auto w-[min(900px,96vw)] py-12">
         <p className={panelHeading}>Project · {data.repo_owner}/{data.repo_name}</p>
         <h1 className="mt-2 font-display text-4xl uppercase leading-tight">
@@ -129,7 +129,7 @@ function ProjectView({ projectId }: { projectId: number }) {
           Problem:{' '}
           <Link
             to={`/problems/${data.problem_id}`}
-            className="text-blue underline underline-offset-4"
+            className="text-accent underline underline-offset-4"
           >
             {data.problem_title}
           </Link>
@@ -137,7 +137,7 @@ function ProjectView({ projectId }: { projectId: number }) {
 
         <section
           aria-label="GitHub progress"
-          className="mt-8 border-[3px] border-ink bg-white p-4 shadow-hard"
+          className="mt-8 border border-ink bg-sheet p-4"
         >
           <div className="flex items-center justify-between gap-3">
             <h2 className={panelHeading}>Progress</h2>
