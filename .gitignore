@@ -73,6 +73,8 @@ venv/
 __pycache__/
 *.py[cod]
 *$py.class
+*.egg-info/
+.python-version
 .pytest_cache/
 .coverage
 coverage.xml
