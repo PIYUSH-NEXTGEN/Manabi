@@ -59,25 +59,25 @@ export function TenantSecurityPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-3xl uppercase leading-none">Tenant Security Audit</h1>
-        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
           &larr; All projects
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-4">
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Tenants</p>
           <p className="font-display text-2xl">{tenants.length}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Open Findings</p>
           <p className="font-display text-2xl">{summary?.open_findings ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Critical</p>
           <p className="font-display text-2xl">{summary?.critical_findings ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">High</p>
           <p className="font-display text-2xl">{summary?.high_findings ?? 0}</p>
         </div>
@@ -91,13 +91,13 @@ export function TenantSecurityPage() {
           <input
             name="name"
             placeholder="Tenant name"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="slug"
             placeholder="tenant-slug"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Create</Button>
@@ -106,7 +106,7 @@ export function TenantSecurityPage() {
 
       <section aria-label="Tenants" className="mb-8">
         <h2 className="font-display text-xl uppercase md:text-2xl mb-4">Tenants</h2>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {tenants.map((t) => (
             <li key={t.id} className="p-3 font-mono text-xs">
               <span className="font-bold">{t.name}</span> ({t.slug}) — plan: {t.plan}
@@ -140,33 +140,33 @@ export function TenantSecurityPage() {
           <input
             name="check_type"
             placeholder="Check type"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="severity"
             placeholder="critical/high/medium/low"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="title"
             placeholder="Title"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="description"
             placeholder="Description"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Log Finding</Button>
         </form>
-        <ul className="mt-4 divide-y border-[3px] border-ink bg-white">
+        <ul className="mt-4 divide-y border border-ink bg-sheet">
           {findings.map((f) => (
             <li key={f.id} className="p-3 font-mono text-xs">
-              <span className={`font-bold text-red`}>{f.severity.toUpperCase()}</span> — {f.title}
+              <span className={`font-bold text-danger`}>{f.severity.toUpperCase()}</span> — {f.title}
               <span className="ml-2 font-bold text-[9px] border-[1px] border-ink px-1">{f.status}</span>
             </li>
           ))}
@@ -195,18 +195,18 @@ export function TenantSecurityPage() {
           <input
             name="role"
             placeholder="admin/member/viewer"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="permission"
             placeholder="read:orders"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Add Permission</Button>
         </form>
-        <ul className="mt-4 divide-y border-[3px] border-ink bg-white">
+        <ul className="mt-4 divide-y border border-ink bg-sheet">
           {rolePerms.map((p) => (
             <li key={p.id} className="p-3 font-mono text-xs">
               {p.role} → {p.permission}{p.resource_type ? ` (${p.resource_type})` : ''}

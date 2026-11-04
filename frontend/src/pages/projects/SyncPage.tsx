@@ -70,29 +70,29 @@ export function SyncPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-3xl uppercase leading-none">Offline Sync</h1>
-        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
           &larr; All projects
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-5">
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Records</p>
           <p className="font-display text-2xl">{stats?.total_records ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Pending</p>
           <p className="font-display text-2xl">{stats?.pending ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Synced</p>
           <p className="font-display text-2xl">{stats?.synced ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Conflicts</p>
           <p className="font-display text-2xl">{stats?.conflicts ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Open Conflicts</p>
           <p className="font-display text-2xl">{stats?.open_conflicts ?? 0}</p>
         </div>
@@ -109,24 +109,24 @@ export function SyncPage() {
           <input
             name="device_id"
             placeholder="Device ID"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="collection"
             placeholder="Collection"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="record_id"
             placeholder="Record ID"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <select
             name="operation"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           >
             <option value="create">Create</option>
             <option value="update">Update</option>
@@ -135,7 +135,7 @@ export function SyncPage() {
           <input
             name="data_value"
             placeholder="Data value"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           />
           <Button type="submit">Create</Button>
         </form>
@@ -145,7 +145,7 @@ export function SyncPage() {
         <h2 className="font-display text-xl uppercase md:text-2xl mb-4">
           Sync Records
         </h2>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {records.map((r) => (
             <li key={r.id} className="p-3 font-mono text-xs">
               <span className="font-bold">{r.device_id}</span> / {r.collection} / {r.record_id}
@@ -175,7 +175,7 @@ export function SyncPage() {
         <h2 className="font-display text-xl uppercase md:text-2xl mb-4">
           Sync Conflicts
         </h2>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {conflicts.map((c) => (
             <li key={c.id} className="p-3 font-mono text-xs">
               {c.collection} / {c.record_id} — {c.status}

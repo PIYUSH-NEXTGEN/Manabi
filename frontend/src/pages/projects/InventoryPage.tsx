@@ -116,25 +116,25 @@ export function InventoryPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-3xl uppercase leading-none">Inventory Reservation</h1>
-        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
           &larr; All projects
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-4">
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Items</p>
           <p className="font-display text-2xl">{stats?.total_items ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Channels</p>
           <p className="font-display text-2xl">{stats?.total_channels ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Active Reservations</p>
           <p className="font-display text-2xl">{stats?.active_reservations ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Low Stock</p>
           <p className="font-display text-2xl">{stats?.low_stock_items ?? 0}</p>
         </div>
@@ -148,13 +148,13 @@ export function InventoryPage() {
           <input
             name="name"
             placeholder="Channel name"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="channel_type"
             placeholder="web/marketplace/pos/api"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Add Channel</Button>
@@ -172,30 +172,30 @@ export function InventoryPage() {
           <input
             name="sku"
             placeholder="SKU"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="name"
             placeholder="Product name"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="total_quantity"
             type="number"
             placeholder="Total qty"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           />
           <input
             name="available_quantity"
             type="number"
             placeholder="Available qty"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           />
           <Button type="submit">Add Item</Button>
         </form>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {items.map((i) => (
             <li key={i.id} className="p-3 font-mono text-xs">
               <span className="font-bold">{i.sku}</span> — {i.name} — available: {i.available_quantity}/{i.total_quantity}
@@ -220,17 +220,17 @@ export function InventoryPage() {
             name="quantity"
             type="number"
             placeholder="Qty"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="external_order_id"
             placeholder="Order ID"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           />
           <Button type="submit">Reserve</Button>
         </form>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {reservations.map((r) => (
             <li key={r.id} className="p-3 font-mono text-xs">
               Item #{r.item_id} — qty {r.quantity} — {r.status}
@@ -262,24 +262,24 @@ export function InventoryPage() {
             name="expected_quantity"
             type="number"
             placeholder="Expected"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="actual_quantity"
             type="number"
             placeholder="Actual"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="reason"
             placeholder="Reason"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           />
           <Button type="submit">Reconcile</Button>
         </form>
-        <ul className="mt-4 divide-y border-[3px] border-ink bg-white">
+        <ul className="mt-4 divide-y border border-ink bg-sheet">
           {reconciliations.map((r) => (
             <li key={r.id} className="p-3 font-mono text-xs">
               Item #{r.item_id} — expected: {r.expected_quantity}, actual: {r.actual_quantity}, discrepancy: {r.discrepancy}

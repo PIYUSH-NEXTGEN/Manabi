@@ -59,21 +59,21 @@ export function ApiContractsPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-3xl uppercase leading-none">API Contract Drift</h1>
-        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
           &larr; All projects
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-3">
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Specs</p>
           <p className="font-display text-2xl">{specs.length}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Comparisons</p>
           <p className="font-display text-2xl">{comparisons.length}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Monitoring Targets</p>
           <p className="font-display text-2xl">{targets.length}</p>
         </div>
@@ -87,13 +87,13 @@ export function ApiContractsPage() {
           <input
             name="name"
             placeholder="Spec name"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="version"
             placeholder="v1.0.0"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Register</Button>
@@ -105,9 +105,9 @@ export function ApiContractsPage() {
           Contract Comparisons
         </h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse border-[3px] border-ink bg-white">
+          <table className="w-full text-left border-collapse border border-ink bg-sheet">
             <thead>
-              <tr className="border-b-[3px] border-ink">
+              <tr className="border-b border-ink">
                 <th className="p-3 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Spec A</th>
                 <th className="p-3 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Spec B</th>
                 <th className="p-3 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Breaking</th>
@@ -156,20 +156,20 @@ export function ApiContractsPage() {
           <input
             name="name"
             placeholder="Target name"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="base_url"
             placeholder="https://api.example.com"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Add Target</Button>
         </form>
         <div className="mt-4 space-y-2">
           {targets.map((t) => (
-            <div key={t.id} className="flex items-center justify-between p-3 border-[3px] border-ink bg-white">
+            <div key={t.id} className="flex items-center justify-between p-3 border border-ink bg-sheet">
               <span className="font-mono text-xs">{t.name}</span>
               <Button
                 onClick={() => runContractCheck(t.id).then((c) => setChecks([c, ...checks]))}
@@ -185,7 +185,7 @@ export function ApiContractsPage() {
         <h2 className="font-display text-xl uppercase md:text-2xl mb-4">
           Recent Contract Checks
         </h2>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {checks.map((c) => (
             <li key={c.id} className="p-3 font-mono text-xs">
               Target #{c.target_id} — {c.status} ({c.breaking_changes_detected} breaking)

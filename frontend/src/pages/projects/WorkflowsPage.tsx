@@ -84,25 +84,25 @@ export function WorkflowsPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-3xl uppercase leading-none">Visual Workflow</h1>
-        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
           &larr; All projects
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-4">
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Workflows</p>
           <p className="font-display text-2xl">{stats?.total_workflows ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Active</p>
           <p className="font-display text-2xl">{stats?.active_workflows ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Executions</p>
           <p className="font-display text-2xl">{stats?.total_executions ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Failed</p>
           <p className="font-display text-2xl">{stats?.failed_executions ?? 0}</p>
         </div>
@@ -116,7 +116,7 @@ export function WorkflowsPage() {
           <input
             name="name"
             placeholder="Workflow name"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Create</Button>
@@ -125,7 +125,7 @@ export function WorkflowsPage() {
 
       <section aria-label="Workflows" className="mb-8">
         <h2 className="font-display text-xl uppercase md:text-2xl mb-4">Workflows</h2>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {workflows.map((w) => (
             <li key={w.id} className="p-3 font-mono text-xs">
               <span className="font-bold">{w.name}</span> — {w.status}
@@ -149,7 +149,7 @@ export function WorkflowsPage() {
         <h2 className="font-display text-xl uppercase md:text-2xl mb-4">
           Executions
         </h2>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {executions.map((e) => (
             <li key={e.id} className="p-3 font-mono text-xs">
               Workflow #{e.workflow_id} — {e.status}
@@ -173,12 +173,12 @@ export function WorkflowsPage() {
           <input
             name="step_id"
             placeholder="Step ID"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <select
             name="step_type"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           >
             <option value="http">HTTP</option>
             <option value="condition">Condition</option>

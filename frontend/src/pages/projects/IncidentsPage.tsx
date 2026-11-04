@@ -47,29 +47,29 @@ export function IncidentsPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-3xl uppercase leading-none">Incident Response</h1>
-        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
           &larr; All projects
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-5">
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Total</p>
           <p className="font-display text-2xl">{stats?.total_incidents ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Open</p>
           <p className="font-display text-2xl">{stats?.open ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Investigating</p>
           <p className="font-display text-2xl">{stats?.investigating ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Resolved</p>
           <p className="font-display text-2xl">{stats?.resolved ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Critical</p>
           <p className="font-display text-2xl">{stats?.critical ?? 0}</p>
         </div>
@@ -83,18 +83,18 @@ export function IncidentsPage() {
           <input
             name="title"
             placeholder="Incident title"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="description"
             placeholder="What happened?"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <select
             name="severity"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           >
             <option value="critical">Critical</option>
             <option value="high">High</option>
@@ -104,7 +104,7 @@ export function IncidentsPage() {
           <input
             name="tags"
             placeholder="tags (comma-separated)"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           />
           <Button type="submit">Declare</Button>
         </form>
@@ -113,9 +113,9 @@ export function IncidentsPage() {
       <section aria-label="Incidents" className="mb-8">
         <h2 className="font-display text-xl uppercase md:text-2xl mb-4">Active Incidents</h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse border-[3px] border-ink bg-white">
+          <table className="w-full text-left border-collapse border border-ink bg-sheet">
             <thead>
-              <tr className="border-b-[3px] border-ink">
+              <tr className="border-b border-ink">
                 <th className="p-3 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Title</th>
                 <th className="p-3 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Severity</th>
                 <th className="p-3 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">Status</th>

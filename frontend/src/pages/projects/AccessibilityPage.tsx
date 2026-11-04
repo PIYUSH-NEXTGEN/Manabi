@@ -81,25 +81,25 @@ export function AccessibilityPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-3xl uppercase leading-none">Accessibility Monitoring</h1>
-        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
           &larr; All projects
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-4">
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Websites</p>
           <p className="font-display text-2xl">{stats?.total_websites ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Scans</p>
           <p className="font-display text-2xl">{stats?.total_scans ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Issues</p>
           <p className="font-display text-2xl">{stats?.total_issues ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Unresolved</p>
           <p className="font-display text-2xl">{stats?.unresolved_issues ?? 0}</p>
         </div>
@@ -113,13 +113,13 @@ export function AccessibilityPage() {
           <input
             name="name"
             placeholder="Site name"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="url"
             placeholder="https://example.com"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Add</Button>
@@ -128,7 +128,7 @@ export function AccessibilityPage() {
 
       <section aria-label="Websites" className="mb-8">
         <h2 className="font-display text-xl uppercase md:text-2xl mb-4">Monitored Websites</h2>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {websites.map((w) => (
             <li key={w.id} className="p-3 font-mono text-xs">
               <span className="font-bold">{w.name}</span> — {w.url} ({w.wcag_level})
@@ -150,7 +150,7 @@ export function AccessibilityPage() {
         >
           <Button type="submit">Run Scan</Button>
         </form>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {scans.map((s) => (
             <li key={s.id} className="p-3 font-mono text-xs">
               Scan #{s.id} — {s.pages_scanned} pages, {s.issues_found} issues — {s.status}
@@ -173,31 +173,31 @@ export function AccessibilityPage() {
           <input
             name="page_url"
             placeholder="Page URL"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="rule_id"
             placeholder="Rule ID (e.g. color-contrast)"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="rule_name"
             placeholder="Rule name"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="severity"
             placeholder="critical/serious/moderate/minor"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="description"
             placeholder="Description"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Log Issue</Button>

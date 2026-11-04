@@ -72,25 +72,25 @@ export function IngestionPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-3xl uppercase leading-none">File Ingestion</h1>
-        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
           &larr; All projects
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-4">
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Jobs</p>
           <p className="font-display text-2xl">{stats?.total_jobs ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Pending</p>
           <p className="font-display text-2xl">{stats?.pending_jobs ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Files</p>
           <p className="font-display text-2xl">{stats?.total_files ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Duplicates Skipped</p>
           <p className="font-display text-2xl">{stats?.duplicate_files ?? 0}</p>
         </div>
@@ -104,7 +104,7 @@ export function IngestionPage() {
           <input
             name="name"
             placeholder="Job name"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Create Job</Button>
@@ -122,28 +122,28 @@ export function IngestionPage() {
           <input
             name="filename"
             placeholder="filename.csv"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="size"
             type="number"
             placeholder="Size (bytes)"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           />
           <input
             name="mime_type"
             placeholder="text/csv"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           />
           <Button type="submit">Add File</Button>
         </form>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {files.map((f) => (
             <li key={f.id} className="p-3 font-mono text-xs">
               <span className="font-bold">{f.original_filename}</span> — {f.file_size} bytes
               <span className="ml-2 font-bold text-[9px] border-[1px] border-ink px-1">{f.status}</span>
-              {f.is_duplicate ? ' <span className="font-bold text-yellow">DUPLICATE</span>' : null}
+              {f.is_duplicate ? ' <span className="font-bold text-accent">DUPLICATE</span>' : null}
             </li>
           ))}
           {files.length === 0 && (
@@ -170,12 +170,12 @@ export function IngestionPage() {
           <input
             name="worker_name"
             placeholder="worker-1"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Add Worker</Button>
         </form>
-        <ul className="mt-4 divide-y border-[3px] border-ink bg-white">
+        <ul className="mt-4 divide-y border border-ink bg-sheet">
           {workers.map((w) => (
             <li key={w.id} className="p-3 font-mono text-xs">
               {w.worker_name} — {w.status}

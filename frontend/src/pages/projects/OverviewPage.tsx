@@ -68,7 +68,7 @@ export function ProjectsOverviewPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <h1 className="font-display text-4xl uppercase leading-none md:text-6xl">
         Advanced{' '}
-        <span className="text-yellow">Project Ideas</span>
+        <span className="text-accent">Project Ideas</span>
       </h1>
       <p className="mt-4 font-mono text-[12px] font-bold uppercase tracking-widest text-ink/70">
         Ten portfolio-grade project domains — system design, distributed architecture, data
@@ -84,7 +84,7 @@ export function ProjectsOverviewPage() {
             <Link
               key={p.to}
               to={p.to}
-              className="group block border-[3px] border-ink bg-white p-6 shadow-hard-sm hover:shadow-hard-lg transition-all duration-150"
+              className="group block border border-line bg-sheet p-6 transition-colors duration-150 hover:border-accent"
             >
               <h3 className="font-display text-xl uppercase leading-none">
                 {p.title}
@@ -93,7 +93,7 @@ export function ProjectsOverviewPage() {
                 {p.field}
               </p>
               <p className="mt-3 text-sm leading-relaxed text-ink/80">{p.tagline}</p>
-              <span className="mt-4 inline-block font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+              <span className="mt-4 inline-block font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
                 Open project &rarr;
               </span>
             </Link>
@@ -101,7 +101,7 @@ export function ProjectsOverviewPage() {
         </div>
       </section>
 
-      <section aria-label="About" className="mt-16 border-t-[3px] border-ink pt-8">
+      <section aria-label="About" className="mt-16 border-t border-ink pt-8">
         <h2 className="font-display text-xl uppercase md:text-2xl">
           What makes these advanced
         </h2>

@@ -54,21 +54,21 @@ export function WebhooksPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-3xl uppercase leading-none">Webhook Reliability</h1>
-        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
           &larr; All projects
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-3">
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Total Endpoints</p>
           <p className="font-display text-2xl">{endpoints.length}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Total Deliveries</p>
           <p className="font-display text-2xl">{stats?.total_deliveries ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Success Rate</p>
           <p className="font-display text-2xl">{stats?.success_rate ?? 0}%</p>
         </div>
@@ -82,13 +82,13 @@ export function WebhooksPage() {
           <input
             name="name"
             placeholder="Endpoint name"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="url"
             placeholder="https://example.com/hooks"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Register</Button>
@@ -100,9 +100,9 @@ export function WebhooksPage() {
           Recent Deliveries
         </h2>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse border-[3px] border-ink bg-white">
+          <table className="w-full text-left border-collapse border border-ink bg-sheet">
             <thead>
-              <tr className="border-b-[3px] border-ink">
+              <tr className="border-b border-ink">
                 <th className="p-3 font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">
                   Endpoint
                 </th>
@@ -155,7 +155,7 @@ export function WebhooksPage() {
         <h2 className="font-display text-xl uppercase md:text-2xl mb-4">
           Recent Events
         </h2>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {events.map((e) => (
             <li key={e.id} className="p-3 font-mono text-xs">
               <span className="font-bold">{e.event_type}</span> on endpoint{' '}

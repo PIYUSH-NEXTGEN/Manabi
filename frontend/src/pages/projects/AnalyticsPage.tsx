@@ -84,25 +84,25 @@ export function AnalyticsPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-3xl uppercase leading-none">Privacy Analytics</h1>
-        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-yellow underline-offset-4 hover:underline">
+        <Link to="/projects" className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent underline-offset-4 hover:underline">
           &larr; All projects
         </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-6 mb-8 sm:grid-cols-4">
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Events</p>
           <p className="font-display text-2xl">{stats?.total_events ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Projects</p>
           <p className="font-display text-2xl">{stats?.total_projects ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Consent Granted</p>
           <p className="font-display text-2xl">{stats?.granted_consent ?? 0}</p>
         </div>
-        <div className="border-[3px] border-ink bg-white p-4 shadow-hard-sm">
+        <div className="border border-ink bg-sheet p-4">
           <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">Consent Denied</p>
           <p className="font-display text-2xl">{stats?.denied_consent ?? 0}</p>
         </div>
@@ -116,7 +116,7 @@ export function AnalyticsPage() {
           <input
             name="event_name"
             placeholder="page_view / button_click"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <Button type="submit">Track</Button>
@@ -134,12 +134,12 @@ export function AnalyticsPage() {
           <input
             name="anonymous_id"
             placeholder="Anonymous ID"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <select
             name="consent_status"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           >
             <option value="granted">Granted</option>
             <option value="denied">Denied</option>
@@ -147,7 +147,7 @@ export function AnalyticsPage() {
           <Button type="submit">Set Consent</Button>
         </form>
         {consent && (
-          <div className="mt-4 p-3 border-[3px] border-ink bg-white">
+          <div className="mt-4 p-3 border border-ink bg-sheet">
             <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/50">
               Consent for {consent.anonymous_id}
             </p>
@@ -167,24 +167,24 @@ export function AnalyticsPage() {
           <input
             name="project_id"
             placeholder="Project ID"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
             required
           />
           <input
             name="event_retention_days"
             type="number"
             placeholder="90"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           />
           <input
             name="raw_data_retention_days"
             type="number"
             placeholder="30"
-            className="border-[3px] border-ink bg-white p-2 font-mono text-sm"
+            className="border border-ink bg-sheet p-2 font-mono text-sm"
           />
           <Button type="submit">Create Policy</Button>
         </form>
-        <ul className="mt-4 divide-y border-[3px] border-ink bg-white">
+        <ul className="mt-4 divide-y border border-ink bg-sheet">
           {policies.map((p) => (
             <li key={p.id} className="p-3 font-mono text-xs">
               {p.project_id} — events: {p.event_retention_days}d, raw: {p.raw_data_retention_days}d
@@ -200,7 +200,7 @@ export function AnalyticsPage() {
         <h2 className="font-display text-xl uppercase md:text-2xl mb-4">
           Recent Events (Anonymous)
         </h2>
-        <ul className="divide-y border-[3px] border-ink bg-white">
+        <ul className="divide-y border border-ink bg-sheet">
           {events.map((e) => (
             <li key={e.id} className="p-3 font-mono text-xs">
               {e.event_name} — anon:{e.anonymous_id.slice(0, 8)}… — {new Date(e.timestamp).toLocaleString()}
