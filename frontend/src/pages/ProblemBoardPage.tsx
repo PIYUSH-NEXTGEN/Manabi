@@ -9,17 +9,13 @@ import { useFacets } from '@/hooks/useFacets';
 import { useInfiniteProblems } from '@/hooks/useInfiniteProblems';
 
 const boardHeader =
-  'font-mono text-[11px] font-bold uppercase tracking-widest';
-const monoLabel = cx(boardHeader);
+  'font-mono text-[10px] font-bold uppercase tracking-[0.16em]';
 
 function BoardSkeletons() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: 6 }, (_, index) => (
-        <div
-          key={index}
-          className="border-[3px] border-ink bg-white p-4 shadow-hard"
-        >
+        <div key={index} className="border border-line bg-sheet p-4">
           <Skeleton className="mb-2 h-3 w-24" />
           <Skeleton className="mb-3 h-6 w-3/4" />
           <Skeleton className="mb-2 h-3 w-full" />
@@ -90,75 +86,100 @@ export function ProblemBoardPage() {
   }
 
   return (
-    <main className="border-b-[3px] border-ink">
-      <div className="mx-auto w-[min(1200px,96vw)] py-12">
-        <p className={monoLabel}>Problem board</p>
-        <h1 className="mt-2 font-display text-4xl uppercase leading-none md:text-6xl">
-          Problems
-        </h1>
-        <p className="mt-3 max-w-2xl text-lg leading-snug">
-          Every real, unglamorous problem in the index. Filter it down, pick
-          one, and build the thing.
-        </p>
+    <main className="border-b border-ink">
+      <div className="mx-auto w-[min(1240px,96vw)] py-12">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted">
+          <span className="flex items-center gap-2">
+            <span aria-hidden className="block size-2 bg-accent" />
+            Problem board / Open index
+          </span>
+          <span>Vol. 01 — 2026</span>
+        </div>
+
+        <div className="mt-8 grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
+          <div>
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-accent">
+              Collection 01
+            </p>
+            <h1
+              className="mt-2 font-display uppercase leading-[0.86] tracking-[-0.03em]"
+              style={{ fontSize: 'clamp(3rem, 8vw, 5.5rem)' }}
+            >
+              Problems
+            </h1>
+          </div>
+          <p className="max-w-md text-sm leading-relaxed text-ink-soft">
+            Every real, unglamorous problem in the index. Filter it down, pick
+            one, and build the thing.
+          </p>
+        </div>
 
         <section
           aria-label="Search and filters"
-          className="mt-8 border-[3px] border-ink bg-white p-4 shadow-hard"
+          className="mt-8 border border-ink bg-sheet"
         >
-          <form
-            noValidate
-            onSubmit={(event) => event.preventDefault()}
-            className="grid gap-4"
-          >
-            <Input
-              label="Search"
-              type="search"
-              placeholder="Leaf blight, stock-outs, SLAs…"
-              value={q}
-              onChange={(event) => setParam('q', event.target.value)}
-            />
-          </form>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            <FilterSelect
-              label="Field"
-              value={field}
-              onChange={(value) => setParam('field', value)}
-              options={facets.data?.fields ?? []}
-            />
-            <FilterSelect
-              label="Difficulty"
-              value={difficulty}
-              onChange={(value) => setParam('difficulty', value)}
-              options={facets.data?.difficulties ?? []}
-            />
-            <FilterSelect
-              label="Domain"
-              value={domain}
-              onChange={(value) => setParam('domain', value)}
-              options={facets.data?.domains ?? []}
-            />
-          </div>
-          <div className="mt-4 flex flex-col gap-2">
-            <span className="sr-only" id="tech-chips-label">
-              Filter by tech
+          <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
+            <h2 className={boardHeader}>Filter index</h2>
+            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+              {board.data ? `${total} entries` : 'Counting…'}
             </span>
-            <TechChips
-              options={(facets.data?.tech_tags ?? []).slice(0, 8)}
-              selected={tech}
-              onToggle={toggleTech}
-            />
+          </div>
+          <div className="p-4">
+            <form
+              noValidate
+              onSubmit={(event) => event.preventDefault()}
+              className="grid gap-4"
+            >
+              <Input
+                label="Search"
+                type="search"
+                placeholder="Leaf blight, stock-outs, SLAs…"
+                value={q}
+                onChange={(event) => setParam('q', event.target.value)}
+              />
+            </form>
+            <div className="mt-4 grid gap-4 md:grid-cols-3">
+              <FilterSelect
+                label="Field"
+                value={field}
+                onChange={(value) => setParam('field', value)}
+                options={facets.data?.fields ?? []}
+              />
+              <FilterSelect
+                label="Difficulty"
+                value={difficulty}
+                onChange={(value) => setParam('difficulty', value)}
+                options={facets.data?.difficulties ?? []}
+              />
+              <FilterSelect
+                label="Domain"
+                value={domain}
+                onChange={(value) => setParam('domain', value)}
+                options={facets.data?.domains ?? []}
+              />
+            </div>
+            <div className="mt-4 flex flex-col gap-2 border-t border-line pt-4">
+              <span className="sr-only" id="tech-chips-label">
+                Filter by tech
+              </span>
+              <TechChips
+                options={(facets.data?.tech_tags ?? []).slice(0, 8)}
+                selected={tech}
+                onToggle={toggleTech}
+              />
+            </div>
           </div>
         </section>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-          <p className="font-mono text-xs font-bold uppercase tracking-widest">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+          <p className={cx(boardHeader, 'text-muted')}>
             {board.data ? `${total} problems in the index` : 'Counting…'}
           </p>
           {hasFilters ? (
             <button
               type="button"
               onClick={clearFilters}
-              className={buttonClasses('secondary')}
+              className={buttonClasses('secondary', 'py-2 text-[10px]')}
             >
               Clear filters
             </button>
@@ -172,8 +193,8 @@ export function ProblemBoardPage() {
         ) : null}
 
         {board.isError && !board.isPlaceholderData && !board.data ? (
-          <section className="mt-6 border-[3px] border-ink bg-white p-6 shadow-hard">
-            <p>
+          <section className="mt-6 border border-ink bg-sheet p-6">
+            <p className="max-w-2xl text-sm leading-relaxed">
               The board could not be loaded. That is almost certainly a backend
               or network problem and it will not fix itself by refreshing
               faster.
@@ -189,8 +210,8 @@ export function ProblemBoardPage() {
         ) : null}
 
         {board.data && problems.length === 0 && hasFilters ? (
-          <section className="mt-6 border-[3px] border-ink bg-white p-6 shadow-hard">
-            <p>
+          <section className="mt-6 border border-line bg-sheet p-6">
+            <p className="text-sm leading-relaxed">
               Nothing in the index matches those filters yet. Clear one or two
               and look again.
             </p>
@@ -198,7 +219,7 @@ export function ProblemBoardPage() {
         ) : null}
 
         {problems.length > 0 ? (
-          <div className="mt-6 grid items-stretch gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-6 grid items-stretch gap-5 md:grid-cols-2 xl:grid-cols-3">
             {problems.map((problem) => (
               <ProblemCard key={problem.id} problem={problem} className="h-full" />
             ))}
@@ -206,7 +227,7 @@ export function ProblemBoardPage() {
         ) : null}
 
         {board.hasNextPage ? (
-          <div className="mt-8 flex justify-center">
+          <div className="mt-10 flex justify-center">
             <button
               type="button"
               onClick={() => board.fetchNextPage()}
