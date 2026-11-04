@@ -63,6 +63,19 @@ export function Hero() {
             className="flex font-display leading-[0.85] tracking-tight"
             style={{ fontSize: 'clamp(3rem, 12vw, 11rem)' }}
           >
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 32 32"
+              fill="#0b0b0b"
+              style={{ marginRight: '12px', flexShrink: 0 }}
+            >
+              <rect width="32" height="32" fill="#f5f1e6"/>
+              <circle cx="16" cy="16" r="14" fill="#0b0b0b"/>
+              <path fill="#ffd500" d="M8 20h16v2H8z"/>
+              <path fill="#e5231b" d="M8 14h16v2H8z"/>
+              <path fill="#1f3bff" d="M8 8h16v2H8z"/>
+            </svg>
             <span aria-hidden className="flex">
               {WORDMARK.split('').map((letter, index) => (
                 <motion.span
