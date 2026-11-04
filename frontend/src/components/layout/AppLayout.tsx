@@ -8,7 +8,7 @@ export function AppLayout() {
     <div className="flex min-h-screen flex-col bg-paper text-ink">
       <a
         href="#content"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:border-[3px] focus:border-ink focus:bg-yellow focus:px-3 focus:py-2 focus:font-mono focus:text-xs focus:font-bold focus:uppercase focus:tracking-widest"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:border focus:border-ink focus:bg-accent focus:px-3 focus:py-2 focus:text-paper focus:font-mono focus:text-xs focus:font-bold focus:uppercase focus:tracking-widest"
       >
         Skip to content
       </a>

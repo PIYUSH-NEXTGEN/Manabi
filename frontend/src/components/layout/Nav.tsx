@@ -1,13 +1,22 @@
-import { Link } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import { Button } from '@/design/primitives';
 import { Logo } from './Logo';
 import { useMe } from '@/hooks/useMe';
+import { cx } from '@/lib/cx';
 
 const NAV_LINKS = [
   { to: '/problems', label: 'Projects' },
   { to: '/repo-analyzer', label: 'Repo Analyzer' },
   { to: '/how-it-works', label: 'How it works' },
 ];
+
+const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
+  cx(
+    'label relative inline-block py-1 transition-colors',
+    isActive
+      ? 'text-accent after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:bg-accent'
+      : 'text-ink hover:text-accent',
+  );
 
 export function Nav() {
   const me = useMe();
@@ -16,50 +25,45 @@ export function Nav() {
     : NAV_LINKS;
 
   return (
-    <header className="sticky top-0 z-30 border-b-[3px] border-ink bg-paper">
+    <header className="sticky top-0 z-30 border-b border-ink bg-paper">
+      <div aria-hidden className="h-1.5 bg-accent" />
       <nav
         aria-label="Main"
-        className="mx-auto flex w-[min(1200px,96vw)] flex-wrap items-center justify-between gap-4 py-3"
+        className="mx-auto flex w-[min(1240px,96vw)] flex-wrap items-center justify-between gap-x-6 gap-y-3 py-3"
       >
-        <Link
-          to="/"
-          className="flex items-center gap-2"
-        >
-          <div className="flex items-center justify-center bg-ink p-1.5 rounded-[4px]">
-            <Logo className="text-paper" />
-          </div>
-          <span className="font-display text-2xl uppercase leading-none tracking-tight">
+        <Link to="/" className="group flex items-center gap-2.5">
+          <Logo className="text-ink transition-colors group-hover:text-accent" />
+          <span className="font-display text-xl uppercase leading-none tracking-tight">
             MANABI
           </span>
         </Link>
 
-        <ul className="hidden items-center gap-5 md:flex">
+        <ul className="hidden items-center gap-7 md:flex">
           {links.map((link) => (
             <li key={link.to}>
-              <Link
-                to={link.to}
-                className="font-mono text-[11px] font-bold uppercase tracking-widest underline-offset-4 hover:underline"
-              >
+              <NavLink to={link.to} className={navLinkClasses}>
                 {link.label}
-              </Link>
+              </NavLink>
             </li>
           ))}
         </ul>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {me.data ? (
             <Link
               to="/me"
-              className="flex items-center gap-2 border-[3px] border-ink bg-white px-4 py-2 shadow-hard-sm"
+              className="press flex items-center gap-2 border border-line bg-sheet px-3 py-1.5 hover:border-ink"
             >
               {me.data.avatar_url ? (
                 <img
                   src={me.data.avatar_url}
                   alt=""
-                  className="size-6 border-[2px] border-ink"
+                  className="size-5 border border-ink object-cover"
                 />
-              ) : null}
-              <span className="font-mono text-sm font-bold uppercase tracking-widest">
+              ) : (
+                <span aria-hidden className="block size-5 bg-tint" />
+              )}
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
                 {me.data.username}
               </span>
             </Link>
@@ -70,22 +74,18 @@ export function Nav() {
               onClick={() => {
                 window.location.assign('/api/auth/github/login');
               }}
-              className="hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-100"
             >
               GitHub
             </Button>
           )}
         </div>
 
-        <ul className="order-last flex w-full items-center gap-4 overflow-x-auto pb-1 md:hidden">
+        <ul className="order-last flex w-full items-center gap-5 overflow-x-auto border-t border-line pt-2 md:hidden">
           {links.map((link) => (
             <li key={link.to} className="shrink-0">
-              <Link
-                to={link.to}
-                className="font-mono text-[11px] font-bold uppercase tracking-widest underline-offset-4 hover:underline"
-              >
+              <NavLink to={link.to} className={navLinkClasses}>
                 {link.label}
-              </Link>
+              </NavLink>
             </li>
           ))}
         </ul>

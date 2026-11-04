@@ -23,10 +23,10 @@ export function TechChips({ options, selected, onToggle }: TechChipsProps) {
             aria-pressed={active}
             onClick={() => onToggle(option.value)}
             className={cx(
-              'border-[3px] border-ink px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest transition-colors',
+              'border border-ink px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest transition-colors',
               active
-                ? 'bg-yellow text-ink'
-                : 'bg-white text-ink hover:bg-paper',
+                ? 'bg-accent text-ink'
+                : 'bg-sheet text-ink hover:bg-paper',
             )}
           >
             {option.value}

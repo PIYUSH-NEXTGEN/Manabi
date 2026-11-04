@@ -17,7 +17,7 @@ export function ReportRemovalLink({
     return (
       <a
         href={`mailto:${CONTACT_EMAIL}?subject=${subject}`}
-        className="font-mono text-[11px] font-bold uppercase tracking-widest text-blue underline underline-offset-4"
+        className="font-mono text-[11px] font-bold uppercase tracking-widest text-accent underline underline-offset-4"
       >
         {label}
       </a>
@@ -26,7 +26,7 @@ export function ReportRemovalLink({
   return (
     <Link
       to="/contact"
-      className="font-mono text-[11px] font-bold uppercase tracking-widest text-blue underline underline-offset-4"
+      className="font-mono text-[11px] font-bold uppercase tracking-widest text-accent underline underline-offset-4"
     >
       {label}
     </Link>

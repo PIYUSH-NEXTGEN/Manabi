@@ -80,16 +80,16 @@ const components = {
   strong: ({ children }: { children?: ReactNode }) => <strong>{children}</strong>,
   em: ({ children }: { children?: ReactNode }) => <em>{children}</em>,
   blockquote: ({ children }: { children?: ReactNode }) => (
-    <blockquote className="mb-2 border-l-4 border-yellow pl-2 last:mb-0">
+    <blockquote className="mb-2 border-l-4 border-accent pl-2 last:mb-0">
       {children}
     </blockquote>
   ),
-  hr: () => <hr className="my-3 border-t-[3px] border-ink" />,
+  hr: () => <hr className="my-3 border-t border-ink" />,
   code: ({ children }: { children?: ReactNode }) => (
-    <code className="bg-yellow/40 px-1 font-mono">{children}</code>
+    <code className="bg-accent/40 px-1 font-mono">{children}</code>
   ),
   pre: ({ children }: { children?: ReactNode }) => (
-    <pre className="mb-2 overflow-x-auto border-[3px] border-ink bg-paper p-2 font-mono text-xs last:mb-0">
+    <pre className="mb-2 overflow-x-auto border border-ink bg-paper p-2 font-mono text-xs last:mb-0">
       {children}
     </pre>
   ),

@@ -39,7 +39,7 @@ function ReplyProblems({ problems }: { problems: ChatProblemItem[] }) {
         <Link
           key={problem.id}
           to={`/problems/${problem.id}`}
-          className="border-[3px] border-ink bg-paper px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest underline-offset-4 hover:underline"
+          className="border border-ink bg-paper px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest underline-offset-4 hover:underline"
         >
           {problem.title}
           <span className="ml-2 text-ink/60">
@@ -121,7 +121,7 @@ export function ChatWidget() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open the MANABI chat"
-        className="fixed bottom-4 right-4 z-40 border-[3px] border-ink bg-yellow px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest text-ink shadow-lg press"
+        className="fixed bottom-4 right-4 z-40 border border-ink bg-accent px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest text-ink shadow-lg press"
       >
         Ask Manabi
       </button>
@@ -131,9 +131,9 @@ export function ChatWidget() {
   return (
     <section
       aria-label="MANABI chat"
-      className="fixed bottom-4 right-4 z-40 flex h-[min(560px,80vh)] w-[min(380px,94vw)] flex-col border-[3px] border-ink bg-white shadow-lg"
+      className="fixed bottom-4 right-4 z-40 flex h-[min(560px,80vh)] w-[min(380px,94vw)] flex-col border border-ink bg-sheet shadow-lg"
     >
-      <header className="flex items-center justify-between border-b-[3px] border-ink bg-ink px-3 py-2">
+      <header className="flex items-center justify-between border-b border-ink bg-ink px-3 py-2">
         <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-paper">
           Ask Manabi
         </h2>
@@ -163,10 +163,10 @@ export function ChatWidget() {
               <li
                 key={index}
                 className={cx(
-                  'max-w-[92%] border-[3px] border-ink p-2 text-sm leading-snug',
+                  'max-w-[92%] border border-ink p-2 text-sm leading-snug',
                   entry.message.role === 'user'
-                    ? 'ml-auto bg-yellow/60'
-                    : 'bg-white',
+                    ? 'ml-auto bg-accent/60'
+                    : 'bg-sheet',
                 )}
               >
                 {entry.message.role === 'assistant' ? (
@@ -188,7 +188,7 @@ export function ChatWidget() {
       {error ? (
         <p
           role="alert"
-          className="border-t-[3px] border-ink px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-red"
+          className="border-t border-ink px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
         >
           {error}
         </p>
@@ -197,7 +197,7 @@ export function ChatWidget() {
       <form
         noValidate
         onSubmit={handleSubmit}
-        className="flex gap-2 border-t-[3px] border-ink p-3"
+        className="flex gap-2 border-t border-ink p-3"
       >
         <textarea
           rows={2}

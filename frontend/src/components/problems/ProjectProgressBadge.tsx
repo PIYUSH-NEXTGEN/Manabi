@@ -14,7 +14,7 @@ export function ProjectProgressBadge({
 }) {
   if (!progress) {
     return (
-      <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-red">
+      <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-danger">
         Progress unknown
       </span>
     );

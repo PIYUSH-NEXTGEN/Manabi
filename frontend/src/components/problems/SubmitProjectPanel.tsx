@@ -100,7 +100,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
 
   if (submitted) {
     return (
-      <aside className="flex flex-col gap-3 border-[3px] border-ink bg-white p-4 shadow-hard">
+      <aside className="flex flex-col gap-3 border border-ink bg-sheet p-4">
         <h2 className={panelHeading}>Submitted</h2>
         <p className="text-sm leading-snug">
           {submitted.repo_url} is on the board with a progress badge.
@@ -116,7 +116,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
   }
 
   return (
-    <aside className="flex flex-col gap-3 border-[3px] border-ink bg-white p-4 shadow-hard">
+    <aside className="flex flex-col gap-3 border border-ink bg-sheet p-4">
       <h2 className={panelHeading}>Submit a project</h2>
       <form
         noValidate
@@ -136,14 +136,14 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
             type="checkbox"
             checked={openForContributors}
             onChange={(event) => setOpenForContributors(event.target.checked)}
-            className="size-4 accent-blue"
+            className="size-4 accent-[var(--accent)]"
           />
           Open for contributors
         </label>
         {submitError ? (
           <p
             role="alert"
-            className="font-mono text-[11px] font-bold uppercase tracking-widest text-red"
+            className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
           >
             {submitError}
           </p>
