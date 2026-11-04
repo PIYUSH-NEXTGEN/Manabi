@@ -160,6 +160,18 @@ def test_sort_popular_and_newest(client, seed):
     assert items[-1]["id"] == seed["old"].id
 
 
+def test_distinct_keeps_one_brief_per_field_or_domain(client, seed):
+    res = client.get("/api/problems", params={"sort": "popular", "distinct": "field"})
+    data = res.json()
+    assert data["total"] == 2
+    assert [item["field"] for item in data["items"]] == ["ml", "computer-vision"]
+    assert data["items"][0]["id"] == seed["pop"].id
+
+    domains = client.get("/api/problems", params={"distinct": "domain"}).json()
+    assert domains["total"] == 3
+    assert len({item["domain"] for item in domains["items"]}) == 3
+
+
 def test_pagination(client, seed):
     res = client.get("/api/problems", params={"limit": 2, "offset": 0})
     data = res.json()

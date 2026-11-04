@@ -7,7 +7,7 @@ Difficulty = Literal["beginner", "intermediate", "advanced"]
 FieldEnum = Literal[
     "ml", "computer-vision", "nlp-llm", "cybersecurity", "web-fullstack", "mobile",
     "data-engineering", "geospatial", "optimization", "iot-embedded",
-    "distributed-systems", "blockchain", "devops-cloud", "data-science", "other",
+    "distributed-systems", "blockchain", "devops-cloud", "data-science", "developer-tools", "other",
 ]
 DomainEnum = Literal[
     "healthcare", "education", "agriculture", "fintech", "climate", "governance",

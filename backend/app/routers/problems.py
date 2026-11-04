@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy import Text, func, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import aliased, joinedload
 
 from app import schemas
 from app.deps import DB, CurrentUser
@@ -15,6 +15,7 @@ from app.models import ORIGIN_CRAWLER, Problem, Project, STATUS_PUBLISHED
 router = APIRouter(prefix="/api/problems", tags=["problems"])
 
 SortParam = Literal["newest", "popular"]
+DistinctParam = Literal["field", "domain"]
 
 
 def problem_to_out(problem: Problem, project_count: int) -> schemas.ProblemOut:
@@ -77,6 +78,7 @@ def list_problems(
     tech: list[str] = Query(default=[]),
     source: str | None = None,
     sort: SortParam = "newest",
+    distinct: DistinctParam | None = None,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ):
@@ -107,18 +109,38 @@ def list_problems(
             | func.lower(Problem.source_id).like(source_needle)
         )
 
+    project_counts = (
+        select(Project.problem_id, func.count(Project.id).label("n")).group_by(Project.problem_id).subquery()
+    )
+    query = query.outerjoin(project_counts, Problem.id == project_counts.c.problem_id)
+    popularity = func.coalesce(project_counts.c.n, 0)
     if sort == "popular":
-        project_counts = (
-            select(Project.problem_id, func.count(Project.id).label("n")).group_by(Project.problem_id).subquery()
-        )
-        query = query.outerjoin(project_counts, Problem.id == project_counts.c.problem_id).order_by(
-            func.coalesce(project_counts.c.n, 0).desc(), Problem.created_at.desc(), Problem.id.desc()
-        )
+        ordering = [popularity.desc(), Problem.created_at.desc(), Problem.id.desc()]
     else:
-        query = query.order_by(Problem.created_at.desc(), Problem.id.desc())
+        ordering = [Problem.created_at.desc(), Problem.id.desc()]
+    query = query.order_by(*ordering)
 
-    total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
-    rows = db.scalars(query.limit(limit).offset(offset)).all()
+    if distinct:
+        # One brief per field/domain, keeping each group's best-ranked row, so a
+        # short list (e.g. the hero showcase) spans topics instead of one field.
+        ranked = query.add_columns(
+            popularity.label("popularity"),
+            func.row_number()
+            .over(partition_by=Problem.field if distinct == "field" else Problem.domain, order_by=ordering)
+            .label("rank"),
+        ).subquery()
+        problem = aliased(Problem, ranked)
+        total = db.scalar(select(func.count(func.distinct(ranked.c[distinct])))) or 0
+        rows = db.scalars(
+            select(problem)
+            .where(ranked.c.rank == 1)
+            .order_by(ranked.c.popularity.desc(), ranked.c.created_at.desc(), ranked.c.id.desc())
+            .limit(limit)
+            .offset(offset)
+        ).all()
+    else:
+        total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
+        rows = db.scalars(query.limit(limit).offset(offset)).all()
     counts = dict(db.execute(select(Project.problem_id, func.count(Project.id)).group_by(Project.problem_id)).all())
     items = [problem_to_out(p, counts.get(p.id, 0)) for p in rows]
     return schemas.ProblemsListOut(items=items, total=total)
