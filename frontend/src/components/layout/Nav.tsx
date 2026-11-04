@@ -1,34 +1,19 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Button, useToast } from '@/design/primitives';
-import { useLogout } from '@/hooks/useLogout';
+import { Link } from 'react-router-dom';
+import { Button } from '@/design/primitives';
+import { Logo } from './Logo';
 import { useMe } from '@/hooks/useMe';
 
 const NAV_LINKS = [
-  { to: '/problems', label: 'Problems' },
-  { to: '/projects', label: 'Advanced Projects' },
+  { to: '/problems', label: 'Projects' },
+  { to: '/repo-analyzer', label: 'Repo Analyzer' },
   { to: '/how-it-works', label: 'How it works' },
 ];
 
 export function Nav() {
   const me = useMe();
-  const logoutMutation = useLogout();
-  const navigate = useNavigate();
-  const toast = useToast();
   const links = me.data?.is_admin
     ? [...NAV_LINKS, { to: '/admin/review', label: 'Review' }]
     : NAV_LINKS;
-
-  function handleLogout() {
-    logoutMutation.mutate(undefined, {
-      onSuccess: () => {
-        toast('Logged out. The board will still be here.');
-        navigate('/');
-      },
-      onError: () => {
-        toast('Log out failed — try again.', 'error');
-      },
-    });
-  }
 
   return (
     <header className="sticky top-0 z-30 border-b-[3px] border-ink bg-paper">
@@ -38,9 +23,14 @@ export function Nav() {
       >
         <Link
           to="/"
-          className="font-display text-2xl uppercase leading-none tracking-tight"
+          className="flex items-center gap-2"
         >
-          MANABI
+          <div className="flex items-center justify-center bg-ink p-1.5 rounded-[4px]">
+            <Logo className="text-paper" />
+          </div>
+          <span className="font-display text-2xl uppercase leading-none tracking-tight">
+            MANABI
+          </span>
         </Link>
 
         <ul className="hidden items-center gap-5 md:flex">
@@ -58,38 +48,31 @@ export function Nav() {
 
         <div className="flex items-center gap-2">
           {me.data ? (
-            <>
-              <Link
-                to="/me"
-                className="flex items-center gap-2 border-[3px] border-ink bg-white px-3 py-1.5 shadow-hard-sm"
-              >
-                {me.data.avatar_url ? (
-                  <img
-                    src={me.data.avatar_url}
-                    alt=""
-                    className="size-5 border-[2px] border-ink"
-                  />
-                ) : null}
-                <span className="font-mono text-[11px] font-bold uppercase tracking-widest">
-                  {me.data.username}
-                </span>
-              </Link>
-              <Button
-                variant="secondary"
-                onClick={handleLogout}
-                disabled={logoutMutation.isPending}
-              >
-                {logoutMutation.isPending ? 'Logging out…' : 'Log out'}
-              </Button>
-            </>
+            <Link
+              to="/me"
+              className="flex items-center gap-2 border-[3px] border-ink bg-white px-4 py-2 shadow-hard-sm"
+            >
+              {me.data.avatar_url ? (
+                <img
+                  src={me.data.avatar_url}
+                  alt=""
+                  className="size-6 border-[2px] border-ink"
+                />
+              ) : null}
+              <span className="font-mono text-sm font-bold uppercase tracking-widest">
+                {me.data.username}
+              </span>
+            </Link>
           ) : (
             <Button
               variant="secondary"
+              size="small"
               onClick={() => {
                 window.location.assign('/api/auth/github/login');
               }}
+              className="hover:-translate-y-0.5 active:translate-y-0 transition-transform duration-100"
             >
-              Log in with GitHub
+              GitHub
             </Button>
           )}
         </div>
