@@ -1,37 +1,40 @@
-import { safeExternalUrl } from '@/lib/url';
 import { Link, useParams } from 'react-router-dom';
-import type { ReactNode } from 'react';
 import { cx } from '@/lib/cx';
-import { Stamp, Tag, type Difficulty } from '@/design/primitives';
+import { Button, Skeleton, Tag } from '@/design/primitives';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
-import { ReportRemovalLink } from '@/components/problems/ReportRemovalLink';
 import { SubmitProjectPanel } from '@/components/problems/SubmitProjectPanel';
 import { useProblem } from '@/hooks/useProblem';
-import { projectOwnerUsername, type ProblemDetail } from '@/api/client';
+import { projectOwnerUsername } from '@/api/client';
 
-const DIFFICULTY_FILL: Record<Difficulty, number> = {
-  beginner: 1,
-  intermediate: 2,
-  advanced: 3,
-};
+const panelHeading = 'font-mono text-xs font-bold uppercase tracking-widest';
 
-const sectionHeading =
-  'font-mono text-[11px] font-bold uppercase tracking-widest';
-
-function isBulkSource(url: string | null | undefined): boolean {
-  return /\.(xlsx|xls|csv|pdf)(\?|$)/i.test(url ?? '');
-}
-
-function DetailSkeleton() {
+function ProjectSkeleton() {
   return (
-    <div className="mx-auto w-[min(1100px,96vw)] animate-pulse space-y-4 py-16">
-      <div className="h-4 w-40 rounded bg-ink/20" />
-      <div className="h-10 w-2/3 rounded bg-ink/20" />
-      <div className="h-4 w-1/2 rounded bg-ink/20" />
-      <div className="h-40 w-full rounded bg-ink/20" />
+    <div className="mx-auto w-[min(900px,96vw)] space-y-4 py-16">
+      <Skeleton className="h-3 w-40" />
+      <Skeleton className="h-10 w-1/2" />
+      <Skeleton className="h-40 w-full" />
     </div>
   );
+}
+
+function futureIdeas(originalText: string | null | undefined): string[] {
+  if (!originalText) return [];
+  const section = originalText.match(
+    /## (Possible future improvements|Stretch goals)[\s\S]*?(?=\n## |\z)/i,
+  );
+  if (!section) return [];
+  return section[0]
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('-'))
+    .map((line) => line.slice(1).trim())
+    .filter(Boolean);
+}
+
+function fullDescription(summary: string, whoAffected: string, whyMatters: string): string {
+  return `${summary} This project is for ${whoAffected.toLowerCase()}. ${whyMatters}`;
 }
 
 export function ProblemDetailPage() {
@@ -51,7 +54,7 @@ function DetailView({ problemId }: { problemId: number }) {
   if (problem.isPending) {
     return (
       <main className="border-b-[3px] border-ink bg-paper">
-        <DetailSkeleton />
+        <ProjectSkeleton />
       </main>
     );
   }
@@ -79,282 +82,97 @@ function DetailView({ problemId }: { problemId: number }) {
   }
 
   const data = problem.data;
+  const ideas = futureIdeas(data.original_text);
+  const description = fullDescription(data.summary, data.who_affected, data.why_matters);
 
   return (
     <main className="border-b-[3px] border-ink">
       <div className="mx-auto w-[min(1100px,96vw)] py-12">
-        <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
-          <article>
-            <p className={sectionHeading}>
-              {data.field} · {data.domain ?? 'unclassed domain'}
+        <section className="border-[3px] border-ink bg-white p-6 shadow-hard lg:p-8">
+          <h1 className="font-display text-4xl uppercase leading-tight">
+            {data.title}
+          </h1>
+          <p className="mt-4 text-lg leading-relaxed">{description}</p>
+
+          <h2 className={cx(panelHeading, 'mt-8')}>Why it matters</h2>
+          <p className="mt-2 text-sm leading-relaxed">{data.why_matters}</p>
+
+          <h2 className={cx(panelHeading, 'mt-8')}>Tech stack</h2>
+          <p className="mt-2 text-sm leading-relaxed">
+            The stack below is a starting point, not a rule. If it lists a
+            backend language you can swap it for another one - Python or Go,
+            for example - and the same goes for the database, frontend, and
+            anything else. Use what fits you.
+          </p>
+          {data.tech_tags.length > 0 ? (
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {data.tech_tags.map((tag) => (
+                <Tag key={tag}>{tag}</Tag>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-3 text-sm">No stack listed.</p>
+          )}
+
+          <h2 className={cx(panelHeading, 'mt-8')}>What you can add later</h2>
+          {ideas.length > 0 ? (
+            <ul className="mt-2 list-disc ml-4 space-y-1 text-sm leading-relaxed">
+              {ideas.map((idea) => (
+                <li key={idea}>{idea}</li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-2 text-sm">
+              Ship the MVP first, then add whatever matters to you. Build what
+              you want to learn and ship it.
             </p>
-            <h1 className="mt-2 font-display text-4xl uppercase leading-tight">
-              {data.title}
-            </h1>
-            <p className="mt-4 text-lg leading-snug">{data.summary}</p>
-            <DetailStructuredCard data={data} />
-            {data.origin === 'crawler' ? (
-              <section
-                aria-label="Source attribution"
-                className="mt-6 border-[3px] border-ink bg-yellow p-4 shadow-hard"
-              >
-                <h2 className={sectionHeading}>Source &amp; attribution</h2>
-                <p className="mt-2 text-sm leading-snug">
-                  Summary generated by MANABI from the original problem
-                  statement; the original is owned by{' '}
-                  {data.organisation || data.source_name}.
-                </p>
-                <p className="mt-2 text-sm">
-                  {data.source_name}
-                  {data.source_year ? ` · ${data.source_year}` : ''}
-                  {data.organisation ? ` · ${data.organisation}` : ''}
-                  {data.source_status === 'open' ? ' · open' : ''}
-                </p>
-                <div className="mt-3 flex flex-wrap gap-4">
-                  {isBulkSource(data.source_url) ? (
-                    <>
-                      <a
-                        href={`/api/problems/${data.id}/export.xlsx`}
-                        className="font-mono text-[11px] font-bold uppercase tracking-widest text-blue underline underline-offset-4"
-                      >
-                        Download this statement (XLSX)
-                      </a>
-                      {safeExternalUrl(data.source_url) ? (
-                        <a
-                          href={safeExternalUrl(data.source_url) ?? undefined}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="font-mono text-[11px] font-bold uppercase tracking-widest text-blue underline underline-offset-4"
-                        >
-                          Official release (all statements) ↗
-                        </a>
-                      ) : null}
-                    </>
-                  ) : safeExternalUrl(data.source_url) ? (
-                    <a
-                      href={safeExternalUrl(data.source_url) ?? undefined}
-                      target="_blank"
-                      rel="noreferrer"
+          )}
+
+          <div className="mt-8 flex justify-start">
+            <Link to={`/problems/${data.id}/guide`}>
+              <Button variant="primary">Build guide</Button>
+            </Link>
+          </div>
+        </section>
+
+        <aside className="mt-8 flex flex-col gap-6">
+          <SubmitProjectPanel problemId={data.id} />
+          <div className="flex flex-col gap-3">
+            <h2 className={panelHeading}>
+              Projects in the wild ({data.projects.length})
+            </h2>
+            <ul className="flex list-none flex-col gap-2 divide-y divide-ink/10">
+              {data.projects.map((project) => {
+                const owner = projectOwnerUsername(project.owner);
+                return (
+                  <li
+                    key={project.id}
+                    className="flex flex-col gap-1 border-[3px] border-ink bg-white p-3 shadow-hard"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-xs font-bold">
+                        {project.repo_name}
+                      </span>
+                      <ProjectProgressBadge progress={project.progress} />
+                    </div>
+                    {owner ? (
+                      <p className="font-mono text-[10px] uppercase tracking-widest text-ink/70">
+                        by {owner} · {project.open_for_contributors ? 'open to contributors' : 'solo run'}
+                      </p>
+                    ) : null}
+                    <Link
+                      to={`/projects/${project.id}`}
                       className="font-mono text-[11px] font-bold uppercase tracking-widest text-blue underline underline-offset-4"
                     >
-                      View original ↗
-                    </a>
-                  ) : null}
-                  <ReportRemovalLink
-                    sourceName={data.source_name}
-                    sourceId={data.source_id}
-                  />
-                </div>
-                {isBulkSource(data.source_url) ? (
-                  <p className="mt-3 text-xs leading-snug">
-                    The official source is a bulk workbook. The XLSX download above
-                    contains only this statement&apos;s MANABI summary and attribution.
-                  </p>
-                ) : null}
-              </section>
-            ) : null}
-          </article>
-
-          <aside className="flex flex-col gap-6">
-            <SubmitProjectPanel problemId={data.id} />
-            <div className="flex flex-col gap-3">
-              <h2 className={sectionHeading}>
-                Projects in the wild ({data.projects.length})
-              </h2>
-              <ul className="flex list-none flex-col gap-2 divide-y divide-ink/10">
-                {data.projects.map((project) => {
-                  const owner = projectOwnerUsername(project.owner);
-                  return (
-                    <li
-                      key={project.id}
-                      className="flex flex-col gap-1 border-[3px] border-ink bg-white p-3 shadow-hard"
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="font-mono text-xs font-bold">
-                          {project.repo_name}
-                        </span>
-                <ProjectProgressBadge progress={project.progress} />
-                      </div>
-                      {owner ? (
-                        <p className="font-mono text-[10px] uppercase tracking-widest text-ink/70">
-                          by {owner} · {project.open_for_contributors ? 'open to contributors' : 'solo run'}
-                        </p>
-                      ) : null}
-                      <Link
-                        to={`/projects/${project.id}`}
-                        className="font-mono text-[11px] font-bold uppercase tracking-widest text-blue underline underline-offset-4"
-                      >
-                        Open project →
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </aside>
-        </div>
-
-        {data.origin === 'crawler' ? null : (
-          <section
-            aria-label="Original statement"
-            className="mt-10 border-[3px] border-ink bg-white p-4 shadow-hard"
-          >
-            <h2 className={sectionHeading}>Original statement</h2>
-            <pre className="mt-2 max-h-96 whitespace-pre-wrap font-body text-sm leading-relaxed">
-              {data.original_text}
-            </pre>
-          </section>
-        )}
+                      Open project →
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </aside>
       </div>
     </main>
-  );
-}
-
-function DetailStructuredCard({ data }: { data: ProblemDetail }) {
-  const filled = DIFFICULTY_FILL[data.difficulty as Difficulty];
-  const squares = `${'■'.repeat(filled)}${'□'.repeat(3 - filled)}`;
-
-  return (
-    <dl className="mt-8 divide-y divide-ink/10 border-[3px] border-ink bg-white shadow-hard">
-      <DetailRow
-        label={
-          <dt className={`${sectionHeading} flex items-center gap-1.5`}>
-            Who is affected
-            {data.ai_fields.includes('who_affected') ? (
-              <Stamp tone="ai-suggested" label="AI-SUGGESTED" rotate={-2} />
-            ) : null}
-          </dt>
-        }
-      >
-        <p className="text-sm leading-snug">{data.who_affected}</p>
-      </DetailRow>
-      <DetailRow
-        label={
-          <dt className={`${sectionHeading} flex items-center gap-1.5`}>
-            Why it matters
-            {data.ai_fields.includes('why_matters') ? (
-              <Stamp tone="ai-suggested" label="AI-SUGGESTED" rotate={-2} />
-            ) : null}
-          </dt>
-        }
-      >
-        <p className="text-sm leading-snug">{data.why_matters}</p>
-      </DetailRow>
-      <DetailRow label={<dt className={sectionHeading}>Tech</dt>}>
-        {data.tech_tags.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
-            {data.tech_tags.map((tag) => (
-              <Tag key={tag}>{tag}</Tag>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm">none of interest</p>
-        )}
-      </DetailRow>
-      <DetailRow
-        label={
-          <dt className={`${sectionHeading} flex items-center gap-1.5`}>
-            Datasets
-          </dt>
-        }
-      >
-        {data.datasets.length > 0 ? (
-          <ul className="ml-4 list-disc text-sm leading-snug">
-            {data.datasets.map((dataset) => {
-              const name = typeof dataset.name === 'string' ? dataset.name : null;
-              const url = typeof dataset.url === 'string' ? dataset.url : null;
-              const safeUrl = url ? safeExternalUrl(url) : null;
-              return (
-                <li key={name ?? url ?? JSON.stringify(dataset)}>
-                  {safeUrl && name ? (
-                    <a href={safeUrl} target="_blank" rel="noreferrer" className="underline underline-offset-4">
-                      {name}
-                    </a>
-                  ) : (
-                    name ?? 'Unnamed dataset'
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="text-sm">No dataset attached to this brief.</p>
-        )}
-      </DetailRow>
-      <DetailRow
-        label={
-          <dt className={`${sectionHeading} flex items-center gap-1.5`}>
-            Approaches worth trying
-            {data.ai_fields.includes('approaches') ? (
-              <Stamp tone="ai-suggested" label="AI-SUGGESTED" rotate={-2} />
-            ) : null}
-          </dt>
-        }
-      >
-        <ol className="ml-4 list-decimal text-sm leading-snug">
-          {data.approaches.map((approach) => (
-            <li key={approach}>{approach}</li>
-          ))}
-        </ol>
-      </DetailRow>
-      <DetailRow
-        label={
-          <dt className={`${sectionHeading} flex items-center gap-1.5`}>
-            Effort
-            {data.ai_fields.includes('est_hours') ? (
-              <Stamp tone="ai-suggested" label="AI-SUGGESTED" rotate={-2} />
-            ) : null}
-          </dt>
-        }
-      >
-        <div className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-widest">
-          <span>
-            <span aria-hidden>{squares}</span>
-            <span className="sr-only">difficulty {data.difficulty}</span>
-          </span>
-          <span aria-hidden>·</span>
-          <span>{data.est_hours} hours</span>
-        </div>
-      </DetailRow>
-      <DetailRow label={<dt className={sectionHeading}>Source</dt>}>
-        {safeExternalUrl(data.source_url) ? (
-          <a
-            href={safeExternalUrl(data.source_url) ?? undefined}
-            target="_blank"
-            rel="noreferrer"
-            className="font-mono text-xs font-bold underline underline-offset-4"
-          >
-            {data.source_url?.replace(/^https?:\/\//, '')}
-          </a>
-        ) : (
-          <span className="font-mono text-xs font-bold">
-            {data.source_name} · no public link
-          </span>
-        )}
-        <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-ink/70">
-          Source: {data.source_name}
-          {data.source_year ? ` · ${data.source_year}` : ''}
-          {data.organisation ? ` · ${data.organisation}` : ''}
-        </p>
-      </DetailRow>
-    </dl>
-  );
-}
-
-interface DetailRowProps {
-  label: ReactNode;
-  children: ReactNode;
-}
-
-function DetailRow({ label, children }: DetailRowProps) {
-  return (
-    <div
-      className={cx(
-        'grid gap-2 px-4 py-4 sm:grid-cols-[180px_1fr] sm:items-baseline',
-      )}
-    >
-      {label}
-      <dd className="contents sm:block">{children}</dd>
-    </div>
   );
 }

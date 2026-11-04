@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { server } from '@/api/mocks/server';
 import { ToastProvider } from '@/design/primitives';
 import { ProblemDetailPage } from './ProblemDetailPage';
+import { ProblemGuidePage } from './ProblemGuidePage';
 import { renderWithProviders } from '@/test/renderWithProviders';
 
 function renderDetail(route: string) {
@@ -13,6 +14,7 @@ function renderDetail(route: string) {
     <ToastProvider>
       <Routes>
         <Route path="/problems/:id" element={<ProblemDetailPage />} />
+        <Route path="/problems/:id/guide" element={<ProblemGuidePage />} />
       </Routes>
     </ToastProvider>,
     { route },
@@ -20,7 +22,7 @@ function renderDetail(route: string) {
 }
 
 describe('ProblemDetailPage', () => {
-  it('renders the structured brief for problem 1', async () => {
+  it('renders the problem title, fuller description and why it matters in one card', async () => {
     renderDetail('/problems/1');
 
     expect(
@@ -29,39 +31,68 @@ describe('ProblemDetailPage', () => {
         level: 1,
       }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Smallholder farmers')).toBeInTheDocument();
     expect(
-      screen.getByText('Fine-tune a small CNN on public leaf datasets'),
+      screen.getByText(/Farmers photograph leaf blight;/),
     ).toBeInTheDocument();
-    expect(screen.getByText('python')).toBeInTheDocument();
-    expect(screen.getByText('Late detection destroys a season of income.')).toBeInTheDocument();
     expect(
-      screen.getByText('No dataset attached to this brief.'),
+      screen.getByText(/This project is for smallholder farmers/),
     ).toBeInTheDocument();
-    expect(screen.getByText(/no public link/i)).toBeInTheDocument();
+    expect(
+      screen.getByText('Late detection destroys a season of income.'),
+    ).toBeInTheDocument();
   });
 
-  it('shows one AI-SUGGESTED stamp for problem 1 and none for non-AI rows', async () => {
+  it('shows the tech stack as options, not a single rule', async () => {
     renderDetail('/problems/1');
 
     await screen.findByRole('heading', { level: 1 });
-    expect(await screen.findAllByText(/ai-suggested/i)).toHaveLength(1);
+
+    expect(screen.getByText('python')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /The stack below is a starting point, not a rule/i,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Python or Go/i)).toBeInTheDocument();
   });
 
-  it('shows all AI-SUGGESTED stamps for problem 2 (approaches + est hours)', async () => {
-    renderDetail('/problems/2');
-
-    await screen.findByRole('heading', { name: 'Streetlight outage tracker' });
-    expect(await screen.findAllByText(/ai-suggested/i)).toHaveLength(2);
-  });
-
-  it('shows the original statement verbatim', async () => {
+  it('shows what you can add later with a fallback when none is listed', async () => {
     renderDetail('/problems/1');
 
-    const statement = await screen.findByRole('region', {
-      name: 'Original statement',
-    });
-    expect(statement).toHaveTextContent('Crop disease triage for small farms');
+    await screen.findByRole('heading', { level: 1 });
+
+    expect(
+      await screen.findByText(
+        /Ship the MVP first, then add whatever matters to you/i,
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it('links to a separate build guide page', async () => {
+    renderDetail('/problems/1');
+
+    await screen.findByRole('heading', { level: 1 });
+    const link = await screen.findByRole('link', { name: 'Build guide' });
+    expect(link).toHaveAttribute('href', '/problems/1/guide');
+  });
+
+  it('opens the build guide page with phases', async () => {
+    renderDetail('/problems/1/guide');
+
+    expect(
+      await screen.findByRole('heading', {
+        name: /build guide · crop disease triage for small farms/i,
+        level: 1,
+      }),
+    ).toBeInTheDocument();
+    expect(await screen.findByText(/Phase 1 · Start/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Phase 2 · Implement/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Phase 3 · Ship/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Fine-tune a small CNN on public leaf datasets',
+      ),
+    ).toBeInTheDocument();
   });
 
   it('lists submitted projects with progress badges', async () => {
@@ -70,14 +101,13 @@ describe('ProblemDetailPage', () => {
     expect(
       await screen.findByText(/Projects in the wild \(1\)/i),
     ).toBeInTheDocument();
-    expect(await screen.findByText(/14 commits/i)).toBeInTheDocument();
     expect(await screen.findByText(/active/i)).toBeInTheDocument();
   });
 
   it('shows the stale badge for problem 2', async () => {
     renderDetail('/problems/2');
 
-    expect(await screen.findByText(/3 commits/i)).toBeInTheDocument();
+    await screen.findByRole('heading', { name: 'Streetlight outage tracker' });
     expect(await screen.findByText(/stale/i)).toBeInTheDocument();
   });
 
@@ -203,54 +233,6 @@ describe('ProblemDetailPage', () => {
     expect(
       await screen.findByText(/You already claimed this problem/i),
     ).toBeInTheDocument();
-  });
-
-  it('offers a single-statement XLSX for a bulk official source', async () => {
-    server.use(
-      http.get('*/api/problems/1', () =>
-        HttpResponse.json({
-          id: 1,
-          title: 'Landslide warning system',
-          summary: 'A generated summary.',
-          who_affected: 'District teams',
-          why_matters: 'Warnings save lives.',
-          field: 'geospatial',
-          domain: 'disaster-management',
-          difficulty: 'intermediate',
-          est_hours: 40,
-          tech_tags: ['python'],
-          datasets: [],
-          approaches: [],
-          source_name: 'Smart India Hackathon 2024',
-          source_id: 'SIH26001',
-          source_url: 'https://sih.gov.in/letters/SIH_PS_2024.xlsx',
-          source_note: null,
-          ai_fields: [],
-          project_count: 0,
-          origin: 'crawler',
-          source_year: 2024,
-          edition: '2024',
-          organisation: 'MDoNER',
-          source_status: 'open',
-          deadline: null,
-          original_text: 'A generated summary.',
-          display_policy: 'summary_only',
-          projects: [],
-        }),
-      ),
-    );
-
-    renderDetail('/problems/1');
-
-    expect(
-      await screen.findByRole('link', { name: 'Download this statement (XLSX)' }),
-    ).toHaveAttribute('href', '/api/problems/1/export.xlsx');
-    expect(
-      screen.getByRole('link', { name: /Official release \(all statements\)/ }),
-    ).toHaveAttribute('href', 'https://sih.gov.in/letters/SIH_PS_2024.xlsx');
-    expect(
-      screen.queryByRole('region', { name: 'Original statement' }),
-    ).not.toBeInTheDocument();
   });
 
   it('renders the 404 page for a missing problem', async () => {
