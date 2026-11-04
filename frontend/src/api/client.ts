@@ -68,6 +68,7 @@ export interface ProblemsQuery {
   tech?: string[];
   source?: string;
   sort?: 'newest' | 'popular';
+  distinct?: 'field' | 'domain';
   limit?: number;
   offset?: number;
 }
@@ -85,6 +86,7 @@ export function getProblems(query: ProblemsQuery = {}): Promise<ProblemsListOut>
   for (const tech of query.tech ?? []) params.append('tech', tech);
   if (query.source) params.set('source', query.source);
   if (query.sort) params.set('sort', query.sort);
+  if (query.distinct) params.set('distinct', query.distinct);
   if (query.limit != null) params.set('limit', String(query.limit));
   if (query.offset != null) params.set('offset', String(query.offset));
   const qs = params.toString();

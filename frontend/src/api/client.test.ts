@@ -73,6 +73,7 @@ describe('apiFetch', () => {
       q: 'crop',
       tech: ['python', 'pandas'],
       sort: 'popular',
+      distinct: 'field',
       limit: 6,
       offset: 3,
     });
@@ -81,6 +82,7 @@ describe('apiFetch', () => {
     expect(params.get('q')).toBe('crop');
     expect(params.getAll('tech')).toEqual(['python', 'pandas']);
     expect(params.get('sort')).toBe('popular');
+    expect(params.get('distinct')).toBe('field');
     expect(params.get('limit')).toBe('6');
     expect(params.get('offset')).toBe('3');
   });

@@ -5,7 +5,7 @@ import { server } from '@/api/mocks/server';
 import { App } from './App';
 
 const STATIC_ROUTE_TARGETS: Array<[string, string]> = [
-  ['/', 'MANABI'],
+  ['/', 'Pick a project. Ship it. Prove it.'],
   ['/_kit', 'MANABI /_kit'],
   ['/about', 'About MANABI'],
   ['/how-it-works', 'From idea to shipped code'],
@@ -91,8 +91,12 @@ describe('Route table (no dead links)', () => {
 
     render(<App />);
 
-    expect(await screen.findByRole('heading', { name: 'MANABI', level: 1 }))
-      .toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Pick a project. Ship it. Prove it.',
+        level: 1,
+      }),
+    ).toBeInTheDocument();
     expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
   });
 

@@ -8,7 +8,10 @@ describe('HomePage', () => {
     renderWithProviders(<HomePage />, { route: '/' });
 
     expect(
-      screen.getByRole('heading', { name: 'MANABI', level: 1 }),
+      screen.getByRole('heading', {
+        name: 'Pick a project. Ship it. Prove it.',
+        level: 1,
+      }),
     ).toBeInTheDocument();
     expect(
       await screen.findByText(/briefs curated/i),

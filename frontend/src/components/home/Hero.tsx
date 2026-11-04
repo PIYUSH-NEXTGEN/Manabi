@@ -44,7 +44,11 @@ function DifficultyMeter({ difficulty }: { difficulty: ProblemOut['difficulty'] 
 }
 
 function BriefShowcase() {
-  const query = useProblems({ sort: 'popular', limit: SHOWCASE_LIMIT });
+  const query = useProblems({
+    sort: 'popular',
+    distinct: 'field',
+    limit: SHOWCASE_LIMIT,
+  });
   const reduced = usePrefersReducedMotion();
   const [index, setIndex] = useState(0);
   const [held, setHeld] = useState(false);
@@ -177,6 +181,45 @@ function BriefShowcase() {
   );
 }
 
+const HEADLINE_LINES = [
+  { text: 'Pick a project.', accent: false },
+  { text: 'Ship it.', accent: true },
+  { text: 'Prove it.', accent: true },
+];
+const HEADLINE_STEP_MS = 1000;
+
+/**
+ * Three-step headline. Every line is in the DOM from the first paint (empty space
+ * reserved), so the reveal only animates opacity/transform: no reflow, no jank.
+ */
+function HeroHeadline() {
+  const reduced = usePrefersReducedMotion();
+
+  return (
+    <h1 className="font-display uppercase leading-[0.92] tracking-[-0.02em] text-[2rem] sm:text-[2.75rem] md:text-[2.15rem] lg:text-[3rem] xl:text-[3.4rem]">
+      {HEADLINE_LINES.map((line, index) => (
+        <motion.span
+          key={line.text}
+          className={cx('block', line.accent && 'text-accent')}
+          initial={reduced ? false : { opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={
+            reduced
+              ? { duration: 0 }
+              : {
+                  duration: 0.7,
+                  delay: (index * HEADLINE_STEP_MS) / 1000,
+                  ease: EASE_SNAP,
+                }
+          }
+        >
+          {line.text}{' '}
+        </motion.span>
+      ))}
+    </h1>
+  );
+}
+
 export function Hero() {
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
@@ -192,29 +235,26 @@ export function Hero() {
       <div className="mx-auto w-[min(1240px,96vw)]">
         <div className="grid items-start gap-12 py-10 md:grid-cols-[1.12fr_0.88fr] md:gap-14 md:py-14">
           <div>
-            <h1
-              className="font-display uppercase leading-[0.82] tracking-[-0.035em]"
-              style={{ fontSize: 'clamp(4rem, 11vw, 8.5rem)' }}
-            >
-              MANABI
-            </h1>
-            <p className="mt-5 max-w-xl font-display text-xl uppercase leading-[0.95] tracking-tight sm:text-2xl">
-              Real problems.
-              <span className="text-accent"> Handpicked by us.</span>
-            </p>
+            <HeroHeadline />
 
-            <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
-              Every brief here is written and reviewed by the MANABI team:
-              real work, scoped so you can actually finish it. Search the
-              library, open a brief, link your repo, and MANABI tracks the
-              commits.
-            </p>
+            <div className="mt-7 max-w-xl space-y-4 text-base leading-[1.7] text-ink-soft sm:text-lg">
+              <p>
+                Tired of Googling project ideas and still not knowing what to
+                build? MANABI gives you real problems across every domain,
+                filtered by difficulty.
+              </p>
+              <p>
+                Pick one that fits your skills, from beginner projects to
+                final-year and Hackathons project. Track your progress through
+                your GitHub repo and show your work publicly on MANABI.
+              </p>
+            </div>
 
             <form
               role="search"
               noValidate
               onSubmit={handleSubmit}
-              className="mt-7 flex w-full max-w-xl flex-col gap-3 sm:flex-row"
+              className="mt-8 flex w-full max-w-xl flex-col gap-3 sm:flex-row"
             >
               <label htmlFor="hero-search" className="sr-only">
                 Search problem briefs
@@ -232,8 +272,8 @@ export function Hero() {
               </button>
             </form>
 
-            <dl className="mt-9 max-w-xl border-t border-ink">
-              <div className="py-4">
+            <dl className="mt-10 max-w-xl border-t border-ink">
+              <div className="py-5">
                 <dt className="font-mono text-[9px] font-bold uppercase leading-relaxed tracking-[0.16em] text-muted">
                   Problem briefs curated
                 </dt>
