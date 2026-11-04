@@ -4,7 +4,7 @@ import { HOW_IT_WORKS_STEPS } from './steps';
 
 export function HowItWorks() {
   return (
-    <section className="border-b-[3px] border-ink">
+    <section className="border-b border-ink">
       <div className="mx-auto w-[min(1200px,96vw)] py-12">
         <h2 className="mb-8 font-mono text-sm font-bold uppercase tracking-widest">
           How it works
@@ -18,7 +18,7 @@ export function HowItWorks() {
               whileInView="show"
               viewport={{ once: true, amount: 0.3 }}
               transition={{ delay: index * 0.06 }}
-              className="border-t-[3px] border-ink pt-3"
+              className="border-t border-ink pt-3"
             >
               <span
                 aria-hidden

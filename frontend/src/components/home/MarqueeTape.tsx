@@ -9,7 +9,7 @@ export function MarqueeTape({
 }) {
   if (query.isLoading) {
     return (
-      <div aria-busy="true" className="border-y-[3px] border-ink">
+      <div aria-busy="true" className="border-y border-ink">
         <div className="skeleton h-10" aria-hidden />
       </div>
     );

@@ -1,305 +1,170 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { buttonClasses } from '@/design';
+import { Link, useNavigate } from 'react-router-dom';
+import { buttonClasses, Stamp } from '@/design';
+import { useProject } from '@/hooks/useProject';
 import { useStats } from '@/hooks/useStats';
 import { CountUp } from './CountUp';
 
-const FEATURES = [
-  {
-    title: 'Sourced briefs',
-    copy: 'Every problem links back to the organisation that published it.',
-  },
-  {
-    title: 'Progress tracked',
-    copy: 'Commits and README update themselves from the repo you link.',
-  },
-  {
-    title: 'Built in public',
-    copy: 'One page per project, so the work speaks before the pitch does.',
-  },
-];
+const STATUS_TONE = {
+  active: 'active',
+  stale: 'stale',
+  not_started: 'not-started',
+} as const;
 
-function HeroArtwork() {
+function CommitMeter({ commits }: { commits: number }) {
+  const filled = Math.min(10, Math.max(commits > 0 ? 1 : 0, Math.round(commits / 2)));
   return (
-    <svg
-      viewBox="0 0 560 420"
-      role="img"
-      aria-labelledby="hero-artwork-title"
-      className="h-auto w-full"
-    >
-      <title id="hero-artwork-title">
-        Layered problem brief cards, a repo progress panel and a phone mockup
-      </title>
+    <div role="img" aria-label={`${commits} commits`} className="mt-2 flex gap-1">
+      {Array.from({ length: 10 }, (_, index) => (
+        <span
+          key={index}
+          className={`block h-2.5 flex-1 border ${
+            index < filled ? 'border-ink bg-ink' : 'border-line bg-transparent'
+          }`}
+        />
+      ))}
+    </div>
+  );
+}
 
-      {/* back brief card */}
-      <g transform="rotate(6 200 130)">
-        <rect
-          x="84"
-          y="46"
-          width="240"
-          height="150"
-          transform="translate(8 8)"
-          fill="var(--ink)"
-        />
-        <rect
-          x="84"
-          y="46"
-          width="240"
-          height="150"
-          fill="var(--white)"
-          stroke="var(--ink)"
-          strokeWidth="3"
-        />
-        <rect x="102" y="66" width="92" height="10" fill="var(--ink)" />
-        <rect
-          x="102"
-          y="90"
-          width="196"
-          height="7"
-          fill="var(--ink)"
-          opacity="0.28"
-        />
-        <rect
-          x="102"
-          y="106"
-          width="168"
-          height="7"
-          fill="var(--ink)"
-          opacity="0.28"
-        />
-        <rect
-          x="102"
-          y="134"
-          width="62"
-          height="20"
-          fill="var(--yellow)"
-          stroke="var(--ink)"
-          strokeWidth="3"
-        />
-        <rect
-          x="174"
-          y="134"
-          width="52"
-          height="20"
-          fill="var(--white)"
-          stroke="var(--ink)"
-          strokeWidth="3"
-        />
-      </g>
+function ProjectRecord() {
+  const query = useProject(1);
+  const project = query.data;
+  const progress = project?.progress;
 
-      {/* phone mockup */}
-      <g transform="rotate(-8 450 200)">
-        <rect
-          x="398"
-          y="56"
-          width="128"
-          height="268"
-          rx="24"
-          transform="translate(8 8)"
-          fill="var(--ink)"
-        />
-        <rect
-          x="398"
-          y="56"
-          width="128"
-          height="268"
-          rx="24"
-          fill="var(--white)"
-          stroke="var(--ink)"
-          strokeWidth="3"
-        />
-        <rect x="442" y="72" width="40" height="8" rx="4" fill="var(--ink)" />
-        <rect
-          x="416"
-          y="102"
-          width="92"
-          height="54"
-          fill="var(--yellow)"
-          stroke="var(--ink)"
-          strokeWidth="3"
-        />
-        <rect x="428" y="118" width="58" height="7" fill="var(--ink)" />
-        <rect
-          x="428"
-          y="132"
-          width="40"
-          height="7"
-          fill="var(--ink)"
-          opacity="0.4"
-        />
-        {[176, 200, 224, 248].map((y) => (
-          <g key={y}>
-            <rect
-              x="416"
-              y={y}
-              width="14"
-              height="14"
-              fill="var(--white)"
-              stroke="var(--ink)"
-              strokeWidth="3"
-            />
-            <rect
-              x="440"
-              y={y + 4}
-              width={y === 224 ? 48 : 66}
-              height="7"
-              fill="var(--ink)"
-              opacity="0.3"
-            />
-          </g>
-        ))}
-        <rect
-          x="416"
-          y="282"
-          width="92"
-          height="18"
-          fill="var(--ink)"
-          opacity="0.85"
-        />
-      </g>
+  return (
+    <figure className="border border-ink bg-sheet">
+      <div className="flex items-center justify-between gap-3 border-b border-ink px-4 py-2.5">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em]">
+          Project record
+        </span>
+        {progress ? (
+          <Stamp tone={STATUS_TONE[progress.status]} />
+        ) : (
+          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+            {query.isLoading ? 'Syncing' : 'No data'}
+          </span>
+        )}
+      </div>
 
-      {/* front brief card */}
-      <g transform="rotate(-5 300 250)">
-        <rect
-          x="148"
-          y="148"
-          width="300"
-          height="196"
-          transform="translate(9 9)"
-          fill="var(--ink)"
-        />
-        <rect
-          x="148"
-          y="148"
-          width="300"
-          height="196"
-          fill="var(--white)"
-          stroke="var(--ink)"
-          strokeWidth="3"
-        />
-        <rect
-          x="148"
-          y="148"
-          width="300"
-          height="36"
-          fill="var(--yellow)"
-          stroke="var(--ink)"
-          strokeWidth="3"
-        />
-        {[166, 180, 194].map((cx) => (
-          <circle key={cx} cx={cx} cy="166" r="4.5" fill="var(--ink)" />
-        ))}
-        <rect
-          x="170"
-          y="204"
-          width="86"
-          height="18"
-          fill="var(--ink)"
-        />
-        <rect x="266" y="209" width="52" height="8" fill="var(--ink)" opacity="0.35" />
-        <rect x="170" y="240" width="240" height="10" fill="var(--ink)" opacity="0.8" />
-        <rect x="170" y="260" width="196" height="8" fill="var(--ink)" opacity="0.3" />
-        <rect x="170" y="278" width="216" height="8" fill="var(--ink)" opacity="0.3" />
-        <rect
-          x="170"
-          y="304"
-          width="74"
-          height="22"
-          fill="var(--white)"
-          stroke="var(--ink)"
-          strokeWidth="3"
-        />
-        <rect
-          x="252"
-          y="304"
-          width="58"
-          height="22"
-          fill="var(--white)"
-          stroke="var(--ink)"
-          strokeWidth="3"
-        />
-        <rect x="322" y="300" width="88" height="26" fill="var(--red)" />
-      </g>
+      <div className="p-5 sm:p-6">
+        {query.isLoading ? (
+          <div className="space-y-3" aria-busy="true">
+            <div className="skeleton h-2.5 w-20" />
+            <div className="skeleton h-8 w-3/4" />
+            <div className="skeleton h-3 w-1/2" />
+            <div className="skeleton mt-6 h-16 w-full" />
+          </div>
+        ) : project ? (
+          <>
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted">
+              Repository
+            </p>
+            <p className="mt-2 break-words font-display text-3xl uppercase leading-[0.95] tracking-tight sm:text-4xl">
+              {project.repo_name}
+            </p>
+            <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
+              {project.repo_owner}
+            </p>
+            <p className="mt-4 text-sm leading-snug text-ink-soft">
+              {project.problem_title}
+            </p>
 
-      {/* repo progress card */}
-      <g transform="rotate(-3 190 356)">
-        <rect
-          x="70"
-          y="300"
-          width="240"
-          height="96"
-          transform="translate(7 7)"
-          fill="var(--ink)"
-        />
-        <rect
-          x="70"
-          y="300"
-          width="240"
-          height="96"
-          fill="var(--white)"
-          stroke="var(--ink)"
-          strokeWidth="3"
-        />
-        <rect x="86" y="316" width="58" height="8" fill="var(--ink)" />
-        <rect x="86" y="332" width="96" height="7" fill="var(--ink)" opacity="0.3" />
-        <g>
-          {Array.from({ length: 10 }, (_, index) => (
-            <rect
-              key={index}
-              x={86 + index * 18}
-              y="352"
-              width="13"
-              height="13"
-              fill={index < 7 ? 'var(--ink)' : 'var(--white)'}
-              stroke="var(--ink)"
-              strokeWidth="2.5"
-            />
-          ))}
-        </g>
-        <rect
-          x="86"
-          y="374"
-          width="44"
-          height="6"
-          fill="var(--ink)"
-          opacity="0.4"
-        />
-        <rect
-          x="140"
-          y="374"
-          width="30"
-          height="6"
-          fill="var(--ink)"
-          opacity="0.4"
-        />
-      </g>
+            {progress ? (
+              <>
+                <div className="mt-6 border-t border-ink pt-4">
+                  <div className="flex items-baseline justify-between gap-3 font-mono text-[9px] font-bold uppercase tracking-[0.16em]">
+                    <span className="text-muted">Commit activity</span>
+                    <span>{progress.commit_count} commits</span>
+                  </div>
+                  <CommitMeter commits={progress.commit_count} />
+                </div>
 
-      {/* accents */}
-      <path
-        d="M36 200 L96 140"
-        stroke="var(--ink)"
-        strokeWidth="3"
-        strokeDasharray="8 7"
-      />
-      <path
-        d="M52 300 L88 264"
-        stroke="var(--ink)"
-        strokeWidth="3"
-        strokeDasharray="8 7"
-      />
-      <circle cx="474" cy="34" r="12" fill="var(--yellow)" stroke="var(--ink)" strokeWidth="3" />
-      <path
-        d="M112 28 L124 52 L100 52 Z"
-        fill="var(--red)"
-        stroke="var(--ink)"
-        strokeWidth="3"
-      />
-    </svg>
+                <dl className="mt-5 grid grid-cols-2 border-t border-line">
+                  <div className="border-b border-r border-line py-3 pr-3">
+                    <dt className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+                      README
+                    </dt>
+                    <dd className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
+                      {progress.has_readme ? 'Present' : 'Missing'}
+                    </dd>
+                  </div>
+                  <div className="border-b border-line py-3 pl-3">
+                    <dt className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+                      Open issues
+                    </dt>
+                    <dd className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
+                      {progress.open_issues.length}
+                    </dd>
+                  </div>
+                  <div className="border-r border-line py-3 pr-3">
+                    <dt className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+                      Last commit
+                    </dt>
+                    <dd className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
+                      {progress.last_commit_at
+                        ? new Date(progress.last_commit_at).toLocaleDateString('en-CA')
+                        : 'Never'}
+                    </dd>
+                  </div>
+                  <div className="py-3 pl-3">
+                    <dt className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+                      Access
+                    </dt>
+                    <dd className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
+                      {project.open_for_contributors ? 'Open' : 'Solo'}
+                    </dd>
+                  </div>
+                </dl>
+              </>
+            ) : (
+              <p className="mt-5 border-t border-line pt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+                No progress tracked yet.
+              </p>
+            )}
+
+            <div className="mt-5 flex items-end justify-between gap-4 border-t border-line pt-4">
+              <Link
+                to={`/projects/${project.id}`}
+                className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
+              >
+                Open project →
+              </Link>
+              <span aria-hidden className="barcode h-7 w-24 opacity-80" />
+              <span aria-hidden className="block size-7 bg-accent" />
+            </div>
+          </>
+        ) : (
+          <div>
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted">
+              Repository
+            </p>
+            <p className="mt-2 font-display text-2xl uppercase leading-tight">
+              Record unavailable
+            </p>
+            <p className="mt-3 text-sm leading-snug text-ink-soft">
+              The projects API did not respond. Browse the archive while it
+              comes back online.
+            </p>
+            <Link
+              to="/problems"
+              className="mt-5 inline-block border border-ink px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] transition-colors hover:bg-ink hover:text-paper"
+            >
+              Browse problems
+            </Link>
+          </div>
+        )}
+      </div>
+
+      <figcaption className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+        <span>Live record</span>
+        <span>Pulled from GitHub</span>
+      </figcaption>
+    </figure>
   );
 }
 
 export function Hero() {
-  const stats = useStats();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
 
@@ -310,106 +175,73 @@ export function Hero() {
   }
 
   return (
-    <section className="overflow-hidden border-b-[3px] border-ink">
-      <div className="mx-auto grid w-[min(1200px,96vw)] items-center gap-12 py-12 md:grid-cols-2 md:gap-10 md:py-16">
-        <div className="flex flex-col items-start gap-7">
-          <h1
-            className="relative inline-block font-display uppercase leading-[0.85] tracking-tight"
-            style={{ fontSize: 'clamp(3.25rem, 9vw, 7rem)' }}
-          >
-            <span className="relative z-10">MANABI</span>
-            <span
-              aria-hidden
-              className="absolute inset-x-0 bottom-[0.12em] z-0 h-[0.16em] bg-yellow"
-            />
-          </h1>
+    <section className="border-b border-ink bg-paper">
+      <div className="mx-auto w-[min(1240px,96vw)]">
+        <div className="grid items-start gap-12 py-10 md:grid-cols-[1.12fr_0.88fr] md:gap-14 md:py-14">
+          <div>
+            <h1
+              className="font-display uppercase leading-[0.82] tracking-[-0.035em]"
+              style={{ fontSize: 'clamp(4rem, 11vw, 8.5rem)' }}
+            >
+              MANABI
+            </h1>
+            <p className="mt-5 max-w-xl font-display text-xl uppercase leading-[0.95] tracking-tight sm:text-2xl">
+              Real problems.
+              <span className="text-accent"> Real sources.</span>
+            </p>
 
-          <p className="max-w-xl text-lg leading-snug md:text-xl">
-            Real problem briefs with real sources. Claim one, link your repo,
-            and build in public.
-          </p>
+            <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
+              A working archive of problem briefs published by real
+              organisations — every record links back to its official source.
+              Search it, open a brief, and start building; link a repo and
+              MANABI tracks the commits.
+            </p>
 
-          <form
-            role="search"
-            noValidate
-            onSubmit={handleSubmit}
-            className="flex w-full max-w-xl flex-col gap-3 sm:flex-row"
-          >
-            <label htmlFor="hero-search" className="sr-only">
-              Search problem briefs
-            </label>
-            <input
-              id="hero-search"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search problems — leaf blight, SLAs…"
-              className="field min-w-0 flex-1"
-            />
-            <button type="submit" className={buttonClasses('primary')}>
-              Browse projects
-            </button>
-          </form>
+            <form
+              role="search"
+              noValidate
+              onSubmit={handleSubmit}
+              className="mt-7 flex w-full max-w-xl flex-col gap-3 sm:flex-row"
+            >
+              <label htmlFor="hero-search" className="sr-only">
+                Search problem briefs
+              </label>
+              <input
+                id="hero-search"
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search problems — leaf blight, SLAs…"
+                className="field min-w-0 flex-1"
+              />
+              <button type="submit" className={buttonClasses('primary', 'shrink-0')}>
+                Browse projects
+              </button>
+            </form>
 
-          <dl className="flex w-full max-w-xl items-stretch gap-6 border-t-[3px] border-ink pt-6 sm:gap-8">
-            <div className="flex flex-col-reverse gap-1 border-r-[3px] border-ink pr-6 sm:pr-8">
-              <dt className="font-mono text-[11px] font-bold uppercase tracking-widest">
-                Problem briefs indexed
-              </dt>
-              <dd className="font-display text-4xl leading-none md:text-5xl">
-                {stats.data ? (
-                  <CountUp value={stats.data.problems} />
-                ) : (
-                  <span aria-hidden>—</span>
-                )}
-              </dd>
-            </div>
-            <div className="flex flex-col-reverse gap-1">
-              <dt className="font-mono text-[11px] font-bold uppercase tracking-widest">
-                Official sources credited
-              </dt>
-              <dd className="font-display text-4xl leading-none md:text-5xl">
-                {stats.data ? (
-                  <CountUp value={stats.data.sources} />
-                ) : (
-                  <span aria-hidden>—</span>
-                )}
-              </dd>
-            </div>
-          </dl>
-          <p className="sr-only" role="status">
-            {stats.data
-              ? `${stats.data.problems} problem briefs indexed from ${stats.data.sources} sources`
-              : stats.isError
-                ? 'Problem count unavailable'
-                : 'Counting problems…'}
-          </p>
-
-          <p className="flex flex-wrap items-center gap-3 font-mono text-[11px] font-bold uppercase tracking-widest">
-            <span className="bg-ink px-2 py-1 text-yellow">Sources</span>
-            <span className="text-ink/70">
-              Official portals · public briefings · open data — each one credited
-            </span>
-          </p>
-        </div>
-
-        <div className="flex flex-col gap-6">
-          <div className="border-[3px] border-ink bg-white p-4 shadow-hard-lg sm:p-6">
-            <HeroArtwork />
+            <dl className="mt-9 max-w-xl border-t border-ink">
+              <div className="py-4">
+                <dt className="font-mono text-[9px] font-bold uppercase leading-relaxed tracking-[0.16em] text-muted">
+                  Problem briefs indexed
+                </dt>
+                <dd className="mt-1 font-display text-4xl leading-none text-accent md:text-5xl">
+                  <StatsNumber />
+                </dd>
+              </div>
+            </dl>
           </div>
 
-          <ul className="grid gap-4 sm:grid-cols-3">
-            {FEATURES.map((feature) => (
-              <li key={feature.title} className="border-t-[3px] border-ink pt-3">
-                <h2 className="font-mono text-[11px] font-bold uppercase tracking-widest">
-                  {feature.title}
-                </h2>
-                <p className="mt-1.5 text-sm leading-snug">{feature.copy}</p>
-              </li>
-            ))}
-          </ul>
+          <ProjectRecord />
         </div>
       </div>
     </section>
   );
+}
+
+function StatsNumber() {
+  const stats = useStats();
+  if (!stats.data) {
+    return <span aria-hidden>—</span>;
+  }
+  return <CountUp value={stats.data.problems} />;
 }

@@ -3,22 +3,27 @@ import { openChatWidget } from '@/components/chat/ChatWidget';
 
 export function AskManabi() {
   return (
-    <section className="border-b-[3px] border-ink">
-      <div className="mx-auto w-[min(1200px,96vw)] py-12">
-        <div className="flex flex-col gap-4 border-[3px] border-ink bg-white p-6 shadow-hard md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="font-display text-2xl uppercase leading-none md:text-3xl">
-              Ask MANABI
-            </h2>
-            <p className="mt-2 max-w-xl text-sm leading-snug">
-              Tell it what you know and what you want to build. It finds
-              problems that fit, scoped for a weekend, and never invents one.
-            </p>
+    <section className="border-b border-ink">
+      <div className="mx-auto w-[min(1240px,96vw)] py-14">
+        <div className="flex flex-col gap-5 border-y border-ink py-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex gap-4">
+            <span className="mt-1 font-mono text-[9px] font-bold tracking-[0.16em] text-accent">
+              04
+            </span>
+            <div>
+              <h2 className="font-display text-2xl uppercase leading-none tracking-tight md:text-3xl">
+                Ask MANABI
+              </h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-soft">
+                Tell it what you know and what you want to build. It finds
+                problems that fit, scoped for a weekend, and never invents one.
+              </p>
+            </div>
           </div>
           <button
             type="button"
             onClick={openChatWidget}
-            className={buttonClasses('primary')}
+            className={buttonClasses('secondary', 'shrink-0')}
           >
             Open the chat
           </button>

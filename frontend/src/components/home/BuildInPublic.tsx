@@ -12,16 +12,12 @@ const STATUS_TONE = {
 function SegmentedMeter({ commits }: { commits: number }) {
   const filled = Math.min(10, Math.max(commits > 0 ? 1 : 0, Math.round(commits / 2)));
   return (
-    <div
-      role="img"
-      aria-label={`${commits} commits`}
-      className="flex gap-1"
-    >
+    <div role="img" aria-label={`${commits} commits`} className="flex gap-1">
       {Array.from({ length: 10 }, (_, index) => (
         <span
           key={index}
-          className={`block size-3.5 border-[2px] border-ink ${
-            index < filled ? 'bg-ink' : 'bg-white'
+          className={`block size-3 border ${
+            index < filled ? 'border-ink bg-ink' : 'border-line bg-transparent'
           }`}
         />
       ))}
@@ -33,10 +29,10 @@ function ProgressPanel({ project }: { project: ProjectOut }) {
   const progress = project.progress;
 
   return (
-    <div className="border-[3px] border-ink bg-white p-5 text-ink shadow-hard-lg">
-      <div className="flex items-start justify-between gap-3 border-b-[3px] border-ink pb-3">
+    <div className="border border-ink bg-paper p-5 text-ink">
+      <div className="flex items-start justify-between gap-3 border-b border-line pb-3">
         <div>
-          <p className="font-mono text-[11px] font-bold uppercase tracking-widest">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-muted">
             {project.repo_owner} / {project.repo_name}
           </p>
           <p className="mt-1 text-sm font-semibold">{project.problem_title}</p>
@@ -47,7 +43,7 @@ function ProgressPanel({ project }: { project: ProjectOut }) {
       {progress ? (
         <div className="mt-4 flex flex-col gap-3">
           <SegmentedMeter commits={progress.commit_count} />
-          <div className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-[11px] font-bold uppercase tracking-widest">
+          <div className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
             <span>{progress.commit_count} commits</span>
             <span>README {progress.has_readme ? '✓' : '□'}</span>
             <span>
@@ -59,7 +55,7 @@ function ProgressPanel({ project }: { project: ProjectOut }) {
           </div>
         </div>
       ) : (
-        <p className="mt-4 font-mono text-[11px] uppercase tracking-widest">
+        <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
           No progress tracked yet.
         </p>
       )}
@@ -71,34 +67,33 @@ export function BuildInPublic() {
   const query = useProject(1);
 
   return (
-    <section className="border-b-[3px] border-ink bg-red text-white">
-      <div className="mx-auto grid w-[min(1200px,96vw)] items-center gap-10 py-12 md:grid-cols-2">
+    <section className="border-b border-ink bg-olive text-paper">
+      <div className="mx-auto grid w-[min(1240px,96vw)] items-center gap-10 py-14 md:grid-cols-2">
         <div className="flex flex-col items-start gap-4">
-          <p className="font-mono text-xs font-bold uppercase tracking-widest">
-            Build in public
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-paper/60">
+            02 / Public record
           </p>
-          <h2 className="font-display text-3xl uppercase leading-none md:text-4xl">
-            Link a repo. <span className="text-yellow">MANABI tracks it.</span>
+          <h2 className="font-display text-3xl uppercase leading-[0.92] tracking-tight md:text-4xl">
+            Link a repo.
+            <br />
+            <span className="text-accent-soft">MANABI tracks it.</span>
           </h2>
-          <p className="max-w-md text-sm leading-snug">
+          <p className="max-w-md text-sm leading-relaxed text-paper/80">
             Commits, README, and good-first-issues update themselves. Visitors
             see proof of work, not a claim of it.
           </p>
-          <Link
-            to="/problems"
-            className="inline-flex items-center gap-2 border-[3px] border-ink bg-yellow px-5 py-2.5 font-mono text-xs font-bold uppercase tracking-widest text-ink shadow-hard press"
-          >
+          <Link to="/problems" className="mt-2 inline-flex border border-paper bg-accent px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-paper transition-colors hover:border-accent hover:bg-paper hover:text-ink">
             Claim a problem
           </Link>
         </div>
 
         <div>
           {query.isLoading ? (
-            <div className="skeleton h-56 border-[3px] border-ink" aria-hidden />
+            <div className="skeleton h-56 border border-paper/40" aria-hidden />
           ) : query.data ? (
             <ProgressPanel project={query.data} />
           ) : (
-            <p className="border-[3px] border-ink bg-white p-4 font-mono text-[11px] uppercase tracking-widest text-ink">
+            <p className="border border-paper/40 p-4 font-mono text-[10px] uppercase tracking-[0.14em]">
               Progress panel loads when the projects API is up.
             </p>
           )}

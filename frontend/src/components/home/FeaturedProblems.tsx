@@ -12,8 +12,8 @@ export function FeaturedProblems({
 }) {
   if (query.isLoading) {
     return (
-      <section className="border-b-[3px] border-ink">
-        <div className="mx-auto grid w-[min(1200px,96vw)] gap-6 py-12 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="border-b border-ink">
+        <div className="mx-auto grid w-[min(1240px,96vw)] gap-5 py-14 sm:grid-cols-2 lg:grid-cols-3">
           {Array.from({ length: 3 }, (_, index) => (
             <Skeleton key={index} className="h-64" />
           ))}
@@ -24,12 +24,12 @@ export function FeaturedProblems({
 
   if (query.isError) {
     return (
-      <section className="border-b-[3px] border-ink">
+      <section className="border-b border-ink">
         <div
           role="alert"
-          className="mx-auto my-12 flex w-[min(1200px,96vw)] flex-col items-start gap-4 border-[3px] border-ink bg-white p-6 shadow-hard"
+          className="mx-auto my-12 flex w-[min(1240px,96vw)] flex-col items-start gap-4 border border-ink bg-sheet p-6"
         >
-          <p className="font-mono text-xs font-bold uppercase tracking-widest">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.16em]">
             Could not load problems — {query.error.detail}
           </p>
           <button
@@ -52,8 +52,8 @@ export function FeaturedProblems({
 
   if (items.length === 0) {
     return (
-      <section className="border-b-[3px] border-ink">
-        <div className="mx-auto my-12 w-[min(1200px,96vw)] border-[3px] border-ink bg-white p-6 shadow-hard">
+      <section className="border-b border-ink">
+        <div className="mx-auto my-12 w-[min(1240px,96vw)] border border-ink bg-sheet p-6">
           <p className="text-sm">No problems on the board yet.</p>
         </div>
       </section>
@@ -61,21 +61,26 @@ export function FeaturedProblems({
   }
 
   return (
-    <section className="border-b-[3px] border-ink">
-      <div className="mx-auto w-[min(1200px,96vw)] py-12">
-        <div className="mb-8 flex items-end justify-between gap-4 border-b-[3px] border-ink pb-3">
-          <h2 className="font-display text-3xl uppercase leading-none md:text-4xl">
-            Featured problems
-          </h2>
+    <section className="border-b border-ink">
+      <div className="mx-auto w-[min(1240px,96vw)] py-14">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-ink pb-4">
+          <div>
+            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-accent">
+              01 / Index highlights
+            </p>
+            <h2 className="mt-2 font-display text-3xl uppercase leading-none tracking-tight md:text-4xl">
+              Featured problems
+            </h2>
+          </div>
           <Link
             to="/problems"
-            className="font-mono text-xs font-bold uppercase tracking-widest text-blue underline underline-offset-4"
+            className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
           >
             See the board →
           </Link>
         </div>
 
-        <div className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid items-stretch gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((problem, index) => (
             <motion.div
               key={problem.id}
@@ -86,10 +91,7 @@ export function FeaturedProblems({
               transition={{ delay: index * 0.06 }}
               className="h-full min-w-0"
             >
-              <Link
-                to={`/problems/${problem.id}`}
-                className="block h-full transition-transform duration-150 hover:-translate-y-1"
-              >
+              <Link to={`/problems/${problem.id}`} className="block h-full">
                 <IndexCard
                   sourceId={problem.source_id}
                   field={problem.field}
@@ -114,4 +116,3 @@ export function FeaturedProblems({
     </section>
   );
 }
-

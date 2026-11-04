@@ -3,20 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { HomePage } from './HomePage';
 import { renderWithProviders } from '@/test/renderWithProviders';
 
-function stubMatchMedia(reduced: boolean) {
-  window.matchMedia = (query: string): MediaQueryList =>
-    ({
-      matches: query.includes('prefers-reduced-motion') ? reduced : false,
-      media: query,
-      onchange: null,
-      addEventListener: () => {},
-      removeEventListener: () => {},
-      addListener: () => {},
-      removeListener: () => {},
-      dispatchEvent: () => false,
-    }) as MediaQueryList;
-}
-
 describe('HomePage', () => {
   it('renders the hero with the real problem count from the API', async () => {
     renderWithProviders(<HomePage />, { route: '/' });
@@ -27,7 +13,6 @@ describe('HomePage', () => {
     expect(
       await screen.findByText(/briefs indexed/i),
     ).toBeInTheDocument();
-    expect(screen.getByText(/sources credited/i)).toBeInTheDocument();
 
     expect(
       screen.getByRole('button', { name: 'Browse projects' }),
@@ -48,17 +33,6 @@ describe('HomePage', () => {
     expect(screen.getAllByText('SIH26017').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('counts up the stats strip to the values from /api/stats', async () => {
-    stubMatchMedia(true);
-    renderWithProviders(<HomePage />, { route: '/' });
-
-    const strip = await screen.findByRole('region', { name: 'Platform stats' });
-    expect(await within(strip).findByText('6')).toBeInTheDocument();
-    expect(within(strip).getByText('3')).toBeInTheDocument();
-    expect(within(strip).getByText('5')).toBeInTheDocument();
-    expect(within(strip).getByText('2')).toBeInTheDocument();
-  });
-
   it('marquees only the sources returned by /api/problems/facets', async () => {
     renderWithProviders(<HomePage />, { route: '/' });
 
@@ -76,8 +50,8 @@ describe('HomePage', () => {
     expect(
       await screen.findByText('demo-farmer / crop-triage'),
     ).toBeInTheDocument();
-    expect(screen.getByText('ACTIVE')).toBeInTheDocument();
-    expect(screen.getByLabelText('14 commits')).toBeInTheDocument();
+    expect(screen.getAllByText('ACTIVE').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByLabelText('14 commits').length).toBeGreaterThanOrEqual(1);
     expect(
       screen.getByRole('heading', { name: /Find it\. Build it\./ }),
     ).toBeInTheDocument();
