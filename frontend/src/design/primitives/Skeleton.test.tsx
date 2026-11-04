@@ -7,7 +7,7 @@ describe('Skeleton', () => {
     const { container } = render(<Skeleton className="h-16" />);
 
     const stripe = container.firstElementChild;
-    expect(stripe).toHaveClass('skeleton', 'h-16', 'border-ink');
+    expect(stripe).toHaveClass('skeleton', 'h-16', 'border-line');
     expect(stripe).toHaveAttribute('aria-hidden');
   });
 });

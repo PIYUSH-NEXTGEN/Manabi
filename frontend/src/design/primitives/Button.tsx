@@ -5,18 +5,21 @@ export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'link';
 export type ButtonSize = 'default' | 'small';
 
 const BASE_CLASSES =
-  'inline-flex items-center justify-center gap-2 border-[3px] border-ink font-mono font-bold uppercase tracking-widest disabled:pointer-events-none disabled:opacity-50 shadow-hard press';
+  'inline-flex items-center justify-center gap-2 border border-ink font-mono text-[11px] font-bold uppercase tracking-[0.16em] disabled:pointer-events-none disabled:opacity-45 press';
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
-  default: 'px-5 py-2.5 text-xs',
-  small: 'px-3 py-1.5 text-[11px]',
+  default: 'px-5 py-3',
+  small: 'px-3 py-2',
 };
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
-  primary: 'bg-yellow text-ink',
-  secondary: 'bg-white text-ink',
-  danger: 'bg-red text-white',
-  link: 'bg-transparent text-blue border-transparent underline underline-offset-4',
+  primary:
+    'border-accent bg-accent text-paper hover:border-ink hover:bg-ink hover:text-paper',
+  secondary:
+    'border-ink bg-transparent text-ink hover:bg-ink hover:text-paper',
+  danger:
+    'border-danger bg-danger text-paper hover:border-ink hover:bg-ink hover:text-paper',
+  link: 'border-transparent bg-transparent px-0 py-0 text-accent underline underline-offset-4 hover:text-ink',
 };
 
 export function buttonClasses(variant: ButtonVariant, className?: string): string {

@@ -21,12 +21,16 @@ describe('IndexCard', () => {
   });
 
   it('shows difficulty as filled squares with a screen-reader label', () => {
-    const { container } = render(
+    render(
       <IndexCard field="ml" title="Drift detector" difficulty="intermediate" />,
     );
 
-    expect(container.querySelector('[aria-hidden]')).toHaveTextContent('■■□');
-    expect(screen.getByText('intermediate')).toBeInTheDocument();
+    const label = screen.getByText('intermediate');
+    const squares = label.previousElementSibling?.children;
+    expect(squares).toHaveLength(3);
+    expect(squares?.[0]).toHaveClass('bg-ink');
+    expect(squares?.[1]).toHaveClass('bg-ink');
+    expect(squares?.[2]).toHaveClass('bg-transparent');
   });
 
   it('falls back to NO-ID when the source has no ID', () => {
@@ -48,6 +52,6 @@ describe('IndexCard', () => {
     );
 
     expect(screen.getByText('Track applications end to end.')).toBeInTheDocument();
-    expect(screen.getByText('governance · 16h')).toBeInTheDocument();
+    expect(screen.getByText('governance · 16 h')).toBeInTheDocument();
   });
 });

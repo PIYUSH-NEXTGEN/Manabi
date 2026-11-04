@@ -14,18 +14,18 @@ describe('Button', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('applies neo-brutalist surface classes per variant', () => {
+  it('applies archival surface classes per variant', () => {
     const { rerender } = render(<Button variant="primary">Go</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-yellow', 'text-ink', 'shadow-hard');
+    expect(screen.getByRole('button')).toHaveClass('bg-accent', 'text-paper');
 
     rerender(<Button variant="secondary">Go</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-white', 'text-ink');
+    expect(screen.getByRole('button')).toHaveClass('bg-transparent', 'text-ink');
 
     rerender(<Button variant="danger">Go</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-red', 'text-white');
+    expect(screen.getByRole('button')).toHaveClass('bg-danger', 'text-paper');
 
     rerender(<Button variant="link">Go</Button>);
-    expect(screen.getByRole('button')).toHaveClass('text-blue', 'underline');
+    expect(screen.getByRole('button')).toHaveClass('text-accent', 'underline');
   });
 
   it('defaults to type=button so it never submits forms by accident', () => {

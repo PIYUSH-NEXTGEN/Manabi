@@ -30,7 +30,7 @@ describe('Toast', () => {
 
     const status = screen.getByRole('status');
     expect(status).toHaveTextContent('Saved to the board');
-    expect(status).toHaveClass('bg-yellow');
+    expect(status).toHaveClass('bg-accent', 'text-paper');
   });
 
   it('renders error toasts on a red slab', async () => {
@@ -43,7 +43,7 @@ describe('Toast', () => {
 
     await user.click(screen.getByRole('button', { name: 'Break' }));
 
-    expect(screen.getByRole('status')).toHaveClass('bg-red', 'text-white');
+    expect(screen.getByRole('status')).toHaveClass('bg-danger', 'text-paper');
   });
 
   it('throws if useToast is used outside the provider', () => {

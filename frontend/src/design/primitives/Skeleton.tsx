@@ -8,7 +8,7 @@ export function Skeleton({ className }: SkeletonProps) {
   return (
     <div
       aria-hidden
-      className={cx('skeleton h-24 w-full border-[3px] border-ink', className)}
+      className={cx('skeleton h-24 w-full border border-line', className)}
     />
   );
 }

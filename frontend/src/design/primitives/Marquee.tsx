@@ -12,14 +12,15 @@ interface MarqueeProps {
 function MarqueeRow({ items, hidden }: { items: string[]; hidden: boolean }) {
   return (
     <ul
-      className="flex shrink-0 items-center gap-8 pr-8"
+      className="flex shrink-0 items-center gap-7 pr-7"
       aria-hidden={hidden || undefined}
     >
       {items.map((item, index) => (
         <li
           key={`${item}-${index}`}
-          className="whitespace-nowrap font-mono text-xs font-bold uppercase tracking-widest"
+          className="flex items-center gap-3 whitespace-nowrap font-mono text-[10px] font-bold uppercase tracking-[0.18em]"
         >
+          <span aria-hidden className="block size-1.5 bg-accent" />
           {item}
         </li>
       ))}
@@ -29,7 +30,7 @@ function MarqueeRow({ items, hidden }: { items: string[]; hidden: boolean }) {
 
 export function Marquee({
   items,
-  durationSec = 30,
+  durationSec = 38,
   className,
   label = 'Sources',
 }: MarqueeProps) {
@@ -48,7 +49,7 @@ export function Marquee({
     <div
       aria-label={label}
       className={cx(
-        'marquee overflow-hidden border-y-[3px] border-ink bg-yellow py-2',
+        'marquee overflow-hidden border-y border-ink bg-sheet py-2.5',
         className,
       )}
     >

@@ -34,7 +34,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         <p
           id={errorId}
           role="alert"
-          className="font-mono text-[11px] font-bold uppercase tracking-widest text-red"
+          className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
         >
           {error}
         </p>

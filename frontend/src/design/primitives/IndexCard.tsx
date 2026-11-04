@@ -30,30 +30,53 @@ export function IndexCard({
   className,
 }: IndexCardProps) {
   const filled = difficulty ? DIFFICULTY_FILL[difficulty] : 0;
-  const squares = `${'■'.repeat(filled)}${'□'.repeat(3 - filled)}`;
-  const meta = [domain, estHours != null ? `${estHours}h` : null]
+  const meta = [domain, estHours != null ? `${estHours} h` : null]
     .filter(Boolean)
     .join(' · ');
 
   return (
     <article
-      className={cx('flex h-full flex-col border-[3px] border-ink bg-white shadow-hard', className)}
+      className={cx(
+        'flex h-full flex-col border border-ink bg-sheet transition-colors duration-150 hover:border-accent',
+        className,
+      )}
     >
-      <header className="flex items-center justify-between gap-3 border-b-[3px] border-ink bg-ink px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest text-paper">
-        <span>{sourceId ?? 'NO-ID'}</span>
-        <span>{field}</span>
+      <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
+        <span className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink">
+          <span aria-hidden className="block size-2 bg-accent" />
+          {sourceId ?? 'NO-ID'}
+        </span>
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-muted">
+          {field}
+        </span>
       </header>
-      <div className="flex flex-1 flex-col gap-2 p-4">
-        <h3 className="font-display text-lg uppercase leading-tight">{title}</h3>
-        {summary ? <p className="line-clamp-3 text-sm leading-snug">{summary}</p> : null}
-        <div className="mt-auto flex items-center justify-between gap-3 pt-2 font-mono text-[11px] font-bold uppercase tracking-widest">
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <h3 className="font-display text-[1.15rem] uppercase leading-[1.02] tracking-tight">
+          {title}
+        </h3>
+        {summary ? (
+          <p className="line-clamp-3 text-[13px] leading-snug text-ink-soft">{summary}</p>
+        ) : null}
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-line pt-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
           {difficulty ? (
-            <span>
-              <span aria-hidden>{squares}</span>
+            <span className="flex items-center gap-1.5">
+              <span aria-hidden className="flex gap-0.5">
+                {Array.from({ length: 3 }, (_, index) => (
+                  <span
+                    key={index}
+                    className={cx(
+                      'block size-2 border border-ink',
+                      index < filled ? 'bg-ink' : 'bg-transparent',
+                    )}
+                  />
+                ))}
+              </span>
               <span className="sr-only">{difficulty}</span>
             </span>
-          ) : null}
-          {meta.length > 0 ? <span>{meta}</span> : null}
+          ) : (
+            <span />
+          )}
+          <span className="text-muted">{meta || 'open brief'}</span>
         </div>
       </div>
     </article>

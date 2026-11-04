@@ -1,21 +1,26 @@
 :root {
-  --ink: #0b0b0b;
-  --paper: #f5f1e6;
-  --white: #ffffff;
-  --yellow: #ffd500;
-  --red: #e5231b;
-  --blue: #1f3bff;
+  /* Surfaces */
+  --ink: #17150f;
+  --ink-soft: #2d2a22;
+  --paper: #eae5db;
+  --sheet: #f4f0e7;
+  --tint: #d9d3c4;
+  --olive: #4e4d3c;
 
+  /* Accent and semantic colour */
+  --accent: #c2451c;
+  --accent-soft: #e4d5c6;
+  --danger: #9f2c14;
+  --muted: #6f695b;
+  --line: rgba(23, 21, 15, 0.22);
+  --line-strong: var(--ink);
+
+  /* Type */
   --ff-display: "Archivo Black", "Arial Black", sans-serif;
   --ff-body: "Archivo", Arial, sans-serif;
   --ff-mono: "JetBrains Mono", "Courier New", monospace;
 
-  --hard-shadow: 6px 6px 0 0 var(--ink);
-  --hard-shadow-lg: 10px 10px 0 0 var(--ink);
-  --hard-shadow-sm: 3px 3px 0 0 var(--ink);
-  --hard-shadow-press: 8px 8px 0 0 var(--ink);
-
-  --border-w: 3px;
+  /* Motion */
   --dur-press: 120ms;
   --ease-snap: cubic-bezier(0.2, 0.9, 0.2, 1);
 }

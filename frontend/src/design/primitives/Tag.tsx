@@ -10,7 +10,7 @@ export function Tag({ children, className }: TagProps) {
   return (
     <span
       className={cx(
-        'inline-block border-[3px] border-ink bg-white px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest',
+        'inline-block border border-line bg-sheet px-2 py-1 font-mono text-[10px] font-bold uppercase leading-none tracking-[0.14em] text-ink-soft',
         className,
       )}
     >

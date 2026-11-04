@@ -8,20 +8,20 @@ describe('Stamp', () => {
     expect(screen.getByText('NOT STARTED')).toBeInTheDocument();
   });
 
-  it('uses red for closed and blue for AI-suggested', () => {
+  it('uses danger for closed and olive for AI-suggested', () => {
     const { rerender } = render(<Stamp tone="closed" />);
-    expect(screen.getByText('CLOSED')).toHaveClass('bg-red', 'text-white');
+    expect(screen.getByText('CLOSED')).toHaveClass('bg-danger', 'text-paper');
 
     rerender(<Stamp tone="ai-suggested" />);
-    expect(screen.getByText('AI-SUGGESTED')).toHaveClass('bg-blue', 'text-white');
+    expect(screen.getByText('AI-SUGGESTED')).toHaveClass('bg-olive', 'text-paper');
   });
 
-  it('uses blue for active and yellow for stale progress states', () => {
+  it('uses olive for active and accent for stale progress states', () => {
     const { rerender } = render(<Stamp tone="active" />);
-    expect(screen.getByText('ACTIVE')).toHaveClass('bg-blue');
+    expect(screen.getByText('ACTIVE')).toHaveClass('bg-olive');
 
     rerender(<Stamp tone="stale" />);
-    expect(screen.getByText('STALE')).toHaveClass('bg-yellow');
+    expect(screen.getByText('STALE')).toHaveClass('bg-accent');
   });
 
   it('accepts a custom label and rotation', () => {
