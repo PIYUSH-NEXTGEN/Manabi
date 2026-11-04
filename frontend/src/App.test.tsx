@@ -10,12 +10,12 @@ const STATIC_ROUTE_TARGETS: Array<[string, string]> = [
   ['/about', 'About MANABI'],
   ['/how-it-works', 'From idea to shipped code'],
   ['/repo-analyzer', 'Repo Analyzer'],
-  ['/sources', 'Sources'],
+  ['/projects', 'Advanced Project Ideas'],
   ['/faq', 'Straight answers'],
   ['/contribute', "Build on someone else's repo"],
   ['/contact', 'Talk to us'],
   ['/privacy', 'Privacy, in plain English'],
-  ['/sources#credits', 'Sources'],
+  ['/terms', 'Terms, in plain English'],
 ];
 
 const PLACEHOLDER_ROUTE_TARGETS: Array<[string, string]> = [];

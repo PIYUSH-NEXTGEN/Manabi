@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, Clock, GitBranch } from 'lucide-react';
+import { ArrowUpRight, GitBranch } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import type { ProblemOut } from '@/api/client';
 
@@ -35,35 +35,9 @@ const ALLOWED_DOMAINS: Record<string, string> = {
   other: 'web dev',
 };
 
-const DIFFICULTY_FILL: Record<ProblemOut['difficulty'], number> = {
-  beginner: 1,
-  intermediate: 2,
-  advanced: 3,
-};
-
 interface ProblemCardProps {
   problem: ProblemOut;
   className?: string;
-}
-
-function DifficultyMeter({ difficulty }: { difficulty: ProblemOut['difficulty'] }) {
-  const filled = DIFFICULTY_FILL[difficulty];
-  return (
-    <span className="flex items-center gap-1.5" title={difficulty}>
-      <span aria-hidden className="flex gap-0.5">
-        {Array.from({ length: 3 }, (_, index) => (
-          <span
-            key={index}
-            className={cx(
-              'block size-2 border border-ink',
-              index < filled ? 'bg-ink' : 'bg-transparent',
-            )}
-          />
-        ))}
-      </span>
-      <span className="sr-only">{difficulty}</span>
-    </span>
-  );
 }
 
 function ProblemCardComponent({ problem, className }: ProblemCardProps) {
@@ -91,11 +65,10 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
         className,
       )}
     >
-      <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
+      <header className="flex items-center border-b border-line px-4 py-2.5">
         <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-accent">
-          {problem.source_id ?? `BRIEF-${problem.id}`}
+          {problem.difficulty}
         </span>
-        <DifficultyMeter difficulty={problem.difficulty} />
       </header>
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
@@ -128,15 +101,9 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
         ) : null}
 
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-[9px] font-bold uppercase tracking-[0.14em]">
-          <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted">
-            <span className="flex items-center gap-1">
-              <Clock aria-hidden size={11} strokeWidth={2.4} />
-              {problem.est_hours} h
-            </span>
-            <span className="flex items-center gap-1">
-              <GitBranch aria-hidden size={11} strokeWidth={2.4} />
-              {projectLabel}
-            </span>
+          <span className="flex items-center gap-1 text-muted">
+            <GitBranch aria-hidden size={11} strokeWidth={2.4} />
+            {projectLabel}
           </span>
           <span className="flex items-center gap-1 text-accent transition-colors group-hover:text-ink">
             Open brief

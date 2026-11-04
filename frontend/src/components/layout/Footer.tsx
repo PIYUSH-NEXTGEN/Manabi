@@ -26,17 +26,19 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     heading: 'Explore',
     icon: Compass,
     links: [
-      { label: 'Problems', to: '/problems' },
-      { label: 'Sources', to: '/sources' },
+      { label: 'Projects', to: '/problems' },
+      { label: 'Advanced projects', to: '/projects' },
+      { label: 'How it works', to: '/how-it-works' },
     ],
   },
   {
     heading: 'Build',
     icon: Hammer,
     links: [
-      { label: 'How it works', to: '/how-it-works' },
+      { label: 'Repo analyzer', to: '/repo-analyzer' },
       { label: 'Submit a project', to: '/problems' },
       { label: 'Contribute', to: '/contribute' },
+      { label: 'Your dashboard', to: '/me' },
     ],
   },
   {
@@ -54,7 +56,6 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     links: [
       { label: 'Privacy', to: '/privacy' },
       { label: 'Terms', to: '/terms' },
-      { label: 'Data & credits', to: '/sources#credits' },
     ],
   },
 ];
@@ -73,8 +74,9 @@ export function Footer() {
             </Link>
 
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-paper/70">
-              Curated problem briefs for developers who want to build something
-              real and show the work behind it.
+              Real problems worth building. Claim a brief, link your GitHub
+              repo, and MANABI tracks commits, README status, and open issues
+              while you ship it.
             </p>
 
             <span className="mt-6 inline-flex items-center gap-2 border border-paper/25 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/65">
@@ -143,8 +145,9 @@ export function Footer() {
               © 2026 MANABI
             </p>
             <p className="max-w-xl text-[11px] leading-relaxed text-paper/45">
-              Briefs are written and reviewed by the MANABI team. Project
-              progress is read from public GitHub repositories.
+              Problem briefs come from hackathons, companies, and public
+              programs, and are reviewed before they appear on the board.
+              Project progress is read from public GitHub repositories.
             </p>
           </div>
 

@@ -11,7 +11,8 @@ export function TermsPage() {
           <dd className="mt-1">
             A hackathon prototype, provided as-is. No warranties, no uptime
             promises, no support desk. There is no company behind this — a
-            small team built it in a weekend.
+            small team built it in a weekend. The advanced project workspaces
+            are demos running on the same API, not production services.
           </dd>
         </div>
 

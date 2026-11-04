@@ -4,16 +4,36 @@ import { StaticShell } from './StaticShell';
 
 const FAQS = [
   {
+    q: 'What is in a brief?',
+    a: 'A real problem statement trimmed into a short brief: a summary, who it affects, why it matters, a difficulty level, an effort estimate, a suggested stack, and the approaches to take.',
+  },
+  {
     q: 'Are these problems real?',
-    a: 'Yes. Every card links to its source and the original statement is shown verbatim. If a source has no link, the card says so.',
+    a: 'Yes. Every card keeps the original statement verbatim and links to the organisation that published it. If a source has no link, the card says so.',
+  },
+  {
+    q: 'What do beginner, intermediate, and advanced mean?',
+    a: 'Scope, not a skill gate. Beginner is one flow in one stack, intermediate adds persistence, auth, or an API, and advanced is systems work — event delivery, consistency, offline sync. Pick where you want to stretch.',
   },
   {
     q: 'Do I need an account?',
-    a: 'Browsing is open. Claiming a problem and submitting a project need a GitHub login.'
+    a: 'Browsing is open. Claiming a problem, submitting a project, and opening your dashboard need a GitHub login.',
   },
   {
     q: 'How does progress tracking work?',
-    a: 'After you link a repo, MANABI reads commits, README, and good-first-issues through the GitHub API and caches the result for 10 minutes. You can refresh manually.',
+    a: 'After you link a public repo, MANABI reads commits, README status, and open issues through the GitHub API and caches the result for 10 minutes. You can refresh manually.',
+  },
+  {
+    q: 'What is the build guide?',
+    a: 'Every brief has a three-phase guide — Start, Implement, Ship — listing what to do and what you should leave each phase with. It is a starting path, not a fixed spec.',
+  },
+  {
+    q: 'What are the advanced projects?',
+    a: 'Ten deeper domains — webhooks, API contracts, multi-tenant security, incident response, ingestion, analytics, accessibility, inventory, offline sync, and workflows. Each has a live workspace wired to a working API you can click through before you build your own.',
+  },
+  {
+    q: 'What does Ask MANABI do?',
+    a: 'It answers from the catalog only: tell it your stack and the time you have, and it suggests briefs that exist, with a link to each one. It will say so plainly when nothing fits.',
   },
   {
     q: 'What does it cost?',
@@ -21,7 +41,7 @@ const FAQS = [
   },
   {
     q: 'What happens to my data?',
-    a: 'See Privacy. GitHub tokens stay on the server and are never returned to the browser.',
+    a: 'See Privacy. GitHub tokens stay on the server and are never returned to the browser, and chat messages are not stored.',
   },
 ];
 
@@ -42,9 +62,12 @@ export function FaqPage() {
         ))}
       </dl>
 
-      <div>
+      <div className="flex flex-wrap gap-4">
         <Link to="/problems" className={buttonClasses('secondary')}>
           Browse problems
+        </Link>
+        <Link to="/how-it-works" className={buttonClasses('secondary')}>
+          How it works
         </Link>
       </div>
     </StaticShell>

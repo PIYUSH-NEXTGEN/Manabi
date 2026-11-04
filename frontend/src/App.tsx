@@ -68,9 +68,6 @@ const ProjectDetailPage = lazy(() =>
 const PrivacyPage = lazy(() =>
   import('@/pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })),
 );
-const SourcesPage = lazy(() =>
-  import('@/pages/SourcesPage').then((m) => ({ default: m.SourcesPage })),
-);
 const TermsPage = lazy(() =>
   import('@/pages/TermsPage').then((m) => ({ default: m.TermsPage })),
 );
@@ -190,7 +187,6 @@ export function App() {
                   />
                   <Route path="/about" element={<AboutPage />} />
                   <Route path="/how-it-works" element={<HowItWorksPage />} />
-                  <Route path="/sources" element={<SourcesPage />} />
                   <Route path="/faq" element={<FaqPage />} />
                   <Route path="/contribute" element={<ContributePage />} />
                   <Route path="/contact" element={<ContactPage />} />

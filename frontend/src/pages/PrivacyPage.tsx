@@ -3,6 +3,7 @@ import { StaticShell } from './StaticShell';
 const WE_STORE = [
   'Your GitHub username, display name, and avatar — shown on projects you submit.',
   'Links to the public repos you submit, plus automatically tracked progress (commits, README, open issues).',
+  'Which briefs you have claimed, and whether a project is marked open for contributors.',
   'A GitHub token on the server side. It is never returned to any browser.',
 ];
 
@@ -33,7 +34,9 @@ export function PrivacyPage() {
           <dd className="mt-1">
             No analytics, no ads, no tracking cookies, no selling anything to
             anyone. Login runs through GitHub OAuth; a signed session cookie
-            keeps you logged in and nothing else rides on it.
+            keeps you logged in and nothing else rides on it. Chat messages are
+            not saved — the assistant reads the message you send and nothing is
+            written to the database.
           </dd>
         </div>
 
