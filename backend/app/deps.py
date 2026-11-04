@@ -41,7 +41,7 @@ OptionalUser = Annotated[User | None, Depends(get_optional_user)]
 
 
 def get_current_admin(user: CurrentUser) -> User:
-    if user.username.lower() not in admin_usernames():
+    if user.username.lower() not in _admin_usernames():
         raise HTTPException(status_code=403, detail="Admin access required")
     return user
 

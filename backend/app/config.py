@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     CHAT_RATE_LIMIT_USER_PER_HOUR: int = 30
 
     SITE_URL: str = "https://github.com/PIYUSH-NEXTGEN/Manabi"
+    ADMIN_GITHUB_USERNAMES: str = ""
 
 
 @lru_cache
