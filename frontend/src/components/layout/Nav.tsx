@@ -1,18 +1,31 @@
 import { NavLink, Link } from 'react-router-dom';
+import {
+  FolderKanban,
+  ListOrdered,
+  ScanSearch,
+  ShieldCheck,
+} from 'lucide-react';
+import { GithubMark } from '@/components/icons/GithubMark';
 import { Button } from '@/design/primitives';
 import { Logo } from './Logo';
 import { useMe } from '@/hooks/useMe';
 import { cx } from '@/lib/cx';
 
 const NAV_LINKS = [
-  { to: '/problems', label: 'Projects' },
-  { to: '/repo-analyzer', label: 'Repo Analyzer' },
-  { to: '/how-it-works', label: 'How it works' },
+  { to: '/problems', label: 'Projects', icon: FolderKanban },
+  { to: '/repo-analyzer', label: 'Repo Analyzer', icon: ScanSearch },
+  { to: '/how-it-works', label: 'How it works', icon: ListOrdered },
 ];
+
+const ADMIN_LINK = {
+  to: '/admin/review',
+  label: 'Review',
+  icon: ShieldCheck,
+};
 
 const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
   cx(
-    'label relative inline-block py-1 transition-colors',
+    'label relative inline-flex items-center gap-1.5 py-1 transition-colors',
     isActive
       ? 'text-accent after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:bg-accent'
       : 'text-ink hover:text-accent',
@@ -20,13 +33,10 @@ const navLinkClasses = ({ isActive }: { isActive: boolean }) =>
 
 export function Nav() {
   const me = useMe();
-  const links = me.data?.is_admin
-    ? [...NAV_LINKS, { to: '/admin/review', label: 'Review' }]
-    : NAV_LINKS;
+  const links = me.data?.is_admin ? [...NAV_LINKS, ADMIN_LINK] : NAV_LINKS;
 
   return (
     <header className="sticky top-0 z-30 border-b border-ink bg-paper">
-      <div aria-hidden className="h-1.5 bg-accent" />
       <nav
         aria-label="Main"
         className="mx-auto flex w-[min(1240px,96vw)] flex-wrap items-center justify-between gap-x-6 gap-y-3 py-3"
@@ -42,6 +52,7 @@ export function Nav() {
           {links.map((link) => (
             <li key={link.to}>
               <NavLink to={link.to} className={navLinkClasses}>
+                <link.icon aria-hidden size={13} strokeWidth={2.4} />
                 {link.label}
               </NavLink>
             </li>
@@ -75,7 +86,8 @@ export function Nav() {
                 window.location.assign('/api/auth/github/login');
               }}
             >
-              GitHub
+              <GithubMark size={14} />
+              GitHub login
             </Button>
           )}
         </div>
@@ -84,6 +96,7 @@ export function Nav() {
           {links.map((link) => (
             <li key={link.to} className="shrink-0">
               <NavLink to={link.to} className={navLinkClasses}>
+                <link.icon aria-hidden size={13} strokeWidth={2.4} />
                 {link.label}
               </NavLink>
             </li>

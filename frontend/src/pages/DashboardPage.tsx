@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Tag } from '@/design/primitives';
+import { Tag, Button } from '@/design/primitives';
 import { ProblemCard } from '@/components/problems/ProblemCard';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
 import type { ProjectOut, RecommendationItem } from '@/api/client';
@@ -7,6 +7,7 @@ import {
   projectOwnerUsername,
 } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
+import { useLogout } from '@/hooks/useLogout';
 import { useMyProjects } from '@/hooks/useMyProjects';
 import { useProjectProgress } from '@/hooks/useProjectProgress';
 import { useRecommendations } from '@/hooks/useRecommendations';
@@ -48,6 +49,7 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
 
 export function DashboardPage() {
   const me = useMe();
+  const logout = useLogout();
   const recommendations = useRecommendations();
   const projects = useMyProjects();
 
@@ -59,7 +61,19 @@ export function DashboardPage() {
         Dashboard
       </h1>
       <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/70">
-        {displayName ? <>Logged in as {displayName}</> : 'Loading…'}
+        {displayName ? (
+          <>
+            Logged in as {displayName}
+            <Button
+              variant="danger"
+              size="small"
+              onClick={() => logout.mutate()}
+              disabled={logout.isPending}
+            >
+              {logout.isPending ? 'Signing out…' : 'Log out'}
+            </Button>
+          </>
+        ) : 'Loading…'}
       </p>
 
       <section aria-label="Your projects" className="mt-8">
