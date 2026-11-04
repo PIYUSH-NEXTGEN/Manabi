@@ -1,150 +1,138 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { buttonClasses, Stamp } from '@/design';
-import { useProject } from '@/hooks/useProject';
+import { AnimatePresence, motion } from 'motion/react';
+import { buttonClasses } from '@/design';
+import { EASE_SNAP } from '@/design/motion';
+import { cx } from '@/lib/cx';
+import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
+import { useProblems } from '@/hooks/useProblems';
 import { useStats } from '@/hooks/useStats';
+import type { ProblemOut } from '@/api/client';
 import { CountUp } from './CountUp';
 
-const STATUS_TONE = {
-  active: 'active',
-  stale: 'stale',
-  not_started: 'not-started',
-} as const;
+const SHOWCASE_LIMIT = 6;
+const CYCLE_MS = 3000;
 
-function CommitMeter({ commits }: { commits: number }) {
-  const filled = Math.min(10, Math.max(commits > 0 ? 1 : 0, Math.round(commits / 2)));
+const DIFFICULTY_FILL: Record<ProblemOut['difficulty'], number> = {
+  beginner: 1,
+  intermediate: 2,
+  advanced: 3,
+};
+
+function pad(value: number) {
+  return String(value).padStart(2, '0');
+}
+
+function DifficultyMeter({ difficulty }: { difficulty: ProblemOut['difficulty'] }) {
+  const filled = DIFFICULTY_FILL[difficulty];
   return (
-    <div role="img" aria-label={`${commits} commits`} className="mt-2 flex gap-1">
-      {Array.from({ length: 10 }, (_, index) => (
-        <span
-          key={index}
-          className={`block h-2.5 flex-1 border ${
-            index < filled ? 'border-ink bg-ink' : 'border-line bg-transparent'
-          }`}
-        />
-      ))}
-    </div>
+    <span className="flex items-center gap-1.5" title={difficulty}>
+      <span aria-hidden className="flex gap-0.5">
+        {Array.from({ length: 3 }, (_, index) => (
+          <span
+            key={index}
+            className={cx(
+              'block size-2 border border-ink',
+              index < filled ? 'bg-ink' : 'bg-transparent',
+            )}
+          />
+        ))}
+      </span>
+      <span className="sr-only">{difficulty}</span>
+    </span>
   );
 }
 
-function ProjectRecord() {
-  const query = useProject(1);
-  const project = query.data;
-  const progress = project?.progress;
+function BriefShowcase() {
+  const query = useProblems({ sort: 'popular', limit: SHOWCASE_LIMIT });
+  const reduced = usePrefersReducedMotion();
+  const [index, setIndex] = useState(0);
+  const [held, setHeld] = useState(false);
+  const [manualPause, setManualPause] = useState(false);
+
+  const items = query.data?.items.slice(0, SHOWCASE_LIMIT) ?? [];
+  const count = items.length;
+  const paused = held || manualPause;
+
+  useEffect(() => {
+    if (paused || reduced || count < 2) return;
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % count);
+    }, CYCLE_MS);
+    return () => window.clearInterval(timer);
+  }, [paused, reduced, count]);
+
+  const current = count > 0 ? index % count : 0;
+  const active = count > 0 ? items[current] : null;
 
   return (
-    <figure className="border border-ink bg-sheet">
+    <figure
+      className="border border-ink bg-sheet"
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+    >
       <div className="flex items-center justify-between gap-3 border-b border-ink px-4 py-2.5">
         <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em]">
-          Project record
+          Brief in focus
         </span>
-        {progress ? (
-          <Stamp tone={STATUS_TONE[progress.status]} />
-        ) : (
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-            {query.isLoading ? 'Syncing' : 'No data'}
-          </span>
-        )}
+        <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+          {count > 0 ? `${pad(current + 1)} / ${pad(count)}` : 'No data'}
+        </span>
       </div>
 
-      <div className="p-5 sm:p-6">
+      <div className="min-h-[300px] p-5 sm:p-6" aria-busy={query.isLoading}>
         {query.isLoading ? (
-          <div className="space-y-3" aria-busy="true">
+          <div className="space-y-3" aria-hidden>
             <div className="skeleton h-2.5 w-20" />
             <div className="skeleton h-8 w-3/4" />
+            <div className="skeleton h-3 w-full" />
             <div className="skeleton h-3 w-1/2" />
-            <div className="skeleton mt-6 h-16 w-full" />
+            <div className="skeleton mt-8 h-9 w-full" />
           </div>
-        ) : project ? (
-          <>
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted">
-              Repository
-            </p>
-            <p className="mt-2 break-words font-display text-3xl uppercase leading-[0.95] tracking-tight sm:text-4xl">
-              {project.repo_name}
-            </p>
-            <p className="mt-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-muted">
-              {project.repo_owner}
-            </p>
-            <p className="mt-4 text-sm leading-snug text-ink-soft">
-              {project.problem_title}
-            </p>
-
-            {progress ? (
-              <>
-                <div className="mt-6 border-t border-ink pt-4">
-                  <div className="flex items-baseline justify-between gap-3 font-mono text-[9px] font-bold uppercase tracking-[0.16em]">
-                    <span className="text-muted">Commit activity</span>
-                    <span>{progress.commit_count} commits</span>
-                  </div>
-                  <CommitMeter commits={progress.commit_count} />
+        ) : active ? (
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={active.id}
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: reduced ? 0 : 0.42, ease: EASE_SNAP }}
+            >
+              <Link to={`/problems/${active.id}`} className="group block">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-accent">
+                    {active.source_id ?? `BRIEF-${active.id}`}
+                  </p>
+                  <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+                    {active.field}
+                  </p>
                 </div>
-
-                <dl className="mt-5 grid grid-cols-2 border-t border-line">
-                  <div className="border-b border-r border-line py-3 pr-3">
-                    <dt className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-                      README
-                    </dt>
-                    <dd className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
-                      {progress.has_readme ? 'Present' : 'Missing'}
-                    </dd>
-                  </div>
-                  <div className="border-b border-line py-3 pl-3">
-                    <dt className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-                      Open issues
-                    </dt>
-                    <dd className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
-                      {progress.open_issues.length}
-                    </dd>
-                  </div>
-                  <div className="border-r border-line py-3 pr-3">
-                    <dt className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-                      Last commit
-                    </dt>
-                    <dd className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
-                      {progress.last_commit_at
-                        ? new Date(progress.last_commit_at).toLocaleDateString('en-CA')
-                        : 'Never'}
-                    </dd>
-                  </div>
-                  <div className="py-3 pl-3">
-                    <dt className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-                      Access
-                    </dt>
-                    <dd className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.1em]">
-                      {project.open_for_contributors ? 'Open' : 'Solo'}
-                    </dd>
-                  </div>
-                </dl>
-              </>
-            ) : (
-              <p className="mt-5 border-t border-line pt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
-                No progress tracked yet.
-              </p>
-            )}
-
-            <div className="mt-5 flex items-end justify-between gap-4 border-t border-line pt-4">
-              <Link
-                to={`/projects/${project.id}`}
-                className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
-              >
-                Open project →
+                <h2 className="mt-2 line-clamp-3 font-display text-2xl uppercase leading-[0.98] tracking-tight sm:text-3xl">
+                  {active.title}
+                </h2>
+                <p className="mt-3 line-clamp-3 text-sm leading-snug text-ink-soft">
+                  {active.summary}
+                </p>
+                <div className="mt-6 flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-[9px] font-bold uppercase tracking-[0.16em]">
+                  <DifficultyMeter difficulty={active.difficulty} />
+                  <span className="text-accent transition-colors group-hover:text-ink">
+                    Open brief →
+                  </span>
+                </div>
               </Link>
-              <span aria-hidden className="barcode h-7 w-24 opacity-80" />
-              <span aria-hidden className="block size-7 bg-accent" />
-            </div>
-          </>
+            </motion.div>
+          </AnimatePresence>
         ) : (
           <div>
             <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted">
-              Repository
+              Index
             </p>
             <p className="mt-2 font-display text-2xl uppercase leading-tight">
-              Record unavailable
+              Briefs unavailable
             </p>
             <p className="mt-3 text-sm leading-snug text-ink-soft">
-              The projects API did not respond. Browse the archive while it
-              comes back online.
+              The problems API did not respond. Open the board while it comes
+              back online.
             </p>
             <Link
               to="/problems"
@@ -157,8 +145,33 @@ function ProjectRecord() {
       </div>
 
       <figcaption className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-        <span>Live record</span>
-        <span>Pulled from GitHub</span>
+        <span>Curated by MANABI</span>
+        {count > 1 ? (
+          <span className="flex items-center gap-3">
+            <span className="flex items-center gap-1">
+              {items.map((item, itemIndex) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setIndex(itemIndex)}
+                  aria-label={`Show brief ${itemIndex + 1}`}
+                  aria-pressed={itemIndex === current}
+                  className={cx(
+                    'block size-2 border border-ink transition-colors',
+                    itemIndex === current ? 'bg-ink' : 'bg-transparent hover:bg-tint',
+                  )}
+                />
+              ))}
+            </span>
+            <button
+              type="button"
+              onClick={() => setManualPause((value) => !value)}
+              className="underline underline-offset-2 transition-colors hover:text-ink"
+            >
+              {manualPause ? 'Play' : 'Pause'}
+            </button>
+          </span>
+        ) : null}
       </figcaption>
     </figure>
   );
@@ -187,14 +200,14 @@ export function Hero() {
             </h1>
             <p className="mt-5 max-w-xl font-display text-xl uppercase leading-[0.95] tracking-tight sm:text-2xl">
               Real problems.
-              <span className="text-accent"> Real sources.</span>
+              <span className="text-accent"> Handpicked by us.</span>
             </p>
 
             <p className="mt-5 max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
-              A working archive of problem briefs published by real
-              organisations — every record links back to its official source.
-              Search it, open a brief, and start building; link a repo and
-              MANABI tracks the commits.
+              Every brief here is written and reviewed by the MANABI team:
+              real work, scoped so you can actually finish it. Search the
+              library, open a brief, link your repo, and MANABI tracks the
+              commits.
             </p>
 
             <form
@@ -211,7 +224,7 @@ export function Hero() {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search problems — leaf blight, SLAs…"
+                placeholder="Search problems: leaf blight, SLAs…"
                 className="field min-w-0 flex-1"
               />
               <button type="submit" className={buttonClasses('primary', 'shrink-0')}>
@@ -222,7 +235,7 @@ export function Hero() {
             <dl className="mt-9 max-w-xl border-t border-ink">
               <div className="py-4">
                 <dt className="font-mono text-[9px] font-bold uppercase leading-relaxed tracking-[0.16em] text-muted">
-                  Problem briefs indexed
+                  Problem briefs curated
                 </dt>
                 <dd className="mt-1 font-display text-4xl leading-none text-accent md:text-5xl">
                   <StatsNumber />
@@ -231,7 +244,7 @@ export function Hero() {
             </dl>
           </div>
 
-          <ProjectRecord />
+          <BriefShowcase />
         </div>
       </div>
     </section>

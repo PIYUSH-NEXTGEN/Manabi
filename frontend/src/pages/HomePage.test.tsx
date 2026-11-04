@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { HomePage } from './HomePage';
 import { renderWithProviders } from '@/test/renderWithProviders';
@@ -11,7 +11,7 @@ describe('HomePage', () => {
       screen.getByRole('heading', { name: 'MANABI', level: 1 }),
     ).toBeInTheDocument();
     expect(
-      await screen.findByText(/briefs indexed/i),
+      await screen.findByText(/briefs curated/i),
     ).toBeInTheDocument();
 
     expect(
@@ -33,16 +33,31 @@ describe('HomePage', () => {
     expect(screen.getAllByText('SIH26017').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('marquees only the sources returned by /api/problems/facets', async () => {
-    renderWithProviders(<HomePage />, { route: '/' });
+  it(
+    'cycles the hero brief showcase every three seconds',
+    async () => {
+      renderWithProviders(<HomePage />, { route: '/' });
 
-    const tape = await screen.findByLabelText('Sources');
-    expect(within(tape).getAllByText('SIH 2026').length).toBeGreaterThan(0);
-    expect(within(tape).getAllByText('TCOE').length).toBeGreaterThan(0);
-    expect(
-      within(tape).getAllByText('OpenGov Data Challenge').length,
-    ).toBeGreaterThan(0);
-  });
+      const showcase = await screen.findByRole('figure');
+      expect(
+        await within(showcase).findByRole('heading', {
+          name: 'Crop disease triage for small farms',
+        }),
+      ).toBeInTheDocument();
+
+      await waitFor(
+        () => {
+          expect(
+            within(showcase).getByRole('heading', {
+              name: 'Streetlight outage tracker',
+            }),
+          ).toBeInTheDocument();
+        },
+        { timeout: 5000 },
+      );
+    },
+    10000,
+  );
 
   it('shows the sample project progress panel with an ACTIVE stamp', async () => {
     renderWithProviders(<HomePage />, { route: '/' });
