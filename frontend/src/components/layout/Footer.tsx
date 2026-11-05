@@ -3,12 +3,11 @@ import type { LucideIcon } from 'lucide-react';
 import {
   ArrowUpRight,
   ChevronRight,
-  Compass,
-  Hammer,
   Info,
   Scale,
 } from 'lucide-react';
 import { Logo } from './Logo';
+import { GithubMark } from '@/components/icons/GithubMark';
 
 export interface FooterLink {
   label: string;
@@ -22,25 +21,6 @@ export interface FooterColumn {
 }
 
 export const FOOTER_COLUMNS: FooterColumn[] = [
-  {
-    heading: 'Explore',
-    icon: Compass,
-    links: [
-      { label: 'Projects', to: '/problems' },
-      { label: 'Advanced projects', to: '/projects' },
-      { label: 'How it works', to: '/how-it-works' },
-    ],
-  },
-  {
-    heading: 'Build',
-    icon: Hammer,
-    links: [
-      { label: 'Repo analyzer', to: '/repo-analyzer' },
-      { label: 'Submit a project', to: '/problems' },
-      { label: 'Contribute', to: '/contribute' },
-      { label: 'Your dashboard', to: '/me' },
-    ],
-  },
   {
     heading: 'MANABI',
     icon: Info,
@@ -62,9 +42,9 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 
 export function Footer() {
   return (
-    <footer className="border-t border-ink bg-ink text-paper">
+    <footer className="relative overflow-hidden border-t border-ink bg-ink text-paper">
       <div className="mx-auto w-[min(1240px,96vw)]">
-        <div className="grid gap-12 py-14 lg:grid-cols-[1.05fr_1.95fr] lg:gap-20">
+        <div className="grid gap-12 py-14 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
           <div>
             <Link to="/" className="group inline-flex items-center gap-3">
               <Logo className="text-paper transition-colors group-hover:text-accent-soft" />
@@ -80,8 +60,17 @@ export function Footer() {
             </p>
 
             <span className="mt-6 inline-flex items-center gap-2 border border-paper/25 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/65">
-              <span aria-hidden className="block size-1.5 bg-accent-soft" />
-              Index open · 2026 edition
+              <a
+                href="https://github.com/PIYUSH-NEXTGEN/Manabi"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="MANABI on GitHub"
+                className="group inline-flex items-center gap-2 transition-colors hover:text-paper"
+              >
+                <span aria-hidden className="block size-1.5 bg-accent-soft" />
+                <GithubMark size={14} className="text-paper/65 transition-colors group-hover:text-accent-soft" />
+                Source on GitHub
+              </a>
             </span>
 
             <Link
@@ -100,7 +89,7 @@ export function Footer() {
 
           <nav
             aria-label="Footer"
-            className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4"
+            className="grid gap-x-8 gap-y-10 sm:grid-cols-2"
           >
             {FOOTER_COLUMNS.map((column) => {
               const Icon = column.icon;
@@ -143,7 +132,21 @@ export function Footer() {
           <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/55">
             © 2026 MANABI
           </p>
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/55">
+            Built for builders · Night shift edition
+          </p>
         </div>
+      </div>
+
+      <div aria-hidden className="relative">
+        <img
+          src="/footer-scene.png"
+          alt=""
+          loading="lazy"
+          draggable={false}
+          className="block h-[300px] w-full object-cover object-bottom md:h-[380px]"
+        />
+        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-ink via-ink/60 to-transparent" />
       </div>
     </footer>
   );

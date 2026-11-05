@@ -1,7 +1,7 @@
 /**
- * MANABI mark: a catalog record with a folded corner and an M monogram.
- * The small accent rule is the index tab — the same orange marker used
- * throughout the interface to tag a record.
+ * MANABI mark: a solid geometric M cut from the same grid as the interface.
+ * The accent square on the baseline is the record tab — the same orange
+ * marker used across the UI to tag a record.
  */
 export function Logo({ className }: { className?: string }) {
   return (
@@ -15,25 +15,10 @@ export function Logo({ className }: { className?: string }) {
       aria-hidden
     >
       <path
-        d="M4 4h24v17.5L21.5 28H4V4Z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="miter"
+        fill="currentColor"
+        d="M3 26V6h4.4l8.6 8.4L24.6 6H29v20h-4.4V12l-8.6 8.8L7.4 12v14H3Z"
       />
-      <path
-        d="M21.5 28v-6.5H28"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="miter"
-      />
-      <path
-        d="M7 22V10l6 7 6-7v12"
-        stroke="currentColor"
-        strokeWidth="2.4"
-        strokeLinecap="square"
-        strokeLinejoin="miter"
-      />
-      <rect x="7" y="24.5" width="7" height="2" fill="var(--accent)" />
+      <rect x="14.4" y="22.4" width="3.2" height="3.6" fill="var(--accent)" />
     </svg>
   );
 }
