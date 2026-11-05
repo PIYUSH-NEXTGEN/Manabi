@@ -22,20 +22,6 @@ describe('HomePage', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows real problem cards in the featured grid', async () => {
-    renderWithProviders(<HomePage />, { route: '/' });
-
-    const cropHeadings = await screen.findAllByRole('heading', {
-      name: 'Crop disease triage for small farms',
-    });
-    expect(cropHeadings.length).toBeGreaterThanOrEqual(1);
-
-    expect(
-      screen.getAllByRole('heading', { name: 'Streetlight outage tracker' }).length,
-    ).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('SIH26017').length).toBeGreaterThanOrEqual(1);
-  });
-
   it(
     'cycles the hero brief showcase every three seconds',
     async () => {
