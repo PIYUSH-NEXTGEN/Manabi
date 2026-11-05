@@ -4,43 +4,7 @@ import { ArrowUpRight, GitBranch } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import type { ProblemOut } from '@/api/client';
 
-const ALLOWED_DOMAINS: Record<string, string> = {
-  'web-fullstack': 'web dev',  mobile: 'app dev',
-  ml: 'ml/data sci',
-  'computer-vision': 'ml/data sci',
-  'nlp-llm': 'ml/data sci',
-  ai: 'ai',
-  blockchain: 'blockchain',
-  web3: 'blockchain',
-  cybersecurity: 'cybersecurity',
-  'devops-cloud': 'devops/cloud',
-  cloud: 'devops/cloud',
-  'data-engineering': 'data engineering',
-  databases: 'data engineering',
-  'iot-embedded': 'system programming',
-  'distributed-systems': 'system programming',
-  systems: 'system programming',
-  healthcare: 'web dev',
-  education: 'web dev',
-  agriculture: 'web dev',
-  fintech: 'web dev',
-  climate: 'web dev',
-  governance: 'web dev',
-  transport: 'web dev',
-  'disaster-management': 'web dev',
-  industry: 'web dev',
-  'social-impact': 'web dev',
-  'developer-tools': 'web dev',
-  other: 'web dev',
-};
-
-const HIDDEN_TECH_TAGS = [
-  'python',
-  'formal-verification',
-  'smt-solvers',
-  'symbolic-execution',
-  'coq-style',
-];
+const prettify = (value: string) => value.replace(/-/g, ' ').trim();
 
 interface ProblemCardProps {
   problem: ProblemOut;
@@ -48,25 +12,13 @@ interface ProblemCardProps {
 }
 
 function ProblemCardComponent({ problem, className }: ProblemCardProps) {
-  const rawDomains = String(problem.domain ?? '')
-    .split(',')
-    .map((d) => d.trim())
-    .filter(Boolean);
-  let domains = Array.from(
-    new Set(rawDomains.map((d) => ALLOWED_DOMAINS[d]).filter(Boolean)),
-  ).slice(0, 2);
-  if (domains.length === 0) {
-    domains = ['web dev'];
-  }
+  // Show the problem's field so card labels match the Field filter.
+  const field = prettify(String(problem.field ?? ''));
 
   const projectLabel =
     problem.project_count === 1
       ? '1 project'
       : `${problem.project_count} projects`;
-
-  const visibleTechTags = problem.tech_tags.filter(
-    (tag) => !HIDDEN_TECH_TAGS.includes(tag),
-  );
 
   return (
     <Link
@@ -84,7 +36,7 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
         <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-          {domains.join(' / ')}
+          {field}
         </p>
         <h3 className="mt-2 font-display text-[1.25rem] uppercase leading-[1.02] tracking-tight">
           {problem.title}
@@ -92,26 +44,6 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
         <p className="mt-3 line-clamp-3 text-[13px] leading-relaxed text-ink-soft">
           {problem.summary}
         </p>
-
-        {problem.tech_tags.length > 0 ? (
-          <ul className="mt-4 flex flex-wrap gap-1">
-            {visibleTechTags
-              .slice(0, 3)
-              .map((tag) => (
-                <li
-                  key={tag}
-                  className="border border-line px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-ink-soft"
-                >
-                  {tag}
-                </li>
-              ))}
-            {visibleTechTags.length > 3 ? (
-              <li className="px-1 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-muted">
-                +{visibleTechTags.length - 3}
-              </li>
-            ) : null}
-          </ul>
-        ) : null}
 
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-[9px] font-bold uppercase tracking-[0.14em]">
           <span className="flex items-center gap-1 text-muted">

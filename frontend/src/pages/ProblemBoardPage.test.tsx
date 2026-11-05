@@ -84,20 +84,6 @@ describe('ProblemBoardPage', () => {
     expect(await screen.findByText(/2 problems in the index/i)).toBeInTheDocument();
   });
 
-  it('tech chips toggle on and off', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
-
-    await screen.findAllByRole('heading', { level: 3 });
-    const mobileChip = screen.getByRole('button', { name: /mobile \(1\)/i });
-
-    await user.click(mobileChip);
-    expect(await screen.findByText(/1 problems? in the index/i)).toBeInTheDocument();
-
-    await user.click(mobileChip);
-    expect(await screen.findByText(/6 problems in the index/i)).toBeInTheDocument();
-  });
-
   it('clear filters resets the board', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ProblemBoardPage />, { route: '/problems' });

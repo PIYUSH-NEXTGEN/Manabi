@@ -5,7 +5,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   BookOpen,
-  Clock,
   GitBranch,
 } from 'lucide-react';
 import { cx } from '@/lib/cx';
@@ -17,7 +16,6 @@ import { SubmitProjectPanel } from '@/components/problems/SubmitProjectPanel';
 import { GithubMark } from '@/components/icons/GithubMark';
 import { useProblem } from '@/hooks/useProblem';
 import { projectOwnerUsername } from '@/api/client';
-import { safeExternalUrl } from '@/lib/url';
 
 const panelHeading = 'font-mono text-[10px] font-bold uppercase tracking-[0.18em]';
 const microLabel = 'font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted';
@@ -133,25 +131,11 @@ function DetailView({ problemId }: { problemId: number }) {
   const data = problem.data;
   const ideas = futureIdeas(data.original_text);
   const description = fullDescription(data.summary, data.who_affected, data.why_matters);
-  const sourceUrl = safeExternalUrl(data.source_url);
   const projectCount = data.projects.length;
 
   return (
     <main className="border-b border-ink bg-paper">
       <div className="mx-auto w-[min(1240px,96vw)] py-8 md:py-10">
-        <nav
-          aria-label="Breadcrumb"
-          className="flex flex-wrap items-center gap-2 border-b border-line pb-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted"
-        >
-          <Link to="/problems" className="transition-colors hover:text-accent">
-            Problem archive
-          </Link>
-          <span aria-hidden>/</span>
-          <span className="text-ink">Record {String(data.id).padStart(3, '0')}</span>
-          <span aria-hidden>/</span>
-          <span>{data.field.replace(/-/g, ' ')}</span>
-        </nav>
-
         <motion.header
           variants={slideUpReveal}
           initial="hidden"
@@ -177,30 +161,9 @@ function DetailView({ problemId }: { problemId: number }) {
 
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
               <span className="flex items-center gap-1.5">
-                <Clock aria-hidden size={12} strokeWidth={2.4} />
-                {data.est_hours} h estimate
-              </span>
-              <span className="flex items-center gap-1.5">
                 <GitBranch aria-hidden size={12} strokeWidth={2.4} />
                 {projectCount === 1 ? '1 project' : `${projectCount} projects`}
               </span>
-              {data.source_name ? (
-                <span className="flex items-center gap-1.5">
-                  Source /
-                  {sourceUrl ? (
-                    <a
-                      href={sourceUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
-                    >
-                      {data.source_name} ↗
-                    </a>
-                  ) : (
-                    <span className="text-ink-soft">{data.source_name}</span>
-                  )}
-                </span>
-              ) : null}
             </div>
           </div>
 
@@ -214,8 +177,6 @@ function DetailView({ problemId }: { problemId: number }) {
             <SpecRow label="Field">{data.field.replace(/-/g, ' ')}</SpecRow>
             <SpecRow label="Domain">{data.domain.replace(/-/g, ' ')}</SpecRow>
             <SpecRow label="Difficulty">{data.difficulty}</SpecRow>
-            <SpecRow label="Est. time">{data.est_hours} h</SpecRow>
-            <SpecRow label="Source">{data.source_id ?? 'Not listed'}</SpecRow>
           </dl>
         </motion.header>
 

@@ -140,25 +140,9 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-5 border-t border-paper/20 py-5 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1.5">
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/55">
-              © 2026 MANABI
-            </p>
-            <p className="max-w-xl text-[11px] leading-relaxed text-paper/45">
-              Problem briefs come from hackathons, companies, and public
-              programs, and are reviewed before they appear on the board.
-              Project progress is read from public GitHub repositories.
-            </p>
-          </div>
-
-          <div className="flex items-end gap-4">
-            <div className="text-right font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/50">
-              <p>Doc. no.</p>
-              <p className="text-paper/85">EA.2026.001</p>
-            </div>
-            <span aria-hidden className="barcode block h-8 w-24 bg-paper/70" />
-            <span aria-hidden className="block size-6 bg-accent" />
-          </div>
+          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/55">
+            © 2026 MANABI
+          </p>
         </div>
       </div>
     </footer>

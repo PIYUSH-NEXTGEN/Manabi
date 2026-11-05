@@ -7,22 +7,10 @@ import { EASE_SNAP } from '@/design/motion';
 import { buttonClasses, Input, Skeleton } from '@/design/primitives';
 import { ProblemCard } from '@/components/problems/ProblemCard';
 import { FilterSelect } from '@/components/problems/FilterSelect';
-import { TechChips } from '@/components/problems/TechChips';
 import { useFacets } from '@/hooks/useFacets';
 import { useInfiniteProblems } from '@/hooks/useInfiniteProblems';
 
 const microLabel = 'font-mono text-[9px] font-bold uppercase tracking-[0.16em]';
-
-const HIDDEN_TECH_TAGS = [
-  'python',
-  'flutter',
-  'pandas',
-  'react',
-  'sql',
-  'postgresql',
-  'javascript',
-  'nodejs',
-];
 
 type SortKey = 'newest' | 'popular';
 
@@ -61,29 +49,19 @@ export function ProblemBoardPage() {
   const domain = searchParams.get('domain') ?? '';
   const difficulty = searchParams.get('difficulty') ?? '';
   const source = searchParams.get('source') ?? '';
-  const tech = searchParams.getAll('tech');
   const sort: SortKey =
     searchParams.get('sort') === 'popular' ? 'popular' : 'newest';
 
-  const filterKey = [
-    q,
-    field,
-    domain,
-    difficulty,
-    source,
-    tech.join(','),
-    sort,
-  ].join('|');
+  const filterKey = [q, field, domain, difficulty, source, sort].join('|');
   const filters = useMemo(
-    () => ({ q, field, domain, difficulty, source, tech, sort }),
+    () => ({ q, field, domain, difficulty, source, sort }),
     [filterKey],
   );
 
   const board = useInfiniteProblems(filters);
   const problems = board.data?.pages.flatMap((page) => page.items) ?? [];
   const total = board.data?.pages[0]?.total ?? 0;
-  const hasFilters =
-    Boolean(q || field || domain || difficulty || source) || tech.length > 0;
+  const hasFilters = Boolean(q || field || domain || difficulty || source);
 
   const activeFilters: { key: string; label: string; value: string }[] = [
     ...(q ? [{ key: 'q', label: 'search', value: q }] : []),
@@ -93,7 +71,6 @@ export function ProblemBoardPage() {
       ? [{ key: 'difficulty', label: 'difficulty', value: difficulty }]
       : []),
     ...(source ? [{ key: 'source', label: 'source', value: source }] : []),
-    ...tech.map((tag) => ({ key: 'tech', label: 'tech', value: tag })),
   ];
 
   function setParam(key: string, value: string) {
@@ -108,24 +85,7 @@ export function ProblemBoardPage() {
     });
   }
 
-  function toggleTech(value: string) {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
-      const current = next.getAll('tech');
-      next.delete('tech');
-      const updated = current.includes(value)
-        ? current.filter((t) => t !== value)
-        : [...current, value];
-      for (const t of updated) next.append('tech', t);
-      return next;
-    });
-  }
-
-  function removeFilter(key: string, value: string) {
-    if (key === 'tech') {
-      toggleTech(value);
-      return;
-    }
+  function removeFilter(key: string) {
     setParam(key, '');
   }
 
@@ -205,7 +165,9 @@ export function ProblemBoardPage() {
                     label="Field"
                     value={field}
                     onChange={(value) => setParam('field', value)}
-                    options={facets.data?.fields ?? []}
+                    options={(facets.data?.fields ?? []).filter(
+                      (f) => f.value !== 'developer-tools',
+                    )}
                   />
                   <FilterSelect
                     label="Difficulty"
@@ -218,16 +180,6 @@ export function ProblemBoardPage() {
                     value={domain}
                     onChange={(value) => setParam('domain', value)}
                     options={facets.data?.domains ?? []}
-                  />
-                </div>
-
-                <div className="mt-4 border-t border-line pt-4">
-                  <TechChips
-                    options={(facets.data?.tech_tags ?? [])
-                      .filter((tag) => !HIDDEN_TECH_TAGS.includes(tag.value))
-                      .slice(0, 8)}
-                    selected={tech}
-                    onToggle={toggleTech}
                   />
                 </div>
               </div>
@@ -276,7 +228,7 @@ export function ProblemBoardPage() {
                   <button
                     key={`${filter.key}-${filter.value}`}
                     type="button"
-                    onClick={() => removeFilter(filter.key, filter.value)}
+                    onClick={() => removeFilter(filter.key)}
                     aria-label={`Remove ${filter.label}: ${filter.value}`}
                     className="group inline-flex items-center gap-1.5 border border-ink bg-sheet px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.12em] transition-colors hover:bg-ink hover:text-paper"
                   >
