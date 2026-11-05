@@ -5,8 +5,7 @@ import { cx } from '@/lib/cx';
 import type { ProblemOut } from '@/api/client';
 
 const ALLOWED_DOMAINS: Record<string, string> = {
-  'web-fullstack': 'web dev',
-  mobile: 'app dev',
+  'web-fullstack': 'web dev',  mobile: 'app dev',
   ml: 'ml/data sci',
   'computer-vision': 'ml/data sci',
   'nlp-llm': 'ml/data sci',
@@ -35,6 +34,14 @@ const ALLOWED_DOMAINS: Record<string, string> = {
   other: 'web dev',
 };
 
+const HIDDEN_TECH_TAGS = [
+  'python',
+  'formal-verification',
+  'smt-solvers',
+  'symbolic-execution',
+  'coq-style',
+];
+
 interface ProblemCardProps {
   problem: ProblemOut;
   className?: string;
@@ -56,6 +63,10 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
     problem.project_count === 1
       ? '1 project'
       : `${problem.project_count} projects`;
+
+  const visibleTechTags = problem.tech_tags.filter(
+    (tag) => !HIDDEN_TECH_TAGS.includes(tag),
+  );
 
   return (
     <Link
@@ -84,17 +95,19 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
 
         {problem.tech_tags.length > 0 ? (
           <ul className="mt-4 flex flex-wrap gap-1">
-            {problem.tech_tags.slice(0, 3).map((tag) => (
-              <li
-                key={tag}
-                className="border border-line px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-ink-soft"
-              >
-                {tag}
-              </li>
-            ))}
-            {problem.tech_tags.length > 3 ? (
+            {visibleTechTags
+              .slice(0, 3)
+              .map((tag) => (
+                <li
+                  key={tag}
+                  className="border border-line px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-ink-soft"
+                >
+                  {tag}
+                </li>
+              ))}
+            {visibleTechTags.length > 3 ? (
               <li className="px-1 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-muted">
-                +{problem.tech_tags.length - 3}
+                +{visibleTechTags.length - 3}
               </li>
             ) : null}
           </ul>
