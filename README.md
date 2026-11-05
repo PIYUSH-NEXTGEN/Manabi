@@ -1,30 +1,43 @@
 # MANABI
 
-MANABI helps students and developers find **real-world problems to build** (from
-governments, companies, and hackathons), claim them, link a GitHub repo for
-auto-tracked progress, and talk to a catalog chatbot. Public problem statements are
-populated today from the saved official SIH fixtures; live-source ingestion is a
-separate planned effort.
+MANABI is a catalog of real problems worth building. Students pick a brief,
+link their GitHub repo, and the site tracks their progress from public repo
+activity. A chat assistant helps you choose, and everything runs on a single
+FastAPI service that also serves the built frontend.
+
+Problem briefs are curated offline and loaded with seed scripts, so the whole
+app works with no crawler and no network sources. The demo seed comes from
+saved SIH fixtures; the other seed files fill in web, mobile, ML, data science,
+cloud, cybersecurity, systems, and web3 briefs.
+
+## What the app does
+
+- Problem board with search plus field, difficulty, and domain filters
+- Problem detail pages with tech stack, build guide, and future ideas
+- Submit a project by repo URL, then auto-tracked progress badges
+- Dashboard that follows your claimed problems and activity
+- Catalog chat with rate limits and an honest mock mode for offline work
+- Admin review page at `/admin/review`, gated by `ADMIN_GITHUB_USERNAMES`
+- Night mode with a persisted toggle
 
 **One service:** FastAPI serves the built React app from `frontend/dist` at `/`
-(with SPA fallback) and keeps every API route under `/api`. No nginx needed —
-put your platform's TLS / load balancer in front of uvicorn.
+(with SPA fallback) and keeps every API route under `/api`. No nginx needed.
+Put your platform's TLS or load balancer in front of uvicorn.
 
 ## Repo layout
 
 ```
 MANABI/
 ├── backend/            # FastAPI API (serves the built frontend too)
-│   ├── app/            # routers, services, models, config
-│   ├── scripts/        # seed_sih_demo.py, export_openapi.py
+│   ├── app/            # routers, services, models, seed files, config
+│   ├── scripts/        # seed_sih_demo.py, seed_*_web_projects.py, export_openapi.py
 │   ├── requirements.txt
 │   ├── start.sh        # prod entrypoint (pip install + uvicorn)
 │   └── Procfile        # Render / Railway / Heroku-style
 ├── frontend/           # Vite + React + TS (calls relative /api/...)
-│   └── dist/           # build output — NEVER committed, built on deploy
+│   └── dist/           # build output, never committed, built on deploy
 ├── docs/
-│   ├── crawler.md      # historical crawler archive (removed modules)
-│   ├── sources/        # per-source compliance records (historical)
+│   ├── crawler.md      # historical note on the retired crawler modules
 │   └── openapi.json    # machine-readable API contract
 ├── DEPLOY.md           # full production runbook (read this to deploy)
 └── render.yaml         # one-click Render blueprint
@@ -33,65 +46,68 @@ MANABI/
 ## Quick start (local dev)
 
 ```sh
-# Terminal 1 — backend
+# Terminal 1, backend
 cd backend
 python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt     # macOS/Linux: .venv/bin/pip
 copy .env.example .env                            # then edit secrets (never commit .env)
 .venv/Scripts/python -m alembic upgrade head
-# optional demo data from the saved official SIH fixtures (no network/LLM):
-.venv/Scripts/python scripts/seed_sih_demo.py --limit 40
+.venv/Scripts/python scripts/seed_sih_demo.py --limit 40   # optional demo data
 .venv/Scripts/python -m uvicorn app.main:app --port 8000
 
-# Terminal 2 — frontend
+# Terminal 2, frontend
 cd frontend
 npm ci
-npm run dev                                       # http://localhost:5173 (proxies /api → :8000)
+npm run dev                                       # http://localhost:5173 (proxies /api -> :8000)
 ```
+
+## Demo and seed data
+
+The app starts empty. Load briefs without any network or LLM call:
+
+```sh
+cd backend
+.venv/Scripts/python scripts/seed_sih_demo.py --limit 40 --reset
+.venv/Scripts/python scripts/seed_beginner_web_projects.py
+.venv/Scripts/python scripts/seed_intermediate_web_projects.py
+```
+
+Summaries are clearly generated, never verbatim source text. Seed scripts are
+for local setups and demos; the production database is fully curated offline.
 
 ## Tests
 
 ```sh
-cd backend && ../backend/.venv/Scripts/python -m pytest -q   # LLM_provider forced to mock
-cd frontend && npm run test        # Vitest + RTL + MSW
+cd backend && .venv/Scripts/python -m pytest -q    # LLM provider forced to mock
+cd frontend && npm run test                        # Vitest + Testing Library + MSW
 ```
 
-## Deploy (summary — full steps in DEPLOY.md)
+Playwright e2e is also wired up in `frontend` (`npm run e2e`) if you want
+browser coverage.
+
+## Deploy (summary, full steps in DEPLOY.md)
 
 ```sh
-cd frontend && npm ci && npm run build     # → frontend/dist/
+cd frontend && npm ci && npm run build     # -> frontend/dist/
 # set env vars on the host (DATABASE_URL, SESSION_SECRET, BASE_URL,
-# GITHUB_CLIENT_ID/SECRET, GEMINI_API_KEY) — never in git
+# GITHUB_CLIENT_ID/SECRET, LLM keys); never in git
 cd ../backend && sh start.sh               # uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
-Health check: `GET /api/health` → `{"status":"ok"}`.
+Health check: `GET /api/health` returns `{"status":"ok"}`.
 
 ## Configuration
 
 | Variable | Purpose |
 |---|---|
 | `DATABASE_URL` | SQLite (`sqlite:///./app.db`) locally, Postgres (Neon/Supabase) in prod |
-| `SESSION_SECRET` | Long random string — app refuses to boot non-local with the placeholder |
-| `BASE_URL` | Public origin; drives OAuth callback + cookie Secure/HttpOnly flags |
+| `SESSION_SECRET` | Long random string. The app refuses to boot non-local with the placeholder |
+| `BASE_URL` | Public origin, drives OAuth callback and cookie Secure/HttpOnly flags |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app for login |
-| `LLM_PROVIDER` | `gemini` | `mock` (mock = offline dev/tests) |
-| `GEMINI_API_KEY` / `GEMINI_MODEL` | Gemini key + optional model override |
-| `CHAT_RATE_LIMIT_ANON_PER_HOUR` / `CHAT_RATE_LIMIT_USER_PER_HOUR` | Chat limits (10 / 30) |
-| `SITE_URL` | Site URL shown in the legacy crawler User-Agent (unused without the crawler) |
+| `LLM_PROVIDER` | `gemini`, `anthropic`, or `mock` (mock for offline dev and tests) |
+| `GEMINI_API_KEY` / `GEMINI_MODEL` / `ANTHROPIC_API_KEY` | Provider keys and optional model override |
+| `CHAT_RATE_LIMIT_ANON_PER_HOUR` / `CHAT_RATE_LIMIT_USER_PER_HOUR` | Chat rate limits (10 / 30) |
+| `ADMIN_GITHUB_USERNAMES` | Comma separated GitHub logins allowed into `/api/admin/*` and `/admin/review` |
 
-Without an LLM key, AI endpoints return `503 {"detail": "AI is not configured yet"}` —
-everything else works.
-
-## Offline demo seed
-
-When an LLM key is unavailable (or the provider is returning 5xx), populate a local
-database from the saved official SIH fixtures with no network or LLM call:
-
-```sh
-cd backend
-.venv/Scripts/python scripts/seed_sih_demo.py --limit 40 --reset
-```
-
-The script parses the stored SIH HTML/XLSX archives and writes clearly generated
-summaries — never verbatim source text. It is a demo fallback only.
+Without LLM keys, AI endpoints return `503 {"detail": "AI is not configured yet"}`.
+Everything else works fine without them.
