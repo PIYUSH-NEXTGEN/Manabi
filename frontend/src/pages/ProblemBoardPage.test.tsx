@@ -89,12 +89,12 @@ describe('ProblemBoardPage', () => {
     renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
 
     await screen.findAllByRole('heading', { level: 3 });
-    const pythonChip = screen.getByRole('button', { name: /python \(5\)/i });
+    const mobileChip = screen.getByRole('button', { name: /mobile \(1\)/i });
 
-    await user.click(pythonChip);
-    expect(await screen.findByText(/5 problems in the index/i)).toBeInTheDocument();
+    await user.click(mobileChip);
+    expect(await screen.findByText(/1 problems? in the index/i)).toBeInTheDocument();
 
-    await user.click(pythonChip);
+    await user.click(mobileChip);
     expect(await screen.findByText(/6 problems in the index/i)).toBeInTheDocument();
   });
 

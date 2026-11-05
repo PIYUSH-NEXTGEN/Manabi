@@ -13,6 +13,17 @@ import { useInfiniteProblems } from '@/hooks/useInfiniteProblems';
 
 const microLabel = 'font-mono text-[9px] font-bold uppercase tracking-[0.16em]';
 
+const HIDDEN_TECH_TAGS = [
+  'python',
+  'flutter',
+  'pandas',
+  'react',
+  'sql',
+  'postgresql',
+  'javascript',
+  'nodejs',
+];
+
 type SortKey = 'newest' | 'popular';
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
@@ -125,13 +136,7 @@ export function ProblemBoardPage() {
   return (
     <main className="border-b border-ink bg-paper">
       <div className="mx-auto w-[min(1240px,96vw)] py-10 md:py-12">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted">
-          <span className="flex items-center gap-2">
-            <span aria-hidden className="block size-2 bg-accent" />
-            Problem board / Open index
-          </span>
-          <span>Vol. 01 / 2026</span>
-        </div>
+
 
         <div className="mt-8 flex flex-wrap items-end justify-between gap-6 border-b border-ink pb-8">
           <div>
@@ -218,7 +223,9 @@ export function ProblemBoardPage() {
 
                 <div className="mt-4 border-t border-line pt-4">
                   <TechChips
-                    options={(facets.data?.tech_tags ?? []).slice(0, 8)}
+                    options={(facets.data?.tech_tags ?? [])
+                      .filter((tag) => !HIDDEN_TECH_TAGS.includes(tag.value))
+                      .slice(0, 8)}
                     selected={tech}
                     onToggle={toggleTech}
                   />

@@ -179,6 +179,7 @@ const facets = {
     { value: 'python', count: 5 },
     { value: 'react', count: 1 },
     { value: 'pandas', count: 1 },
+    { value: 'mobile', count: 1 },
   ],
   sources: [
     { value: 'SIH 2026', count: 3 },
