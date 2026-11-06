@@ -272,15 +272,20 @@ export function Hero() {
               </button>
             </form>
 
-            <dl className="mt-10 max-w-xl border-t border-ink">
-              <div className="py-5">
-                <dt className="font-mono text-[9px] font-bold uppercase leading-relaxed tracking-[0.16em] text-muted">
-                  Problem briefs curated
-                </dt>
-                <dd className="mt-1 font-display text-4xl leading-none text-accent md:text-5xl">
-                  <StatsNumber />
-                </dd>
-              </div>
+            <dl className="mt-10 grid max-w-xl grid-cols-3 border-t border-ink">
+              {HERO_STATS.map((stat) => (
+                <div
+                  key={stat.key}
+                  className="border-r border-line py-5 pr-3 last:border-r-0 last:pr-0 [&:not(:first-child)]:pl-3"
+                >
+                  <dt className="font-mono text-[9px] font-bold uppercase leading-relaxed tracking-[0.16em] text-muted">
+                    {stat.label}
+                  </dt>
+                  <dd className="mt-1 font-display text-3xl leading-none text-accent md:text-4xl">
+                    <StatsNumber statKey={stat.key} />
+                  </dd>
+                </div>
+              ))}
             </dl>
           </div>
 
@@ -291,10 +296,20 @@ export function Hero() {
   );
 }
 
-function StatsNumber() {
+const HERO_STATS = [
+  { key: 'problems', label: 'Problem briefs curated' },
+  { key: 'fields', label: 'Fields' },
+  { key: 'projects', label: 'Projects' },
+] as const;
+
+function StatsNumber({
+  statKey,
+}: {
+  statKey: (typeof HERO_STATS)[number]['key'];
+}) {
   const stats = useStats();
   if (!stats.data) {
     return <span aria-hidden>—</span>;
   }
-  return <CountUp value={stats.data.problems} />;
+  return <CountUp value={stats.data[statKey]} />;
 }

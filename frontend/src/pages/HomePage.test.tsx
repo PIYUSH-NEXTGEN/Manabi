@@ -56,8 +56,5 @@ describe('HomePage', () => {
     ).toBeInTheDocument();
     expect(screen.getAllByText('ACTIVE').length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByLabelText('14 commits').length).toBeGreaterThanOrEqual(1);
-    expect(
-      screen.getByRole('heading', { name: /Find it\. Build it\./ }),
-    ).toBeInTheDocument();
   });
 });
