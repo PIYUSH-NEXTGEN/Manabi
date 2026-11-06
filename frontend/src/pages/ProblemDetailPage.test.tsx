@@ -166,6 +166,14 @@ describe('ProblemDetailPage', () => {
           repo_owner: 'tester',
           repo_name: 'new-thing',
           open_for_contributors: true,
+          verification_status: 'verified',
+          solution_summary: 'An offline capture flow that routes leaf cases to officers.',
+          completed_at: null,
+          demo_url: null,
+          reflection: null,
+          relevance_reason: null,
+          ownership_basis: null,
+          review_note: null,
           owner: { username: 'tester', avatar_url: null },
           progress: null,
           progress_updated_at: null,
@@ -188,6 +196,10 @@ describe('ProblemDetailPage', () => {
     await user.type(
       screen.getByLabelText('GitHub repo URL'),
       'https://github.com/tester/new-thing/',
+    );
+    await user.type(
+      screen.getByLabelText(/How it solves this problem/),
+      'An offline capture queue routes leaf cases to the right officer.',
     );
     await user.click(screen.getByLabelText('Open for contributors'));
     await user.click(screen.getByRole('button', { name: 'Submit project' }));
@@ -227,6 +239,10 @@ describe('ProblemDetailPage', () => {
     await user.type(
       screen.getByLabelText('GitHub repo URL'),
       'https://github.com/tester/again',
+    );
+    await user.type(
+      screen.getByLabelText(/How it solves this problem/),
+      'An offline capture queue routes leaf cases to the right officers.',
     );
     await user.click(screen.getByRole('button', { name: 'Submit project' }));
 

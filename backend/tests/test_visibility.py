@@ -151,7 +151,7 @@ def test_chat_postprocess_strips_non_published_refs(db_session, mixed):
 
 # ---------------- projects ----------------
 
-def test_cannot_submit_project_to_non_published_problem(client, db_session, mixed, monkeypatch):
+def test_cannot_submit_project_to_non_published_problem(client, db_session, mixed):
     db_session.commit()
     user = User(github_id=2, username="u2")
     db_session.add(user)
@@ -162,7 +162,11 @@ def test_cannot_submit_project_to_non_published_problem(client, db_session, mixe
     for problem in mixed[1:]:
         res = client.post(
             f"/api/problems/{problem.id}/projects",
-            json={"repo_url": "https://github.com/u2/repo", "open_for_contributors": False},
+            json={
+                "repo_url": "https://github.com/u2/repo",
+                "solution_summary": "A repository is linked here with a full-ish solution summary description.",
+                "open_for_contributors": False,
+            },
         )
         assert res.status_code == 404
     app.dependency_overrides.pop(get_current_user)
@@ -183,6 +187,7 @@ def test_profile_hides_projects_on_non_published_problems(client, db_session, mi
                 repo_owner="u3",
                 repo_name=f"repo-{problem.id}",
                 repo_url=f"https://github.com/u3/repo-{problem.id}",
+                verification_status="verified",
             )
         )
     db_session.commit()

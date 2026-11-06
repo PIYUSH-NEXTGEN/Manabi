@@ -73,18 +73,6 @@ export function Footer() {
               </a>
             </span>
 
-            <Link
-              to="/problems"
-              className="group mt-6 flex w-fit items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-accent-soft transition-colors hover:text-paper"
-            >
-              Start with a brief
-              <ArrowUpRight
-                aria-hidden
-                size={13}
-                strokeWidth={2.6}
-                className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              />
-            </Link>
           </div>
 
           <nav
@@ -138,15 +126,31 @@ export function Footer() {
         </div>
       </div>
 
-      <div aria-hidden className="relative">
+      <div className="relative">
         <img
           src="/footer-scene.png"
           alt=""
           loading="lazy"
           draggable={false}
-          className="block h-[300px] w-full object-cover object-bottom md:h-[380px]"
+          className="block h-[320px] w-full object-cover object-bottom md:h-[460px]"
         />
         <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-ink via-ink/60 to-transparent" />
+        <div className="absolute inset-x-0 top-0">
+          <div className="mx-auto w-[min(1240px,96vw)] pt-7">
+            <Link
+              to="/problems"
+              className="group inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-paper/90 transition-colors hover:text-accent-soft"
+            >
+              Start with a brief
+              <ArrowUpRight
+                aria-hidden
+                size={13}
+                strokeWidth={2.6}
+                className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              />
+            </Link>
+          </div>
+        </div>
       </div>
     </footer>
   );

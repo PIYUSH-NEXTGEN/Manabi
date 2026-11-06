@@ -1,16 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  editProblem,
-  getAdminReview,
-  moderateProblem,
-  type AdminReviewOut,
+  approveSubmission,
+  getAdminSubmissions,
+  rejectSubmission,
+  type AdminSubmissionsOut,
   type ApiError,
+  type SubmissionStatusFilter,
 } from '@/api/client';
 
-export function useAdminReview(status = 'pending_review') {
-  return useQuery<AdminReviewOut, ApiError>({
-    queryKey: ['admin', 'review', status],
-    queryFn: () => getAdminReview(status),
+export function useAdminSubmissions(status: SubmissionStatusFilter) {
+  return useQuery<AdminSubmissionsOut, ApiError>({
+    queryKey: ['admin', 'submissions', status],
+    queryFn: () => getAdminSubmissions(status),
     retry: false,
   });
 }
@@ -22,25 +23,20 @@ function useRefreshAdmin() {
   };
 }
 
-export function useModerateProblem() {
+export function useApproveSubmission() {
   const refresh = useRefreshAdmin();
   return useMutation({
-    mutationFn: ({
-      id,
-      action,
-    }: {
-      id: number;
-      action: 'approve' | 'reject' | 'unpublish';
-    }) => moderateProblem(id, action),
+    mutationFn: ({ id, note }: { id: number; note?: string }) =>
+      approveSubmission(id, note),
     onSuccess: refresh,
   });
 }
 
-export function useEditProblem() {
+export function useRejectSubmission() {
   const refresh = useRefreshAdmin();
   return useMutation({
-    mutationFn: ({ id, body }: { id: number; body: { title?: string; summary?: string } }) =>
-      editProblem(id, body),
+    mutationFn: ({ id, note }: { id: number; note?: string }) =>
+      rejectSubmission(id, note),
     onSuccess: refresh,
   });
 }

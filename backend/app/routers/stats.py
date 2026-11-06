@@ -3,7 +3,7 @@ from sqlalchemy import func, select
 
 from app import schemas
 from app.deps import DB
-from app.models import Problem, Project, STATUS_PUBLISHED
+from app.models import Problem, Project, STATUS_PUBLISHED, VERIFICATION_VERIFIED
 
 router = APIRouter(prefix="/api", tags=["stats"])
 
@@ -17,5 +17,8 @@ def stats(db: DB):
     fields = db.scalar(
         select(func.count(func.distinct(Problem.field))).where(Problem.status == STATUS_PUBLISHED)
     ) or 0
-    projects = db.scalar(select(func.count(Project.id))) or 0
+    # Public counters show verified submissions only (§7.4)
+    projects = db.scalar(
+        select(func.count(Project.id)).where(Project.verification_status == VERIFICATION_VERIFIED)
+    ) or 0
     return schemas.StatsOut(problems=problems, sources=sources, fields=fields, projects=projects)

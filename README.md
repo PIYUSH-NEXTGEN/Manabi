@@ -15,10 +15,14 @@ briefs.
 
 - Problem board with search plus field, difficulty, and domain filters
 - Problem detail pages with tech stack, build guide, and future ideas
-- Submit a project by repo URL, then auto-tracked progress badges
-- Dashboard that follows your claimed problems and activity
+- Submit a project by repo URL (owner/contributor-only + LLM relevance check)
+- Verified projects get a "Completed" tick; unverified work stays `building`
+  and is hidden from curated counts until an admin (or the LLM) verifies it
+- Dashboard that follows your claimed problems and activity with
+  edit/complete/remove/reopen actions for your own projects
 - Catalog chat with rate limits and an honest mock mode for offline work
-- Admin review page at `/admin/review`, gated by `ADMIN_GITHUB_USERNAMES`
+- Admin submissions queue at `/admin/review` (approve/reject), gated by
+  `ADMIN_GITHUB_USERNAMES`
 - Night mode with a persisted toggle
 
 **One service:** FastAPI serves the built React app from `frontend/dist` at `/`
@@ -73,6 +77,17 @@ cd backend
 
 Summaries are clearly generated, never verbatim source text. Seed scripts are
 for local setups and demos; the production database is fully curated offline.
+
+## Project submission & verification
+
+Submitting a repo is gated hard: you must be the repo owner, have push access,
+or have ≥ 3 commits under your own GitHub account; anti-abuse limits (per-day
+submissions, max active projects, one repo per problem, forks off) apply
+before GitHub is even contacted. An LLM then checks the README + your summary
+against the problem brief — high relevance auto-verifies the project, low
+relevance sends it to the admin queue at `/admin/review`, and any LLM/GitHub
+failure degrades safely to human review (never an unearned ✓). Deployment
+checklist and rule details: `DEPLOY.md` §6.
 
 ## Tests
 

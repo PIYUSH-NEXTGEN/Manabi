@@ -25,6 +25,14 @@ const MY_PROJECTS = [
     repo_owner: 'ml-learner',
     repo_name: 'crop-triage',
     open_for_contributors: true,
+    verification_status: 'verified',
+    solution_summary: 'Triage flow description long enough for verification tests here.',
+    completed_at: null,
+    demo_url: null,
+    reflection: null,
+    relevance_reason: null,
+    ownership_basis: null,
+    review_note: null,
     owner: { username: 'ml-learner', avatar_url: null },
     progress: null,
     progress_updated_at: null,
@@ -63,9 +71,11 @@ const RECOMMENDATIONS = {
 
 function renderDashboard() {
   return renderWithProviders(
-    <Routes>
-      <Route path="/me" element={<DashboardPage />} />
-    </Routes>,
+    <ToastProvider>
+      <Routes>
+        <Route path="/me" element={<DashboardPage />} />
+      </Routes>
+    </ToastProvider>,
     { route: '/me' },
   );
 }
