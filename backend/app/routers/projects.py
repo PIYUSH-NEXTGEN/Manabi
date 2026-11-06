@@ -12,6 +12,7 @@ from app.models import (
     Problem,
     Project,
     ProjectReport,
+    User,
     VERIFICATION_NEEDS_REVIEW,
     VERIFICATION_REJECTED,
     VERIFICATION_VERIFIED,
