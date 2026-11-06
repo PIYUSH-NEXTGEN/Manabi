@@ -150,9 +150,15 @@ export type ChatPageContext = Schemas['ChatPageContext'];
 export type ChatProblemItem = Schemas['ChatProblemItem'];
 export type RecommendationsOut = Schemas['RecommendationsOut'];
 export type RecommendationItem = Schemas['RecommendationItem'];
-export type AdminProblemOut = Schemas['AdminProblemOut'];
-export type AdminReviewOut = Schemas['AdminReviewOut'];
-export type CrawlRunOut = Schemas['CrawlRunOut'];
+export type AdminProblemOut = Schemas['ProblemOut'] & {
+  status: string;
+  origin: string;
+  created_at: string;
+};
+export type AdminReviewOut = {
+  items: AdminProblemOut[];
+  total: number;
+};
 
 export function getAdminReview(
   status = 'pending_review',
@@ -187,26 +193,11 @@ export function editProblem(
     est_hours: number;
     tech_tags: string[];
     approaches: string[];
-    review_notes: string;
   }>,
 ): Promise<{ ok: boolean; problem_id: number; status: string }> {
   return apiFetch(`/api/admin/problems/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(body),
-  });
-}
-
-export function getCrawlRuns(limit = 20): Promise<CrawlRunOut[]> {
-  return apiFetch<CrawlRunOut[]>(`/api/admin/crawl-runs?limit=${limit}`);
-}
-
-export function takedownSource(sourceKey: string): Promise<{
-  ok: boolean;
-  source_key: string;
-  unpublished: number;
-}> {
-  return apiFetch(`/api/admin/sources/${sourceKey}/unpublish-all`, {
-    method: 'POST',
   });
 }
 

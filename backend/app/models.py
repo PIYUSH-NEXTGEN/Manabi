@@ -18,7 +18,6 @@ STATUS_REJECTED = "rejected"
 STATUS_REMOVED = "removed"
 
 ORIGIN_MANUAL = "manual"
-ORIGIN_CRAWLER = "crawler"
 
 
 class User(Base):
@@ -62,22 +61,14 @@ class Problem(Base):
     created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
 
-    # Crawler/review pipeline (Â§6.2). Existing rows default to published so the
-    # migration never makes already-visible content disappear.
+    # Review lifecycle: public read paths only ever surface published rows;
+    # origin marks manual curation now that the crawler is gone.
     status: Mapped[str] = mapped_column(String(20), default=STATUS_PUBLISHED, nullable=False)
     origin: Mapped[str] = mapped_column(String(20), default=ORIGIN_MANUAL, nullable=False)
-    content_hash: Mapped[str | None] = mapped_column(String(64), index=True, nullable=True)
     source_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
     edition: Mapped[str | None] = mapped_column(String(100), nullable=True)
     organisation: Mapped[str | None] = mapped_column(String(255), nullable=True)
     deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
-    source_status: Mapped[str] = mapped_column(String(20), default="unknown", nullable=False)
-    first_seen_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    last_crawled_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    extraction_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
-    review_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
-    crawl_source_key: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     creator: Mapped[User | None] = relationship()
     projects: Mapped[list["Project"]] = relationship(back_populates="problem")
@@ -102,34 +93,3 @@ class Project(Base):
 
     problem: Mapped[Problem] = relationship(back_populates="projects")
     user: Mapped[User] = relationship(back_populates="projects")
-
-
-class CrawlRun(Base):
-    __tablename__ = "crawl_runs"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    source_key: Mapped[str] = mapped_column(String(64), nullable=False)
-    started_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
-    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
-    status: Mapped[str] = mapped_column(String(20), default="running", nullable=False)
-    counts: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
-    llm_calls: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    error_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
-    triggered_by: Mapped[str] = mapped_column(String(10), default="manual", nullable=False)
-
-
-class CrawlItem(Base):
-    __tablename__ = "crawl_items"
-    __table_args__ = (UniqueConstraint("url", name="uq_crawl_items_url"),)
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    source_key: Mapped[str] = mapped_column(String(64), nullable=False)
-    url: Mapped[str] = mapped_column(String(1000), nullable=False)
-    problem_id: Mapped[int | None] = mapped_column(ForeignKey("problems.id"), nullable=True)
-    last_status: Mapped[str | None] = mapped_column(String(20), nullable=True)
-    etag: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    last_modified: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    content_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
-    last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
-

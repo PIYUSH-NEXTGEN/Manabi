@@ -30,10 +30,6 @@ const IN_THE_INDEX = [
     copy: 'Three phases per brief, with the approach list and the deliverable you should be holding at the end of each phase.',
   },
   {
-    title: 'Advanced projects',
-    copy: 'Ten deeper domains — webhooks, API contracts, tenant security, incidents, ingestion, analytics, accessibility, inventory, offline sync, and workflows — each with a live workspace.',
-  },
-  {
     title: 'Your dashboard',
     copy: 'Every repo you submit, tracked against GitHub, plus recommendations scored on the briefs you have already picked.',
   },
@@ -91,7 +87,7 @@ export function AboutPage() {
 
       <p className="border-l-[6px] border-accent pl-4">
         Built as a hackathon prototype: the index, build guides, GitHub
-        tracking, advanced project workspaces, and the chat are live. The Repo
+        tracking, and the chat are live. The Repo
         Analyzer is still being built, so its form does not submit yet.
       </p>
 

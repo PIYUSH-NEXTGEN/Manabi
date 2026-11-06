@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { Button, Skeleton, Tag, useToast } from '@/design/primitives';
 import {
   useAdminReview,
-  useCrawlRuns,
   useEditProblem,
   useModerateProblem,
 } from '@/hooks/useAdmin';
@@ -17,7 +16,6 @@ const sectionHeading =
 export function AdminReviewPage() {
   const me = useMe();
   const review = useAdminReview();
-  const runs = useCrawlRuns();
   const moderate = useModerateProblem();
   const edit = useEditProblem();
   const toast = useToast();
@@ -91,7 +89,7 @@ export function AdminReviewPage() {
       <h1 className="mt-2 font-display text-4xl uppercase">Review queue</h1>
       <p className="mt-2 text-sm">
         Only published problems appear on the public board. Approve, edit, or
-        reject crawled items before they go live.
+        reject problems before they go live.
       </p>
 
       {review.isError ? (
@@ -122,12 +120,6 @@ export function AdminReviewPage() {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     <Tag>{problem.source_id ?? 'no id'}</Tag>
-                    <span className="font-mono text-[11px] uppercase tracking-widest">
-                      confidence{' '}
-                      {problem.extraction_confidence == null
-                        ? 'n/a'
-                        : problem.extraction_confidence.toFixed(2)}
-                    </span>
                   </div>
                 </div>
 
@@ -145,11 +137,6 @@ export function AdminReviewPage() {
                   >
                     View original ↗
                   </a>
-                ) : null}
-                {problem.review_notes ? (
-                  <p className="mt-2 border-l-[4px] border-accent pl-3 text-sm">
-                    {problem.review_notes}
-                  </p>
                 ) : null}
 
                 <div className="mt-4 flex flex-wrap gap-2">
@@ -218,52 +205,6 @@ export function AdminReviewPage() {
           })}
         </ul>
       )}
-
-      <section className="mt-12">
-        <h2 className="font-display text-2xl uppercase">Crawl runs</h2>
-        {runs.isError ? (
-          <p role="alert" className="mt-3 border border-ink bg-sheet p-4">
-            Could not load runs — {runs.error.detail}
-          </p>
-        ) : runs.isPending ? (
-          <Skeleton className="mt-3 h-24" />
-        ) : runs.data.length === 0 ? (
-          <p className="mt-3 border border-ink bg-sheet p-4">
-            No crawl runs recorded yet.
-          </p>
-        ) : (
-          <div className="mt-3 overflow-x-auto border border-ink bg-sheet">
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="border-b border-ink">
-                <tr>
-                  {['Source', 'Status', 'New', 'Review', 'LLM calls', 'Trigger'].map(
-                    (heading) => (
-                      <th
-                        key={heading}
-                        className="px-3 py-2 font-mono text-[11px] uppercase tracking-widest"
-                      >
-                        {heading}
-                      </th>
-                    ),
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                {runs.data.map((run) => (
-                  <tr key={run.id} className="border-b border-ink/20">
-                    <td className="px-3 py-2">{run.source_key}</td>
-                    <td className="px-3 py-2">{run.status}</td>
-                    <td className="px-3 py-2">{run.counts.new ?? 0}</td>
-                    <td className="px-3 py-2">{run.counts.needs_review ?? 0}</td>
-                    <td className="px-3 py-2">{run.llm_calls}</td>
-                    <td className="px-3 py-2">{run.triggered_by}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
 
       <p className="mt-8">
         <Link to="/problems" className="font-mono text-xs underline">

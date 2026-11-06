@@ -28,10 +28,6 @@ const FAQS = [
     a: 'Every brief has a three-phase guide — Start, Implement, Ship — listing what to do and what you should leave each phase with. It is a starting path, not a fixed spec.',
   },
   {
-    q: 'What are the advanced projects?',
-    a: 'Ten deeper domains — webhooks, API contracts, multi-tenant security, incident response, ingestion, analytics, accessibility, inventory, offline sync, and workflows. Each has a live workspace wired to a working API you can click through before you build your own.',
-  },
-  {
     q: 'What does Ask MANABI do?',
     a: 'It answers from the catalog only: tell it your stack and the time you have, and it suggests briefs that exist, with a link to each one. It will say so plainly when nothing fits.',
   },

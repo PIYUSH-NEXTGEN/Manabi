@@ -11,8 +11,8 @@ python -m venv .venv                    # Windows:  .venv\Scripts\python
 .venv\Scripts\pip install -r requirements.txt
 copy .env.example .env                  # then edit (session secret, GitHub OAuth, LLM key)
 .venv\Scripts\python -m alembic upgrade head
-# Optional: populate from the saved official SIH fixtures (no network/LLM):
-.venv\Scripts\python scripts/seed_sih_demo.py --limit 40
+# Optional: populate briefs from the seed scripts (no network/LLM):
+.venv\Scripts\python scripts/seed_beginner_web_projects.py
 .venv\Scripts\python -m uvicorn app.main:app --port 8000
 ```
 
@@ -57,7 +57,7 @@ against Postgres it runs `alembic upgrade head` itself, so prod never silently d
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | Gemini (default model in code: `gemini-3.8-flash`) |
 | `ANTHROPIC_API_KEY`, `LLM_MODEL_FAST` | Optional Anthropic provider |
 | `CHAT_RATE_LIMIT_ANON_PER_HOUR` / `CHAT_RATE_LIMIT_USER_PER_HOUR` | Chat limits |
-| `SITE_URL` | Site URL in the crawler User-Agent (legacy; unused without the crawler) |
+| `ADMIN_GITHUB_USERNAMES` | Comma separated GitHub logins allowed into the `/admin/review` page |
 
 Without an LLM key the AI endpoints return `503 {"detail": "AI is not configured yet"}`.
 

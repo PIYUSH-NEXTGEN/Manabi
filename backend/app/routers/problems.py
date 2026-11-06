@@ -10,7 +10,7 @@ from sqlalchemy.orm import aliased, joinedload
 
 from app import schemas
 from app.deps import DB, CurrentUser
-from app.models import ORIGIN_CRAWLER, Problem, Project, STATUS_PUBLISHED
+from app.models import Problem, Project, STATUS_PUBLISHED
 
 router = APIRouter(prefix="/api/problems", tags=["problems"])
 
@@ -42,7 +42,6 @@ def problem_to_out(problem: Problem, project_count: int) -> schemas.ProblemOut:
         source_year=problem.source_year,
         edition=problem.edition,
         organisation=problem.organisation,
-        source_status=problem.source_status,
         deadline=problem.deadline,
     )
 
@@ -159,7 +158,7 @@ def facets(db: DB):
         select(
             Problem.source_name,
             func.count(Problem.id),
-            func.max(func.coalesce(Problem.last_seen_at, Problem.created_at)),
+            func.max(Problem.created_at),
         )
         .where(Problem.status == STATUS_PUBLISHED)
         .group_by(Problem.source_name)
@@ -246,14 +245,8 @@ def get_problem(problem_id: int, db: DB):
         raise HTTPException(status_code=404, detail="Problem not found")
     base = problem_to_out(problem, len(problem.projects))
     detail = base.model_dump()
-    if problem.origin == ORIGIN_CRAWLER:
-        # §5: never expose full verbatim crawled text. The generated summary is
-        # what the page shows; summary_plus_excerpt sources may add 300 chars.
-        detail["original_text"] = problem.summary
-        detail["display_policy"] = "summary_only"
-    else:
-        detail["original_text"] = problem.original_text
-        detail["display_policy"] = "summary_plus_excerpt"
+    detail["original_text"] = problem.original_text
+    detail["display_policy"] = "summary_plus_excerpt"
     detail["projects"] = [project_to_out(p).model_dump() for p in problem.projects]
     return schemas.ProblemDetail(**detail)
 

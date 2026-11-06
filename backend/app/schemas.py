@@ -50,7 +50,6 @@ class ProblemOut(ProblemCard):
     source_year: int | None = None
     edition: str | None = None
     organisation: str | None = None
-    source_status: str = "unknown"
     deadline: date | None = None
 
 
@@ -90,16 +89,6 @@ class ProblemDetail(ProblemOut):
 class AdminProblemOut(ProblemOut):
     status: str
     origin: str
-    source_year: int | None
-    edition: str | None
-    organisation: str | None
-    deadline: date | None
-    source_status: str
-    extraction_confidence: float | None
-    review_notes: str | None
-    crawl_source_key: str | None
-    first_seen_at: datetime | None
-    last_seen_at: datetime | None
     created_at: datetime
 
 
@@ -119,31 +108,12 @@ class ProblemPatch(BaseModel):
     est_hours: int | None = Field(default=None, ge=1, le=1000)
     tech_tags: list[_problem_tag_item] | None = Field(default=None, max_length=25)
     approaches: list[Annotated[str, Field(min_length=1, max_length=800)]] | None = Field(default=None, max_length=8)
-    review_notes: str | None = Field(default=None, max_length=4000)
 
 
 class AdminActionOut(BaseModel):
     ok: bool
     problem_id: int
     status: str
-
-
-class CrawlRunOut(BaseModel):
-    id: int
-    source_key: str
-    started_at: datetime
-    finished_at: datetime | None
-    status: str
-    counts: dict[str, int]
-    llm_calls: int
-    error_summary: str | None
-    triggered_by: str
-
-
-class TakedownOut(BaseModel):
-    ok: bool
-    source_key: str
-    unpublished: int
 
 
 class DatasetIn(BaseModel):

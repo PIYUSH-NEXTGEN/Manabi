@@ -10,7 +10,6 @@ const STATIC_ROUTE_TARGETS: Array<[string, string]> = [
   ['/about', 'About MANABI'],
   ['/how-it-works', 'From idea to shipped code'],
   ['/repo-analyzer', 'Repo Analyzer'],
-  ['/projects', 'Advanced Project Ideas'],
   ['/faq', 'Straight answers'],
   ['/contribute', "Build on someone else's repo"],
   ['/contact', 'Talk to us'],
@@ -23,6 +22,11 @@ const PLACEHOLDER_ROUTE_TARGETS: Array<[string, string]> = [];
 const DEAD_TARGETS = [
   '/nope',
   '/problems/1/extra',
+  '/projects',
+  '/projects/webhooks',
+  '/projects/tenant-security',
+  '/projects/analytics',
+  '/projects/workflows',
 ];
 
 describe('Route table (no dead links)', () => {
@@ -137,7 +141,7 @@ describe('Route table (no dead links)', () => {
 
     render(<App />);
 
-    for (const heading of ['Explore', 'Build', 'MANABI', 'Legal']) {
+    for (const heading of ['MANABI', 'Legal']) {
       expect(
         screen.getByRole('heading', { name: heading, level: 2 }),
       ).toBeInTheDocument();

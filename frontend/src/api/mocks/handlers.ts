@@ -387,7 +387,6 @@ export const handlers = [
   http.get('*/api/admin/review', () =>
     HttpResponse.json({ items: [], total: 0 }),
   ),
-  http.get('*/api/admin/crawl-runs', () => HttpResponse.json([])),
   http.post('*/api/admin/problems/:id/:action', ({ params }) =>
     HttpResponse.json({
       ok: true,

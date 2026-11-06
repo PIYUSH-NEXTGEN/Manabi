@@ -31,7 +31,6 @@ GITHUB_CLIENT_ID=<deployed OAuth app id>
 GITHUB_CLIENT_SECRET=<secret>
 LLM_PROVIDER=gemini            # or mock to start
 GEMINI_API_KEY=<key>
-SITE_URL=https://<your-domain>  # site URL
 ```
 
 Notes:
@@ -57,10 +56,8 @@ python -m venv .venv
   `.venv/bin/python -m alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`).
   As a safety net the app itself also runs `upgrade head` on startup when `DATABASE_URL` is Postgres.
 - SQLite (local dev) keeps `create_all` on startup; do not rely on that in production.
-- The catalog is populated from the saved official SIH fixtures when you run
-  `.venv/bin/python scripts/seed_sih_demo.py --limit 40 --reset` pointed at the
-  production database. Live-source ingestion (the old crawler and admin review queue)
-  was removed; re-adding it is a separate planned effort.
+- The catalog is populated from the seed scripts (`scripts/seed_*_web_projects.py`)
+  and manual curation in the app; production data is curated offline.
 
 ## 4. Start the service
 

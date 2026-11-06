@@ -297,259 +297,10 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/admin/review": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Review Queue */
-        get: operations["review_queue_api_admin_review_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/admin/problems/{problem_id}/approve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Approve */
-        post: operations["approve_api_admin_problems__problem_id__approve_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/admin/problems/{problem_id}/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reject */
-        post: operations["reject_api_admin_problems__problem_id__reject_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/admin/problems/{problem_id}/unpublish": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Unpublish */
-        post: operations["unpublish_api_admin_problems__problem_id__unpublish_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/admin/problems/{problem_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Admin Problem */
-        get: operations["admin_problem_api_admin_problems__problem_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        /** Edit Problem */
-        patch: operations["edit_problem_api_admin_problems__problem_id__patch"];
-        trace?: never;
-    };
-    "/api/admin/crawl-runs": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Crawl Runs */
-        get: operations["crawl_runs_api_admin_crawl_runs_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/admin/crawl-runs/{run_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Crawl Run */
-        get: operations["crawl_run_api_admin_crawl_runs__run_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/admin/sources/{source_key}/unpublish-all": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Unpublish Source */
-        post: operations["unpublish_source_api_admin_sources__source_key__unpublish_all_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/admin/crawl/{source_key}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Trigger Crawl */
-        post: operations["trigger_crawl_api_admin_crawl__source_key__post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        /** AdminActionOut */
-        AdminActionOut: {
-            /** Ok */
-            ok: boolean;
-            /** Problem Id */
-            problem_id: number;
-            /** Status */
-            status: string;
-        };
-        /** AdminProblemOut */
-        AdminProblemOut: {
-            /** Title */
-            title: string;
-            /** Summary */
-            summary: string;
-            /** Who Affected */
-            who_affected: string;
-            /** Why Matters */
-            why_matters: string;
-            /**
-             * Field
-             * @enum {string}
-             */
-            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "other";
-            /**
-             * Domain
-             * @enum {string}
-             */
-            domain: "healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "other";
-            /**
-             * Difficulty
-             * @enum {string}
-             */
-            difficulty: "beginner" | "intermediate" | "advanced";
-            /** Est Hours */
-            est_hours: number;
-            /** Tech Tags */
-            tech_tags: string[];
-            /** Datasets */
-            datasets: {
-                [key: string]: unknown;
-            }[];
-            /** Approaches */
-            approaches: string[];
-            /** Source Name */
-            source_name: string;
-            /** Source Id */
-            source_id?: string | null;
-            /** Source Url */
-            source_url?: string | null;
-            /** Source Note */
-            source_note?: string | null;
-            /** Id */
-            id: number;
-            /** Project Count */
-            project_count: number;
-            /** Ai Fields */
-            ai_fields: string[];
-            /** Origin */
-            origin: string;
-            /** Source Year */
-            source_year: number | null;
-            /** Edition */
-            edition: string | null;
-            /** Organisation */
-            organisation: string | null;
-            /** Source Status */
-            source_status: string;
-            /** Deadline */
-            deadline: string | null;
-            /** Status */
-            status: string;
-            /** Extraction Confidence */
-            extraction_confidence: number | null;
-            /** Review Notes */
-            review_notes: string | null;
-            /** Crawl Source Key */
-            crawl_source_key: string | null;
-            /** First Seen At */
-            first_seen_at: string | null;
-            /** Last Seen At */
-            last_seen_at: string | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
-        };
-        /** AdminReviewOut */
-        AdminReviewOut: {
-            /** Items */
-            items: components["schemas"]["AdminProblemOut"][];
-            /** Total */
-            total: number;
-        };
         /** ChatIn */
         ChatIn: {
             /** Messages */
@@ -588,38 +339,12 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "other";
+            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "data-science" | "developer-tools" | "other";
             /**
              * Difficulty
              * @enum {string}
              */
             difficulty: "beginner" | "intermediate" | "advanced";
-        };
-        /** CrawlRunOut */
-        CrawlRunOut: {
-            /** Id */
-            id: number;
-            /** Source Key */
-            source_key: string;
-            /**
-             * Started At
-             * Format: date-time
-             */
-            started_at: string;
-            /** Finished At */
-            finished_at: string | null;
-            /** Status */
-            status: string;
-            /** Counts */
-            counts: {
-                [key: string]: number;
-            };
-            /** Llm Calls */
-            llm_calls: number;
-            /** Error Summary */
-            error_summary: string | null;
-            /** Triggered By */
-            triggered_by: string;
         };
         /** Facet */
         Facet: {
@@ -662,12 +387,12 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "other";
+            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "data-science" | "developer-tools" | "other";
             /**
              * Domain
              * @enum {string}
              */
-            domain: "healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "other";
+            domain: "healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "cybersecurity" | "computer-vision" | "iot-embedded" | "distributed-systems" | "ml" | "devops-cloud" | "nlp-llm" | "cloud" | "blockchain" | "web3" | "databases" | "systems" | "other";
             /**
              * Difficulty
              * @enum {string}
@@ -708,11 +433,6 @@ export interface components {
             edition?: string | null;
             /** Organisation */
             organisation?: string | null;
-            /**
-             * Source Status
-             * @default unknown
-             */
-            source_status: string;
             /** Deadline */
             deadline?: string | null;
             /** Original Text */
@@ -743,12 +463,12 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "other";
+            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "data-science" | "developer-tools" | "other";
             /**
              * Domain
              * @enum {string}
              */
-            domain: "healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "other";
+            domain: "healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "cybersecurity" | "computer-vision" | "iot-embedded" | "distributed-systems" | "ml" | "devops-cloud" | "nlp-llm" | "cloud" | "blockchain" | "web3" | "databases" | "systems" | "other";
             /**
              * Difficulty
              * @enum {string}
@@ -792,12 +512,12 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "other";
+            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "data-science" | "developer-tools" | "other";
             /**
              * Domain
              * @enum {string}
              */
-            domain: "healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "other";
+            domain: "healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "cybersecurity" | "computer-vision" | "iot-embedded" | "distributed-systems" | "ml" | "devops-cloud" | "nlp-llm" | "cloud" | "blockchain" | "web3" | "databases" | "systems" | "other";
             /**
              * Difficulty
              * @enum {string}
@@ -838,38 +558,8 @@ export interface components {
             edition?: string | null;
             /** Organisation */
             organisation?: string | null;
-            /**
-             * Source Status
-             * @default unknown
-             */
-            source_status: string;
             /** Deadline */
             deadline?: string | null;
-        };
-        /** ProblemPatch */
-        ProblemPatch: {
-            /** Title */
-            title?: string | null;
-            /** Summary */
-            summary?: string | null;
-            /** Who Affected */
-            who_affected?: string | null;
-            /** Why Matters */
-            why_matters?: string | null;
-            /** Field */
-            field?: ("ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "other") | null;
-            /** Domain */
-            domain?: ("healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "other") | null;
-            /** Difficulty */
-            difficulty?: ("beginner" | "intermediate" | "advanced") | null;
-            /** Est Hours */
-            est_hours?: number | null;
-            /** Tech Tags */
-            tech_tags?: string[] | null;
-            /** Approaches */
-            approaches?: string[] | null;
-            /** Review Notes */
-            review_notes?: string | null;
         };
         /** ProblemsListOut */
         ProblemsListOut: {
@@ -958,15 +648,6 @@ export interface components {
             /** Projects */
             projects: number;
         };
-        /** TakedownOut */
-        TakedownOut: {
-            /** Ok */
-            ok: boolean;
-            /** Source Key */
-            source_key: string;
-            /** Unpublished */
-            unpublished: number;
-        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -1015,12 +696,13 @@ export interface operations {
         parameters: {
             query?: {
                 q?: string | null;
-                field?: ("ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "other") | null;
-                domain?: ("healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "other") | null;
+                field?: ("ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "data-science" | "developer-tools" | "other") | null;
+                domain?: ("healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "cybersecurity" | "computer-vision" | "iot-embedded" | "distributed-systems" | "ml" | "devops-cloud" | "nlp-llm" | "cloud" | "blockchain" | "web3" | "databases" | "systems" | "other") | null;
                 difficulty?: ("beginner" | "intermediate" | "advanced") | null;
                 tech?: string[];
                 source?: string | null;
                 sort?: "newest" | "popular";
+                distinct?: ("field" | "domain") | null;
                 limit?: number;
                 offset?: number;
             };
@@ -1450,322 +1132,6 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    review_queue_api_admin_review_get: {
-        parameters: {
-            query?: {
-                status?: string;
-                limit?: number;
-                offset?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminReviewOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    approve_api_admin_problems__problem_id__approve_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                problem_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminActionOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    reject_api_admin_problems__problem_id__reject_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                problem_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminActionOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    unpublish_api_admin_problems__problem_id__unpublish_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                problem_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminActionOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    admin_problem_api_admin_problems__problem_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                problem_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminProblemOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    edit_problem_api_admin_problems__problem_id__patch: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                problem_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ProblemPatch"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AdminActionOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    crawl_runs_api_admin_crawl_runs_get: {
-        parameters: {
-            query?: {
-                limit?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrawlRunOut"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    crawl_run_api_admin_crawl_runs__run_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                run_id: number;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CrawlRunOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    unpublish_source_api_admin_sources__source_key__unpublish_all_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                source_key: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["TakedownOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    trigger_crawl_api_admin_crawl__source_key__post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                source_key: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            202: {
                 headers: {
                     [name: string]: unknown;
                 };

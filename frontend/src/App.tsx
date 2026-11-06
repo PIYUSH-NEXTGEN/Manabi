@@ -71,61 +71,6 @@ const PrivacyPage = lazy(() =>
 const TermsPage = lazy(() =>
   import('@/pages/TermsPage').then((m) => ({ default: m.TermsPage })),
 );
-const ProjectsOverviewPage = lazy(() =>
-  import('@/pages/projects/OverviewPage').then((m) => ({
-    default: m.ProjectsOverviewPage,
-  })),
-);
-const WebhooksPage = lazy(() =>
-  import('@/pages/projects/WebhooksPage').then((m) => ({
-    default: m.WebhooksPage,
-  })),
-);
-const ApiContractsPage = lazy(() =>
-  import('@/pages/projects/ApiContractsPage').then((m) => ({
-    default: m.ApiContractsPage,
-  })),
-);
-const TenantSecurityPage = lazy(() =>
-  import('@/pages/projects/TenantSecurityPage').then((m) => ({
-    default: m.TenantSecurityPage,
-  })),
-);
-const IncidentsPage = lazy(() =>
-  import('@/pages/projects/IncidentsPage').then((m) => ({
-    default: m.IncidentsPage,
-  })),
-);
-const IngestionPage = lazy(() =>
-  import('@/pages/projects/IngestionPage').then((m) => ({
-    default: m.IngestionPage,
-  })),
-);
-const AnalyticsPage = lazy(() =>
-  import('@/pages/projects/AnalyticsPage').then((m) => ({
-    default: m.AnalyticsPage,
-  })),
-);
-const AccessibilityPage = lazy(() =>
-  import('@/pages/projects/AccessibilityPage').then((m) => ({
-    default: m.AccessibilityPage,
-  })),
-);
-const InventoryPage = lazy(() =>
-  import('@/pages/projects/InventoryPage').then((m) => ({
-    default: m.InventoryPage,
-  })),
-);
-const SyncPage = lazy(() =>
-  import('@/pages/projects/SyncPage').then((m) => ({
-    default: m.SyncPage,
-  })),
-);
-const WorkflowsPage = lazy(() =>
-  import('@/pages/projects/WorkflowsPage').then((m) => ({
-    default: m.WorkflowsPage,
-  })),
-);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -193,17 +138,6 @@ export function App() {
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/404" element={<NotFoundPage />} />
-                  <Route path="/projects" element={<ProjectsOverviewPage />} />
-                  <Route path="/projects/webhooks" element={<WebhooksPage />} />
-                  <Route path="/projects/api-contracts" element={<ApiContractsPage />} />
-                  <Route path="/projects/tenant-security" element={<TenantSecurityPage />} />
-                  <Route path="/projects/incidents" element={<IncidentsPage />} />
-                  <Route path="/projects/ingestion" element={<IngestionPage />} />
-                  <Route path="/projects/analytics" element={<AnalyticsPage />} />
-                  <Route path="/projects/accessibility" element={<AccessibilityPage />} />
-                  <Route path="/projects/inventory" element={<InventoryPage />} />
-                  <Route path="/projects/sync" element={<SyncPage />} />
-                  <Route path="/projects/workflows" element={<WorkflowsPage />} />
                   <Route path="*" element={<NotFoundPage />} />
                 </Route>
               </Routes>

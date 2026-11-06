@@ -35,5 +35,3 @@ services:
         value: 30
       - key: ADMIN_GITHUB_USERNAMES
         sync: false # comma-separated GitHub logins for /admin/review
-      - key: SITE_URL
-        value: https://github.com/PIYUSH-NEXTGEN/Manabi

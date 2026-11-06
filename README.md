@@ -5,10 +5,11 @@ link their GitHub repo, and the site tracks their progress from public repo
 activity. A chat assistant helps you choose, and everything runs on a single
 FastAPI service that also serves the built frontend.
 
-Problem briefs are curated offline and loaded with seed scripts, so the whole
-app works with no crawler and no network sources. The demo seed comes from
-saved SIH fixtures; the other seed files fill in web, mobile, ML, data science,
-cloud, cybersecurity, systems, and web3 briefs.
+Problem briefs are curated manually, via seed scripts and the app itself — the
+app needs no network sources. Automated crawling was evaluated early on and
+intentionally removed: several public sources prohibit scraping. The seed files
+fill in web, mobile, ML, data science, cloud, cybersecurity, systems, and web3
+briefs.
 
 ## What the app does
 
@@ -30,14 +31,13 @@ Put your platform's TLS or load balancer in front of uvicorn.
 MANABI/
 ├── backend/            # FastAPI API (serves the built frontend too)
 │   ├── app/            # routers, services, models, seed files, config
-│   ├── scripts/        # seed_sih_demo.py, seed_*_web_projects.py, export_openapi.py
+│   ├── scripts/        # seed_*_web_projects.py, export_openapi.py
 │   ├── requirements.txt
 │   ├── start.sh        # prod entrypoint (pip install + uvicorn)
 │   └── Procfile        # Render / Railway / Heroku-style
 ├── frontend/           # Vite + React + TS (calls relative /api/...)
 │   └── dist/           # build output, never committed, built on deploy
 ├── docs/
-│   ├── crawler.md      # historical note on the retired crawler modules
 │   └── openapi.json    # machine-readable API contract
 ├── DEPLOY.md           # full production runbook (read this to deploy)
 └── render.yaml         # one-click Render blueprint
@@ -52,7 +52,7 @@ python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt     # macOS/Linux: .venv/bin/pip
 copy .env.example .env                            # then edit secrets (never commit .env)
 .venv/Scripts/python -m alembic upgrade head
-.venv/Scripts/python scripts/seed_sih_demo.py --limit 40   # optional demo data
+.venv/Scripts/python scripts/seed_beginner_web_projects.py
 .venv/Scripts/python -m uvicorn app.main:app --port 8000
 
 # Terminal 2, frontend
@@ -67,7 +67,6 @@ The app starts empty. Load briefs without any network or LLM call:
 
 ```sh
 cd backend
-.venv/Scripts/python scripts/seed_sih_demo.py --limit 40 --reset
 .venv/Scripts/python scripts/seed_beginner_web_projects.py
 .venv/Scripts/python scripts/seed_intermediate_web_projects.py
 ```
@@ -107,7 +106,7 @@ Health check: `GET /api/health` returns `{"status":"ok"}`.
 | `LLM_PROVIDER` | `gemini`, `anthropic`, or `mock` (mock for offline dev and tests) |
 | `GEMINI_API_KEY` / `GEMINI_MODEL` / `ANTHROPIC_API_KEY` | Provider keys and optional model override |
 | `CHAT_RATE_LIMIT_ANON_PER_HOUR` / `CHAT_RATE_LIMIT_USER_PER_HOUR` | Chat rate limits (10 / 30) |
-| `ADMIN_GITHUB_USERNAMES` | Comma separated GitHub logins allowed into `/api/admin/*` and `/admin/review` |
+| `ADMIN_GITHUB_USERNAMES` | Comma separated GitHub logins allowed into the `/admin/review` page |
 
 Without LLM keys, AI endpoints return `503 {"detail": "AI is not configured yet"}`.
 Everything else works fine without them.

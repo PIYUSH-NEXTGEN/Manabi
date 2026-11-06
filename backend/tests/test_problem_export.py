@@ -48,12 +48,8 @@ def _problem(db, *, status="published") -> Problem:
         source_url="https://sih.gov.in/letters/SIH_PS_2024.xlsx",
         original_text="VERBATIM SOURCE TEXT MUST NOT BE EXPORTED",
         status=status,
-        origin="crawler",
         source_year=2024,
         organisation="MDoNER",
-        source_status="open",
-        extraction_confidence=0.8,
-        crawl_source_key="sih",
         created_at=datetime.now(timezone.utc),
     )
     db.add(problem)
