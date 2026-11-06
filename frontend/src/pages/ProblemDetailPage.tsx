@@ -131,7 +131,9 @@ function DetailView({ problemId }: { problemId: number }) {
   const data = problem.data;
   const ideas = futureIdeas(data.original_text);
   const description = fullDescription(data.summary, data.who_affected, data.why_matters);
-  const projectCount = data.projects.length;
+  const projectCount = data.project_count ?? data.projects.length;
+  const completedCount = data.completed_count ?? 0;
+  const buildingCount = projectCount - completedCount;
 
   return (
     <main className="border-b border-ink bg-paper">
@@ -162,7 +164,9 @@ function DetailView({ problemId }: { problemId: number }) {
             <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
               <span className="flex items-center gap-1.5">
                 <GitBranch aria-hidden size={12} strokeWidth={2.4} />
-                {projectCount === 1 ? '1 project' : `${projectCount} projects`}
+                {buildingCount === 1
+                  ? `1 building${completedCount === 1 ? ' · 1 completed' : ''}`
+                  : `${buildingCount} building${completedCount > 0 ? ` · ${completedCount} completed` : ''}`}
               </span>
             </div>
           </div>
@@ -263,11 +267,17 @@ function DetailView({ problemId }: { problemId: number }) {
 
             <section>
               <h2 className={cx(panelHeading, 'border-b border-ink pb-2')}>
-                Projects in the wild ({data.projects.length})
+                Projects in the wild
+                {buildingCount === 1 && completedCount === 0
+                  ? ' (1)'
+                  : ` (${buildingCount} building${
+                      completedCount > 0 ? ` · ${completedCount} completed` : ''
+                    })`}
               </h2>
               <ul className="flex list-none flex-col">
                 {data.projects.map((project) => {
                   const owner = projectOwnerUsername(project.owner);
+                  const completed = project.completed_at != null;
                   return (
                     <li
                       key={project.id}
@@ -279,6 +289,18 @@ function DetailView({ problemId }: { problemId: number }) {
                           <span className="truncate font-mono text-xs font-bold">
                             {project.repo_name}
                           </span>
+                          {completed ? (
+                            <span
+                              title={
+                                project.demo_url != null
+                                  ? `Demo: ${project.demo_url}`
+                                  : 'Marked as completed'
+                              }
+                              className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent"
+                            >
+                              ✓ Completed
+                            </span>
+                          ) : null}
                         </span>
                         <ProjectProgressBadge progress={project.progress} />
                       </div>

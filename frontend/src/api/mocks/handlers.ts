@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw';
+﻿import { http, HttpResponse } from 'msw';
 
 const stats = {
   problems: 6,
@@ -30,6 +30,7 @@ const problems = [
     source_url: null,
     source_note: null,
     project_count: 1,
+    completed_count: 0,
     ai_fields: ['approaches'],
   },
   {
@@ -54,6 +55,7 @@ const problems = [
     source_url: null,
     source_note: null,
     project_count: 1,
+    completed_count: 1,
     ai_fields: ['approaches', 'est_hours'],
   },
   {
@@ -78,6 +80,7 @@ const problems = [
     source_url: null,
     source_note: null,
     project_count: 0,
+    completed_count: 0,
     ai_fields: ['approaches'],
   },
   {
@@ -102,6 +105,7 @@ const problems = [
     source_url: null,
     source_note: 'Submission window closed 5 Oct 2026',
     project_count: 0,
+    completed_count: 0,
     ai_fields: ['approaches', 'est_hours'],
   },
   {
@@ -126,6 +130,7 @@ const problems = [
     source_url: null,
     source_note: null,
     project_count: 0,
+    completed_count: 0,
     ai_fields: ['approaches'],
   },
   {
@@ -150,6 +155,7 @@ const problems = [
     source_url: null,
     source_note: null,
     project_count: 0,
+    completed_count: 0,
     ai_fields: ['approaches', 'who_affected'],
   },
 ];
@@ -196,6 +202,15 @@ const sampleProject = {
   repo_owner: 'demo-farmer',
   repo_name: 'crop-triage',
   open_for_contributors: true,
+  verification_status: 'verified',
+  solution_summary:
+    'A phone-first triage flow with an offline capture queue that routes leaf-blight cases to the right extension officer.',
+  completed_at: null,
+  demo_url: null,
+  reflection: null,
+  relevance_reason: null,
+  ownership_basis: null,
+  review_note: null,
   owner: { username: 'demo-farmer', avatar_url: null },
   progress: {
     status: 'active',
@@ -226,6 +241,15 @@ const secondProject = {
   repo_owner: 'demo-civic',
   repo_name: 'streetlight-ops',
   open_for_contributors: false,
+  verification_status: 'verified',
+  solution_summary:
+    'Geo-hashed civic reports deduped by pole with SLA escalation states per ward and a live ops desk queue.',
+  completed_at: '2026-10-20T09:00:00Z',
+  demo_url: 'https://streetlight-ops.demo.example',
+  reflection: 'Shipped after three ward pilots.',
+  relevance_reason: null,
+  ownership_basis: null,
+  review_note: null,
   owner: { username: 'demo-civic', avatar_url: null },
   progress: {
     status: 'stale',
@@ -239,6 +263,54 @@ const secondProject = {
   },
   progress_updated_at: '2026-10-02T19:00:00Z',
 };
+
+const adminSubmissions: Record<string, Array<{ [key: string]: unknown }>> = {
+  needs_review: [
+    {
+      id: 11,
+      problem_id: 3,
+      problem_title: 'Fraud pattern walkthrough for UPI micro-transactions',
+      repo_url: 'https://github.com/demo-farmer/crop-triage',
+      repo_owner: 'demo-farmer',
+      repo_name: 'crop-triage',
+      submitter: 'demo-farmer',
+      submitter_avatar_url: null,
+      verification_status: 'needs_review',
+      ownership_basis: 'contributor',
+      relevance_score: 0.42,
+      relevance_reason: 'Linked to the problem by keywords?',
+      solution_summary:
+        'Drift baselines notebook for micro-transaction fraud with weekly precision logging.',
+      review_note: null,
+      demo_url: null,
+      reflection: null,
+      open_for_contributors: true,
+      report_count: 0,
+      created_at: '2026-11-04T08:00:00Z',
+      completed_at: null,
+    },
+  ],
+  rejected: [],
+  verified: [],
+};
+
+function adminSubmissionsOf(status: string): Array<{ [key: string]: unknown }> {
+  return (adminSubmissions[status] ?? []).map((item) => ({ ...item }));
+}
+
+function adminSubmissionsResponse(request: Request): { items: Array<{ [key: string]: unknown }>; total: number } {
+  const url = new URL(request.url);
+  const status = url.searchParams.get('status') ?? 'needs_review';
+  const items = adminSubmissionsOf(status);
+  return { items, total: items.length };
+}
+
+function changeSubmissionStatus(id: number, status: string) {
+  for (const queue of Object.values(adminSubmissions)) {
+    const found = queue.find((item) => item.id === id);
+    if (found) found.verification_status = status;
+  }
+}
 
 export const handlers = [
   http.get('*/api/health', () => HttpResponse.json({ status: 'ok' })),
@@ -304,13 +376,33 @@ export const handlers = [
 
     const body = (await request.json()) as {
       repo_url?: string;
+      solution_summary?: string;
       open_for_contributors?: boolean;
     };
     const repoUrl = body.repo_url ?? '';
     if (!/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/.test(repoUrl)) {
       return HttpResponse.json(
-        { detail: 'repo_url must be a GitHub repository URL' },
+        { detail: { code: 'invalid_repo_url', message: 'Use a GitHub repo URL like https://github.com/owner/name' } },
         { status: 422 },
+      );
+    }
+    const summary = (body.solution_summary ?? '').trim();
+    if (summary.length < 40 || summary.length > 800) {
+      return HttpResponse.json(
+        { detail: { code: 'invalid_summary', message: 'Describe how your project solves the problem in 40-800 characters.' } },
+        { status: 422 },
+      );
+    }
+    if (/demo-only-not-owner/.test(repoUrl)) {
+      return HttpResponse.json(
+        { detail: { code: 'not_repo_owner', message: 'You can only submit repositories you own or have contributed to.' } },
+        { status: 403 },
+      );
+    }
+    if (/already-used/.test(repoUrl)) {
+      return HttpResponse.json(
+        { detail: { code: 'already_submitted', message: 'You already linked this repository to this problem.' } },
+        { status: 409 },
       );
     }
 
@@ -320,25 +412,36 @@ export const handlers = [
     const name = parts[4];
     const nextId = Math.max(...problems.map((p) => p.id), 1) + 10;
 
-    return HttpResponse.json({
-      id: nextId,
-      problem_id: problem.id,
-      problem_title: problem.title,
-      repo_url: repoUrl,
-      repo_owner: owner,
-      repo_name: name,
-      open_for_contributors: body.open_for_contributors === true,
-      owner: { username: owner, avatar_url: null },
-      progress: {
-        status: 'not_started',
-        commit_count: 0,
-        last_commit_at: null,
-        has_readme: false,
-        recent_commits: [],
-        open_issues: [],
+    return HttpResponse.json(
+      {
+        id: nextId,
+        problem_id: problem.id,
+        problem_title: problem.title,
+        repo_url: repoUrl,
+        repo_owner: owner,
+        repo_name: name,
+        open_for_contributors: body.open_for_contributors === true,
+        verification_status: 'needs_review',
+        solution_summary: summary,
+        completed_at: null,
+        demo_url: null,
+        reflection: null,
+        relevance_reason: 'Automatic check could not fully confirm relevance',
+        ownership_basis: 'push_access',
+        review_note: null,
+        owner: { username: owner, avatar_url: null },
+        progress: {
+          status: 'not_started',
+          commit_count: 0,
+          last_commit_at: null,
+          has_readme: false,
+          recent_commits: [],
+          open_issues: [],
+        },
+        progress_updated_at: null,
       },
-      progress_updated_at: null,
-    });
+      { status: 201 },
+    );
   }),
   http.post('*/api/chat', async ({ request }) => {
     const body = (await request.json()) as {
@@ -363,7 +466,7 @@ export const handlers = [
 
     return HttpResponse.json({
       reply:
-        'Based on what you told me, the closest problems from the catalog are linked under this reply. Nothing here was invented — both are already in the index.',
+        'Based on what you told me, the closest problems from the catalog are linked under this reply. Nothing here was invented â€” both are already in the index.',
       problems: [
         ...problemMatches,
         problems.find((p) => p.id === 5),
@@ -384,23 +487,89 @@ export const handlers = [
   http.get('*/api/me/projects', () =>
     HttpResponse.json({ detail: 'Not logged in' }, { status: 401 }),
   ),
-  http.get('*/api/admin/review', () =>
-    HttpResponse.json({ items: [], total: 0 }),
+  http.get('*/api/admin/submissions', ({ request }) =>
+    HttpResponse.json(adminSubmissionsResponse(request)),
   ),
-  http.post('*/api/admin/problems/:id/:action', ({ params }) =>
-    HttpResponse.json({
+  http.post('*/api/admin/submissions/:id/approve', ({ params }) => {
+    changeSubmissionStatus(Number(params.id), 'verified');
+    return HttpResponse.json({
       ok: true,
-      problem_id: Number(params.id),
-      status: params.action === 'approve' ? 'published' : 'rejected',
+      project_id: Number(params.id),
+      verification_status: 'verified',
+    });
+  }),
+  http.post('*/api/admin/submissions/:id/reject', ({ params }) => {
+    changeSubmissionStatus(Number(params.id), 'rejected');
+    return HttpResponse.json({
+      ok: true,
+      project_id: Number(params.id),
+      verification_status: 'rejected',
+    });
+  }),
+  http.delete('*/api/projects/:id', () =>
+    new HttpResponse(null, { status: 204 }),
+  ),
+  http.patch('*/api/projects/:id', async ({ request, params }) => {
+    const body = (await request.json()) as {
+      demo_url?: string;
+      open_for_contributors?: boolean;
+    };
+    if (typeof body.demo_url === 'string' && !/^https?:\/\//.test(body.demo_url)) {
+      return HttpResponse.json(
+        { detail: { code: 'invalid_demo_url', message: 'Demo link must be a plain http(s) URL.' } },
+        { status: 422 },
+      );
+    }
+    return HttpResponse.json({ ...sampleProject, ...body, id: Number(params.id) });
+  }),
+  http.post('*/api/projects/:id/complete', async ({ request, params }) => {
+    const body = (await request.json()) as {
+      demo_url?: string;
+      reflection?: string;
+    };
+    const id = Number(params.id);
+    if (id === 2) {
+      return HttpResponse.json(
+        {
+          detail: {
+            code: 'not_ready_to_complete',
+            message: 'Not ready to mark this project as completed yet.',
+            checklist: [
+              { item: 'Verified submission', ok: false },
+              { item: 'README', ok: true },
+              { item: 'At least 5 commits', ok: true },
+            ],
+          },
+        },
+        { status: 422 },
+      );
+    }
+    return HttpResponse.json({
+      ...sampleProject,
+      id,
+      completed_at: '2026-11-06T09:00:00Z',
+      demo_url: body.demo_url ?? sampleProject.demo_url,
+      reflection: body.reflection ?? sampleProject.reflection,
+    });
+  }),
+  http.post('*/api/projects/:id/reopen', ({ params }) =>
+    HttpResponse.json({
+      ...sampleProject,
+      id: Number(params.id),
+      completed_at: null,
     }),
   ),
-  http.patch('*/api/admin/problems/:id', ({ params }) =>
-    HttpResponse.json({
-      ok: true,
-      problem_id: Number(params.id),
-      status: 'pending_review',
-    }),
-  ),
+  http.post('*/api/projects/:id/report', async ({ request }) => {
+    const body = (await request.json()) as { reason?: string };
+    const reason = typeof body.reason === 'string' ? body.reason : '';
+    if (reason.trim().length === 0) {
+      return HttpResponse.json(
+        { detail: { code: 'invalid_report', message: 'Add a short reason so the maintainers know what is wrong.' } },
+        { status: 422 },
+      );
+    }
+    return HttpResponse.json({ ok: true, report_count: 1 }, { status: 201 });
+  }),
   http.post('*/api/problems', async ({ request }) => {
     const body = (await request.json()) as { title?: string };
     const title = typeof body.title === 'string' ? body.title : 'Pasted problem';
@@ -423,6 +592,7 @@ export const handlers = [
         source_url: null,
         source_note: null,
         project_count: 0,
+        completed_count: 0,
         ai_fields: [],
         projects: [],
         original_text: title,

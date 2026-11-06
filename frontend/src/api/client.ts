@@ -12,17 +12,44 @@ export type StatsOut = Schemas['StatsOut'];
 export class ApiError extends Error {
   readonly status: number;
   readonly detail: string;
+  /** Machine-readable error code from {"detail": {"code", "message"}} bodies. */
+  readonly code: string | null;
+  /** The raw parsed response body, for error payloads with extra fields
+   * (e.g. the completion checklist). */
+  readonly payload?: unknown;
 
-  constructor(status: number, detail: string) {
+  constructor(status: number, detail: string, code: string | null = null, payload?: unknown) {
     super(detail);
     this.name = 'ApiError';
     this.status = status;
     this.detail = detail;
+    this.code = code;
+    this.payload = payload;
   }
 }
 
 interface ErrorBody {
   detail?: unknown;
+}
+
+/** FastAPI can return the error detail as a plain string or as
+ * {"code": ..., "message": ...}. Handle both. */
+function parseErrorBody(body: ErrorBody): { detail: string; code: string | null } | null {
+  if (typeof body.detail === 'string' && body.detail.length > 0) {
+    return { detail: body.detail, code: null };
+  }
+  if (typeof body.detail === 'object' && body.detail !== null) {
+    const object = body.detail as Record<string, unknown>;
+    if (
+      typeof object.code === 'string' &&
+      typeof object.message === 'string' &&
+      object.message.length > 0
+    ) {
+      return { detail: object.message, code: object.code };
+    }
+    return null;
+  }
+  return null;
 }
 
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -39,15 +66,20 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 
   if (!response.ok) {
     let detail = `Request failed with status ${response.status}`;
+    let code: string | null = null;
+    let payload: unknown;
     try {
       const body = (await response.json()) as ErrorBody;
-      if (typeof body.detail === 'string' && body.detail.length > 0) {
-        detail = body.detail;
+      payload = body;
+      const parsed = parseErrorBody(body);
+      if (parsed) {
+        detail = parsed.detail;
+        code = parsed.code;
       }
     } catch {
       detail = `Request failed with status ${response.status}`;
     }
-    throw new ApiError(response.status, detail);
+    throw new ApiError(response.status, detail, code, payload);
   }
 
   return (await response.json()) as T;
@@ -150,55 +182,53 @@ export type ChatPageContext = Schemas['ChatPageContext'];
 export type ChatProblemItem = Schemas['ChatProblemItem'];
 export type RecommendationsOut = Schemas['RecommendationsOut'];
 export type RecommendationItem = Schemas['RecommendationItem'];
-export type AdminProblemOut = Schemas['ProblemOut'] & {
-  status: string;
-  origin: string;
-  created_at: string;
-};
-export type AdminReviewOut = {
-  items: AdminProblemOut[];
-  total: number;
-};
+export type AdminSubmissionOut = Schemas['AdminSubmissionOut'];
+export type AdminSubmissionsOut = Schemas['AdminSubmissionsOut'];
+export type AdminSubmissionActionOut = Schemas['AdminSubmissionActionOut'];
+/** Checklist item inside the not_ready_to_complete error body. */
+export interface CompletionChecklistItem {
+  item: string;
+  ok: boolean;
+}
 
-export function getAdminReview(
-  status = 'pending_review',
+export type SubmissionStatusFilter =
+  | 'verified'
+  | 'needs_review'
+  | 'rejected';
+
+export function getAdminSubmissions(
+  status: SubmissionStatusFilter = 'needs_review',
   limit = 50,
   offset = 0,
-): Promise<AdminReviewOut> {
+): Promise<AdminSubmissionsOut> {
   const params = new URLSearchParams({
     status,
     limit: String(limit),
     offset: String(offset),
   });
-  return apiFetch<AdminReviewOut>(`/api/admin/review?${params}`);
+  return apiFetch<AdminSubmissionsOut>(`/api/admin/submissions?${params}`);
 }
 
-export function moderateProblem(
+export function approveSubmission(
   id: number,
-  action: 'approve' | 'reject' | 'unpublish',
-): Promise<{ ok: boolean; problem_id: number; status: string }> {
-  return apiFetch(`/api/admin/problems/${id}/${action}`, { method: 'POST' });
+  note?: string,
+): Promise<AdminSubmissionActionOut> {
+  const qs = note ? `?note=${encodeURIComponent(note)}` : '';
+  return apiFetch<AdminSubmissionActionOut>(
+    `/api/admin/submissions/${id}/approve${qs}`,
+    { method: 'POST' },
+  );
 }
 
-export function editProblem(
+export function rejectSubmission(
   id: number,
-  body: Partial<{
-    title: string;
-    summary: string;
-    who_affected: string;
-    why_matters: string;
-    field: string;
-    domain: string;
-    difficulty: string;
-    est_hours: number;
-    tech_tags: string[];
-    approaches: string[];
-  }>,
-): Promise<{ ok: boolean; problem_id: number; status: string }> {
-  return apiFetch(`/api/admin/problems/${id}`, {
-    method: 'PATCH',
-    body: JSON.stringify(body),
-  });
+  note?: string,
+): Promise<AdminSubmissionActionOut> {
+  const qs = note ? `?note=${encodeURIComponent(note)}` : '';
+  return apiFetch<AdminSubmissionActionOut>(
+    `/api/admin/submissions/${id}/reject${qs}`,
+    { method: 'POST' },
+  );
 }
 
 export function projectOwnerUsername(owner: ProjectOut['owner']): string | null {
@@ -265,4 +295,39 @@ export function submitProject(
     method: 'POST',
     body: JSON.stringify(body),
   });
+}
+
+export type ProjectPatch = Schemas['ProjectPatch'];
+export type CompleteIn = Schemas['CompleteIn'];
+
+export function deleteProject(id: number): Promise<void> {
+  return apiFetch<void>(`/api/projects/${id}`, { method: 'DELETE' });
+}
+
+export function patchProject(id: number, body: ProjectPatch): Promise<ProjectOut> {
+  return apiFetch<ProjectOut>(`/api/projects/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(body),
+  });
+}
+
+export function completeProject(id: number, body: CompleteIn): Promise<ProjectOut> {
+  return apiFetch<ProjectOut>(`/api/projects/${id}/complete`, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export function reopenProject(id: number): Promise<ProjectOut> {
+  return apiFetch<ProjectOut>(`/api/projects/${id}/reopen`, { method: 'POST' });
+}
+
+export function reportProject(
+  id: number,
+  body: { reason?: string },
+): Promise<{ ok: boolean; report_count: number }> {
+  return apiFetch<{ ok: boolean; report_count: number }>(
+    `/api/projects/${id}/report`,
+    { method: 'POST', body: JSON.stringify(body) },
+  );
 }

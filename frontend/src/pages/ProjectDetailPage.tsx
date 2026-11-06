@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { cx } from '@/lib/cx';
@@ -7,14 +8,88 @@ import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
 import { useProject } from '@/hooks/useProject';
 import { useRefreshProgress } from '@/hooks/useRefreshProgress';
+import { useMe } from '@/hooks/useMe';
+import { useReportProject } from '@/hooks/useMyProjects';
 import {
   asCommitSummary,
   asIssueSummary,
+  ApiError,
   projectOwnerUsername,
 } from '@/api/client';
 
 const panelHeading = 'font-mono text-xs font-bold uppercase tracking-widest';
 const smallMono = 'font-mono text-[10px] font-bold uppercase tracking-widest';
+
+function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolean }) {
+  const me = useMe();
+  const report = useReportProject(projectId);
+  const toast = useToast();
+  const [reason, setReason] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  if (!me.data || isOwner) return null;
+
+  function report_it() {
+    if (reason.trim().length < 10) {
+      setError('Add a short reason (10+ characters) so the maintainers know what is wrong.');
+      return;
+    }
+    setError(null);
+    report.mutate(reason.trim(), {
+      onSuccess: () => {
+        toast('Report sent — thanks. A maintainer will take a look.');
+        setReason('');
+      },
+      onError: (err) => {
+        if (err instanceof ApiError) {
+          if (err.status === 409) {
+            setError('You already reported this project.');
+          } else if (err.status === 422) {
+            setError('You cannot report your own submission.');
+          } else if (err.status === 429) {
+            setError('Too many reports this hour — try again later.');
+          } else {
+            setError(err.detail);
+          }
+        } else {
+          setError('Could not send the report. Try again.');
+        }
+      },
+    });
+  }
+
+  return (
+    <div className="mt-6 border-t border-line pt-4">
+      <label
+        htmlFor="report-reason"
+        className={cx(smallMono, 'block')}
+      >
+        Something wrong with this submission?
+      </label>
+      <textarea
+        id="report-reason"
+        value={reason}
+        onChange={(event) => setReason(event.target.value)}
+        rows={2}
+        placeholder="Reports go to a maintainer, not to the repo owner."
+        className="mt-2 w-[min(420px,100%)] border border-ink bg-paper px-3 py-2 text-sm"
+      />
+      {error ? (
+        <p role="alert" className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
+          {error}
+        </p>
+      ) : null}
+      <button
+        type="button"
+        onClick={report_it}
+        disabled={report.isPending}
+        className={cx(buttonClasses('secondary'), 'mt-2')}
+      >
+        {report.isPending ? 'Sending…' : 'Report submission'}
+      </button>
+    </div>
+  );
+}
 
 function ProjectSkeleton() {
   return (
@@ -41,6 +116,7 @@ function ProjectView({ projectId }: { projectId: number }) {
   const project = useProject(projectId);
   const refresh = useRefreshProgress(projectId);
   const toast = useToast();
+  const me = useMe();
 
   if (project.isPending) {
     return (
@@ -103,6 +179,11 @@ function ProjectView({ projectId }: { projectId: number }) {
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <ProjectProgressBadge progress={progress} />
+          {data.completed_at != null ? (
+            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
+              ✓ Completed
+            </span>
+          ) : null}
           {data.open_for_contributors ? (
             <Tag>open for contributors</Tag>
           ) : null}
@@ -134,6 +215,30 @@ function ProjectView({ projectId }: { projectId: number }) {
             {data.problem_title}
           </Link>
         </p>
+
+        {data.solution_summary ? (
+          <section aria-label="Solution summary" className="mt-6 border border-ink bg-sheet p-4">
+            <h2 className={panelHeading}>How it solves this problem</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+              {data.solution_summary}
+            </p>
+            {data.demo_url && safeExternalUrl(data.demo_url) ? (
+              <a
+                href={safeExternalUrl(data.demo_url) ?? undefined}
+                target="_blank"
+                rel="noreferrer"
+                className="font-mono text-xs font-bold underline underline-offset-4"
+              >
+                Live demo ↗
+              </a>
+            ) : null}
+            {data.reflection ? (
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                “{data.reflection}”
+              </p>
+            ) : null}
+          </section>
+        ) : null}
 
         <section
           aria-label="GitHub progress"
@@ -235,6 +340,8 @@ function ProjectView({ projectId }: { projectId: number }) {
           ) : (
             <p className="mt-2 text-sm">No open issues right now.</p>
           )}
+
+          <ReportRow projectId={data.id} isOwner={owner != null && owner === (me.data?.username ?? null)} />
         </section>
       </div>
     </main>
