@@ -130,3 +130,83 @@ On Render/Railway a `Procfile` is included (`web: uvicorn app.main:app --host 0.
 ## Rate limits (env-tunable)
 
 `CHAT_RATE_LIMIT_ANON_PER_HOUR=10`, `CHAT_RATE_LIMIT_USER_PER_HOUR=30`. The UI shows the backend's raw limit messages honestly when they trip.
+
+## 6. The submission-verification system (0005) — production checklist
+
+Revision `0005_project_verification` adds columns on `projects`
+(`verification_status` default `needs_review`), a partial unique index
+`uq_project_repo_github_id_user_id` and the `project_reports` table. It is
+additive and safe: `0005.downgrade` only removes what it added.
+
+1. **Backup**: `pg_dump -Fc -f manabi-pre-0005.dump $DATABASE_URL`.
+2. **Check the stamp on a copy first**: the production DB must be at
+   `0004_cleanup` before `upgrade head` (the app auto-runs `upgrade head` on
+   Postgres at startup, so a lagging stamp usually never happens here — verify
+   with `alembic current` on a restored copy).
+3. **Deploy** and confirm `alembic current` → `0005_project_verification (head)`.
+4. **Run the one-time re-verification dry run** (backfilled rows get
+   `relevance_checked_at = NULL`; this populates real relevance evidence):
+
+   ```
+   cd backend
+   python scripts/reverify_projects.py            # dry run — no writes, CSV report
+   # review backend/scripts/reverify_report.csv, then:
+   python scripts/reverify_projects.py --apply    # or --limit 20 to go in batches
+   ```
+
+   The script needs working `LLM_PROVIDER` config (it re-runs the relevance
+   check) and uses each owner's stored GitHub token when present. It is
+   **fail safe**: LLM or GitHub failure downgrades to `needs_review`, never to
+   `verified`, and it never inflates counts by force — statuses only move to
+   `verified` when the model itself confirms relevance (§6.4). Tokens are
+   never printed or written to the CSV.
+5. **Smoke test** the money path: submit a repo you own against any problem
+   (expect 201 + `needs_review` from the mock LLM or a real score with
+   Gemini), then approve it at `/admin/review`, then confirm the problem page
+   shows the verified-only counts.
+
+### Verification rules at a glance (details in backend/app/services/verification.py)
+
+- **Ownership (hard gate)**: repo owner by GitHub numeric id, push/admin
+  permission from the authenticated repo payload, or ≥
+  `CONTRIBUTOR_MIN_COMMITS` (3) entries under your own id in
+  `/contributors`. Username string matches are never trusted.
+- **Anti-abuse**: `MAX_SUBMISSIONS_PER_DAY` (5 rolling 24h),
+  `MAX_ACTIVE_PROJECTS_PER_USER` (10 non-rejected rows), one repo per user per
+  problem, one GitHub repo id per problem across everyone (legacy rows with a
+  NULL `repo_github_id` are exempt until re-verified), forks rejected unless
+  `ALLOW_FORK_SUBMISSIONS=true`, archived/disabled repos rejected.
+- **Relevance**: Gemini judges a `<problem>` block against a `<repository>`
+  block (README excerpt ≤ 4000 chars) and the submitter's summary — all
+  untrusted data is delimited and the prompt tells the model to ignore
+  instructions inside it. Score ≥ `RELEVANCE_VERIFY_MIN` (0.70) → `verified`;
+  ≥ `RELEVANCE_REJECT_BELOW` (0.35) → `needs_review`; below → hard 422. LLM
+  outages fall back to a keyword heuristic that can only reach
+  `needs_review`, never `verified`. Repos older than
+  `PREEXISTING_REPO_DAYS` (180) also need ≥ 0.85 to auto-verify.
+- **Re-verification paths**: progress refresh / project detail can flip a row
+  to `needs_review` (repo gone, renamed — tracked by the immutable GitHub id —
+  or ownership lost); a `needs_review` row auto-re-checks once per
+  `AUTO_REVERIFY_MIN_INTERVAL_HOURS` (24) when the repo gains a README + 3
+  commits; editing the solution summary re-runs the check at most once per
+  that interval (429 `verification_rate_limited` otherwise).
+- **Human review**: admins run the submissions queue at `/admin/review`
+  (approve → `verified`, reject → `rejected`). Reports: any viewer may report
+  a verified project once; ≥ `REPORTS_BEFORE_REVIEW` (3) reports flips the row
+  back to `needs_review` for an admin.
+- **Limitation (known)**: contributor detection matches by GitHub **account
+  id**; if your commit emails are not linked to that account, your commits do
+  not appear in `/contributors` and contributor-based ownership fails even
+  though you contributed. Fix upstream (add the email to your GitHub account)
+  or submit with push access. This is a GitHub limitation, not a MANABI bug;
+  it is documented in the final report.
+
+### Token storage note (report-only, deliberately not implemented)
+
+`users.github_token` (OAuth access token) is stored **in plaintext**,
+`String(255)`, inside the database. Pre-existing behaviour — this change set
+did not touch it — but the risk is documented: a database dump or SQLi leaks
+every user's GitHub token. Recommended hardening (not in this PR): encrypt at
+rest with an env-held key (`SESSION_SECRET` or a dedicated `GITHUB_TOKEN_KEY`)
+using Fernet/AES, decrypt only in the GitHub service layer, and rotate the
+defunct fallback collection. Ask before implementing.
