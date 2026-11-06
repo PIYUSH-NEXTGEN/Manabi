@@ -218,3 +218,80 @@ def test_spa_blocks_path_escape(_escape_probe_dist):
 
     assert _spa_response(_escape_probe_dist, "index.html", "text/html").status_code in (200, None)  # own file ok (starlette returns response)
 
+
+# ---------------- regression: removed advanced/ops feature surface ----------------
+
+REMOVED_API_PREFIXES = (
+    "/api/webhooks",
+    "/api/api-contracts",
+    "/api/tenant-security",
+    "/api/incidents",
+    "/api/ingestion",
+    "/api/analytics",
+    "/api/accessibility",
+    "/api/inventory",
+    "/api/sync",
+    "/api/workflows",
+)
+
+REMOVED_TABLE_NAMES = {
+    "webhook_endpoints", "webhook_events", "webhook_deliveries",
+    "api_specs", "api_contract_comparisons", "api_monitoring_targets", "api_contract_checks",
+    "tenants", "tenant_memberships", "tenant_resources", "security_findings", "role_permissions",
+    "incidents", "incident_events", "incident_assignments", "incident_timeline_entries",
+    "ingestion_jobs", "ingested_files", "processing_workers",
+    "analytics_events", "consent_records", "data_retention_policies", "funnel_definitions", "retention_cohorts",
+    "monitored_websites", "accessibility_scans", "accessibility_issues",
+    "sales_channels", "inventory_items", "inventory_reservations", "stock_reconciliations",
+    "sync_records", "sync_conflicts",
+    "workflows", "workflow_executions", "workflow_step_executions",
+}
+
+CORE_API_ROUTES = (
+    "/api/health",
+    "/api/problems",
+    "/api/problems/facets",
+    "/api/problems/{problem_id}/export.xlsx",
+    "/api/problems/{problem_id}",
+    "/api/problems/{problem_id}/projects",
+    "/api/stats",
+    "/api/chat",
+    "/api/recommendations",
+    "/api/me/projects",
+    "/api/auth/github/login",
+    "/api/auth/github/callback",
+    "/api/auth/me",
+    "/api/auth/logout",
+    "/api/u/{username}",
+    "/api/projects/{project_id}",
+    "/api/projects/{project_id}/progress",
+)
+
+
+def _registered_api_paths() -> set[str]:
+    return set(app.openapi()["paths"])
+
+
+def test_removed_feature_api_prefixes_are_gone():
+    # FastAPI 0.143 wraps include_router with nested routers, so read the
+    # resolved OpenAPI path map rather than app.routes.
+    registered = _registered_api_paths()
+    for prefix in REMOVED_API_PREFIXES:
+        matches = [p for p in registered if p == prefix or p.startswith(prefix + "/")]
+        assert not matches, f"removed feature route still registered: {matches}"
+
+
+def test_core_api_routes_are_registered():
+    registered = _registered_api_paths()
+    missing = [path for path in CORE_API_ROUTES if path not in registered]
+    assert missing == [], f"core MANABI routes missing: {missing}"
+
+
+def test_removed_feature_tables_are_not_models():
+    tables = set(Base.metadata.tables)
+    leftover = REMOVED_TABLE_NAMES & tables
+    assert leftover == set(), f"removed feature models still registered: {sorted(leftover)}"
+    for kept in ("users", "problems", "projects"):
+        assert kept in tables
+
+
