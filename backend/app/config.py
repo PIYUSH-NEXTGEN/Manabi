@@ -19,7 +19,20 @@ class Settings(BaseSettings):
     CHAT_RATE_LIMIT_ANON_PER_HOUR: int = 10
     CHAT_RATE_LIMIT_USER_PER_HOUR: int = 30
 
+    # --- Admin ---
     ADMIN_GITHUB_USERNAMES: str = ""
+
+    # --- Project submission verification ---
+    RELEVANCE_VERIFY_MIN: float = 0.70
+    RELEVANCE_REJECT_BELOW: float = 0.35
+    CONTRIBUTOR_MIN_COMMITS: int = 3
+    COMPLETE_MIN_COMMITS: int = 5
+    MAX_ACTIVE_PROJECTS_PER_USER: int = 10
+    MAX_SUBMISSIONS_PER_DAY: int = 5
+    PREEXISTING_REPO_DAYS: int = 180
+    ALLOW_FORK_SUBMISSIONS: bool = False
+    AUTO_REVERIFY_MIN_INTERVAL_HOURS: int = 24
+    REPORTS_BEFORE_REVIEW: int = 3
 
 
 @lru_cache

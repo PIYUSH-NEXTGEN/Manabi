@@ -47,6 +47,28 @@ REMOVED_PROBLEM_COLUMNS = {
     "crawl_source_key",
 }
 
+PROJECT_0005_COLUMNS = {
+    "verification_status", "ownership_basis", "solution_summary",
+    "relevance_score", "relevance_reason", "relevance_checked_at",
+    "review_note", "repo_github_id", "repo_created_at", "completed_at",
+    "demo_url", "reflection",
+}
+
+
+def _seed_project_row(cfg, sqlite_url) -> None:
+    """Create the schema up to 0004 plus one pre-0005 project row."""
+    command.upgrade(cfg, "0004_cleanup")
+    engine = create_engine(sqlite_url)
+    with engine.begin() as conn:
+        conn.execute(text("""INSERT INTO users (github_id, username, name, signals_json, created_at)
+                           VALUES (7, 'u', NULL, '{}', '2026-01-01 00:00:00'),
+                                  (8, 'v', NULL, '{}', '2026-01-01 00:00:00')"""))
+        conn.execute(text(BASELINE_PROBLEM_SQL))
+        conn.execute(text("""INSERT INTO projects (problem_id, user_id, repo_owner, repo_name, repo_url, created_at)
+                           SELECT pr.id, u.id, 'own', 'repo', 'https://github.com/own/repo', '2026-01-01 00:00:00'
+                           FROM problems pr, users u LIMIT 1"""))
+    engine.dispose()
+
 
 @pytest.fixture
 def sqlite_url(tmp_path):
@@ -156,7 +178,9 @@ def test_downgrade_last_step_recreates_schema_empty(sqlite_url):
     cfg = alembic_config(sqlite_url)
     _seed_baseline_rows(cfg, sqlite_url)
     command.upgrade(cfg, "head")
-    command.downgrade(cfg, "-1")  # head (0004) -> 0003
+    # head used to be 0004; since 0005 the 0004-downgrade tail is reached via -2.
+    # (0005's own downgrade is covered by the dedicated tests below.)
+    command.downgrade(cfg, "-2")  # 0005 -> 0004 -> 0003
     engine = create_engine(sqlite_url)
     names = set(inspect(engine).get_table_names())
     cols = {c["name"] for c in inspect(engine).get_columns("problems")}
@@ -198,3 +222,83 @@ def test_models_match_migrated_schema(sqlite_url):
     # tighten: migrated schema must not contain tables the app forgot about
     assert db_tables == model_tables, f"extra tables: {db_tables - model_tables}"
     engine.dispose()
+
+
+# ---------------- 0005_project_verification ----------------
+
+
+def test_0005_upgrade_keeps_rows_and_backfills_needs_review(sqlite_url):
+    """Pre-0005 rows survive with verification_status='needs_review'."""
+    cfg = alembic_config(sqlite_url)
+    _seed_project_row(cfg, sqlite_url)
+    command.upgrade(cfg, "head")
+    engine = create_engine(sqlite_url)
+    with engine.begin() as conn:
+        rows = conn.execute(text(
+            "SELECT repo_owner, verification_status, ownership_basis, solution_summary FROM projects"
+        )).all()
+        counts = conn.execute(text(
+            "SELECT (SELECT COUNT(*) FROM projects), (SELECT COUNT(*) FROM project_reports)"
+        )).one()
+        cols = {c["name"] for c in inspect(engine).get_columns("projects")}
+        has_partial_index = any(
+            i["name"] == "uq_project_repo_github_id_user_id" for i in inspect(engine).get_indexes("projects")
+        )
+    engine.dispose()
+    assert len(PROJECT_0005_COLUMNS & cols) == len(PROJECT_0005_COLUMNS)
+    assert rows == [("own", "needs_review", None, "")]
+    assert counts == (1, 0)  # no rows lost, empty reports table
+    assert has_partial_index
+
+
+def test_0005_upgrade_from_empty_then_downgrade(sqlite_url):
+    cfg = alembic_config(sqlite_url)
+    command.upgrade(cfg, "0004_cleanup")
+    command.upgrade(cfg, "head")
+    command.downgrade(cfg, "-1")  # back to 0004: 0005 objects gone again
+    engine = create_engine(sqlite_url)
+    cols = {c["name"] for c in inspect(engine).get_columns("projects")}
+    names = set(inspect(engine).get_table_names())
+    engine.dispose()
+    assert not ("project_reports" in names)
+    assert not (PROJECT_0005_COLUMNS & cols)
+    # forward again works
+    command.upgrade(cfg, "head")
+    engine = create_engine(sqlite_url)
+    cols = {c["name"] for c in inspect(engine).get_columns("projects")}
+    names = set(inspect(engine).get_table_names())
+    engine.dispose()
+    assert "project_reports" in names
+    assert len(PROJECT_0005_COLUMNS & cols) == len(PROJECT_0005_COLUMNS)
+
+
+def test_0005_reports_table_unique_and_cascade(sqlite_url):
+    cfg = alembic_config(sqlite_url)
+    _seed_project_row(cfg, sqlite_url)
+    command.upgrade(cfg, "head")
+    engine = create_engine(sqlite_url)
+
+    def project_report_values(reason: str) -> str:
+        return f"SELECT p.id, u.id, '{reason}', '2026-01-01 00:00:00' FROM projects p CROSS JOIN users u"
+
+    with engine.begin() as conn:
+        # one report per (project, reporter): a second identical pair is rejected
+        conn.execute(text(
+            "INSERT INTO project_reports (project_id, reporter_user_id, reason, created_at) "
+            + project_report_values("first")
+        ))
+        with pytest.raises(Exception):
+            conn.execute(text(
+                "INSERT INTO project_reports (project_id, reporter_user_id, reason, created_at) "
+                + project_report_values("duplicate")
+            ))
+    with engine.connect().execution_options(isolation_level="AUTOCOMMIT") as conn:
+        conn.exec_driver_sql("PRAGMA foreign_keys=ON")  # must run outside a transaction
+        before = conn.execute(text("SELECT COUNT(*) FROM project_reports")).one()[0]
+        conn.execute(text("DELETE FROM projects WHERE id = (SELECT id FROM projects LIMIT 1)"))
+        after = conn.execute(text("SELECT COUNT(*) FROM project_reports")).one()[0]
+    engine.dispose()
+    assert before == 2  # one report per user of the single project
+    assert after == 0
+    engine.dispose()
+    assert after == 0
