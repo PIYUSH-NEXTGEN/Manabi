@@ -16,6 +16,17 @@ from app.services.github import parse_repo_url
 
 NOW = datetime.now(timezone.utc)
 USER_ID = 42
+SUMMARY = "Flood alert triage pipeline that ranks incoming reports, filters duplicates and alerts the field ministry in real time with python ml."
+
+
+@pytest.fixture(autouse=True)
+def env(monkeypatch):
+    from app import config
+
+    monkeypatch.setenv("LLM_PROVIDER", "mock")
+    config.get_settings.cache_clear()
+    yield
+    config.get_settings.cache_clear()
 
 
 @pytest.fixture
@@ -79,11 +90,34 @@ def commit(sha: str, date: datetime, message: str = "work") -> dict:
     return {"sha": sha, "commit": {"committer": {"date": date.strftime("%Y-%m-%dT%H:%M:%SZ")}, "message": message}}
 
 
+REPO_PAYLOAD = {
+    "id": 999,
+    "name": "triage",
+    "full_name": "octocat/triage",
+    "owner": {"login": "octocat", "id": 42, "type": "User"},
+    "private": False,
+    "fork": False,
+    "archived": False,
+    "disabled": False,
+    "size": 120,
+    "description": "flood triage tool",
+    "topics": [],
+    "language": "Python",
+    "created_at": "2026-10-01T00:00:00Z",
+}
+
+
 @pytest.fixture
 def github_repo_mock():
     with respx.mock(assert_all_called=False) as mock:
         mock.get("https://api.github.com/repos/octocat/triage").mock(
-            return_value=HTTPResponse(200, json={"full_name": "octocat/triage", "private": False})
+            return_value=HTTPResponse(200, json=REPO_PAYLOAD)
+        )
+        mock.get("https://api.github.com/repos/octocat/triage/commits").mock(
+            return_value=HTTPResponse(403, json={"message": "rate limit"})
+        )
+        mock.get("https://api.github.com/repos/octocat/triage/readme").mock(
+            return_value=HTTPResponse(404, json={})
         )
         yield mock
 
@@ -144,51 +178,79 @@ def test_parse_repo_url_case_insensitive_host():
 # --- submit project ---
 
 def test_submit_project_requires_auth(db_session, client, problem, anon):
-    res = client.post(f"/api/problems/{problem.id}/projects", json={"repo_url": "https://github.com/octocat/triage"})
+    res = client.post(
+        f"/api/problems/{problem.id}/projects",
+        json={"repo_url": "https://github.com/octocat/triage", "solution_summary": SUMMARY},
+    )
     assert res.status_code == 401
 
 
 def test_submit_project_happy_path(db_session, client, user, problem, github_repo_mock):
     res = client.post(
         f"/api/problems/{problem.id}/projects",
-        json={"repo_url": "https://github.com/octocat/triage", "open_for_contributors": True},
+        json={"repo_url": "https://github.com/octocat/triage", "solution_summary": SUMMARY, "open_for_contributors": True},
     )
-    assert res.status_code in (200, 201)
+    assert res.status_code == 201
     data = res.json()
     assert data["repo_owner"] == "octocat" and data["repo_name"] == "triage"
     assert data["problem_id"] == problem.id
     assert data["owner"] == {"username": "octocat", "avatar_url": "http://a/1.png"}
     assert data["open_for_contributors"] is True
     assert data["progress"] is None
+    # mock LLM never verifies: fallback sends the row to needs_review
+    assert data["verification_status"] == "needs_review"
+    assert data["relevance_reason"] is not None
+    assert data["review_note"] is None
 
 
 def test_submit_project_invalid_url_422(client, user, problem, github_repo_mock):
-    res = client.post(f"/api/problems/{problem.id}/projects", json={"repo_url": "https://gitlab.com/a/b"})
+    res = client.post(
+        f"/api/problems/{problem.id}/projects",
+        json={"repo_url": "https://gitlab.com/a/b", "solution_summary": SUMMARY},
+    )
     assert res.status_code == 422
-    assert "GitHub" in res.json()["detail"]
+    assert res.json()["detail"]["code"] == "invalid_repo_url"
+
+
+def test_submit_project_invalid_summary_422(client, user, problem, github_repo_mock):
+    res = client.post(
+        f"/api/problems/{problem.id}/projects",
+        json={"repo_url": "https://github.com/octocat/triage", "solution_summary": "too short"},
+    )
+    assert res.status_code == 422
+    assert res.json()["detail"][0]["loc"][-1] == "solution_summary"
 
 
 def test_submit_project_missing_or_private_repo_422(db_session, client, user, problem):
     with respx.mock(assert_all_called=False) as mock:
         mock.get("https://api.github.com/repos/octocat/ghost").mock(return_value=HTTPResponse(404, json={}))
-        res = client.post(f"/api/problems/{problem.id}/projects", json={"repo_url": "https://github.com/octocat/ghost"})
+        res = client.post(
+            f"/api/problems/{problem.id}/projects",
+            json={"repo_url": "https://github.com/octocat/ghost", "solution_summary": SUMMARY},
+        )
         assert res.status_code == 422
+        assert res.json()["detail"]["code"] == "repo_not_found"
 
 
 def test_submit_project_duplicate_409(db_session, client, user, problem, github_repo_mock):
-    client.post(
+    res1 = client.post(
         f"/api/problems/{problem.id}/projects",
-        json={"repo_url": "https://github.com/octocat/triage", "open_for_contributors": True},
+        json={"repo_url": "https://github.com/octocat/triage", "solution_summary": SUMMARY, "open_for_contributors": True},
     )
+    assert res1.status_code == 201
     res = client.post(
         f"/api/problems/{problem.id}/projects",
-        json={"repo_url": "https://github.com/octocat/triage.git"},
+        json={"repo_url": "https://github.com/octocat/triage.git", "solution_summary": SUMMARY},
     )
     assert res.status_code == 409
+    assert res.json()["detail"]["code"] == "already_submitted"
 
 
 def test_submit_project_unknown_problem_404(db_session, client, user, github_repo_mock):
-    res = client.post("/api/problems/999/projects", json={"repo_url": "https://github.com/octocat/triage"})
+    res = client.post(
+        "/api/problems/999/projects",
+        json={"repo_url": "https://github.com/octocat/triage", "solution_summary": SUMMARY},
+    )
     assert res.status_code == 404
 
 
@@ -349,7 +411,11 @@ def test_progress_recent_commits_max_five():
 # --- detail & me ---
 
 def test_project_detail(db_session, client, user, problem, anon):
-    project = make_project(db_session, user, problem, progress_json=cached_progress(1))
+    project = make_project(
+        db_session, user, problem,
+        progress_json=cached_progress(1),
+        verification_status="verified",
+    )
     res = client.get(f"/api/projects/{project.id}")
     assert res.status_code == 200
     data = res.json()
@@ -358,6 +424,7 @@ def test_project_detail(db_session, client, user, problem, anon):
     assert data["owner"]["username"] == "octocat"
     assert data["progress"]["commit_count"] == 4
     assert "github_token" not in data
+    assert "relevance_score" not in data
 
 
 def test_project_detail_404(client, db_session):

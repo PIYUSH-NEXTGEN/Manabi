@@ -66,6 +66,7 @@ def seeded(db_session):
         Project(
             problem_id=problem.id, user_id=jane.id, repo_owner="jane", repo_name="flood",
             repo_url="https://github.com/jane/flood", open_for_contributors=True,
+            verification_status="verified",
         )
     )
     db_session.commit()

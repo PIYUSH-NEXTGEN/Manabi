@@ -4,13 +4,14 @@ from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
-from sqlalchemy import Text, func, select
+from sqlalchemy import Text, case, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased, joinedload
 
 from app import schemas
-from app.deps import DB, CurrentUser
-from app.models import Problem, Project, STATUS_PUBLISHED
+from app.deps import DB, CurrentUser, OptionalUser
+from app.models import Problem, Project, STATUS_PUBLISHED, VERIFICATION_VERIFIED
+from app.services.visibility import can_view_project, is_admin
 
 router = APIRouter(prefix="/api/problems", tags=["problems"])
 
@@ -18,7 +19,7 @@ SortParam = Literal["newest", "popular"]
 DistinctParam = Literal["field", "domain"]
 
 
-def problem_to_out(problem: Problem, project_count: int) -> schemas.ProblemOut:
+def problem_to_out(problem: Problem, project_count: int, completed_count: int = 0) -> schemas.ProblemOut:
     return schemas.ProblemOut(
         id=problem.id,
         title=problem.title,
@@ -38,6 +39,7 @@ def problem_to_out(problem: Problem, project_count: int) -> schemas.ProblemOut:
         source_note=problem.source_note,
         ai_fields=problem.ai_fields,
         project_count=project_count,
+        completed_count=completed_count,
         origin=problem.origin,
         source_year=problem.source_year,
         edition=problem.edition,
@@ -46,8 +48,14 @@ def problem_to_out(problem: Problem, project_count: int) -> schemas.ProblemOut:
     )
 
 
-def project_to_out(project: Project) -> schemas.ProjectOut:
-    return schemas.ProjectOut(
+def project_to_out(project: Project, include_private: bool = False) -> schemas.ProjectOut:
+    """Public shape for a project row.
+
+    include_private adds the owner/admin-only fields (relevance reason,
+    ownership basis, review note). relevance_score is never part of this
+    schema — it is not exposed publicly beyond the admin queue.
+    """
+    out = schemas.ProjectOut(
         id=project.id,
         problem_id=project.problem_id,
         problem_title=project.problem.title,
@@ -58,7 +66,30 @@ def project_to_out(project: Project) -> schemas.ProjectOut:
         owner={"username": project.user.username, "avatar_url": project.user.avatar_url},
         progress=project.progress_json,
         progress_updated_at=project.progress_updated_at,
+        verification_status=project.verification_status,
+        solution_summary=project.solution_summary or None,
+        completed_at=project.completed_at,
+        demo_url=project.demo_url,
+        reflection=project.reflection,
     )
+    if include_private:
+        out.relevance_reason = project.relevance_reason
+        out.ownership_basis = project.ownership_basis
+        out.review_note = project.review_note
+    return out
+
+
+def verified_problem_counts(db) -> dict[int, tuple[int, int]]:
+    """Verified-only (building, completed) counts per problem id."""
+    completed = func.sum(
+        case((Project.completed_at.is_not(None), 1), else_=0)
+    ).label("completed")
+    rows = db.execute(
+        select(Project.problem_id, func.count(Project.id), completed)
+        .where(Project.verification_status == VERIFICATION_VERIFIED)
+        .group_by(Project.problem_id)
+    ).all()
+    return {pid: (int(building), int(completed)) for pid, building, completed in rows}
 
 
 def _counts_by_column(db, column) -> list[tuple[str, int]]:
@@ -109,7 +140,10 @@ def list_problems(
         )
 
     project_counts = (
-        select(Project.problem_id, func.count(Project.id).label("n")).group_by(Project.problem_id).subquery()
+        select(Project.problem_id, func.count(Project.id).label("n"))
+        .where(Project.verification_status == VERIFICATION_VERIFIED)
+        .group_by(Project.problem_id)
+        .subquery()
     )
     query = query.outerjoin(project_counts, Problem.id == project_counts.c.problem_id)
     popularity = func.coalesce(project_counts.c.n, 0)
@@ -140,8 +174,8 @@ def list_problems(
     else:
         total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
         rows = db.scalars(query.limit(limit).offset(offset)).all()
-    counts = dict(db.execute(select(Project.problem_id, func.count(Project.id)).group_by(Project.problem_id)).all())
-    items = [problem_to_out(p, counts.get(p.id, 0)) for p in rows]
+    counts = verified_problem_counts(db)
+    items = [problem_to_out(p, counts.get(p.id, (0, 0))[0], counts.get(p.id, (0, 0))[1]) for p in rows]
     return schemas.ProblemsListOut(items=items, total=total)
 
 
@@ -235,7 +269,7 @@ def export_problem(problem_id: int, db: DB):
 
 
 @router.get("/{problem_id}", response_model=schemas.ProblemDetail)
-def get_problem(problem_id: int, db: DB):
+def get_problem(problem_id: int, db: DB, user: OptionalUser):
     problem = db.scalar(
         select(Problem)
         .options(joinedload(Problem.projects).joinedload(Project.user))
@@ -243,11 +277,19 @@ def get_problem(problem_id: int, db: DB):
     )
     if problem is None:
         raise HTTPException(status_code=404, detail="Problem not found")
-    base = problem_to_out(problem, len(problem.projects))
+    # Anonymous visitors and other users see verified submissions only; the
+    # owner (and admins) additionally see their own rows in every status.
+    visible = [p for p in problem.projects if can_view_project(p, user)]
+    project_count = len(visible)
+    completed_count = sum(1 for p in visible if p.completed_at is not None and p.verification_status == VERIFICATION_VERIFIED)
+    base = problem_to_out(problem, project_count, completed_count)
     detail = base.model_dump()
     detail["original_text"] = problem.original_text
     detail["display_policy"] = "summary_plus_excerpt"
-    detail["projects"] = [project_to_out(p).model_dump() for p in problem.projects]
+    detail["projects"] = [
+        project_to_out(p, include_private=(user is not None and (user.id == p.user_id or is_admin(user)))).model_dump(mode="json")
+        for p in visible
+    ]
     return schemas.ProblemDetail(**detail)
 
 
@@ -286,4 +328,4 @@ def create_problem(body: schemas.ProblemIn, user: CurrentUser, db: DB):
         db.rollback()
         raise HTTPException(status_code=409, detail="A problem with this source ID already exists")
     db.refresh(problem)
-    return problem_to_out(problem, 0)
+    return problem_to_out(problem, 0, 0)

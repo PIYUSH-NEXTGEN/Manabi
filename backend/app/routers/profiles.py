@@ -5,6 +5,7 @@ from app import schemas
 from app.deps import DB, public_user
 from app.models import Problem, Project, STATUS_PUBLISHED, User
 from app.routers.problems import project_to_out
+from app.services.visibility import filter_visible
 
 router = APIRouter(tags=["profiles"])
 
@@ -14,12 +15,15 @@ def public_profile(username: str, db: DB):
     user = db.scalar(select(User).where(User.username == username))
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    projects = db.scalars(
+    rows = db.scalars(
         select(Project)
         .join(Problem, Project.problem_id == Problem.id)
         .where(Project.user_id == user.id, Problem.status == STATUS_PUBLISHED)
         .order_by(Project.id.desc())
     ).all()
+    # Public profile: verified rows only — for everyone (the owner has their
+    # own dashboard for non-verified states).
+    projects = filter_visible(rows, None)
     return {
         "user": public_user(user),
         "projects": [project_to_out(project) for project in projects],

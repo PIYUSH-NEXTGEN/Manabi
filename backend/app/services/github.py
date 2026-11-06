@@ -1,4 +1,5 @@
 import asyncio
+import base64
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 from collections import Counter
@@ -72,6 +73,62 @@ async def get_repo(owner: str, name: str, token: str | None = None) -> dict:
     if data.get("private"):
         raise GitHubError(404, "Repository not found or not public")
     return data
+
+
+def canonical_repo_url(repo: dict) -> str:
+    """Canonical https://github.com/owner/name URL from a repo API payload."""
+    name = repo.get("full_name")
+    if not name:
+        owner = (repo.get("owner") or {}).get("login", "")
+        name = f"{owner}/{repo.get('name', '')}"
+    return f"https://github.com/{name}"
+
+
+def repo_created_at(repo: dict) -> datetime | None:
+    raw = repo.get("created_at")
+    if not raw:
+        return None
+    try:
+        return datetime.fromisoformat(str(raw).replace("Z", "+00:00")).replace(tzinfo=None)
+    except ValueError:
+        return None
+
+
+async def fetch_readme_text(owner: str, name: str, token: str | None = None, max_chars: int = 4000) -> str | None:
+    """README body as decoded text (truncated), or None when absent/unreadable."""
+    try:
+        data = await _fetch_json(f"/repos/{owner}/{name}/readme", token)
+    except (httpx.HTTPError, GitHubError):
+        return None
+    content = data.get("content")
+    if not content or not isinstance(content, str):
+        return None
+    try:
+        decoded = base64.b64decode(content).decode("utf-8", errors="replace")
+    except (ValueError, TypeError):
+        return None
+    return decoded[:max_chars]
+
+
+async def fetch_contributors(owner: str, name: str, token: str | None = None) -> list[dict] | None:
+    """Contributor list or None when GitHub could not answer (rate limit etc.).
+
+    An empty list means the repo genuinely has no contributors (GitHub may
+    also answer 204 for an empty list)."""
+    try:
+        response = await get_client().get(
+            f"/repos/{owner}/{name}/contributors", headers=_headers(token), params={"per_page": 100}
+        )
+    except httpx.HTTPError:
+        raise GitHubError(502, "Could not reach GitHub")
+    if response.status_code in (200, 204):
+        data = response.json() if response.status_code == 200 else []
+        return data if isinstance(data, list) else []
+    if response.status_code == 404:
+        return []
+    if response.status_code == 403:
+        raise GitHubError(403, "GitHub rate limit reached")
+    raise GitHubError(502, "GitHub unavailable")
 
 
 def _commit_date(raw: str) -> datetime | None:

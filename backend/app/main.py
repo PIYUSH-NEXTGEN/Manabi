@@ -74,12 +74,13 @@ def create_app() -> FastAPI:
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         return response
 
-    from app.routers import auth, chat, problems, profiles, projects, recommendations, stats
+    from app.routers import admin, auth, chat, problems, profiles, projects, recommendations, stats
 
     auth.setup_oauth(app)
     app.include_router(problems.router)
     app.include_router(stats.router)
     app.include_router(projects.router)
+    app.include_router(admin.router)
     app.include_router(auth.router)
     app.include_router(chat.router)
     app.include_router(recommendations.router)

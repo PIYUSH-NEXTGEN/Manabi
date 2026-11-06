@@ -1,4 +1,4 @@
-﻿from datetime import date, datetime
+from datetime import date, datetime
 from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
@@ -45,6 +45,7 @@ class ProblemCard(BaseModel):
 class ProblemOut(ProblemCard):
     id: int
     project_count: int
+    completed_count: int = 0
     ai_fields: list[str]
     origin: str = "manual"
     source_year: int | None = None
@@ -55,7 +56,70 @@ class ProblemOut(ProblemCard):
 
 class ProjectCreate(BaseModel):
     repo_url: str
+    solution_summary: str = Field(min_length=40, max_length=800)
     open_for_contributors: bool = False
+
+
+class ProjectPatch(BaseModel):
+    """PATCH /api/projects/{id}: the repo link itself is immutable (§7.2)."""
+
+    solution_summary: str | None = Field(default=None, min_length=40, max_length=800)
+    open_for_contributors: bool | None = None
+    demo_url: str | None = Field(default=None, max_length=500)
+
+
+class CompleteIn(BaseModel):
+    demo_url: str | None = Field(default=None, max_length=500)
+    reflection: str | None = Field(default=None, max_length=800)
+
+
+class CompletionChecklistItem(BaseModel):
+    item: str
+    ok: bool
+
+
+class NotReadyToComplete(BaseModel):
+    code: str = "not_ready_to_complete"
+    message: str
+    checklist: list[CompletionChecklistItem]
+
+
+class ReportIn(BaseModel):
+    reason: str = Field(min_length=1, max_length=300)
+
+
+class AdminSubmissionOut(BaseModel):
+    id: int
+    problem_id: int
+    problem_title: str
+    repo_url: str
+    repo_owner: str
+    repo_name: str
+    submitter: str
+    submitter_avatar_url: str | None = None
+    verification_status: str
+    ownership_basis: str | None = None
+    relevance_score: float | None = None
+    relevance_reason: str | None = None
+    solution_summary: str | None = None
+    review_note: str | None = None
+    demo_url: str | None = None
+    reflection: str | None = None
+    open_for_contributors: bool
+    report_count: int = 0
+    created_at: datetime
+    completed_at: datetime | None = None
+
+
+class AdminSubmissionsOut(BaseModel):
+    items: list[AdminSubmissionOut]
+    total: int
+
+
+class AdminSubmissionActionOut(BaseModel):
+    ok: bool
+    project_id: int
+    verification_status: str
 
 
 class Progress(BaseModel):
@@ -78,6 +142,15 @@ class ProjectOut(BaseModel):
     owner: dict
     progress: Progress | None
     progress_updated_at: datetime | None
+    verification_status: str = "needs_review"
+    solution_summary: str | None = None
+    completed_at: datetime | None = None
+    demo_url: str | None = None
+    reflection: str | None = None
+    # owner/admin-only fields: never shown to anonymous viewers or other users
+    relevance_reason: str | None = None
+    ownership_basis: str | None = None
+    review_note: str | None = None
 
 
 class ProblemDetail(ProblemOut):

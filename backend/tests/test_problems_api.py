@@ -87,6 +87,7 @@ def seed(db_session: Session):
     db_session.add(Project(
         problem_id=p_pop.id, user_id=user.id, repo_owner="octocat", repo_name="triage",
         repo_url="https://github.com/octocat/triage", open_for_contributors=True,
+        verification_status="verified",
     ))
     db_session.commit()
     return {"user": user, "old": p_old, "new": p_new, "pop": p_pop}
