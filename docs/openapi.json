@@ -1180,6 +1180,28 @@
           }
         }
       }
+    },
+    "/api/me/github-heatmap": {
+      "get": {
+        "tags": [
+          "profiles"
+        ],
+        "summary": "Github Heatmap",
+        "description": "Daily public push activity for the logged-in user (last 13 weeks).\n\nDegrades to `{days: [], total: 0, window_days: N}` when GitHub is\nunreachable \u2014 the UI shows an honest empty grid, never fake data.",
+        "operationId": "github_heatmap_api_me_github_heatmap_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapOut"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1654,6 +1676,51 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "HeatmapDay": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "count"
+        ],
+        "title": "HeatmapDay",
+        "description": "One day of public GitHub push activity (UTC date)."
+      },
+      "HeatmapOut": {
+        "properties": {
+          "days": {
+            "items": {
+              "$ref": "#/components/schemas/HeatmapDay"
+            },
+            "type": "array",
+            "title": "Days"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "window_days": {
+            "type": "integer",
+            "title": "Window Days"
+          }
+        },
+        "type": "object",
+        "required": [
+          "days",
+          "total",
+          "window_days"
+        ],
+        "title": "HeatmapOut"
       },
       "ProblemDetail": {
         "properties": {
@@ -2464,10 +2531,28 @@
             "title": "Repo Url"
           },
           "solution_summary": {
-            "type": "string",
-            "maxLength": 800,
-            "minLength": 40,
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 400
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Solution Summary"
+          },
+          "demo_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Url"
           },
           "open_for_contributors": {
             "type": "boolean",
@@ -2477,8 +2562,7 @@
         },
         "type": "object",
         "required": [
-          "repo_url",
-          "solution_summary"
+          "repo_url"
         ],
         "title": "ProjectCreate"
       },
@@ -2644,8 +2728,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "maxLength": 800,
-                "minLength": 40
+                "maxLength": 400
               },
               {
                 "type": "null"

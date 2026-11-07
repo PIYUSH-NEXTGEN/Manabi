@@ -245,3 +245,47 @@ async def _fetch_repo_topics(owner: str, name: str, token: str | None) -> list[s
     except (httpx.HTTPError, GitHubError):
         return []
     return [str(item) for item in data.get("names", [])]
+
+
+HEATMAP_DAYS = 91
+
+
+async def fetch_contribution_histogram(username: str, token: str | None) -> list[dict] | None:
+    """Daily public-push histogram for the last HEATMAP_DAYS days.
+
+    Aggregates the GitHub public events API (PushEvents only) into a
+    date-sorted [{date, count}] list. Returns None when GitHub is
+    unreachable so the UI can degrade honestly instead of a fake grid.
+    """
+    pages: list[list] = []
+    for page in (1, 2, 3):
+        try:
+            events = await _fetch_json(
+                f"/users/{username}/events/public",
+                token,
+                params={"per_page": 100, "page": page},
+            )
+        except (httpx.HTTPError, GitHubError):
+            return None
+        if not isinstance(events, list):
+            break
+        pages.append(events)
+        if len(events) < 100:
+            break
+    cutoff = datetime.now(timezone.utc) - timedelta(days=HEATMAP_DAYS)
+    daily: Counter[str] = Counter()
+    for events in pages:
+        for event in events:
+            if event.get("type") != "PushEvent":
+                continue
+            created = event.get("created_at")
+            if not created:
+                continue
+            try:
+                at = datetime.fromisoformat(created.replace("Z", "+00:00"))
+            except ValueError:
+                continue
+            if at < cutoff:
+                continue
+            daily[at.strftime("%Y-%m-%d")] += 1
+    return [{"date": date, "count": count} for date, count in sorted(daily.items())]

@@ -75,6 +75,7 @@ async def submit_project(problem_id: int, body: schemas.ProjectCreate, user: Cur
             repo_url=body.repo_url,
             solution_summary=body.solution_summary,
             open_for_contributors=body.open_for_contributors,
+            demo_url=body.demo_url,
         )
     except SubmissionError as err:
         raise _error(err)

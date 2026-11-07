@@ -40,8 +40,7 @@ from app.services.llm import chat as llm_chat
 
 logger = logging.getLogger(__name__)
 
-SUMMARY_MIN = 40
-SUMMARY_MAX = 800
+SUMMARY_MAX = 400
 
 
 class SubmissionError(Exception):
@@ -142,12 +141,13 @@ def clean_text(value: str | None) -> str:
 
 
 def validate_solution_summary(value: str | None) -> str:
+    """Optional: the relevance check works from the README when absent."""
     cleaned = clean_text(value)
-    if len(cleaned) < SUMMARY_MIN or len(cleaned) > SUMMARY_MAX:
+    if len(cleaned) > SUMMARY_MAX:
         raise SubmissionError(
             422,
             "invalid_summary",
-            f"Describe how your project solves the problem in {SUMMARY_MIN}-{SUMMARY_MAX} characters.",
+            f"Keep the description to at most {SUMMARY_MAX} characters.",
         )
     return cleaned
 
@@ -509,11 +509,13 @@ async def create_submission(
     user: User,
     problem: Problem,
     repo_url: str,
-    solution_summary: str,
+    solution_summary: str | None,
     open_for_contributors: bool,
+    demo_url: str | None = None,
 ) -> Project:
     """Validate + verify a submission, then store it. No row on any rejection."""
     summary = validate_solution_summary(solution_summary)
+    validated_demo_url = validate_demo_url(demo_url)
     owner, name = normalise_repo_url(repo_url)
     assert_limits(db, user)
 
@@ -544,6 +546,7 @@ async def create_submission(
         verification_status=evaluation.status,
         ownership_basis=basis,
         solution_summary=summary,
+        demo_url=validated_demo_url,
         relevance_score=evaluation.score,
         relevance_reason=(evaluation.reason or None) and evaluation.reason[:_REASON_LIMIT],
         relevance_checked_at=utcnow(),

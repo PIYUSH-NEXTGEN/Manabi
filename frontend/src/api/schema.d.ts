@@ -401,6 +401,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/me/github-heatmap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Github Heatmap
+         * @description Daily public push activity for the logged-in user (last 13 weeks).
+         *
+         *     Degrades to `{days: [], total: 0, window_days: N}` when GitHub is
+         *     unreachable — the UI shows an honest empty grid, never fake data.
+         */
+        get: operations["github_heatmap_api_me_github_heatmap_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -548,6 +571,25 @@ export interface components {
         HTTPValidationError: {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
+        };
+        /**
+         * HeatmapDay
+         * @description One day of public GitHub push activity (UTC date).
+         */
+        HeatmapDay: {
+            /** Date */
+            date: string;
+            /** Count */
+            count: number;
+        };
+        /** HeatmapOut */
+        HeatmapOut: {
+            /** Days */
+            days: components["schemas"]["HeatmapDay"][];
+            /** Total */
+            total: number;
+            /** Window Days */
+            window_days: number;
         };
         /** ProblemDetail */
         ProblemDetail: {
@@ -781,7 +823,9 @@ export interface components {
             /** Repo Url */
             repo_url: string;
             /** Solution Summary */
-            solution_summary: string;
+            solution_summary?: string | null;
+            /** Demo Url */
+            demo_url?: string | null;
             /**
              * Open For Contributors
              * @default false
@@ -1634,6 +1678,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    github_heatmap_api_me_github_heatmap_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HeatmapOut"];
                 };
             };
         };

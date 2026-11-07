@@ -56,14 +56,15 @@ class ProblemOut(ProblemCard):
 
 class ProjectCreate(BaseModel):
     repo_url: str
-    solution_summary: str = Field(min_length=40, max_length=800)
+    solution_summary: str | None = Field(default=None, max_length=400)
+    demo_url: str | None = Field(default=None, max_length=500)
     open_for_contributors: bool = False
 
 
 class ProjectPatch(BaseModel):
     """PATCH /api/projects/{id}: the repo link itself is immutable (§7.2)."""
 
-    solution_summary: str | None = Field(default=None, min_length=40, max_length=800)
+    solution_summary: str | None = Field(default=None, max_length=400)
     open_for_contributors: bool | None = None
     demo_url: str | None = Field(default=None, max_length=500)
 
@@ -76,6 +77,19 @@ class CompleteIn(BaseModel):
 class CompletionChecklistItem(BaseModel):
     item: str
     ok: bool
+
+
+class HeatmapDay(BaseModel):
+    """One day of public GitHub push activity (UTC date)."""
+
+    date: str  # YYYY-MM-DD
+    count: int
+
+
+class HeatmapOut(BaseModel):
+    days: list[HeatmapDay]
+    total: int
+    window_days: int
 
 
 class NotReadyToComplete(BaseModel):

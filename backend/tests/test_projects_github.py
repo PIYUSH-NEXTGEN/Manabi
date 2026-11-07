@@ -215,10 +215,21 @@ def test_submit_project_invalid_url_422(client, user, problem, github_repo_mock)
 def test_submit_project_invalid_summary_422(client, user, problem, github_repo_mock):
     res = client.post(
         f"/api/problems/{problem.id}/projects",
-        json={"repo_url": "https://github.com/octocat/triage", "solution_summary": "too short"},
+        json={"repo_url": "https://github.com/octocat/triage", "solution_summary": "x" * 401},
     )
     assert res.status_code == 422
     assert res.json()["detail"][0]["loc"][-1] == "solution_summary"
+
+
+def test_submit_project_summary_optional_and_demo_url(db_session, client, user, problem, github_repo_mock):
+    res = client.post(
+        f"/api/problems/{problem.id}/projects",
+        json={"repo_url": "https://github.com/octocat/triage", "demo_url": "https://example.com/live"},
+    )
+    assert res.status_code == 201
+    data = res.json()
+    assert data["solution_summary"] is None
+    assert data["demo_url"] == "https://example.com/live"
 
 
 def test_submit_project_missing_or_private_repo_422(db_session, client, user, problem):
