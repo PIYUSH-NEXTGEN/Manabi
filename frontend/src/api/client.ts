@@ -82,6 +82,9 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     throw new ApiError(response.status, detail, code, payload);
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
   return (await response.json()) as T;
 }
 
@@ -169,6 +172,12 @@ export function getRecommendations(): Promise<RecommendationsOut> {
 
 export function getMyProjects(): Promise<ProjectOut[]> {
   return apiFetch<ProjectOut[]>('/api/me/projects');
+}
+
+export type HeatmapOut = Schemas['HeatmapOut'];
+
+export function getGithubHeatmap(): Promise<HeatmapOut> {
+  return apiFetch<HeatmapOut>('/api/me/github-heatmap');
 }
 
 export type Progress = NonNullable<Schemas['ProjectOut']['progress']>;

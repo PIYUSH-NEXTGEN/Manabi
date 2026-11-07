@@ -1,12 +1,25 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { server } from '@/api/mocks/server';
-import { ApiError, apiFetch, getHealth, getProblems, getStats } from './client';
+import { ApiError, apiFetch, deleteProject, getHealth, getProblems, getStats } from './client';
 
 describe('apiFetch', () => {
   it('parses JSON on success', async () => {
     const health = await getHealth();
     expect(health).toEqual({ status: 'ok' });
+  });
+
+  it('resolves without parsing a body on 204 no content (project delete)', async () => {
+    let deleted = false;
+    server.use(
+      http.delete('*/api/projects/7', () => {
+        deleted = true;
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    await expect(deleteProject(7)).resolves.toBeUndefined();
+    expect(deleted).toBe(true);
   });
 
   it('throws an ApiError carrying detail and status on failure', async () => {
