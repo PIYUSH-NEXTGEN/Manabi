@@ -18,7 +18,7 @@ briefs.
 - Submit a project by repo URL (owner/contributor-only + LLM relevance check)
 - Verified projects get a "Completed" tick; unverified work stays `building`
   and is hidden from curated counts until an admin (or the LLM) verifies it
-- Dashboard that follows your claimed problems and activity with
+- Dashboard that follows your claimed problems with
   edit/complete/remove/reopen actions for your own projects
 - Catalog chat with rate limits and an honest mock mode for offline work
 - Admin submissions queue at `/admin/review` (approve/reject), gated by
@@ -109,6 +109,13 @@ cd ../backend && sh start.sh               # uvicorn app.main:app --host 0.0.0.0
 ```
 
 Health check: `GET /api/health` returns `{"status":"ok"}`.
+
+## Docs
+
+- `SECURITY.md` - security model, known issues, and how to report something
+- `CONTRIBUTING.md` - how to work on the project and submit changes
+- `CODE_OF_CONDUCT.md` - expected behavior in project spaces
+- `DEPLOY.md` - full production runbook, env vars, migrations, and verification details
 
 ## Configuration
 
