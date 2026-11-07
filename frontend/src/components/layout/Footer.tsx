@@ -54,9 +54,11 @@ export function Footer() {
             </Link>
 
             <p className="mt-5 max-w-xs text-sm leading-relaxed text-paper/70">
-              Real problems worth building. Claim a brief, link your GitHub
-              repo, and MANABI tracks commits, README status, and open issues
-              while you ship it.
+              Tired of Googling project ideas and still not knowing what to
+              build? MANABI gives you real problems across every domain,
+              filtered by difficulty. Pick one that fits your skills, from
+              beginner projects to Resume and Hackathons level projects. Link
+              your Repo and live demo show your work publicly.
             </p>
 
             <span className="mt-6 inline-flex items-center gap-2 border border-paper/25 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/65">
@@ -127,16 +129,11 @@ export function Footer() {
       </div>
 
       <div className="relative bg-ink">
-        <video
-          src="/footer-scene.mp4"
-          poster="/footer-scene-poster.jpg"
-          autoPlay
-          loop
-          muted
-          playsInline
-          disablePictureInPicture
+        <img
+          src="/footer-scene.png"
+          alt=""
           draggable={false}
-          className="block w-full"
+          className="block h-80 w-full object-cover object-bottom [image-rendering:pixelated] sm:h-96 md:h-[480px] lg:h-[560px]"
         />
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink via-ink/70 to-transparent pointer-events-none" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-ink/40 to-transparent" />
