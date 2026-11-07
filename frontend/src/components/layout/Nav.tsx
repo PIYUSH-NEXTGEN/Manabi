@@ -1,7 +1,7 @@
 import { NavLink, Link } from 'react-router-dom';
 import {
   FolderKanban,
-  ListOrdered,
+  LayoutDashboard,
   Moon,
   ScanSearch,
   ShieldCheck,
@@ -17,7 +17,7 @@ import { cx } from '@/lib/cx';
 const NAV_LINKS = [
   { to: '/problems', label: 'Projects', icon: FolderKanban },
   { to: '/repo-analyzer', label: 'Repo Analyzer', icon: ScanSearch },
-  { to: '/how-it-works', label: 'How it works', icon: ListOrdered },
+  { to: '/me', label: 'Dashboard', icon: LayoutDashboard },
 ];
 
 const ADMIN_LINK = {

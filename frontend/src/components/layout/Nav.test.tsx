@@ -36,8 +36,8 @@ describe('Nav', () => {
       screen.getAllByRole('link', { name: 'Repo Analyzer' })[0],
     ).toHaveAttribute('href', '/repo-analyzer');
     expect(
-      screen.getAllByRole('link', { name: 'How it works' })[0],
-    ).toHaveAttribute('href', '/how-it-works');
+      screen.getAllByRole('link', { name: 'Dashboard' })[0],
+    ).toHaveAttribute('href', '/me');
   });
 
   it('switches between day and night mode', async () => {

@@ -27,11 +27,6 @@ const FaqPage = lazy(() =>
 const HomePage = lazy(() =>
   import('@/pages/HomePage').then((m) => ({ default: m.HomePage })),
 );
-const HowItWorksPage = lazy(() =>
-  import('@/pages/HowItWorksPage').then((m) => ({
-    default: m.HowItWorksPage,
-  })),
-);
 const KitPage = lazy(() =>
   import('@/pages/KitPage').then((m) => ({ default: m.KitPage })),
 );
@@ -133,7 +128,6 @@ export function App() {
                     }
                   />
                   <Route path="/about" element={<AboutPage />} />
-                  <Route path="/how-it-works" element={<HowItWorksPage />} />
                   <Route path="/faq" element={<FaqPage />} />
                   <Route path="/contribute" element={<ContributePage />} />
                   <Route path="/contact" element={<ContactPage />} />

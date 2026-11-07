@@ -95,9 +95,6 @@ export function AboutPage() {
         <Link to="/problems" className={buttonClasses('primary')}>
           Browse problems
         </Link>
-        <Link to="/how-it-works" className={buttonClasses('secondary')}>
-          How it works
-        </Link>
       </div>
     </StaticShell>
   );

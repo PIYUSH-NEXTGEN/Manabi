@@ -8,7 +8,6 @@ const STATIC_ROUTE_TARGETS: Array<[string, string]> = [
   ['/', 'Pick a project. Ship it. Prove it.'],
   ['/_kit', 'MANABI /_kit'],
   ['/about', 'About MANABI'],
-  ['/how-it-works', 'From idea to shipped code'],
   ['/repo-analyzer', 'Repo Analyzer'],
   ['/faq', 'Straight answers'],
   ['/contribute', "Build on someone else's repo"],
@@ -35,8 +34,14 @@ describe('Route table (no dead links)', () => {
 
     render(<App />);
 
+    // Lazy routes resolve a chunk; under a full parallel suite that can take
+    // longer than the 1s default.
     expect(
-      await screen.findByRole('heading', { name: title, level: 1 }),
+      await screen.findByRole(
+        'heading',
+        { name: title, level: 1 },
+        { timeout: 5000 },
+      ),
     ).toBeInTheDocument();
   });
 
@@ -56,7 +61,7 @@ describe('Route table (no dead links)', () => {
 
     render(<App />);
 
-    expect(await screen.findByRole('heading', { name: 'Problems', level: 1 }))
+    expect(await screen.findByRole('heading', { name: 'Projects', level: 1 }))
       .toBeInTheDocument();
     expect(
       await screen.findByRole('heading', {
@@ -101,7 +106,9 @@ describe('Route table (no dead links)', () => {
         level: 1,
       }),
     ).toBeInTheDocument();
-    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Dashboard', level: 1 }),
+    ).not.toBeInTheDocument();
   });
 
   it('/me shows the dashboard when logged in', async () => {

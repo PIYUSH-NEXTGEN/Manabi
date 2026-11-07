@@ -51,9 +51,6 @@ export function ContributePage() {
         <Link to="/problems" className={buttonClasses('primary')}>
           Find a problem
         </Link>
-        <Link to="/how-it-works" className={buttonClasses('secondary')}>
-          How it works
-        </Link>
       </div>
     </StaticShell>
   );
