@@ -126,15 +126,20 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="relative">
-        <img
-          src="/footer-scene.png"
-          alt=""
-          loading="lazy"
+      <div className="relative bg-ink">
+        <video
+          src="/footer-scene.mp4"
+          poster="/footer-scene-poster.jpg"
+          autoPlay
+          loop
+          muted
+          playsInline
+          disablePictureInPicture
           draggable={false}
-          className="block h-[320px] w-full object-cover object-bottom md:h-[460px]"
+          className="block w-full"
         />
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-ink via-ink/60 to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink via-ink/70 to-transparent pointer-events-none" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-ink/40 to-transparent" />
         <div className="absolute inset-x-0 top-0">
           <div className="mx-auto w-[min(1240px,96vw)] pt-7">
             <Link
