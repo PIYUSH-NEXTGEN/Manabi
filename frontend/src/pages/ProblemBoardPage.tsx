@@ -1,7 +1,14 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import {
+  GraduationCap,
+  Search,
+  SlidersHorizontal,
+  Trophy,
+  X,
+  FileBadge,
+} from 'lucide-react';
 import { cx } from '@/lib/cx';
 import { EASE_SNAP } from '@/design/motion';
 import { buttonClasses, Input, Skeleton } from '@/design/primitives';
@@ -12,12 +19,37 @@ import { useInfiniteProblems } from '@/hooks/useInfiniteProblems';
 
 const microLabel = 'font-mono text-[9px] font-bold uppercase tracking-[0.16em]';
 
-type SortKey = 'newest' | 'popular';
+type GoalKey = 'resume' | 'hackathon' | 'learning';
 
-const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: 'newest', label: 'Newest' },
-  { value: 'popular', label: 'Most projects' },
+const GOAL_OPTIONS: {
+  value: GoalKey;
+  label: string;
+  description: string;
+  icon: typeof Trophy;
+}[] = [
+  {
+    value: 'resume',
+    label: 'Resume',
+    description: 'Interview-ready builds that show recruiters proof of work.',
+    icon: FileBadge,
+  },
+  {
+    value: 'hackathon',
+    label: 'Hackathon',
+    description: 'Deadline-tight briefs for team sprints and demo days.',
+    icon: Trophy,
+  },
+  {
+    value: 'learning',
+    label: 'Learning',
+    description: 'Skill-builder projects to grow at your own pace.',
+    icon: GraduationCap,
+  },
 ];
+
+function goalOf(problem: unknown): GoalKey | undefined {
+  return (problem as { goal?: GoalKey }).goal;
+}
 
 function BoardSkeletons() {
   return (
@@ -49,18 +81,26 @@ export function ProblemBoardPage() {
   const domain = searchParams.get('domain') ?? '';
   const difficulty = searchParams.get('difficulty') ?? '';
   const source = searchParams.get('source') ?? '';
-  const sort: SortKey =
-    searchParams.get('sort') === 'popular' ? 'popular' : 'newest';
+  const goalParam = searchParams.get('goal');
+  const goal: GoalKey | '' = GOAL_OPTIONS.some(
+    (option) => option.value === goalParam,
+  )
+    ? (goalParam as GoalKey)
+    : '';
 
-  const filterKey = [q, field, domain, difficulty, source, sort].join('|');
+  const filterKey = [q, field, domain, difficulty, source].join('|');
   const filters = useMemo(
-    () => ({ q, field, domain, difficulty, source, sort }),
+    () => ({ q, field, domain, difficulty, source }),
     [filterKey],
   );
 
   const board = useInfiniteProblems(filters);
   const problems = board.data?.pages.flatMap((page) => page.items) ?? [];
   const total = board.data?.pages[0]?.total ?? 0;
+  const visibleProblems = goal
+    ? problems.filter((problem) => goalOf(problem) === goal)
+    : problems;
+  const shownTotal = goal ? visibleProblems.length : total;
   const hasFilters = Boolean(q || field || domain || difficulty || source);
 
   const activeFilters: { key: string; label: string; value: string }[] = [
@@ -107,13 +147,63 @@ export function ProblemBoardPage() {
               className="mt-2 font-display uppercase leading-[0.86] tracking-[-0.03em]"
               style={{ fontSize: 'clamp(3rem, 8vw, 5.5rem)' }}
             >
-              Problems
+              Projects
             </h1>
           </div>
           <p className="max-w-md text-sm leading-relaxed text-ink-soft">
             Every brief is written and reviewed by the MANABI team. Filter it
             down, pick the one you can finish, and build the thing.
           </p>
+        </div>
+
+        <div className="mt-8" role="group" aria-label="Project tracks">
+          <p className={cx(microLabel, 'text-muted')}>Browse by track</p>
+          <div className="mt-3 grid gap-5 sm:grid-cols-3">
+            {GOAL_OPTIONS.map((option) => {
+              const active = goal === option.value;
+              const Icon = option.icon;
+              const count = problems.filter(
+                (problem) => goalOf(problem) === option.value,
+              ).length;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setParam('goal', active ? '' : option.value)}
+                  className={cx(
+                    'flex flex-col gap-2 border border-ink bg-sheet px-5 py-5 text-left transition-colors',
+                    active
+                      ? 'bg-ink text-paper'
+                      : 'text-ink hover:bg-tint',
+                  )}
+                >
+                  <span className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em]">
+                    <Icon
+                      aria-hidden
+                      size={14}
+                      strokeWidth={2.4}
+                      className={active ? 'text-accent-soft' : 'text-accent'}
+                    />
+                    {option.label}
+                  </span>
+                  <span
+                    className={cx(
+                      'text-sm leading-snug',
+                      active ? 'text-paper/75' : 'text-ink-soft',
+                    )}
+                  >
+                    {option.description}
+                  </span>
+                  <span
+                    className={cx(microLabel, active ? 'text-paper/55' : 'text-muted')}
+                  >
+                    {board.data ? `${count} projects` : 'Counting…'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         <div className="mt-8 grid gap-8 lg:grid-cols-[276px_minmax(0,1fr)] lg:gap-10">
@@ -132,9 +222,6 @@ export function ProblemBoardPage() {
                   />
                   Filter index
                 </h2>
-                <span className={cx(microLabel, 'text-muted')}>
-                  {board.data ? `${total} entries` : 'Counting…'}
-                </span>
               </div>
 
               <div className="p-4">
@@ -189,34 +276,10 @@ export function ProblemBoardPage() {
           <div className="min-w-0">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
               <p className={cx(microLabel, 'text-muted')}>
-                {board.data ? `${total} problems in the index` : 'Counting…'}
+                {board.data
+                  ? `${shownTotal} projects in the index`
+                  : 'Counting…'}
               </p>
-
-              <div
-                role="group"
-                aria-label="Sort problems"
-                className="flex border border-ink"
-              >
-                {SORT_OPTIONS.map((option) => {
-                  const active = sort === option.value;
-                  return (
-                    <button
-                      key={option.value}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => setParam('sort', option.value)}
-                      className={cx(
-                        'px-2.5 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] transition-colors',
-                        active
-                          ? 'bg-ink text-paper'
-                          : 'bg-transparent text-ink hover:bg-tint',
-                      )}
-                    >
-                      {option.label}
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             {hasFilters ? (
@@ -272,18 +335,33 @@ export function ProblemBoardPage() {
               </section>
             ) : null}
 
-            {board.data && problems.length === 0 && hasFilters ? (
+            {board.data &&
+            visibleProblems.length === 0 &&
+            (!goal ? hasFilters : true) ? (
               <section className="mt-6 border border-line bg-sheet p-6">
-                <p className="text-sm leading-relaxed">
-                  Nothing in the index matches those filters yet. Clear one or
-                  two and look again.
-                </p>
+                {goal ? (
+                  <p className="text-sm leading-relaxed">
+                    No projects in this track yet. New briefs land here as
+                    soon as they're tagged for the{' '}
+                    {goal === 'resume'
+                      ? 'resume'
+                      : goal === 'hackathon'
+                        ? 'hackathon'
+                        : 'learning'}{' '}
+                    track.
+                  </p>
+                ) : (
+                  <p className="text-sm leading-relaxed">
+                    Nothing in the index matches those filters yet. Clear one
+                    or two and look again.
+                  </p>
+                )}
               </section>
             ) : null}
 
-            {problems.length > 0 ? (
+            {visibleProblems.length > 0 ? (
               <div className="mt-6 grid items-stretch gap-5 sm:grid-cols-2 2xl:grid-cols-3">
-                {problems.map((problem, index) => (
+                {visibleProblems.map((problem, index) => (
                   <motion.div
                     key={problem.id}
                     initial={{ opacity: 0, y: 14 }}
@@ -301,7 +379,7 @@ export function ProblemBoardPage() {
               </div>
             ) : null}
 
-            {board.hasNextPage ? (
+            {board.hasNextPage && !goal ? (
               <div className="mt-10 flex justify-center">
                 <button
                   type="button"

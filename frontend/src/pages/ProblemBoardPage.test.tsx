@@ -36,7 +36,7 @@ describe('ProblemBoardPage', () => {
     const cards = await screen.findAllByRole('heading', { level: 3 });
     expect(cards).toHaveLength(6);
     expect(
-      await screen.findByText(/6 problems in the index/i),
+      await screen.findByText(/6 projects in the index/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText('Fraud pattern walkthrough for UPI micro-transactions'),
@@ -65,7 +65,7 @@ describe('ProblemBoardPage', () => {
     expect(
       screen.queryByText('Crop disease triage for small farms'),
     ).not.toBeInTheDocument();
-    expect(await screen.findByText(/1 problems? in the index/i)).toBeInTheDocument();
+    expect(await screen.findByText(/1 projects? in the index/i)).toBeInTheDocument();
   });
 
   it('the difficulty filter updates results', async () => {
@@ -81,7 +81,7 @@ describe('ProblemBoardPage', () => {
     expect(
       screen.queryByText('Streetlight outage tracker'),
     ).not.toBeInTheDocument();
-    expect(await screen.findByText(/2 problems in the index/i)).toBeInTheDocument();
+    expect(await screen.findByText(/2 projects in the index/i)).toBeInTheDocument();
   });
 
   it('clear filters resets the board', async () => {
@@ -96,7 +96,7 @@ describe('ProblemBoardPage', () => {
     });
     await user.click(clearButton);
 
-    expect(await screen.findByText(/6 problems in the index/i)).toBeInTheDocument();
+    expect(await screen.findByText(/6 projects in the index/i)).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Clear filters' }),
     ).not.toBeInTheDocument();
@@ -120,7 +120,7 @@ describe('ProblemBoardPage', () => {
     const cards = await screen.findAllByRole('heading', { level: 3 });
     expect(cards).toHaveLength(12);
     expect(
-      await screen.findByText(/15 problems in the index/i),
+      await screen.findByText(/15 projects in the index/i),
     ).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: 'Load more' }));

@@ -24,22 +24,34 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
     <Link
       to={`/problems/${problem.id}`}
       className={cx(
-        'group flex h-full flex-col border border-ink bg-sheet transition-[transform,box-shadow,border-color] duration-200 ease-out hover:-translate-y-1 hover:border-accent hover:shadow-[7px_7px_0_0_var(--accent)] focus-visible:-translate-y-1 focus-visible:shadow-[7px_7px_0_0_var(--accent)]',
+        'group relative flex h-full flex-col overflow-hidden border border-ink bg-sheet [transition:transform_400ms_cubic-bezier(0.22,1,0.36,1),box-shadow_400ms_cubic-bezier(0.22,1,0.36,1),border-color_400ms_cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[6px] hover:border-accent hover:shadow-[0_26px_48px_-24px_rgba(10,10,25,0.5)] focus-visible:-translate-y-[6px] focus-visible:border-accent focus-visible:shadow-[0_26px_48px_-24px_rgba(10,10,25,0.5)]',
         className,
       )}
     >
-      <header className="flex items-center border-b border-line px-4 py-2.5">
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -translate-x-[120%] skew-x-[-18deg] bg-[linear-gradient(100deg,transparent_40%,rgba(255,255,255,0.35)_50%,transparent_60%)] [transition:transform_900ms_cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[120%]"
+      />
+      <header className="relative flex items-center border-b border-line px-4 py-2.5">
         <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-accent">
           {problem.difficulty}
         </span>
+        <span
+          aria-hidden
+          className="absolute inset-x-0 bottom-[-1px] h-[2px] origin-left scale-x-0 bg-accent [transition:transform_300ms_cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
+        />
       </header>
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
         <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
           {field}
         </p>
-        <h3 className="mt-2 font-display text-[1.25rem] uppercase leading-[1.02] tracking-tight">
+        <h3 className="relative mt-2 inline-block w-fit font-display text-[1.25rem] uppercase leading-[1.02] tracking-tight">
           {problem.title}
+          <span
+            aria-hidden
+            className="absolute inset-x-0 bottom-[-8px] h-[6px] origin-left scale-x-0 bg-current [mask-image:url('data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20width=%2240%22%20height=%226%22%3E%3Cpath%20d=%22M0%203%20Q5%200.5%2010%203%20T20%203%20T30%203%20T40%203%22%20fill=%22none%22%20stroke=%22black%22%20stroke-width=%221.8%22/%3E%3C/svg%3E')] [mask-size:40px_100%] [mask-repeat:repeat-x] [transition:transform_400ms_cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
+          />
         </h3>
         <p className="mt-3 line-clamp-3 text-[13px] leading-relaxed text-ink-soft">
           {problem.summary}
@@ -56,7 +68,7 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
               aria-hidden
               size={12}
               strokeWidth={2.6}
-              className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+              className="[transition:transform_300ms_cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-1 group-hover:translate-x-1"
             />
           </span>
         </div>
