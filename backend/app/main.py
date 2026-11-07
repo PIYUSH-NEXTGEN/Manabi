@@ -100,8 +100,14 @@ def _spa_response(dist: Path, full_path: str, accept: str) -> FileResponse:
     """Serve an existing file; browser navigations fall back to index.html. Escape attempts → 404."""
     if full_path.startswith("api/") or full_path == "api":
         raise HTTPException(status_code=404, detail="Not found")
-    candidate = (dist / full_path).resolve()
-    if not candidate.is_relative_to(dist.resolve()):
+    try:
+        root = dist.resolve()
+        candidate = (dist / full_path).resolve()
+    except OSError:
+        # Windows raises for UNC/network paths and other unrepresentable
+        # names instead of returning a path. Treat it as an escape.
+        raise HTTPException(status_code=404, detail="Not found")
+    if not candidate.is_relative_to(root):
         raise HTTPException(status_code=404, detail="Not found")
     if full_path and candidate.is_file():
         if full_path.startswith("assets/"):

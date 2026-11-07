@@ -15,7 +15,7 @@ from app import config
 from app.db import Base, get_db
 from app.deps import get_current_user, get_optional_user
 from app.main import app
-from app.models import Problem, Project, User
+from app.models import Problem, Project, ProjectReport, User
 
 NOW = datetime.now(timezone.utc)
 
@@ -172,6 +172,22 @@ def test_delete_own_project_204(db_session, client, user):
     res = client.delete(f"/api/projects/{project.id}")
     assert res.status_code == 204
     assert db_session.get(Project, project.id) is None
+
+
+def test_delete_own_project_also_removes_its_reports(db_session, client, user, other):
+    problem = make_problem(db_session)
+    project = make_project(db_session, user, problem)
+    db_session.add(
+        ProjectReport(project_id=project.id, reporter_user_id=other.id, reason="spam")
+    )
+    db_session.commit()
+
+    res = client.delete(f"/api/projects/{project.id}")
+
+    assert res.status_code == 204
+    assert db_session.get(Project, project.id) is None
+    remaining = db_session.query(ProjectReport).filter_by(project_id=project.id).count()
+    assert remaining == 0
 
 
 def test_delete_other_project_404(db_session, client, user, other):
