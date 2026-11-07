@@ -323,6 +323,42 @@ def test_progress_refresh_param_forces_fetch(db_session, client, user, problem, 
     assert res.json()["commit_count"] == 3
 
 
+def test_progress_refresh_judges_ownership_by_submitter_not_viewer(
+    db_session, client, user, problem
+):
+    project = make_project(
+        db_session,
+        user,
+        problem,
+        verification_status="verified",
+        ownership_basis="owner",
+        repo_github_id=999,
+        progress_json=cached_progress(1),
+        progress_updated_at=datetime.now(timezone.utc),
+    )
+    viewer = User(github_id=7, username="viewer", github_token=None)
+    db_session.add(viewer)
+    db_session.commit()
+    # Someone else's project, viewed by a different logged-in account: the
+    # refresh must not treat the viewer as the owner.
+    app.dependency_overrides[get_optional_user] = lambda: viewer
+    app.dependency_overrides[get_current_user] = lambda: viewer
+
+    with respx.mock(assert_all_called=False) as mock:
+        mock_progress_fetch(
+            mock, commits=[commit("s1", NOW), commit("s2", NOW), commit("s3", NOW)], issues=[]
+        )
+        mock.get("https://api.github.com/repos/octocat/triage").mock(
+            return_value=HTTPResponse(200, json=REPO_PAYLOAD)
+        )
+        res = client.get(f"/api/projects/{project.id}/progress", params={"refresh": "true"})
+
+    assert res.status_code == 200
+    db_session.refresh(project)
+    assert project.verification_status == "verified"
+    assert project.ownership_basis == "owner"
+
+
 def test_progress_github_failure_returns_cached(db_session, client, user, problem, anon):
     project = make_project(
         db_session, user, problem,

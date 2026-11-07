@@ -213,6 +213,30 @@ def test_push_access_accepted(client, user, db_session):
     assert res.json()["ownership_basis"] == "push_access"
 
 
+def test_collaborator_permission_on_another_users_personal_repo_rejected(client, user, db_session):
+    problem = make_problem(db_session)
+    # A collaborator invite gives push permission, but the repo still belongs
+    # to a different personal account: that is not ownership.
+    with mock_repo(
+        owner={"login": "someone", "id": 7, "type": "User"},
+        permissions={"push": True, "admin": False},
+        contributors=[],
+    ):
+        res = submit(client, problem.id)
+    assert res.status_code == 403
+    assert res.json()["detail"]["code"] == "not_repo_owner"
+    assert db_session.query(Project).count() == 0
+
+
+def test_contributor_on_personal_repo_accepted(client, user, db_session):
+    problem = make_problem(db_session)
+    contributors = [{"id": 42, "contributions": 4}]
+    with mock_repo(owner={"login": "someone", "id": 7, "type": "User"}, contributors=contributors):
+        res = submit(client, problem.id)
+    assert res.status_code == 201
+    assert res.json()["ownership_basis"] == "contributor"
+
+
 def test_contributor_basis_accepted(client, user, db_session):
     problem = make_problem(db_session)
     contributors = [{"id": 42, "contributions": 5}, {"id": 8, "contributions": 2}]

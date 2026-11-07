@@ -167,10 +167,11 @@ additive and safe: `0005.downgrade` only removes what it added.
 
 ### Verification rules at a glance (details in backend/app/services/verification.py)
 
-- **Ownership (hard gate)**: repo owner by GitHub numeric id, push/admin
-  permission from the authenticated repo payload, or ≥
-  `CONTRIBUTOR_MIN_COMMITS` (3) entries under your own id in
-  `/contributors`. Username string matches are never trusted.
+- **Ownership (hard gate)**: the repo owner by GitHub numeric id (the only
+  accepted basis for a personal repo — a collaborator invite is not
+  ownership), push/admin permission from the authenticated repo payload for
+  organization-owned repos, or ≥ `CONTRIBUTOR_MIN_COMMITS` (3) entries under
+  your own id in `/contributors`. Username string matches are never trusted.
 - **Anti-abuse**: `MAX_SUBMISSIONS_PER_DAY` (5 rolling 24h),
   `MAX_ACTIVE_PROJECTS_PER_USER` (10 non-rejected rows), one repo per user per
   problem, one GitHub repo id per problem across everyone (legacy rows with a

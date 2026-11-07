@@ -26,7 +26,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   repo_not_found: 'Repository not found on GitHub or not public.',
   fork_not_allowed: 'This is a fork — submit the original repo you built the solution in.',
   repo_not_available: 'This repository is archived or disabled and cannot accept submissions.',
-  not_repo_owner: 'You can only submit repositories you own or have contributed to.',
+  not_repo_owner: 'You can only submit repositories you own',
   github_rate_limited: 'GitHub rate limit reached — try again in a few minutes.',
   github_unavailable: 'GitHub is not reachable right now — try again shortly.',
   not_relevant: 'Automatic check: this repo does not relate to the problem. You can edit and resubmit if that is wrong.',

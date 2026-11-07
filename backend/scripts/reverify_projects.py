@@ -41,8 +41,10 @@ REPORT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reverify
 def _ownership_from_facts(facts: RepoFacts, user: User | None) -> str | None:
     if user is None:
         return None
-    if facts.owner_type == "User" and facts.owner_id is not None and facts.owner_id == user.github_id:
-        return OWNERSHIP_OWNER
+    if facts.owner_type != "Organization":
+        if facts.owner_id is not None and facts.owner_id == user.github_id:
+            return OWNERSHIP_OWNER
+        return None
     if facts.permissions.get("admin") or facts.permissions.get("push"):
         return OWNERSHIP_PUSH_ACCESS
     return None

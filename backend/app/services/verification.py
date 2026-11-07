@@ -207,8 +207,14 @@ async def _repo_facts(owner: str, name: str, token: str | None) -> RepoFacts:
 
 
 def _ownership_from_repo(facts: RepoFacts, user: User) -> str | None:
-    if facts.owner_type == "User" and facts.owner_id is not None and facts.owner_id == user.github_id:
-        return OWNERSHIP_OWNER
+    """Repo-level ownership. A personal repo belongs to exactly one account, so
+    mere collaborator permission on someone else's repo is not ownership; only
+    an exact numeric-id match counts. Organization repos have no user owner, so
+    push/admin permission (org membership) is the repo-level signal there."""
+    if facts.owner_type != "Organization":
+        if facts.owner_id is not None and facts.owner_id == user.github_id:
+            return OWNERSHIP_OWNER
+        return None
     perms = facts.permissions
     if perms.get("admin") or perms.get("push"):
         return OWNERSHIP_PUSH_ACCESS
@@ -235,7 +241,11 @@ async def _ownership_via_contributors(facts: RepoFacts, user: User, token: str |
 
 
 async def check_ownership(facts: RepoFacts, user: User, token: str | None) -> str | None:
-    """Winning ownership basis or None. Never accepts on the username string."""
+    """Winning ownership basis or None. Never accepts on the username string.
+
+    Order: the repo's own owner/admin signal, then genuine contribution
+    (CONTRIBUTOR_MIN_COMMITS commits under the caller's GitHub account id).
+    """
     basis = _ownership_from_repo(facts, user)
     if basis:
         return basis
@@ -246,7 +256,7 @@ def reject_not_owner() -> SubmissionError:
     return SubmissionError(
         403,
         "not_repo_owner",
-        "You can only submit repositories you own or have contributed to.",
+        "You can only submit repositories you own",
     )
 
 
@@ -591,8 +601,12 @@ async def refresh_project_state(db, project: Project, user: User | None) -> None
     Detects: repo gone/private, renamed/transferred (by immutable id),
     ownership lost (needs_review + reason). Never raises for verification
     matters — progress fetching must keep working.
+
+    `user` is the logged-in viewer who triggered the refresh. Ownership is
+    always judged against the project's submitter, never the viewer.
     """
-    token = user.github_token if user else None
+    submitter = project.user or db.get(User, project.user_id)
+    token = submitter.github_token if submitter else None
     try:
         repo = await github.get_repo(project.repo_owner, project.repo_name, token)
     except GitHubError as exc:
@@ -622,8 +636,8 @@ async def refresh_project_state(db, project: Project, user: User | None) -> None
         project.verification_status = VERIFICATION_NEEDS_REVIEW
         project.relevance_reason = "Repository was renamed or transferred — review required"
 
-    if user is not None:
-        basis = await check_ownership(facts, user, token)
+    if submitter is not None:
+        basis = await check_ownership(facts, submitter, token)
         if basis is None:
             project.verification_status = VERIFICATION_NEEDS_REVIEW
             project.relevance_reason = "Ownership of this repository could no longer be confirmed"

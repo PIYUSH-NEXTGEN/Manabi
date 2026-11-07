@@ -126,8 +126,8 @@ async def get_project_progress(
     project.progress_updated_at = datetime.now(timezone.utc)
 
     # §6.7: re-verification opportunities on the refresh path. Only happens
-    # for logged-in viewers (permission checks need a token) and never breaks
-    # the progress call itself.
+    # for logged-in viewers, is judged against the submitter (not the viewer)
+    # and never breaks the progress call itself.
     if (refresh or not cache_fresh) and user is not None:
         try:
             await verification.refresh_project_state(db, project, user)

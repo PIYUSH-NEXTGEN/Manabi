@@ -402,7 +402,7 @@ export const handlers = [
     }
     if (/demo-only-not-owner/.test(repoUrl)) {
       return HttpResponse.json(
-        { detail: { code: 'not_repo_owner', message: 'You can only submit repositories you own or have contributed to.' } },
+        { detail: { code: 'not_repo_owner', message: 'You can only submit repositories you own' } },
         { status: 403 },
       );
     }
