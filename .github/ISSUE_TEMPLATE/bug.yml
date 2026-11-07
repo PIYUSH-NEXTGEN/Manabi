@@ -1,0 +1,53 @@
+name: Bug report
+description: Something in the app is broken or behaving unexpectedly
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Please describe what happened, what you expected, and how to reproduce it. Include enough context to follow the issue without reaching into someone else's account or data.
+  - type: input
+    id: version
+    attributes:
+      label: Where did this happen
+      description: Local dev, preview, deployed instance, or CI
+      placeholder: e.g. local dev on localhost:5173
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      placeholder: Describe the actual behavior, including any error text, console output, or API response.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      placeholder: Describe the expected behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to ...
+        2. Click ...
+        3. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Add anything that helps narrow this down. Auth state, project or problem ids, browser, recent config changes, or relevant requests are all useful.
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Private data
+      options:
+        - "I have removed or anonymized any info that belongs to other users."
+    validations:
+      required: true

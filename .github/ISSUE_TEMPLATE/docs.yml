@@ -1,0 +1,47 @@
+name: Docs update
+description: Fix or improve documentation, examples, or runbooks
+title: "[Docs] "
+labels: ["docs"]
+body:
+  - type: markdown
+    attributes:
+      value: This covers README, DEPLOY.md, the API contract in docs/, and any other project documentation. If the docs are now wrong because the app changed, that is a valid bug, not just a doc nit.
+  - type: dropdown
+    id: doc
+    attributes:
+      label: Document
+      options:
+        - README.md
+        - DEPLOY.md
+        - SECURITY.md
+        - CONTRIBUTING.md
+        - CODE_OF_CONDUCT.md
+        - docs/openapi.json
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: What the docs say now
+      placeholder: Quote the passage that is wrong, outdated, or unclear.
+  - type: textarea
+    id: wanted
+    attributes:
+      label: What it should say
+      placeholder: Describe the correction or addition. If you are not sure about the exact wording, describe the intended meaning.
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why this matters
+      placeholder: Link the doc issue to a real change, a frequent question, or a deployment pain point if you can.
+  - type: checkboxes
+    id: checked
+    attributes:
+      label: Quick checks
+      options:
+        - "I checked that the current text is actually wrong or outdated, and not just untended."
+    validations:
+      required: true

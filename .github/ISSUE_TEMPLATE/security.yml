@@ -1,0 +1,46 @@
+name: Security report
+description: Report a suspected vulnerability privately if possible
+title: "[Security] "
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If this is a real vulnerability, please consider a private report first rather than a public issue. See SECURITY.md for what is in scope and how we prioritize reports.
+
+        Do not paste secrets, tokens, session values, database URLs, or other people's data in this form.
+  - type: input
+    id: contact
+    attributes:
+      label: Preferred contact
+      description: If you would rather not discuss this publicly yet, leave a contact note instead of sensitive details.
+      placeholder: e.g. email or a note saying "please use a private channel"
+    validations:
+      required: false
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: One or two sentences describing the issue.
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      placeholder: What could an attacker or misusing user do, or what data or behavior is affected?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include only what is needed to understand the issue. Redact anything that looks like a secret or other people's data.
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - "I have read SECURITY.md and believe this falls within the project's scope."
+    validations:
+      required: true

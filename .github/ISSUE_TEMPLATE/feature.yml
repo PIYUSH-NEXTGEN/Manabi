@@ -1,0 +1,52 @@
+name: Feature request
+description: Propose something the app or docs should do next
+title: "[Feat] "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: MANABI is a small single-service project, so smaller and more focused proposals are easier to review. Say what problem you are solving and why it belongs in the app rather than somewhere else.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or use case
+      placeholder: What are you trying to do, and what is missing or awkward today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      placeholder: Describe the change you want. A screenshot, mock, or example flow helps when the idea is UI-heavy.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional, but useful when the request could be solved more than one way.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Pick the part of the project this most affects.
+      options:
+        - Auth or login
+        - Project submission or verification
+        - Admin review
+        - Problem catalog or search
+        - Chat
+        - Dashboard
+        - Frontend UI
+        - Backend API
+        - Docs
+        - Testing or CI
+        - Other
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - "I understand this may be out of scope for the current project direction."
+    validations:
+      required: true
