@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Dialog, useToast } from '@/design/primitives';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
-import type { ProjectOut, CompletionChecklistItem } from '@/api/client';
+import type {
+  ProjectOut,
+  ProjectPatch,
+  CompletionChecklistItem,
+} from '@/api/client';
 import { ApiError } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
 import { useGithubHeatmap } from '@/hooks/useGithubHeatmap';
@@ -36,32 +40,72 @@ function checkCompletionError(error: unknown): CompletionChecklistItem[] | null 
 function EditProjectDialog({ project }: { project: ProjectOut }) {
   const patch = usePatchProject(project.id);
   const toast = useToast();
+  const [open, setOpen] = useState(false);
   const [summary, setSummary] = useState(project.solution_summary ?? '');
   const [demoUrl, setDemoUrl] = useState(project.demo_url ?? '');
   const [openToContributors, setOpenToContributors] = useState(project.open_for_contributors);
 
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (next) {
+      // Re-sync from the latest server copy every time the dialog opens.
+      setSummary(project.solution_summary ?? '');
+      setDemoUrl(project.demo_url ?? '');
+      setOpenToContributors(project.open_for_contributors);
+    }
+  }
+
   function save() {
-    patch.mutate(
-      {
-        solution_summary: summary.trim().length > 0 ? summary.trim() : undefined,
-        demo_url: demoUrl.trim().length > 0 ? demoUrl.trim() : undefined,
-        open_for_contributors: openToContributors,
+    const nextSummary = summary.trim();
+    const nextDemoUrl = demoUrl.trim();
+    const body: ProjectPatch = { open_for_contributors: openToContributors };
+    let changed = openToContributors !== project.open_for_contributors;
+    // Send only changed fields, and send "" to clear one. An omitted field
+    // means "leave it alone", so undefined could never clear a value.
+    if (nextSummary !== (project.solution_summary ?? '').trim()) {
+      body.solution_summary = nextSummary;
+      changed = true;
+    }
+    if (nextDemoUrl !== (project.demo_url ?? '').trim()) {
+      body.demo_url = nextDemoUrl;
+      changed = true;
+    }
+    if (!changed) {
+      setOpen(false);
+      return;
+    }
+    patch.mutate(body, {
+      onSuccess: () => {
+        setOpen(false);
+        toast('Project saved.');
       },
-      {
-        onSuccess: () => toast('Project saved.'),
-        onError: (error) =>
-          toast(
-            error instanceof ApiError
-              ? error.detail
-              : 'Could not save the project. Try again.',
-            'error',
-          ),
+      onError: (error) => {
+        // The backend commits the edit before re-running the relevance check,
+        // so rate-limit/GitHub errors mean saved-but-not-reverified.
+        const savedAnyway =
+          error instanceof ApiError && (error.status === 429 || error.status === 503);
+        if (savedAnyway) {
+          setOpen(false);
+          toast(`${error.detail} Your changes were saved.`);
+          return;
+        }
+        toast(
+          error instanceof ApiError
+            ? error.detail
+            : 'Could not save the project. Try again.',
+          'error',
+        );
       },
-    );
+    });
   }
 
   return (
-    <Dialog title={`Edit ${project.repo_name}`} triggerLabel="Edit">
+    <Dialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title={`Edit ${project.repo_name}`}
+      triggerLabel="Edit"
+    >
       <div className="flex flex-col gap-3">
         <label className="block" htmlFor={`summary-${project.id}`}>
           <span className={cx(fieldLabelClasses, 'block')}>
@@ -126,10 +170,21 @@ function CompleteChecklistRow({ checklist }: { checklist: CompletionChecklistIte
 function CompleteProjectDialog({ project }: { project: ProjectOut }) {
   const complete = useCompleteProject(project.id);
   const toast = useToast();
+  const [open, setOpen] = useState(false);
   const [demoUrl, setDemoUrl] = useState(project.demo_url ?? '');
   const [reflection, setReflection] = useState('');
   const [checklist, setChecklist] = useState<CompletionChecklistItem[] | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
+
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (next) {
+      setDemoUrl(project.demo_url ?? '');
+      setReflection('');
+      setChecklist(null);
+      setFailure(null);
+    }
+  }
 
   function markComplete() {
     setChecklist(null);
@@ -140,7 +195,10 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
         reflection: reflection.trim().length > 0 ? reflection.trim() : undefined,
       },
       {
-        onSuccess: () => toast('Marked as completed. Nice ship.'),
+        onSuccess: () => {
+          setOpen(false);
+          toast('Marked as completed. Nice ship.');
+        },
         onError: (error) => {
           const items = checkCompletionError(error);
           if (items) {
@@ -160,7 +218,12 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
   }
 
   return (
-    <Dialog title={`Complete ${project.repo_name}`} triggerLabel="Mark complete">
+    <Dialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title={`Complete ${project.repo_name}`}
+      triggerLabel="Mark complete"
+    >
       <div className="flex flex-col gap-3">
         <p className="text-sm leading-snug">
           Completing needs a verified submission, a README and at least 5
@@ -212,10 +275,21 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
 function RemoveProjectDialog({ project }: { project: ProjectOut }) {
   const remove = useDeleteProject();
   const toast = useToast();
+  const [open, setOpen] = useState(false);
   const [failure, setFailure] = useState<string | null>(null);
 
+  function handleOpenChange(next: boolean) {
+    setOpen(next);
+    if (next) setFailure(null);
+  }
+
   return (
-    <Dialog title={`Remove ${project.repo_name}?`} triggerLabel="Remove">
+    <Dialog
+      open={open}
+      onOpenChange={handleOpenChange}
+      title={`Remove ${project.repo_name}?`}
+      triggerLabel="Remove"
+    >
       <div className="flex flex-col gap-3">
         <p className="text-sm leading-snug">
           This removes the submission from the board completely. Your GitHub
@@ -229,7 +303,10 @@ function RemoveProjectDialog({ project }: { project: ProjectOut }) {
         <Button
           onClick={() =>
             remove.mutate(project.id, {
-              onSuccess: () => toast(`${project.repo_name} removed.`),
+              onSuccess: () => {
+                setOpen(false);
+                toast(`${project.repo_name} removed.`);
+              },
               onError: () =>
                 setFailure('Could not remove the project. Try again.'),
             })

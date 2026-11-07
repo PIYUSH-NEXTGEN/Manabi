@@ -8,6 +8,7 @@ import {
   reportProject,
   type ApiError,
   type ProjectOut,
+  type ProjectPatch,
 } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
 
@@ -41,8 +42,7 @@ export function useDeleteProject() {
 export function usePatchProject(projectId: number) {
   const invalidate = useInvalidateProjects();
   return useMutation({
-    mutationFn: (body: { solution_summary?: string; demo_url?: string; open_for_contributors?: boolean }) =>
-      patchProject(projectId, body),
+    mutationFn: (body: ProjectPatch) => patchProject(projectId, body),
     onSuccess: invalidate,
   });
 }

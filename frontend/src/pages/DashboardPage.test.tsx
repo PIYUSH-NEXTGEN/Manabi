@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { server } from '@/api/mocks/server';
@@ -128,6 +129,70 @@ describe('DashboardPage', () => {
 
     expect(await screen.findByText('GitHub token expired')).toBeInTheDocument();
     expect(await screen.findByText('GitHub rate limit reached')).toBeInTheDocument();
+  });
+
+  it('saves edits, clears fields with an empty string, and closes the dialog', async () => {
+    const user = userEvent.setup();
+    const bodies: Array<Record<string, unknown>> = [];
+    const project = { ...MY_PROJECTS[0], demo_url: 'https://example.com/demo' };
+    server.use(
+      http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
+      http.get('*/api/me/projects', () => HttpResponse.json([project])),
+      http.patch('*/api/projects/1', async ({ request }) => {
+        const body = (await request.json()) as Record<string, unknown>;
+        bodies.push(body);
+        return HttpResponse.json({ ...project, ...body });
+      }),
+    );
+    renderDashboard();
+
+    await user.click(await screen.findByRole('button', { name: 'Edit' }));
+    expect(screen.getByRole('dialog')).toBeVisible();
+
+    await user.clear(screen.getByRole('textbox', { name: /Description/ }));
+    await user.clear(screen.getByLabelText(/Demo URL/));
+    await user.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    );
+    expect(bodies).toEqual([
+      {
+        solution_summary: '',
+        demo_url: '',
+        open_for_contributors: true,
+      },
+    ]);
+    expect(await screen.findByRole('status')).toHaveTextContent('Project saved.');
+  });
+
+  it('removes a project from the board and closes the confirm dialog', async () => {
+    const user = userEvent.setup();
+    let rows = [...MY_PROJECTS];
+    let deleted = false;
+    server.use(
+      http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
+      http.get('*/api/me/projects', () => HttpResponse.json(rows)),
+      http.delete('*/api/projects/1', () => {
+        deleted = true;
+        rows = [];
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    renderDashboard();
+
+    await user.click(await screen.findByRole('button', { name: 'Remove' }));
+    expect(screen.getByRole('dialog')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Yes, remove it' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    );
+    expect(deleted).toBe(true);
+    expect(await screen.findByText(/No projects yet/)).toBeInTheDocument();
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'crop-triage removed.',
+    );
   });
 
   it('redirects anonymous visitors to the home catalog and never renders the dashboard', async () => {

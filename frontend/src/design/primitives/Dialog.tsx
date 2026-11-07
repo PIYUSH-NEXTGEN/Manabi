@@ -8,11 +8,21 @@ interface DialogProps {
   triggerLabel: string;
   children: ReactNode;
   className?: string;
+  /** Optional controlled state; omit both for the uncontrolled default. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function Dialog({ title, triggerLabel, children, className }: DialogProps) {
+export function Dialog({
+  title,
+  triggerLabel,
+  children,
+  className,
+  open,
+  onOpenChange,
+}: DialogProps) {
   return (
-    <DialogPrimitive.Root>
+    <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Trigger asChild>
         <Button variant="secondary">{triggerLabel}</Button>
       </DialogPrimitive.Trigger>
