@@ -17,12 +17,12 @@ const panelHeading =
   'font-mono text-xs font-bold uppercase tracking-widest';
 const invalidReason =
   'Use a GitHub repo URL like https://github.com/owner/name';
-const SUMMARY_MIN = 40;
-const SUMMARY_MAX = 800;
+const SUMMARY_MAX = 400;
 
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_repo_url: 'Use a GitHub repo URL like https://github.com/owner/name.',
-  invalid_summary: 'Describe how your project solves the problem in 40–800 characters.',
+  invalid_summary: 'Keep the description to at most 400 characters.',
+  invalid_demo_url: 'The deployed link must be a plain http(s) URL, at most 500 characters.',
   repo_not_found: 'Repository not found on GitHub or not public.',
   fork_not_allowed: 'This is a fork — submit the original repo you built the solution in.',
   repo_not_available: 'This repository is archived or disabled and cannot accept submissions.',
@@ -64,6 +64,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
 
   const [repoUrl, setRepoUrl] = useState('');
   const [summary, setSummary] = useState('');
+  const [demoUrl, setDemoUrl] = useState('');
   const [openForContributors, setOpenForContributors] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -105,6 +106,10 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
     setSummary(event.target.value);
   }
 
+  function handleDemoUrlChange(event: ChangeEvent<HTMLInputElement>) {
+    setDemoUrl(event.target.value);
+  }
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitError(null);
@@ -117,10 +122,9 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
       setValidationError(invalidReason);
       return;
     }
-    if (summary.trim().length < SUMMARY_MIN) {
-      setValidationError(
-        `Add a summary of at least ${SUMMARY_MIN} characters explaining how the repo solves this problem.`,
-      );
+    const demo = demoUrl.trim();
+    if (demo && !/^https?:\/\/\S+$/i.test(demo)) {
+      setValidationError('The deployed link must start with http:// or https://');
       return;
     }
 
@@ -129,7 +133,8 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
     submit.mutate(
       {
         repo_url: normalized,
-        solution_summary: summary.trim(),
+        solution_summary: summary.trim() ? summary.trim() : undefined,
+        demo_url: demo ? demo : undefined,
         open_for_contributors: openForContributors,
       },
       {
@@ -137,6 +142,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           setSubmitted(project);
           setRepoUrl('');
           setSummary('');
+          setDemoUrl('');
           setOpenForContributors(false);
           toast('Submission received.');
         },
@@ -184,18 +190,14 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           htmlFor="solution-summary"
           className={cx(panelHeading, 'flex items-baseline justify-between')}
         >
-          How it solves this problem
+          Description (optional)
           <span
             className={cx(
               'normal-case tracking-normal',
-              summary.trim().length > SUMMARY_MAX
-                ? 'text-danger'
-                : summary.trim().length >= SUMMARY_MIN
-                  ? 'text-ink/60'
-                  : 'text-ink/40',
+              summary.trim().length > SUMMARY_MAX ? 'text-danger' : 'text-ink/40',
             )}
           >
-            {summary.trim().length}–{SUMMARY_MAX}
+            {summary.trim().length}/400
           </span>
         </label>
         <textarea
@@ -203,13 +205,17 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           value={summary}
           onChange={handleSummaryChange}
           rows={5}
-          maxLength={800}
-          placeholder={`What the repo does, how it addresses the problem, and where the data comes from (${SUMMARY_MIN}–${SUMMARY_MAX} characters).`}
+          maxLength={400}
+          placeholder="Optional up to 400 characters: what the repo does, how it addresses the problem, and where the data comes from."
           className="border border-ink bg-paper px-3 py-2 text-sm"
         />
-        <p className="text-[13px] leading-snug text-ink-soft">
-          Only the summary and stats are public — your repo README stays yours.
-        </p>
+        <Input
+          label="Deployed link (optional)"
+          type="url"
+          placeholder="https://your-project.example.com"
+          value={demoUrl}
+          onChange={handleDemoUrlChange}
+        />
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"

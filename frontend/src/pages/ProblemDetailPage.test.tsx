@@ -197,10 +197,6 @@ describe('ProblemDetailPage', () => {
       screen.getByLabelText('GitHub repo URL'),
       'https://github.com/tester/new-thing/',
     );
-    await user.type(
-      screen.getByLabelText(/How it solves this problem/),
-      'An offline capture queue routes leaf cases to the right officer.',
-    );
     await user.click(screen.getByLabelText('Open for contributors'));
     await user.click(screen.getByRole('button', { name: 'Submit project' }));
 
@@ -239,10 +235,6 @@ describe('ProblemDetailPage', () => {
     await user.type(
       screen.getByLabelText('GitHub repo URL'),
       'https://github.com/tester/again',
-    );
-    await user.type(
-      screen.getByLabelText(/How it solves this problem/),
-      'An offline capture queue routes leaf cases to the right officers.',
     );
     await user.click(screen.getByRole('button', { name: 'Submit project' }));
 
