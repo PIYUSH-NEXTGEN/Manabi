@@ -9,7 +9,6 @@ import type {
 } from '@/api/client';
 import { ApiError } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
-import { useGithubHeatmap } from '@/hooks/useGithubHeatmap';
 import { useLogout } from '@/hooks/useLogout';
 import {
   useCompleteProject,
@@ -393,87 +392,6 @@ function verifiedOrBetter(project: ProjectOut): boolean {
   return project.verification_status === 'verified' && project.completed_at == null;
 }
 
-const HEAT_LEVEL_BG: Record<number, string> = {
-  0: 'bg-ink/10',
-  1: 'bg-accent/40',
-  2: 'bg-accent/65',
-  3: 'bg-accent/85',
-  4: 'bg-accent',
-};
-
-const WEEKS = 13;
-
-function GithubHeatmapSection({ username }: { username: string }) {
-  const heatmap = useGithubHeatmap();
-
-  const byDate = new Map<string, number>();
-  if (heatmap.data) {
-    for (const day of heatmap.data.days) {
-      byDate.set(day.date, day.count);
-    }
-  }
-
-  const today = new Date();
-  const totalCells = WEEKS * 7;
-  const cells: Array<{ date: string; count: number }> = [];
-  for (let i = totalCells - 1; i >= 0; i -= 1) {
-    const date = new Date(today);
-    date.setUTCDate(today.getUTCDate() - i);
-    const iso = date.toISOString().slice(0, 10);
-    cells.push({ date: iso, count: byDate.get(iso) ?? 0 });
-  }
-
-  function level(count: number): number {
-    if (count <= 0) return 0;
-    if (count < 3) return 1;
-    if (count < 6) return 2;
-    if (count < 10) return 3;
-    return 4;
-  }
-
-  return (
-    <section aria-label="GitHub activity" className="mt-8">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-display text-xl uppercase md:text-2xl">GitHub activity</h2>
-        {heatmap.data ? (
-          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/70">
-            {`${heatmap.data.total} pushes · public · last ${WEEKS} weeks`}
-          </p>
-        ) : null}
-      </div>
-      {heatmap.isPending ? (
-        <p className="mt-3 text-sm">Loading activity from GitHub…</p>
-      ) : heatmap.error ? (
-        <p className="mt-3 font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
-          {heatmap.error.detail || 'Could not load GitHub activity.'}
-        </p>
-      ) : (
-        <div className="mt-3 border border-ink bg-sheet p-4">
-          <div
-            className="grid gap-[3px]"
-            style={{ gridTemplateColumns: `repeat(${WEEKS}, 1fr)` }}
-          >
-            {cells.map((cell) => (
-              <span
-                key={cell.date}
-                aria-label={`${cell.date}: ${cell.count} pushes`}
-                title={`${cell.date}: ${cell.count} ${cell.count === 1 ? 'push' : 'pushes'}`}
-                className={cx(
-                  'block aspect-square rounded-[1px]',
-                  HEAT_LEVEL_BG[level(cell.count)],
-                )}
-              />
-            ))}
-          </div>
-          <p className="mt-3 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-            Public pushes by {username} · updates from GitHub
-          </p>
-        </div>
-      )}
-    </section>
-  );
-}
-
 const fieldLabelClasses = 'font-mono text-[11px] font-bold uppercase tracking-widest';
 
 export function DashboardPage() {
@@ -546,7 +464,6 @@ export function DashboardPage() {
         ) : null}
       </section>
 
-      {me.data ? <GithubHeatmapSection username={me.data.username} /> : null}
     </main>
   );
 }

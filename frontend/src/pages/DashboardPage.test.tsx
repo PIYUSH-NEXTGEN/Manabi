@@ -91,12 +91,6 @@ describe('DashboardPage', () => {
     expect(screen.getByText('Crop disease triage for small farms')).toBeInTheDocument();
     expect(await screen.findByText('ACTIVE')).toBeInTheDocument();
 
-    expect(await screen.findByText('GitHub activity')).toBeInTheDocument();
-    expect(screen.getByText('3 pushes · public · last 13 weeks')).toBeInTheDocument();
-    expect(
-      screen.getByText(/Public pushes by ml-learner/i),
-    ).toBeInTheDocument();
-
     expect(screen.queryByRole('heading', { name: 'For you' })).not.toBeInTheDocument();
   });
 
@@ -111,8 +105,6 @@ describe('DashboardPage', () => {
     renderDashboard();
 
     expect(await screen.findByText(/No projects yet/i)).toBeInTheDocument();
-    expect(await screen.findByText('GitHub activity')).toBeInTheDocument();
-    expect(await screen.findByText('0 pushes · public · last 13 weeks')).toBeInTheDocument();
   });
 
   it('shows the backend error detail honestly when GitHub activity fails', async () => {
@@ -121,14 +113,10 @@ describe('DashboardPage', () => {
       http.get('*/api/me/projects', () =>
         HttpResponse.json({ detail: 'GitHub token expired' }, { status: 401 }),
       ),
-      http.get('*/api/me/github-heatmap', () =>
-        HttpResponse.json({ detail: 'GitHub rate limit reached' }, { status: 403 }),
-      ),
-    );
+      );
     renderDashboard();
 
     expect(await screen.findByText('GitHub token expired')).toBeInTheDocument();
-    expect(await screen.findByText('GitHub rate limit reached')).toBeInTheDocument();
   });
 
   it('saves edits, clears fields with an empty string, and closes the dialog', async () => {
