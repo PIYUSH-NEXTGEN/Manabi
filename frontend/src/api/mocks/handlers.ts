@@ -377,6 +377,7 @@ export const handlers = [
     const body = (await request.json()) as {
       repo_url?: string;
       solution_summary?: string;
+      demo_url?: string;
       open_for_contributors?: boolean;
     };
     const repoUrl = body.repo_url ?? '';
@@ -387,9 +388,15 @@ export const handlers = [
       );
     }
     const summary = (body.solution_summary ?? '').trim();
-    if (summary.length < 40 || summary.length > 800) {
+    if (summary.length > 400) {
       return HttpResponse.json(
-        { detail: { code: 'invalid_summary', message: 'Describe how your project solves the problem in 40-800 characters.' } },
+        { detail: { code: 'invalid_summary', message: 'Keep the description to at most 400 characters.' } },
+        { status: 422 },
+      );
+    }
+    if (/bad-demo-link/.test(repoUrl)) {
+      return HttpResponse.json(
+        { detail: { code: 'invalid_demo_url', message: 'Demo link must be a plain http(s) URL.' } },
         { status: 422 },
       );
     }
@@ -424,7 +431,7 @@ export const handlers = [
         verification_status: 'needs_review',
         solution_summary: summary,
         completed_at: null,
-        demo_url: null,
+        demo_url: body.demo_url?.trim() ? body.demo_url.trim() : null,
         reflection: null,
         relevance_reason: 'Automatic check could not fully confirm relevance',
         ownership_basis: 'push_access',
@@ -509,6 +516,23 @@ export const handlers = [
   http.delete('*/api/projects/:id', () =>
     new HttpResponse(null, { status: 204 }),
   ),
+  http.get('*/api/me/github-heatmap', () => {
+    const today = new Date();
+    const days: Array<{ date: string; count: number }> = [];
+    let total = 0;
+    for (let i = 90; i >= 0; i -= 1) {
+      const date = new Date(today);
+      date.setUTCDate(today.getUTCDate() - i);
+      // sparse deterministic activity, like the real backlog: only recent weeks
+      const seeded = (i * 7 + 13) % 31;
+      if (i < 14 && seeded % 3 === 0) {
+        const count = (seeded % 9) + 1;
+        total += count;
+        days.push({ date: date.toISOString().slice(0, 10), count });
+      }
+    }
+    return HttpResponse.json({ days, total, window_days: 91 });
+  }),
   http.patch('*/api/projects/:id', async ({ request, params }) => {
     const body = (await request.json()) as {
       demo_url?: string;

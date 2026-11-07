@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button, Dialog, Tag, useToast } from '@/design/primitives';
-import { ProblemCard } from '@/components/problems/ProblemCard';
+import { Button, Dialog, useToast } from '@/design/primitives';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
-import type { ProjectOut, RecommendationItem, CompletionChecklistItem } from '@/api/client';
-import { ApiError, projectOwnerUsername } from '@/api/client';
+import type { ProjectOut, CompletionChecklistItem } from '@/api/client';
+import { ApiError } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
+import { useGithubHeatmap } from '@/hooks/useGithubHeatmap';
 import { useLogout } from '@/hooks/useLogout';
 import {
   useCompleteProject,
@@ -15,23 +15,9 @@ import {
   useReopenProject,
 } from '@/hooks/useMyProjects';
 import { useProjectProgress } from '@/hooks/useProjectProgress';
-import { useRecommendations } from '@/hooks/useRecommendations';
 import { cx } from '@/lib/cx';
 
-function ReasonList({ reasons }: { reasons: RecommendationItem['reasons'] }) {
-  if (reasons.length === 0) return null;
-
-  return (
-    <ul className="mt-3 space-y-1 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/70">
-      {reasons.map((reason) => (
-        <li key={reason}>+ {reason}</li>
-      ))}
-    </ul>
-  );
-}
-
-const SUMMARY_MIN = 40;
-const SUMMARY_MAX = 800;
+const SUMMARY_MAX = 400;
 
 const STATUS_TAGS: Record<ProjectOut['verification_status'], { label: string; tone: string }> = {
   verified: { label: 'verified · public', tone: 'text-accent' },
@@ -57,7 +43,7 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
   function save() {
     patch.mutate(
       {
-        solution_summary: summary.trim().length >= SUMMARY_MIN ? summary.trim() : undefined,
+        solution_summary: summary.trim().length > 0 ? summary.trim() : undefined,
         demo_url: demoUrl.trim().length > 0 ? demoUrl.trim() : undefined,
         open_for_contributors: openToContributors,
       },
@@ -79,7 +65,7 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
       <div className="flex flex-col gap-3">
         <label className="block" htmlFor={`summary-${project.id}`}>
           <span className={cx(fieldLabelClasses, 'block')}>
-            How it solves the problem ({summary.trim().length}–{SUMMARY_MAX})
+            Description (optional) ({summary.trim().length}/400)
           </span>
           <textarea
             id={`summary-${project.id}`}
@@ -90,7 +76,7 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
             className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-sm"
           />
           <span className="mt-1 block text-xs text-ink-soft">
-            Editing the summary re-runs the automatic relevance check at most
+            Editing the description re-runs the automatic relevance check at most
             once per day.
           </span>
         </label>
@@ -226,6 +212,7 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
 function RemoveProjectDialog({ project }: { project: ProjectOut }) {
   const remove = useDeleteProject();
   const toast = useToast();
+  const [failure, setFailure] = useState<string | null>(null);
 
   return (
     <Dialog title={`Remove ${project.repo_name}?`} triggerLabel="Remove">
@@ -234,11 +221,17 @@ function RemoveProjectDialog({ project }: { project: ProjectOut }) {
           This removes the submission from the board completely. Your GitHub
           repository itself is untouched.
         </p>
+        {failure ? (
+          <p role="alert" className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
+            {failure}
+          </p>
+        ) : null}
         <Button
           onClick={() =>
             remove.mutate(project.id, {
               onSuccess: () => toast(`${project.repo_name} removed.`),
-              onError: () => toast('Could not remove the project. Try again.', 'error'),
+              onError: () =>
+                setFailure('Could not remove the project. Try again.'),
             })
           }
           disabled={remove.isPending}
@@ -254,7 +247,6 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
   const progress = useProjectProgress(project.id);
   const reopen = useReopenProject(project.id);
   const toast = useToast();
-  const repoLabel = projectOwnerUsername(project.owner) ?? project.repo_url;
   const statusTag = STATUS_TAGS[project.verification_status] ?? null;
   const completed = project.completed_at != null;
 
@@ -268,12 +260,17 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
   return (
     <li className="flex flex-col gap-2 px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Link
-          to={`/projects/${project.id}`}
-          className="font-mono text-sm font-bold underline-offset-4 hover:underline"
-        >
-          {repoLabel}
-        </Link>
+        <div className="min-w-0">
+          <Link
+            to={`/projects/${project.id}`}
+            className="font-display text-base uppercase leading-tight underline-offset-4 hover:underline md:text-lg"
+          >
+            {project.repo_name}
+          </Link>
+          <p className="mt-0.5 truncate font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">
+            {project.problem_title}
+          </p>
+        </div>
         <div className="flex flex-wrap items-center gap-2">
           {statusTag ? (
             <span
@@ -319,12 +316,92 @@ function verifiedOrBetter(project: ProjectOut): boolean {
   return project.verification_status === 'verified' && project.completed_at == null;
 }
 
+const HEAT_LEVEL_BG: Record<number, string> = {
+  0: 'bg-ink/10',
+  1: 'bg-accent/40',
+  2: 'bg-accent/65',
+  3: 'bg-accent/85',
+  4: 'bg-accent',
+};
+
+const WEEKS = 13;
+
+function GithubHeatmapSection({ username }: { username: string }) {
+  const heatmap = useGithubHeatmap();
+
+  const byDate = new Map<string, number>();
+  if (heatmap.data) {
+    for (const day of heatmap.data.days) {
+      byDate.set(day.date, day.count);
+    }
+  }
+
+  const today = new Date();
+  const totalCells = WEEKS * 7;
+  const cells: Array<{ date: string; count: number }> = [];
+  for (let i = totalCells - 1; i >= 0; i -= 1) {
+    const date = new Date(today);
+    date.setUTCDate(today.getUTCDate() - i);
+    const iso = date.toISOString().slice(0, 10);
+    cells.push({ date: iso, count: byDate.get(iso) ?? 0 });
+  }
+
+  function level(count: number): number {
+    if (count <= 0) return 0;
+    if (count < 3) return 1;
+    if (count < 6) return 2;
+    if (count < 10) return 3;
+    return 4;
+  }
+
+  return (
+    <section aria-label="GitHub activity" className="mt-8">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="font-display text-xl uppercase md:text-2xl">GitHub activity</h2>
+        {heatmap.data ? (
+          <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/70">
+            {`${heatmap.data.total} pushes · public · last ${WEEKS} weeks`}
+          </p>
+        ) : null}
+      </div>
+      {heatmap.isPending ? (
+        <p className="mt-3 text-sm">Loading activity from GitHub…</p>
+      ) : heatmap.error ? (
+        <p className="mt-3 font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
+          {heatmap.error.detail || 'Could not load GitHub activity.'}
+        </p>
+      ) : (
+        <div className="mt-3 border border-ink bg-sheet p-4">
+          <div
+            className="grid gap-[3px]"
+            style={{ gridTemplateColumns: `repeat(${WEEKS}, 1fr)` }}
+          >
+            {cells.map((cell) => (
+              <span
+                key={cell.date}
+                aria-label={`${cell.date}: ${cell.count} pushes`}
+                title={`${cell.date}: ${cell.count} ${cell.count === 1 ? 'push' : 'pushes'}`}
+                className={cx(
+                  'block aspect-square rounded-[1px]',
+                  HEAT_LEVEL_BG[level(cell.count)],
+                )}
+              />
+            ))}
+          </div>
+          <p className="mt-3 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+            Public pushes by {username} · updates from GitHub
+          </p>
+        </div>
+      )}
+    </section>
+  );
+}
+
 const fieldLabelClasses = 'font-mono text-[11px] font-bold uppercase tracking-widest';
 
 export function DashboardPage() {
   const me = useMe();
   const logout = useLogout();
-  const recommendations = useRecommendations();
   const projects = useMyProjects();
 
   const displayName = me.data?.name || me.data?.username;
@@ -335,24 +412,26 @@ export function DashboardPage() {
 
   return (
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
-      <h1 className="font-display text-3xl uppercase leading-none md:text-4xl">
-        Dashboard
-      </h1>
-      <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/70">
-        {displayName ? (
-          <>
-            Logged in as {displayName}
-            <Button
-              variant="danger"
-              size="small"
-              onClick={() => logout.mutate()}
-              disabled={logout.isPending}
-            >
-              {logout.isPending ? 'Signing out…' : 'Log out'}
-            </Button>
-          </>
-        ) : 'Loading…'}
-      </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-3xl uppercase leading-none md:text-4xl">
+            Dashboard
+          </h1>
+          <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/70">
+            {displayName ? `Logged in as ${displayName}` : 'Loading…'}
+          </p>
+        </div>
+        {me.data ? (
+          <Button
+            variant="danger"
+            size="small"
+            onClick={() => logout.mutate()}
+            disabled={logout.isPending}
+          >
+            {logout.isPending ? 'Signing out…' : 'Log out'}
+          </Button>
+        ) : null}
+      </div>
 
       <section aria-label="Your projects" className="mt-8">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -390,36 +469,7 @@ export function DashboardPage() {
         ) : null}
       </section>
 
-      <section aria-label="For you" className="mt-8">
-        <h2 className="font-display text-xl uppercase md:text-2xl">For you</h2>
-        {recommendations.isLoading ? (
-          <p className="mt-2 text-sm">Loading recommendations…</p>
-        ) : null}
-        {recommendations.error ? (
-          <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
-            {recommendations.error.detail}
-          </p>
-        ) : null}
-        {recommendations.data && recommendations.data.items.length === 0 ? (
-          <p className="mt-3 border border-ink bg-sheet p-4 text-sm leading-snug">
-            Nothing matched yet — try more problems and projects, and this
-            fills up.
-          </p>
-        ) : null}
-        {recommendations.data && recommendations.data.items.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4 pt-4 sm:grid-cols-2 lg:grid-cols-3">
-            {recommendations.data.items.map((item) => (
-              <div key={item.problem.id} className="flex flex-col">
-                <ProblemCard problem={item.problem} />
-                <div className="flex items-center gap-2 px-1 pt-2">
-                  <Tag>{`score ${item.score}`}</Tag>
-                </div>
-                <ReasonList reasons={item.reasons} />
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </section>
+      {me.data ? <GithubHeatmapSection username={me.data.username} /> : null}
     </main>
   );
 }

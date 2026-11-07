@@ -39,36 +39,6 @@ const MY_PROJECTS = [
   },
 ];
 
-const RECOMMENDATIONS = {
-  items: [
-    {
-      problem: {
-        id: 5,
-        title: 'Attendance pipeline that fails loudly',
-        summary:
-          'A school network imports biometric attendance CSVs; silent row drops must become alerts.',
-        who_affected: 'School network administrators',
-        why_matters: 'Silent data loss hides absent children.',
-        field: 'data-engineering',
-        domain: 'education',
-        difficulty: 'beginner',
-        est_hours: 24,
-        tech_tags: ['python', 'airflow', 'pytest'],
-        datasets: [],
-        approaches: [],
-        source_name: 'TCOE',
-        source_id: 'TCOE PS03',
-        source_url: null,
-        source_note: null,
-        project_count: 0,
-        ai_fields: [],
-      },
-      score: 3,
-      reasons: ['Matches your python and pytest tags', 'Beginner fits your level'],
-    },
-  ],
-};
-
 function renderDashboard() {
   return renderWithProviders(
     <ToastProvider>
@@ -81,11 +51,10 @@ function renderDashboard() {
 }
 
 describe('DashboardPage', () => {
-  it('shows greeting, own projects with progress badges, and scored recommendations', async () => {
+  it('shows greeting, own projects by name with progress badges, and the GitHub heatmap', async () => {
     server.use(
       http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
       http.get('*/api/me/projects', () => HttpResponse.json(MY_PROJECTS)),
-      http.get('*/api/recommendations', () => HttpResponse.json(RECOMMENDATIONS)),
       http.get('*/api/projects/1/progress', () =>
         HttpResponse.json({
           status: 'active',
@@ -96,57 +65,69 @@ describe('DashboardPage', () => {
           open_issues: [],
         }),
       ),
+      http.get('*/api/me/github-heatmap', () =>
+        HttpResponse.json({
+          days: [
+            { date: '2026-11-01', count: 3 },
+            { date: '2026-11-02', count: 0 },
+          ],
+          total: 3,
+          window_days: 91,
+        }),
+      ),
     );
     renderDashboard();
 
     expect(await screen.findByText('Logged in as Ml Learner')).toBeInTheDocument();
+    const logOut = await screen.findByRole('button', { name: 'Log out' });
+    // top right: not nested inside the greeting paragraph anymore
+    expect(logOut.closest('p')).toBeNull();
+
     expect(
-      await screen.findByRole('link', { name: 'ml-learner' }),
+      await screen.findByRole('link', { name: 'crop-triage' }),
     ).toHaveAttribute('href', '/projects/1');
+    expect(screen.queryByRole('link', { name: 'ml-learner' })).not.toBeInTheDocument();
+    expect(screen.getByText('Crop disease triage for small farms')).toBeInTheDocument();
     expect(await screen.findByText('ACTIVE')).toBeInTheDocument();
 
+    expect(await screen.findByText('GitHub activity')).toBeInTheDocument();
+    expect(screen.getByText('3 pushes · public · last 13 weeks')).toBeInTheDocument();
     expect(
-      await screen.findByText('Attendance pipeline that fails loudly'),
+      screen.getByText(/Public pushes by ml-learner/i),
     ).toBeInTheDocument();
-    expect(screen.getByText('score 3')).toBeInTheDocument();
-    expect(
-      screen.getByText('+ Matches your python and pytest tags'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText('+ Beginner fits your level'),
-    ).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'For you', level: 2 })).toBeInTheDocument();
+
+    expect(screen.queryByRole('heading', { name: 'For you' })).not.toBeInTheDocument();
   });
 
-  it('shows honest empty states when there are no projects and no matches', async () => {
+  it('shows honest empty states when there are no projects', async () => {
     server.use(
       http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
       http.get('*/api/me/projects', () => HttpResponse.json([])),
-      http.get('*/api/recommendations', () => HttpResponse.json({ items: [] })),
+      http.get('*/api/me/github-heatmap', () =>
+        HttpResponse.json({ days: [], total: 0, window_days: 91 }),
+      ),
     );
     renderDashboard();
 
     expect(await screen.findByText(/No projects yet/i)).toBeInTheDocument();
-    expect(
-      await screen.findByText(/Nothing matched yet/i),
-    ).toBeInTheDocument();
-    expect(screen.queryByText('score 0')).not.toBeInTheDocument();
+    expect(await screen.findByText('GitHub activity')).toBeInTheDocument();
+    expect(await screen.findByText('0 pushes · public · last 13 weeks')).toBeInTheDocument();
   });
 
-  it('shows the backend error detail honestly when recommendations fail', async () => {
+  it('shows the backend error detail honestly when GitHub activity fails', async () => {
     server.use(
       http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
       http.get('*/api/me/projects', () =>
         HttpResponse.json({ detail: 'GitHub token expired' }, { status: 401 }),
       ),
-      http.get('*/api/recommendations', () =>
-        HttpResponse.json({ detail: 'Scoring failed' }, { status: 500 }),
+      http.get('*/api/me/github-heatmap', () =>
+        HttpResponse.json({ detail: 'GitHub rate limit reached' }, { status: 403 }),
       ),
     );
     renderDashboard();
 
     expect(await screen.findByText('GitHub token expired')).toBeInTheDocument();
-    expect(await screen.findByText('Scoring failed')).toBeInTheDocument();
+    expect(await screen.findByText('GitHub rate limit reached')).toBeInTheDocument();
   });
 
   it('redirects anonymous visitors to the home catalog and never renders the dashboard', async () => {

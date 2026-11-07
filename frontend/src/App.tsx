@@ -4,6 +4,7 @@ import { MotionConfig } from 'motion/react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { ToastProvider } from '@/design/primitives';
 
 const AboutPage = lazy(() =>
@@ -97,6 +98,7 @@ export function App() {
       <MotionConfig reducedMotion="user">
         <ToastProvider>
           <BrowserRouter>
+            <ScrollToTop />
             <Suspense fallback={<RouteFallback />}>
               <Routes>
                 <Route element={<AppLayout />}>
