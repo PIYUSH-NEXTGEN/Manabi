@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MotionConfig } from 'motion/react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
@@ -33,6 +33,29 @@ const KitPage = lazy(() =>
 const DashboardPage = lazy(() =>
   import('@/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
 );
+// After first paint the app preloads every route chunk while the browser is
+// idle. Without this, switching pages waits on a network round trip for a
+// 1-26 kB chunk and shows the RouteFallback skeleton — the "delay" felt when
+// opening a project or switching pages (docs/PERF_2026-11-09.md, FIN-6).
+const PAGE_PRELOADS = [
+  () => import('@/pages/HomePage'),
+  () => import('@/pages/ProblemBoardPage'),
+  () => import('@/pages/ProblemDetailPage'),
+  () => import('@/pages/ProblemGuidePage'),
+  () => import('@/pages/ProjectDetailPage'),
+  () => import('@/pages/DashboardPage'),
+  () => import('@/pages/AdminReviewPage'),
+  () => import('@/pages/RepoAnalyzerPage'),
+  () => import('@/pages/AboutPage'),
+  () => import('@/pages/FaqPage'),
+  () => import('@/pages/ContributePage'),
+  () => import('@/pages/ContactPage'),
+  () => import('@/pages/PrivacyPage'),
+  () => import('@/pages/TermsPage'),
+  () => import('@/pages/NotFoundPage'),
+  () => import('@/pages/KitPage'),
+];
+
 const NotFoundPage = lazy(() =>
   import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })),
 );
@@ -41,6 +64,20 @@ const ProblemBoardPage = lazy(() =>
     default: m.ProblemBoardPage,
   })),
 );
+function prefetchPages() {
+  for (const load of PAGE_PRELOADS) void load().catch(() => {});
+}
+
+export function schedulePrefetch(): void {
+  if (typeof window === 'undefined') return;
+  const idle = window.requestIdleCallback;
+  if (idle) {
+    idle(prefetchPages);
+    return;
+  }
+  setTimeout(prefetchPages, 350);
+}
+
 const RepoAnalyzerPage = lazy(() =>
   import('@/pages/RepoAnalyzerPage').then((m) => ({
     default: m.RepoAnalyzerPage,
@@ -73,6 +110,10 @@ const queryClient = new QueryClient({
     queries: {
       retry: false,
       refetchOnWindowFocus: false,
+      // Keep fresh results around a little: navigating back to a page that
+      // already fetched data renders instantly from cache with a background
+      // refresh, instead of re-flashing the loading skeleton.
+      staleTime: 30_000,
     },
   },
 });
@@ -88,6 +129,10 @@ function RouteFallback() {
 }
 
 export function App() {
+  useEffect(() => {
+    schedulePrefetch();
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <MotionConfig reducedMotion="user">
