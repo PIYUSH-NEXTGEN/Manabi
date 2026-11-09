@@ -22,7 +22,7 @@ services:
       - key: DATABASE_URL
         value: sqlite:///./app.db
       - key: LLM_PROVIDER
-        value: mock # flip to gemini once GEMINI_API_KEY is set
+        value: gemini # set GEMINI_API_KEY in the Render dashboard; without it submissions fail safe to the keyword check
       - key: GITHUB_CLIENT_ID
         sync: false
       - key: GITHUB_CLIENT_SECRET

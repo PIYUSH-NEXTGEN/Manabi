@@ -1,4 +1,5 @@
 import logging
+import time
 
 import httpx
 
@@ -101,11 +102,22 @@ def _call_gemini(system: str, user: str, model: str | None, max_tokens: int | No
     prompt = f"{system}\n\n{user}" if user else system
     try:
         client = _gemini(settings.GEMINI_API_KEY)
-        response = client.models.generate_content(model=model_name, contents=[prompt], config=config)
-        return response.text or ""
-    except Exception as exc:  # SDK (quota/safety/model) and transport errors must not leak as 500s
-        logger.exception("Gemini call failed (model=%s)", model_name)
+    except Exception as exc:
+        logger.exception("Gemini client init failed")
         raise LLMResponseError(f"Gemini request failed: {exc}") from exc
+    # Free-tier capacity blips (503 overloaded, 504 deadline) recover within
+    # seconds; retry briefly so occasional outages do not silently degrade
+    # every submission to the keyword fallback.
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(model=model_name, contents=[prompt], config=config)
+            return response.text or ""
+        except Exception as exc:
+            transient = getattr(exc, "code", None) in (503, 504)
+            if not transient or attempt == 2:
+                logger.exception("Gemini call failed (model=%s, attempt=%s)", model_name, attempt + 1)
+                raise LLMResponseError(f"Gemini request failed: {exc}") from exc
+            time.sleep(2 * (attempt + 1))
 
 
 def _call_anthropic(system: str, user: str, model: str | None, max_tokens: int | None = None) -> str:
