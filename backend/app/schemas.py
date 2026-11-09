@@ -13,6 +13,7 @@ DomainEnum = Literal[
     "healthcare", "education", "agriculture", "fintech", "climate", "governance",
     "transport", "disaster-management", "industry", "social-impact", "developer-tools", "cybersecurity", "computer-vision", "iot-embedded", "distributed-systems", "ml", "devops-cloud", "nlp-llm", "cloud", "blockchain", "web3", "databases", "systems", "other",
 ]
+GoalEnum = Literal["resume", "hackathon", "learning"]
 
 
 MAX_TITLE = 300
@@ -275,9 +276,6 @@ class StatsOut(BaseModel):
 class ProblemsListOut(BaseModel):
     items: list[ProblemOut]
     total: int
-
-
-GoalEnum = Literal["resume", "hackathon", "learning"]
 
 
 class AdminGoalSetIn(BaseModel):

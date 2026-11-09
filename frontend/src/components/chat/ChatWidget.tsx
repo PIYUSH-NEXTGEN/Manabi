@@ -143,7 +143,7 @@ export function ChatWidget() {
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close the chat"
-            className="border-[2px] border-paper px-2 font-mono text-xs font-bold uppercase tracking-widest text-paper hover:bg-black/20"
+            className="border-2 border-paper px-2 font-mono text-xs font-bold uppercase tracking-widest text-paper hover:bg-black/20"
           >
             ×
           </button>

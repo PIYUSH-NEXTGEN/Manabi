@@ -80,7 +80,7 @@ function SpecRow({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-t border-line py-2.5 first:border-t-0">
       <dt className={microLabel}>{label}</dt>
-      <dd className="text-right font-mono text-[10px] font-bold uppercase tracking-[0.1em]">
+      <dd className="text-right font-mono text-[10px] font-bold uppercase tracking-widest">
         {children}
       </dd>
     </div>
