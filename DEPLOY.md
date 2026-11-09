@@ -129,9 +129,10 @@ On Render/Railway a `Procfile` is included (`web: uvicorn app.main:app --host 0.
 
 ## Rate limits (env-tunable)
 
-`CHAT_RATE_LIMIT_ANON_PER_HOUR=10`, `CHAT_RATE_LIMIT_USER_PER_HOUR=30`, and
+`CHAT_RATE_LIMIT_ANON_PER_HOUR=10`, `CHAT_RATE_LIMIT_USER_PER_HOUR=30`,
 `PROBLEM_CREATE_PER_HOUR=5` (problem creation per user per hour; admins are
-exempt). The UI shows the backend's raw limit messages honestly when they trip.
+exempt) and `REPORT_RATE_LIMIT_PER_HOUR=30`. The UI shows the backend's raw
+limit messages honestly when they trip.
 
 ## 6. The submission-verification system (0005) — production checklist
 
