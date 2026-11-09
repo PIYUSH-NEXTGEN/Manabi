@@ -1,10 +1,7 @@
 """Seed 30 AI/ML project ideas (10 beginner, 10 intermediate, 10 advanced)."""
 
-from sqlalchemy import select
-from sqlalchemy.orm import Session
+from app.seed.runner import seed_problems
 
-from app.db import get_session_factory
-from app.models import Problem, STATUS_PUBLISHED
 
 PROBLEMS = [
     # ── Beginner ──
@@ -704,46 +701,5 @@ PROBLEMS = [
 ]
 
 
-def seed() -> None:
-    session = get_session_factory()()
-    inserted = 0
-    skipped = 0
-    try:
-        for p in PROBLEMS:
-            existing = session.scalar(
-                select(Problem).where(Problem.source_id == p["source_id"])
-            )
-            if existing is not None:
-                skipped += 1
-                continue
-            problem = Problem(
-                title=p["title"],
-                summary=p["summary"],
-                who_affected=p["who_affected"],
-                why_matters=p["why_matters"],
-                field=p["field"],
-                domain=p["domain"],
-                difficulty=p["difficulty"],
-                est_hours=p["est_hours"],
-                tech_tags=p["tech_tags"],
-                datasets=p["datasets"],
-                approaches=p["approaches"],
-                source_name=p["source_name"],
-                source_id=p["source_id"],
-                source_url=None,
-                source_note=p.get("source_note"),
-                original_text=p["original_text"],
-                ai_fields=p["ai_fields"],
-                created_by=None,
-                status=STATUS_PUBLISHED,
-            )
-            session.add(problem)
-            inserted += 1
-        session.commit()
-        print(f"Inserted: {inserted}, Skipped (already present): {skipped}")
-    finally:
-        session.close()
-
-
 if __name__ == "__main__":
-    seed()
+    seed_problems(PROBLEMS)

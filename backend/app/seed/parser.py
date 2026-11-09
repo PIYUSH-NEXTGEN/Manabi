@@ -7,7 +7,6 @@ ENTRY_RE = re.compile(
     r"\s*(?P<src>SIH\d{5}|TCOE PS\d{2}|KAG\d{2})(?:,\s*(?P<org>[^.]+?))?\.\s*(?P<body>.+)$"
 )
 DATASETS_RE = re.compile(r"datasets?\s*\(([^)]+)\)", re.IGNORECASE)
-SENTENCE_SPLIT_RE = re.compile(r"(?<=\.)\s+")
 
 SOURCE_NAME_BY_PREFIX = {"SIH": "Smart India Hackathon 2026", "TCOE PS": "TCOE", "KAG": "Kaggle"}
 DEFAULT_EST_HOURS = 40
@@ -183,8 +182,6 @@ def _build_entry(match: re.Match, original: str) -> ParsedEntry:
         datasets = [{"name": n, "url": None} for n in names if n]
     if not datasets:
         ai_fields.append("datasets")
-
-    first_sentence = SENTENCE_SPLIT_RE.split(body, maxsplit=1)[0].strip()
 
     return ParsedEntry(
         title=title,

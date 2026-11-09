@@ -27,27 +27,15 @@ from app.db import get_session_factory  # noqa: E402
 from app.models import Problem, Project, User, utcnow  # noqa: E402
 from app.services import github  # noqa: E402
 from app.services.verification import (  # noqa: E402
-    OWNERSHIP_OWNER,
-    OWNERSHIP_PUSH_ACCESS,
-    RepoFacts,
     VERIFICATION_NEEDS_REVIEW,
+    RepoFacts,
     evaluate_relevance,
+    ownership_from_repo,
+    repo_was_renamed_or_transferred,
 )
 
 
 REPORT_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "reverify_report.csv")
-
-
-def _ownership_from_facts(facts: RepoFacts, user: User | None) -> str | None:
-    if user is None:
-        return None
-    if facts.owner_type != "Organization":
-        if facts.owner_id is not None and facts.owner_id == user.github_id:
-            return OWNERSHIP_OWNER
-        return None
-    if facts.permissions.get("admin") or facts.permissions.get("push"):
-        return OWNERSHIP_PUSH_ACCESS
-    return None
 
 
 async def main(apply: bool, limit: int | None) -> None:
@@ -92,17 +80,12 @@ async def main(apply: bool, limit: int | None) -> None:
                     facts = RepoFacts.from_repo(repo)
                     readme = await github.fetch_readme_text(facts.owner_login, facts.name, token)
                     try:
-                        commits = await github._fetch_commits(facts.owner_login, facts.name, token)
+                        commits = await github.fetch_commits(facts.owner_login, facts.name, token)
                         commit_count = len(commits) if isinstance(commits, list) else 1
                     except Exception:  # noqa: BLE001
                         commit_count = 1
 
-                    renamed = (
-                        project.repo_github_id is not None and facts.github_id != project.repo_github_id
-                    ) or (
-                        project.repo_github_id is None
-                        and facts.owner_login.lower() != project.repo_owner.lower()
-                    )
+                    renamed = repo_was_renamed_or_transferred(facts, project)
                     evaluation = evaluate_relevance(
                         problem, project.solution_summary or "", facts, readme, commit_count
                     )
@@ -117,7 +100,7 @@ async def main(apply: bool, limit: int | None) -> None:
                         project.relevance_reason = reason[:300] or None
                         project.relevance_checked_at = utcnow()
                         project.verification_status = new_status
-                        owner_basis = _ownership_from_facts(facts, user)
+                        owner_basis = ownership_from_repo(facts, user) if user else None
                         if owner_basis:
                             project.ownership_basis = owner_basis
                         db.commit()

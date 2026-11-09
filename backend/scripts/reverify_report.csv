@@ -1,3 +1,0 @@
-project_id,user_id,token,old_status,new_status,reason,action
-1,2,stored,needs_review,needs_review,Linked to the problem by keywords — automatic check could not fully confirm.,dry-run
-2,2,stored,needs_review,needs_review,Linked to the problem by keywords — automatic check could not fully confirm.,dry-run

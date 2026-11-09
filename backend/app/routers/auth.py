@@ -2,15 +2,14 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from starlette.middleware.sessions import SessionMiddleware
-from typing import Annotated
 
 from authlib.integrations.base_client.errors import MismatchingStateError
 from authlib.integrations.starlette_client import OAuth
-from fastapi import Depends
 
 from app.config import get_settings
-from app.deps import DB, get_current_user
+from app.deps import CurrentUser, DB
 from app.models import User
+from app.services.visibility import is_admin
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -44,9 +43,6 @@ def get_github_client():
             client_kwargs={"scope": "read:user"},
         )
         return oauth.github
-
-
-CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
 @router.get("/github/login")
@@ -101,15 +97,12 @@ async def github_callback(request: Request, db: DB):
 
 @router.get("/me")
 def me(user: CurrentUser):
-    raw = get_settings().ADMIN_GITHUB_USERNAMES
-    admin_usernames = {name.strip().lower() for name in raw.split(",") if name.strip()}
-
     return {
         "id": user.id,
         "username": user.username,
         "name": user.name,
         "avatar_url": user.avatar_url,
-        "is_admin": user.username.lower() in admin_usernames,
+        "is_admin": is_admin(user),
     }
 
 

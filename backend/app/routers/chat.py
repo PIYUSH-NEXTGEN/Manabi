@@ -4,7 +4,7 @@ import re
 from fastapi import APIRouter, HTTPException, Request
 
 from app import schemas
-from app.deps import DB, CurrentUser, OptionalUser
+from app.deps import DB, OptionalUser
 from app.models import STATUS_PUBLISHED, Problem
 from app.services.catalog_search import search_catalog
 from app.services.llm import LLMConfigError, LLMResponseError

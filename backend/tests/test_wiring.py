@@ -174,6 +174,20 @@ def test_problem_create_accepts_boundary_sizes(client, db_session, user):
     assert res.status_code == 201, res.json()
 
 
+def test_problem_create_stores_datasets(client, db_session, user):
+    """datasets is a free-form list[dict]; posted entries must be stored and
+    echoed back verbatim (regression: create used to call .model_dump() on
+    plain dicts and crash with a 500)."""
+    card = draft_card_factory(source_id="DATASET-1")
+    card["datasets"] = [
+        {"name": "Landslide inventory", "url": None},
+        {"name": "Sentinel-2 tiles", "url": "https://example.com/tiles"},
+    ]
+    res = client.post("/api/problems", json=card)
+    assert res.status_code == 201, res.json()
+    assert res.json()["datasets"] == card["datasets"]
+
+
 def test_problem_create_rate_limited_for_regular_users(client, db_session, user, monkeypatch):
     from app.routers.problems import PROBLEM_CREATE_LIMITER
 

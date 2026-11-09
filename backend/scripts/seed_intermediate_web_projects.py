@@ -19,7 +19,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from sqlalchemy import select
 
 from app.db import session_scope
-from app.models import ORIGIN_MANUAL, Problem, STATUS_PUBLISHED
+from app.models import Problem
 
 SOURCE_NAME = "MANABI Curated"
 

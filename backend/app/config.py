@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # imports only for ingest; the catalog is admin-curated, so user limits
     # track the moderation posture (admins exempt below).
     PROBLEM_CREATE_PER_HOUR: int = 5
+    # Reports against published projects, per user per hour. Independent of the
+    # chat limit so tuning one cannot silently retune the other.
+    REPORT_RATE_LIMIT_PER_HOUR: int = 30
 
     # --- Admin ---
     ADMIN_GITHUB_USERNAMES: str = ""

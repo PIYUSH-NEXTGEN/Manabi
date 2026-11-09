@@ -4,7 +4,7 @@ from sqlalchemy import select
 from app import schemas
 from app.deps import DB, CurrentUser, public_user
 from app.models import Problem, Project, STATUS_PUBLISHED, User
-from app.routers.problems import project_to_out
+from app.services.presenters import project_to_out
 from app.services import github
 from app.services.visibility import filter_visible
 

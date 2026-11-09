@@ -73,8 +73,6 @@ def import_entries(session: Session, text: str, create_tables: bool = False) -> 
 
 def _id_coverage(text: str, entries) -> tuple[dict[str, int], list[str]]:
     """Count source IDs in raw text vs parsed entries; anything missed is reported, never silently dropped."""
-    import re as _re
-
     from app.seed.parser import SOURCE_ID_RE
 
     found: dict[str, int] = {}

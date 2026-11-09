@@ -177,7 +177,7 @@ def _status_for(commit_count: int, last_commit_at: datetime | None) -> str:
     return "stale"
 
 
-async def _fetch_commits(owner: str, name: str, token: str | None) -> list[dict]:
+async def fetch_commits(owner: str, name: str, token: str | None) -> list[dict]:
     return await _fetch_json(f"/repos/{owner}/{name}/commits", token, params={"per_page": 100})
 
 
@@ -194,7 +194,7 @@ async def get_progress(owner: str, name: str, token: str | None = None) -> dict 
     """Returns a Progress-dict. None if core data (commits) cannot be fetched."""
     try:
         commits, has_readme, issues = await asyncio.gather(
-            _fetch_commits(owner, name, token),
+            fetch_commits(owner, name, token),
             _fetch_readme(owner, name, token),
             _fetch_issues(owner, name, token),
             return_exceptions=True,

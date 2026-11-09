@@ -94,12 +94,6 @@ class HeatmapOut(BaseModel):
     window_days: int
 
 
-class NotReadyToComplete(BaseModel):
-    code: str = "not_ready_to_complete"
-    message: str
-    checklist: list[CompletionChecklistItem]
-
-
 class ReportIn(BaseModel):
     reason: str = Field(min_length=1, max_length=300)
 
@@ -175,43 +169,9 @@ class ProblemDetail(ProblemOut):
     display_policy: Literal["summary_only", "summary_plus_excerpt"] = "summary_plus_excerpt"
 
 
-class AdminProblemOut(ProblemOut):
-    status: str
-    origin: str
-    created_at: datetime
-
-
-class AdminReviewOut(BaseModel):
-    items: list[AdminProblemOut]
-    total: int
-
-
-class ProblemPatch(BaseModel):
-    title: str | None = Field(default=None, min_length=1, max_length=MAX_TITLE)
-    summary: str | None = Field(default=None, min_length=1, max_length=MAX_SUMMARY)
-    who_affected: str | None = Field(default=None, min_length=1, max_length=MAX_SHORT)
-    why_matters: str | None = Field(default=None, min_length=1, max_length=MAX_SHORT)
-    field: FieldEnum | None = None
-    domain: DomainEnum | None = None
-    difficulty: Difficulty | None = None
-    est_hours: int | None = Field(default=None, ge=1, le=1000)
-    tech_tags: list[_problem_tag_item] | None = Field(default=None, max_length=25)
-    approaches: list[Annotated[str, Field(min_length=1, max_length=800)]] | None = Field(default=None, max_length=8)
-
-
-class AdminActionOut(BaseModel):
-    ok: bool
-    problem_id: int
-    status: str
-
-
-class DatasetIn(BaseModel):
-    name: str
-    url: str | None = None
-
-
 class ProblemIn(ProblemCard):
-    """POST /api/problems body: ProblemCard per contract, plus optional ai_fields (see docs/REQUESTS.md)."""
+    """POST /api/problems body: the ProblemCard contract above, plus optional
+    ai_fields (a curated ingest may mark which fields the AI authored)."""
 
     ai_fields: list[str] = []
 

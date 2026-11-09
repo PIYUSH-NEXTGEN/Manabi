@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
+from fastapi import APIRouter, HTTPException, Query
 
-from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload
 
@@ -14,12 +14,12 @@ from app.models import (
     ProjectReport,
     User,
     VERIFICATION_NEEDS_REVIEW,
-    VERIFICATION_REJECTED,
     VERIFICATION_VERIFIED,
+    as_utc,
     utcnow,
 )
-from app.routers.problems import project_to_out
 from app.services import github, verification, visibility
+from app.services.presenters import project_out_safely
 from app.services.ratelimit import RateLimiter
 from app.services.verification import SubmissionError
 
@@ -27,11 +27,7 @@ router = APIRouter(tags=["projects"])
 
 CACHE_TTL = timedelta(minutes=10)
 
-REPORT_LIMITER = RateLimiter("CHAT_RATE_LIMIT_USER_PER_HOUR")  # per-user, hourly
-
-
-def _aware(dt: datetime) -> datetime:
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+REPORT_LIMITER = RateLimiter("REPORT_RATE_LIMIT_PER_HOUR")  # per-user, hourly
 
 
 def _error(err: SubmissionError) -> HTTPException:
@@ -45,13 +41,6 @@ def _project_or_404(db, project_id: int) -> Project:
     if project is None:
         raise HTTPException(status_code=404, detail="Project not found")
     return project
-
-
-def project_out_safely(project: Project, include_private: bool = False) -> schemas.ProjectOut:
-    out = project_to_out(project, include_private=include_private)
-    if out.progress is not None:
-        out.progress = schemas.Progress.model_validate(out.progress)
-    return out
 
 
 # ---------------------------------------------------------------------------
@@ -110,7 +99,7 @@ async def get_project_progress(
     cache_fresh = (
         cached is not None
         and project.progress_updated_at is not None
-        and now - _aware(project.progress_updated_at) <= CACHE_TTL
+        and now - as_utc(project.progress_updated_at) <= CACHE_TTL
     )
     if not refresh and cache_fresh:
         return schemas.Progress.model_validate(cached)
@@ -126,9 +115,10 @@ async def get_project_progress(
     project.progress_updated_at = datetime.now(timezone.utc)
 
     # §6.7: re-verification opportunities on the refresh path. Only happens
-    # for logged-in viewers, is judged against the submitter (not the viewer)
-    # and never breaks the progress call itself.
-    if (refresh or not cache_fresh) and user is not None:
+    # for logged-in viewers (this branch only runs when refresh was asked for
+    # or the cache was stale), is judged against the submitter (not the
+    # viewer) and never breaks the progress call itself.
+    if user is not None:
         try:
             await verification.refresh_project_state(db, project, user)
             if project.verification_status == VERIFICATION_NEEDS_REVIEW:
@@ -307,8 +297,6 @@ def report_project(project_id: int, body: schemas.ReportIn, user: CurrentUser, d
     db.commit()
     count = db.scalar(select(func.count(ProjectReport.id)).where(ProjectReport.project_id == project.id)) or 0
     settings = get_settings()
-    if count >= settings.REPORTS_BEFORE_REVIEW and project.verification_status != VERIFICATION_REJECTED:
-        project.verification_status = VERIFICATION_NEEDS_REVIEW
-        project.relevance_reason = "Reported by users"
-        db.commit()
+    if count >= settings.REPORTS_BEFORE_REVIEW:
+        verification.needs_review_state(db, project, "Reported by users")
     return {"ok": True, "report_count": int(count)}

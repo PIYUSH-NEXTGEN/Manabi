@@ -10,7 +10,6 @@ from app import schemas
 from app.deps import AdminUser, DB
 from app.models import Problem, Project, ProjectReport, VERIFICATION_NEEDS_REVIEW, VERIFICATION_REJECTED, VERIFICATION_VERIFIED
 from app.services import verification
-from app.services.verification import SubmissionError
 
 router = APIRouter(prefix="/api/admin/submissions", tags=["admin"])
 

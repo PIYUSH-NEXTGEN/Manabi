@@ -10,6 +10,11 @@ def utcnow() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def as_utc(dt: datetime) -> datetime:
+    """SQLite stores naive UTC datetimes; treat any naive value as UTC."""
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+
 # Review-lifecycle values for Problem.status (§6.2). Public read paths only
 # ever surface PUBLISHED rows; everything else lives in the review queue.
 STATUS_PUBLISHED = "published"

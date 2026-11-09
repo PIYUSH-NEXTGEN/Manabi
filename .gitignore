@@ -65,6 +65,10 @@ backend/Procfile
 *.sqlite-wal
 backend/app.db*
 backend/*.db*
+backend/scripts/reverify_report.csv
+
+# Tool-local state
+/.freebuff/
 
 # ── Python ──
 backend/.venv/

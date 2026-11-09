@@ -20,7 +20,6 @@ from pydantic import BaseModel as _pyd_BaseModel, Field as _pyd_Field  # noqa: N
 
 from sqlalchemy import func, select
 
-from app import schemas
 from app.config import get_settings
 from app.models import (
     OWNERSHIP_CONTRIBUTOR,
@@ -32,6 +31,7 @@ from app.models import (
     VERIFICATION_NEEDS_REVIEW,
     VERIFICATION_REJECTED,
     VERIFICATION_VERIFIED,
+    as_utc,
     utcnow,
 )
 from app.services import github
@@ -206,7 +206,7 @@ async def _repo_facts(owner: str, name: str, token: str | None) -> RepoFacts:
 # ---------------------------------------------------------------------------
 
 
-def _ownership_from_repo(facts: RepoFacts, user: User) -> str | None:
+def ownership_from_repo(facts: "RepoFacts", user: User) -> str | None:
     """Repo-level ownership. A personal repo belongs to exactly one account, so
     mere collaborator permission on someone else's repo is not ownership; only
     an exact numeric-id match counts. Organization repos have no user owner, so
@@ -219,6 +219,17 @@ def _ownership_from_repo(facts: RepoFacts, user: User) -> str | None:
     if perms.get("admin") or perms.get("push"):
         return OWNERSHIP_PUSH_ACCESS
     return None
+
+
+def repo_was_renamed_or_transferred(facts: "RepoFacts", project: Project) -> bool:
+    """A moved repository (new GitHub id, or same id moved to a new owner when
+    the id was never recorded) needs human review of the new location."""
+    return (
+        project.repo_github_id is not None and facts.github_id != project.repo_github_id
+    ) or (
+        project.repo_github_id is None
+        and facts.owner_login.lower() != project.repo_owner.lower()
+    )
 
 
 async def _ownership_via_contributors(facts: RepoFacts, user: User, token: str | None) -> str | None:
@@ -246,7 +257,7 @@ async def check_ownership(facts: RepoFacts, user: User, token: str | None) -> st
     Order: the repo's own owner/admin signal, then genuine contribution
     (CONTRIBUTOR_MIN_COMMITS commits under the caller's GitHub account id).
     """
-    basis = _ownership_from_repo(facts, user)
+    basis = ownership_from_repo(facts, user)
     if basis:
         return basis
     return await _ownership_via_contributors(facts, user, token)
@@ -324,13 +335,6 @@ def assert_duplicates(db, problem: Problem, facts: RepoFacts, user: User) -> Non
         raise SubmissionError(
             409, "repo_already_used", "This repository is already linked to another problem."
         )
-
-
-def repo_linked_to_problem(db, problem_id: int, github_id: int) -> Project | None:
-    """Whether any user linked github_id to problem_id (team submissions)."""
-    return db.scalar(
-        select(Project).where(Project.repo_github_id == github_id, Project.problem_id == problem_id)
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -575,7 +579,7 @@ async def create_submission(
 
 async def _commit_count(facts: RepoFacts, token: str | None) -> int:
     try:
-        commits = await github._fetch_commits(facts.owner_login, facts.name, token)
+        commits = await github.fetch_commits(facts.owner_login, facts.name, token)
     except Exception:  # noqa: BLE001 - best effort; empty-repo gate only needs certainty
         return 1  # assume activity so a transient GitHub failure cannot mark 'Waiting for README/commits'
     return len(commits) if isinstance(commits, list) else 1
@@ -591,8 +595,7 @@ def _interval_elapsed(project: Project) -> bool:
     checked = project.relevance_checked_at
     if checked is None:
         return True
-    checked_aware = checked if checked.tzinfo else checked.replace(tzinfo=timezone.utc)
-    return utcnow() - checked_aware >= timedelta(hours=settings.AUTO_REVERIFY_MIN_INTERVAL_HOURS)
+    return utcnow() - as_utc(checked) >= timedelta(hours=settings.AUTO_REVERIFY_MIN_INTERVAL_HOURS)
 
 
 async def refresh_project_state(db, project: Project, user: User | None) -> None:
@@ -620,15 +623,7 @@ async def refresh_project_state(db, project: Project, user: User | None) -> None
 
     facts = RepoFacts.from_repo(repo)
 
-    renamed = (
-        project.repo_github_id is not None
-        and facts.github_id != project.repo_github_id
-    )
-    transferred = (
-        project.repo_github_id is None
-        and facts.owner_login.lower() != project.repo_owner.lower()
-    )
-    if renamed or transferred:
+    if repo_was_renamed_or_transferred(facts, project):
         project.repo_owner = facts.owner_login
         project.repo_name = facts.name
         project.repo_url = facts.url
@@ -659,7 +654,7 @@ async def auto_reverify(db, project: Project, problem: Problem, user: User) -> b
     token = user.github_token if user else None
     readme = await github.fetch_readme_text(project.repo_owner, project.repo_name, token)
     try:
-        commits = await github._fetch_commits(project.repo_owner, project.repo_name, token)
+        commits = await github.fetch_commits(project.repo_owner, project.repo_name, token)
         commit_count = len(commits) if isinstance(commits, list) else 0
     except Exception:  # noqa: BLE001 - GitHub trouble: skip this round, try again later
         return False

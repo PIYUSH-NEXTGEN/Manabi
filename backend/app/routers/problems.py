@@ -11,6 +11,7 @@ from sqlalchemy.orm import aliased, joinedload
 from app import schemas
 from app.deps import DB, CurrentUser, OptionalUser
 from app.models import Problem, Project, STATUS_PUBLISHED, VERIFICATION_VERIFIED
+from app.services.presenters import problem_to_out, project_to_out
 from app.services.ratelimit import RateLimiter
 from app.services.visibility import can_view_project, is_admin
 
@@ -20,67 +21,6 @@ SortParam = Literal["newest", "popular"]
 DistinctParam = Literal["field", "domain"]
 
 PROBLEM_CREATE_LIMITER = RateLimiter("PROBLEM_CREATE_PER_HOUR")
-
-
-def problem_to_out(problem: Problem, project_count: int, completed_count: int = 0) -> schemas.ProblemOut:
-    return schemas.ProblemOut(
-        id=problem.id,
-        title=problem.title,
-        summary=problem.summary,
-        who_affected=problem.who_affected,
-        why_matters=problem.why_matters,
-        field=problem.field,
-        domain=problem.domain,
-        difficulty=problem.difficulty,
-        est_hours=problem.est_hours,
-        tech_tags=problem.tech_tags,
-        datasets=problem.datasets,
-        approaches=problem.approaches,
-        source_name=problem.source_name,
-        source_id=problem.source_id,
-        source_url=problem.source_url,
-        source_note=problem.source_note,
-        ai_fields=problem.ai_fields,
-        project_count=project_count,
-        completed_count=completed_count,
-        origin=problem.origin,
-        source_year=problem.source_year,
-        edition=problem.edition,
-        organisation=problem.organisation,
-        deadline=problem.deadline,
-        goal=problem.goal,
-    )
-
-
-def project_to_out(project: Project, include_private: bool = False) -> schemas.ProjectOut:
-    """Public shape for a project row.
-
-    include_private adds the owner/admin-only fields (relevance reason,
-    ownership basis, review note). relevance_score is never part of this
-    schema — it is not exposed publicly beyond the admin queue.
-    """
-    out = schemas.ProjectOut(
-        id=project.id,
-        problem_id=project.problem_id,
-        problem_title=project.problem.title,
-        repo_url=project.repo_url,
-        repo_owner=project.repo_owner,
-        repo_name=project.repo_name,
-        open_for_contributors=project.open_for_contributors,
-        owner={"username": project.user.username, "avatar_url": project.user.avatar_url},
-        progress=project.progress_json,
-        progress_updated_at=project.progress_updated_at,
-        verification_status=project.verification_status,
-        solution_summary=project.solution_summary or None,
-        completed_at=project.completed_at,
-        demo_url=project.demo_url,
-        reflection=project.reflection,
-    )
-    if include_private:
-        out.relevance_reason = project.relevance_reason
-        out.ownership_basis = project.ownership_basis
-        out.review_note = project.review_note
-    return out
 
 
 def verified_problem_counts(db) -> dict[int, tuple[int, int]]:
@@ -338,7 +278,9 @@ def create_problem(body: schemas.ProblemIn, user: CurrentUser, db: DB):
         difficulty=body.difficulty,
         est_hours=max(1, body.est_hours),
         tech_tags=[t.strip().lower() for t in body.tech_tags],
-        datasets=[d.model_dump() for d in body.datasets],
+        # datasets arrive as validated JSON dicts (list[dict]) and are stored
+        # verbatim; they also flow back out unchanged in ProblemOut.
+        datasets=list(body.datasets),
         approaches=body.approaches,
         source_name=body.source_name,
         source_id=body.source_id,
