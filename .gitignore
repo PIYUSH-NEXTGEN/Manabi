@@ -109,6 +109,9 @@ junit*.xml
 *.lcov
 .vitest-cache/
 
+# ── Mascot image (local only, provided by the user) ──
+frontend/public/cat*.png
+
 # ── OS / editors ──
 .DS_Store
 Thumbs.db

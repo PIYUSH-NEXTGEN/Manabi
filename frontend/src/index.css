@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "./design/tokens.css";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
@@ -11,6 +13,7 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
   --color-muted: var(--muted);
   --color-line: var(--line);
   --font-display: var(--ff-display);
@@ -140,6 +143,49 @@ body {
   }
 }
 
+/* Submission-progress card: the ink cat batting a ball, animated by anime.js.
+   Transform origins pin the roll to the ball and the lean to the cat's base. */
+.cat-figure {
+  will-change: transform;
+  filter: drop-shadow(0 3px 0 var(--tint));
+}
+
+.cat-cat {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  will-change: transform;
+}
+
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.submit-card-enter {
+  animation: card-enter 240ms var(--ease-snap) both;
+}
+
+@keyframes stage-pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+
+  to {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent);
+  }
+}
+
+.stage-dot {
+  animation: stage-pulse 1.4s var(--ease-snap) infinite alternate;
+}
+
 .marquee-track {
   display: flex;
   width: max-content;
@@ -157,5 +203,15 @@ body {
 
   .marquee-track {
     animation: none;
+  }
+
+  .stage-dot,
+  .submit-card-enter {
+    animation: none;
+  }
+
+  .cat-figure,
+  .cat-cat {
+    transform: none;
   }
 }
