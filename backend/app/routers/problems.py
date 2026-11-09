@@ -23,41 +23,15 @@ DistinctParam = Literal["field", "domain"]
 PROBLEM_CREATE_LIMITER = RateLimiter("PROBLEM_CREATE_PER_HOUR")
 
 
-def verified_problem_counts(db) -> dict[int, tuple[int, int]]:
-    """Verified-only (building, completed) counts per problem id."""
-    completed = func.sum(
+def _completed_count():
+    """Verified-completed share of a problem's verified submissions."""
+    return func.sum(
         case((Project.completed_at.is_not(None), 1), else_=0)
     ).label("completed")
-    rows = db.execute(
-        select(Project.problem_id, func.count(Project.id), completed)
-        .where(Project.verification_status == VERIFICATION_VERIFIED)
-        .group_by(Project.problem_id)
-    ).all()
-    return {pid: (int(building), int(completed)) for pid, building, completed in rows}
 
 
-def _counts_by_column(db, column) -> list[tuple[str, int]]:
-    query = select(column, func.count(Problem.id)).where(Problem.status == STATUS_PUBLISHED).group_by(column)
-    rows = db.execute(query).all()
-    return [(str(value), int(count)) for value, count in rows if value is not None]
-
-
-@router.get("", response_model=schemas.ProblemsListOut)
-def list_problems(
-    db: DB,
-    q: str | None = None,
-    field: schemas.FieldEnum | None = None,
-    domain: schemas.DomainEnum | None = None,
-    difficulty: schemas.Difficulty | None = None,
-    tech: list[str] = Query(default=[]),
-    source: str | None = None,
-    sort: SortParam = "newest",
-    distinct: DistinctParam | None = None,
-    limit: int = Query(default=20, ge=1, le=100),
-    offset: int = Query(default=0, ge=0),
-):
-    query = select(Problem).where(Problem.status == STATUS_PUBLISHED)
-
+def apply_problem_filters(query, q, field, domain, difficulty, tech, source):
+    """Shared WHERE filters for the board list and any aggregate over it."""
     if q:
         needle = f"%{q.lower()}%"
         tech_text = func.lower(func.cast(Problem.tech_tags, Text))
@@ -82,15 +56,48 @@ def list_problems(
             func.lower(Problem.source_name).like(source_needle)
             | func.lower(Problem.source_id).like(source_needle)
         )
+    return query
 
-    project_counts = (
-        select(Project.problem_id, func.count(Project.id).label("n"))
+
+def _counts_by_column(db, column) -> list[tuple[str, int]]:
+    query = select(column, func.count(Problem.id)).where(Problem.status == STATUS_PUBLISHED).group_by(column)
+    rows = db.execute(query).all()
+    return [(str(value), int(count)) for value, count in rows if value is not None]
+
+
+@router.get("", response_model=schemas.ProblemsListOut)
+def list_problems(
+    db: DB,
+    q: str | None = None,
+    field: schemas.FieldEnum | None = None,
+    domain: schemas.DomainEnum | None = None,
+    difficulty: schemas.Difficulty | None = None,
+    tech: list[str] = Query(default=[]),
+    source: str | None = None,
+    sort: SortParam = "newest",
+    distinct: DistinctParam | None = None,
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+):
+    query = apply_problem_filters(
+        select(Problem).where(Problem.status == STATUS_PUBLISHED), q, field, domain, difficulty, tech, source
+    )
+
+    # One aggregate over the same popularity subquery serves ordering AND the
+    # card counts on the page; a separate full-table counts query per request
+    # was removed (quantified in docs/PERF_2026-11-09.md, FIN-2).
+    counts_sub = (
+        select(
+            Project.problem_id,
+            func.count(Project.id).label("n"),
+            _completed_count(),
+        )
         .where(Project.verification_status == VERIFICATION_VERIFIED)
         .group_by(Project.problem_id)
         .subquery()
     )
-    query = query.outerjoin(project_counts, Problem.id == project_counts.c.problem_id)
-    popularity = func.coalesce(project_counts.c.n, 0)
+    popularity = func.coalesce(counts_sub.c.n, 0).label("n")
+    query = query.add_columns(popularity, counts_sub.c["completed"]).outerjoin(counts_sub, Problem.id == counts_sub.c.problem_id)
     if sort == "popular":
         ordering = [popularity.desc(), Problem.created_at.desc(), Problem.id.desc()]
     else:
@@ -101,25 +108,44 @@ def list_problems(
         # One brief per field/domain, keeping each group's best-ranked row, so a
         # short list (e.g. the hero showcase) spans topics instead of one field.
         ranked = query.add_columns(
-            popularity.label("popularity"),
             func.row_number()
             .over(partition_by=Problem.field if distinct == "field" else Problem.domain, order_by=ordering)
             .label("rank"),
         ).subquery()
         problem = aliased(Problem, ranked)
-        total = db.scalar(select(func.count(func.distinct(ranked.c[distinct])))) or 0
-        rows = db.scalars(
-            select(problem)
-            .where(ranked.c.rank == 1)
-            .order_by(ranked.c.popularity.desc(), ranked.c.created_at.desc(), ranked.c.id.desc())
+        # Distinct count of group values comes from the plain filtered set:
+        # it does not need the window/join machinery of the ranked subquery,
+        # and the old form re-ran it per request (docs/PERF_2026-11-09.md, FIN-3).
+        base_col = Problem.field if distinct == "field" else Problem.domain
+        distinct_base = select(base_col).where(Problem.status == STATUS_PUBLISHED)
+        distinct_base = apply_problem_filters(distinct_base, q, field, domain, difficulty, tech, source)
+        total = db.scalar(select(func.count()).select_from(distinct_base.distinct().subquery())) or 0
+        rows = db.execute(
+            select(
+                problem,
+                ranked.c["n"],
+                ranked.c["completed"],
+            )
+            .where(ranked.c["rank"] == 1)
+            .order_by(ranked.c["n"].desc(), ranked.c.created_at.desc(), ranked.c.id.desc())
             .limit(limit)
             .offset(offset)
         ).all()
-    else:
-        total = db.scalar(select(func.count()).select_from(query.subquery())) or 0
-        rows = db.scalars(query.limit(limit).offset(offset)).all()
-    counts = verified_problem_counts(db)
-    items = [problem_to_out(p, counts.get(p.id, (0, 0))[0], counts.get(p.id, (0, 0))[1]) for p in rows]
+        items = [
+            problem_to_out(p, int(n or 0), int(c or 0)) for p, n, c in rows
+        ]
+        return schemas.ProblemsListOut(items=items, total=total)
+
+    total = (
+        db.scalar(
+            select(func.count()).select_from(query.order_by(None).subquery())
+        )
+        or 0
+    )  # popularity/completed columns are carried but ignored by count(*)
+    rows = db.execute(query.limit(limit).offset(offset)).all()
+    items = [
+        problem_to_out(p, int(n or 0), int(c or 0)) for p, n, c in rows
+    ]
     return schemas.ProblemsListOut(items=items, total=total)
 
 

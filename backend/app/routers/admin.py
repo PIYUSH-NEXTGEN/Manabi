@@ -33,18 +33,50 @@ def set_problem_goal(problem_id: int, body: schemas.AdminGoalSetIn, user: AdminU
     return schemas.AdminGoalOut(ok=True, problem_id=problem.id, goal=problem.goal)
 
 
-def _submission_to_out(db, project: Project) -> schemas.AdminSubmissionOut:
+def _submission_reports(db, project_ids: list[int]) -> dict[int, tuple[int, str | None]]:
+    """Bulk (report_count, latest_note) for the page's projects.
+
+    Earlier revisions ran two scalar queries per row here (classic N+1 — 102
+    queries for a 50-row page). Two grouped statements replace them; the
+    latest-note tie-break (id desc) is deterministic, which the per-row
+    `created_at desc, limit 1` version was not on ties.
+    """
+    if not project_ids:
+        return {}
+    counts = dict(db.execute(
+        select(ProjectReport.project_id, func.count(ProjectReport.id))
+        .where(ProjectReport.project_id.in_(project_ids))
+        .group_by(ProjectReport.project_id)
+    ).all())
+    ranked = select(
+        ProjectReport.project_id,
+        ProjectReport.reason,
+        func.row_number()
+        .over(
+            partition_by=ProjectReport.project_id,
+            order_by=(ProjectReport.created_at.desc(), ProjectReport.id.desc()),
+        )
+        .label("rn"),
+    ).where(ProjectReport.project_id.in_(project_ids)).subquery()
+    latest: dict[int, str | None] = {}
+    for project_id, reason in db.execute(
+        select(ranked.c.project_id, ranked.c.reason).where(ranked.c.rn == 1)
+    ).all():
+        latest[project_id] = reason
+    return {
+        pid: (int(counts.get(pid, 0)), latest.get(pid))
+        for pid in project_ids
+    }
+
+
+def _submission_to_out(
+    db,
+    project: Project,
+    reports: tuple[int, str | None],
+) -> schemas.AdminSubmissionOut:
     problem = project.problem
     user = project.user
-    report_count = db.scalar(
-        select(func.count(ProjectReport.id)).where(ProjectReport.project_id == project.id)
-    ) or 0
-    latest_note = db.scalar(
-        select(ProjectReport.reason)
-        .where(ProjectReport.project_id == project.id)
-        .order_by(ProjectReport.created_at.desc())
-        .limit(1)
-    )
+    report_count, latest_note = reports
     return schemas.AdminSubmissionOut(
         id=project.id,
         problem_id=project.problem_id,
@@ -84,8 +116,9 @@ def list_submissions(
     ).where(Project.verification_status == status)
     total = db.scalar(select(func.count(Project.id)).where(Project.verification_status == status)) or 0
     rows = db.scalars(query.order_by(Project.created_at.desc()).limit(limit).offset(offset)).all()
+    reports = _submission_reports(db, [p.id for p in rows])
     return schemas.AdminSubmissionsOut(
-        items=[_submission_to_out(db, p) for p in rows], total=int(total)
+        items=[_submission_to_out(db, p, reports[p.id]) for p in rows], total=int(total)
     )
 
 

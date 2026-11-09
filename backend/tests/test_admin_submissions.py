@@ -1,5 +1,7 @@
 """Admin submissions queue: auth, filters, approve/reject, evidence fields."""
 
+from datetime import datetime
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -10,7 +12,7 @@ from app import config
 from app.db import Base, get_db
 from app.deps import get_current_user
 from app.main import app
-from app.models import Project, Problem, User
+from app.models import Project, Problem, ProjectReport, User
 
 
 @pytest.fixture(autouse=True)
@@ -164,3 +166,23 @@ def test_admin_reject_rejects(db_session, client, user, other):
 def test_admin_unknown_submission_404(db_session, client, user):
     res = client.post("/api/admin/submissions/999/approve")
     assert res.status_code == 404
+
+
+def test_admin_queue_aggregates_reports(db_session, client, user, other):
+    """Report counts and the latest note come from two grouped queries now
+    (previously 2 per row); the newest note wins, with an id tie-break."""
+    problem = make_problem(db_session)
+    project = make_project(db_session, other, problem, verification_status="needs_review")
+    other_project = make_project(db_session, other, problem, repo_name="t2", repo_url="https://github.com/octocat/t2")
+    for reporter, created_at, reason in [
+        (other, datetime.fromisoformat("2026-01-01T00:00:00+00:00"), "older complaint"),
+        (user, datetime.fromisoformat("2026-02-02T00:00:00+00:00"), "newer complaint"),
+    ]:
+        db_session.add(ProjectReport(project_id=project.id, reporter_user_id=reporter.id, reason=reason, created_at=created_at))
+    db_session.commit()
+    res = client.get("/api/admin/submissions")
+    items = {item["id"]: item for item in res.json()["items"]}
+    assert items[project.id]["report_count"] == 2
+    assert items[project.id]["relevance_reason"] == "newer complaint"
+    assert items[other_project.id]["report_count"] == 0
+    assert items[other_project.id]["relevance_reason"] is None
