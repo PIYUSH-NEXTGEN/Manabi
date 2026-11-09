@@ -52,18 +52,23 @@ def user(db_session):
     return u
 
 
-def _iso(day_offset: int) -> str:
-    return (datetime.now(timezone.utc) - timedelta(days=day_offset)).isoformat()
+def _iso(day_offset: int, now: datetime) -> str:
+    return (now - timedelta(days=day_offset)).isoformat()
 
 
 @respx.mock
 def test_heatmap_counts_push_events_per_day(client, user):
+    # Freeze one reference moment for BOTH the event timestamps and the
+    # expected bucket date. Deriving them from separate now() calls was a
+    # midnight-UTC boundary race: when the clock flipped between the two
+    # calls the event landed on the next day and the assert failed.
+    now = datetime.now(timezone.utc)
     respx.get("https://api.github.com/users/octocat/events/public").mock(
         return_value=HTTPResponse(200, json=[
-            {"type": "PushEvent", "created_at": _iso(3)},
-            {"type": "PushEvent", "created_at": _iso(3)},
-            {"type": "IssuesEvent", "created_at": _iso(3)},
-            {"type": "PushEvent", "created_at": _iso(200)},  # outside the window
+            {"type": "PushEvent", "created_at": _iso(3, now)},
+            {"type": "PushEvent", "created_at": _iso(3, now)},
+            {"type": "IssuesEvent", "created_at": _iso(3, now)},
+            {"type": "PushEvent", "created_at": _iso(200, now)},  # outside the window
         ])
     )
     res = client.get("/api/me/github-heatmap")
@@ -71,7 +76,7 @@ def test_heatmap_counts_push_events_per_day(client, user):
     body = res.json()
     assert body["window_days"] == 91
     assert body["total"] == 2
-    recent_day = (datetime.now(timezone.utc) - timedelta(days=3)).strftime("%Y-%m-%d")
+    recent_day = (now - timedelta(days=3)).strftime("%Y-%m-%d")
     entry = next(d for d in body["days"] if d["date"] == recent_day)
     assert entry["count"] == 2
 

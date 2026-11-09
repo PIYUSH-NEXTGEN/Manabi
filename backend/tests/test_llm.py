@@ -111,7 +111,7 @@ def test_anthropic_500_maps_to_response_error(monkeypatch):
         mock.post("https://api.anthropic.com/v1/messages").mock(
             return_value=httpx.Response(500, json={"error": {"type": "api_error"}})
         )
-        with pytest.raises((LLMResponseError, LLMConfigError)):
+        with pytest.raises(LLMResponseError):
             chat("s", [{"role": "user", "content": "u"}])
 
 

@@ -281,6 +281,60 @@ def test_submit_project_unknown_problem_404(db_session, client, user, github_rep
     assert res.status_code == 404
 
 
+def test_submit_project_github_down_503_github_unavailable(db_session, client, user, problem):
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get("https://api.github.com/repos/octocat/down").mock(
+            return_value=HTTPResponse(500, json={})
+        )
+        res = client.post(
+            f"/api/problems/{problem.id}/projects",
+            json={"repo_url": "https://github.com/octocat/down", "solution_summary": SUMMARY},
+        )
+        assert res.status_code == 503
+        assert res.json()["detail"]["code"] == "github_unavailable"
+
+
+def test_submit_project_github_rate_limited_503(db_session, client, user, problem):
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get("https://api.github.com/repos/octocat/limited").mock(
+            return_value=HTTPResponse(403, json={"message": "API rate limit exceeded"})
+        )
+        res = client.post(
+            f"/api/problems/{problem.id}/projects",
+            json={"repo_url": "https://github.com/octocat/limited", "solution_summary": SUMMARY},
+        )
+        assert res.status_code == 503
+        assert res.json()["detail"]["code"] == "github_rate_limited"
+
+
+def test_submit_project_fork_rejected_422(db_session, client, user, problem):
+    payload = dict(REPO_PAYLOAD, fork=True)
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get("https://api.github.com/repos/octocat/forky").mock(
+            return_value=HTTPResponse(200, json=payload)
+        )
+        res = client.post(
+            f"/api/problems/{problem.id}/projects",
+            json={"repo_url": "https://github.com/octocat/forky", "solution_summary": SUMMARY},
+        )
+        assert res.status_code == 422
+        assert res.json()["detail"]["code"] == "fork_not_allowed"
+
+
+def test_submit_project_archived_repo_rejected_422(db_session, client, user, problem):
+    payload = dict(REPO_PAYLOAD, archived=True)
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get("https://api.github.com/repos/octocat/frozen").mock(
+            return_value=HTTPResponse(200, json=payload)
+        )
+        res = client.post(
+            f"/api/problems/{problem.id}/projects",
+            json={"repo_url": "https://github.com/octocat/frozen", "solution_summary": SUMMARY},
+        )
+        assert res.status_code == 422
+        assert res.json()["detail"]["code"] == "repo_not_available"
+
+
 # --- progress fetch + cache ---
 
 def cached_progress(commits_ago_days: float):
@@ -301,7 +355,7 @@ def test_progress_serves_fresh_cache_without_github(db_session, client, user, pr
         progress_json=cached_progress(1),
         progress_updated_at=datetime.now(timezone.utc),
     )
-    with respx.mock(assert_all_called=True) as mock:
+    with respx.mock:
         res = client.get(f"/api/projects/{project.id}/progress")
     assert res.status_code == 200
     data = res.json()
@@ -418,7 +472,6 @@ def test_status_derivation():
 
 @pytest.mark.anyio
 async def test_get_progress_builds_shape_and_filters_issues(db_session):
-    now_iso = NOW.strftime("%Y-%m-%dT%H:%M:%SZ")
     commits = [
         commit("s1", NOW, "first commit"),
         commit("s2", NOW - timedelta(minutes=5), "second"),
@@ -450,7 +503,6 @@ async def test_get_progress_builds_shape_and_filters_issues(db_session):
 
 
 def test_progress_recent_commits_max_five():
-    now_iso = NOW.strftime("%Y-%m-%dT%H:%M:%SZ")
     commits = [commit(f"s{i}", NOW, f"m{i}") for i in range(9)]
     return_value = commits
     import asyncio

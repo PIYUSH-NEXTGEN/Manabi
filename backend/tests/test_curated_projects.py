@@ -4,6 +4,7 @@ Verifies that the 10 curated beginner web projects are stored correctly, are
 discoverable through the existing field / difficulty / search / facets filters,
 and expose a working detail page. Also verifies the seed logic is idempotent.
 """
+import pytest
 from fastapi.testclient import TestClient
 from app.db import Base, get_db
 from sqlalchemy import create_engine, func, select
@@ -14,13 +15,16 @@ from app.models import Problem, User
 from scripts.seed_beginner_web_projects import PROJECTS, SOURCE_NAME
 
 
+@pytest.fixture
 def _client():
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine, autoflush=False, autocommit=False)
     session = factory()
     app.dependency_overrides[get_db] = lambda: session
-    return TestClient(app), session
+    yield TestClient(app), session
+    app.dependency_overrides.clear()
+    session.close()
 
 
 def _seed_curated(session):
@@ -34,8 +38,8 @@ def _curated_count(session):
     return session.scalar(select(func.count(Problem.id)).where(Problem.source_name == SOURCE_NAME))
 
 
-def test_all_curated_projects_are_beginner_web():
-    _, session = _client()
+def test_all_curated_projects_are_beginner_web(_client):
+    _, session = _client
     _seed_curated(session)
 
     rows = session.scalars(select(Problem).where(Problem.source_name == SOURCE_NAME)).all()
@@ -49,8 +53,8 @@ def test_all_curated_projects_are_beginner_web():
         assert row.ai_fields == []
 
 
-def test_curated_discoverable_via_filters():
-    client, session = _client()
+def test_curated_discoverable_via_filters(_client):
+    client, session = _client
     _seed_curated(session)
     session.add(Problem(
         title="Old ML problem", summary="s", who_affected="w", why_matters="m",
@@ -74,8 +78,8 @@ def test_curated_discoverable_via_filters():
     assert difs.get("beginner", 0) >= 10
 
 
-def test_curated_search_and_detail():
-    client, session = _client()
+def test_curated_search_and_detail(_client):
+    client, session = _client
     _seed_curated(session)
     first_title = PROJECTS[0]["title"]
     session.commit()
@@ -92,8 +96,8 @@ def test_curated_search_and_detail():
     assert r2.json()["original_text"]
 
 
-def test_seed_logic_is_idempotent():
-    _, session = _client()
+def test_seed_logic_is_idempotent(_client):
+    _, session = _client
     _seed_curated(session)
     assert _curated_count(session) == 10
 

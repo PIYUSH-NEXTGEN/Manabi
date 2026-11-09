@@ -174,6 +174,26 @@ def test_problem_create_accepts_boundary_sizes(client, db_session, user):
     assert res.status_code == 201, res.json()
 
 
+def test_problem_create_requires_login(client, db_session):
+    """No auth override installed -> the create endpoint must demand a user."""
+    res = client.post("/api/problems", json=draft_card_factory())
+    assert res.status_code == 401
+
+
+def test_problem_create_rejects_duplicate_source_id(client, db_session, user):
+    res = client.post(
+        "/api/problems",
+        json=draft_card_factory(source_name="SIH 2026", source_id="PS-42"),
+    )
+    assert res.status_code == 201, res.json()
+    res = client.post(
+        "/api/problems",
+        json=draft_card_factory(source_name="SIH 2026", source_id="PS-42"),
+    )
+    assert res.status_code == 409
+    assert res.json()["detail"] == "A problem with this source ID already exists"
+
+
 def test_problem_create_stores_datasets(client, db_session, user):
     """datasets is a free-form list[dict]; posted entries must be stored and
     echoed back verbatim (regression: create used to call .model_dump() on

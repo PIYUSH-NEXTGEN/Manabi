@@ -1,4 +1,6 @@
+import pytest
 from sqlalchemy import create_engine, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
@@ -48,7 +50,7 @@ def make_problem(session: Session, source_id: str = "SIH26017", title: str = "Fl
 
 def test_create_all_and_user_roundtrip():
     session = make_session()
-    user = make_user(session)
+    make_user(session)
     session.commit()
     loaded = session.scalar(select(User).where(User.github_id == 1))
     assert loaded is not None
@@ -62,19 +64,15 @@ def test_github_id_is_unique():
     session = make_session()
     session.add(User(github_id=1, username="a"))
     session.add(User(github_id=1, username="b"))
-    try:
+    with pytest.raises(IntegrityError):
         session.commit()
-        raised = False
-    except Exception:
-        session.rollback()
-        raised = True
-    assert raised
+    session.rollback()
     session.close()
 
 
 def test_problem_json_fields_and_defaults():
     session = make_session()
-    problem = make_problem(session)
+    make_problem(session)
     session.commit()
     loaded = session.scalar(select(Problem))
     assert loaded.tech_tags == ["python", "pandas"]
@@ -89,13 +87,9 @@ def test_problem_unique_source_name_and_id():
     session = make_session()
     make_problem(session)
     make_problem(session)
-    try:
+    with pytest.raises(IntegrityError):
         session.commit()
-        raised = False
-    except Exception:
-        session.rollback()
-        raised = True
-    assert raised
+    session.rollback()
     session.close()
 
 
@@ -113,13 +107,9 @@ def test_project_unique_per_problem_user_repo():
     session.add(Project(problem_id=problem.id, user_id=user.id, **args))
     session.commit()
     session.add(Project(problem_id=problem.id, user_id=user.id, **args))
-    try:
+    with pytest.raises(IntegrityError):
         session.commit()
-        raised = False
-    except Exception:
-        session.rollback()
-        raised = True
-    assert raised
+    session.rollback()
     session.close()
 
 

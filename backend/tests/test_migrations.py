@@ -142,9 +142,6 @@ def test_0004_upgrade_preserves_existing_row_values(sqlite_url):
         problem_rows_before = conn.execute(text(
             "SELECT title, summary, field, status, origin FROM problems ORDER BY id"
         )).all()
-        project_rows_before = conn.execute(text(
-            "SELECT problem_id, user_id, repo_owner, repo_name, repo_url FROM projects ORDER BY id"
-        )).all()
     engine.dispose()
 
     command.upgrade(cfg, "head")

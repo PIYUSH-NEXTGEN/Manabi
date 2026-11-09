@@ -1,7 +1,7 @@
 """Project management surface (§7): owner-only DELETE / PATCH / complete /
 reopen and their guards."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 import pytest
 import respx
