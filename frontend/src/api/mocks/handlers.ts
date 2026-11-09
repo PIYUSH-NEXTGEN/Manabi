@@ -314,9 +314,15 @@ function adminSubmissionsResponse(request: Request): { items: Array<{ [key: stri
 }
 
 function changeSubmissionStatus(id: number, status: string) {
-  for (const queue of Object.values(adminSubmissions)) {
+  // Move the candidate across queues so a later GET reflects the action.
+  for (const [fromStatus, queue] of Object.entries(adminSubmissions)) {
     const found = queue.find((item) => item.id === id);
-    if (found) found.verification_status = status;
+    if (found) {
+      adminSubmissions[fromStatus] = queue.filter((item) => item.id !== id);
+      found.verification_status = status;
+      adminSubmissions[status] = [...(adminSubmissions[status] ?? []), found];
+      return;
+    }
   }
 }
 
@@ -607,3 +613,21 @@ export const handlers = [
     return HttpResponse.json(sampleProject.progress);
   }),
 ];
+
+const adminSubmissionSeed: string = JSON.stringify(adminSubmissions);
+
+/** Tests mutate the module-level admin queues via the approve/reject
+ * endpoints; restore the pristine fixture so state never leaks between
+ * tests. Call from the global afterEach alongside server.resetHandlers(). */
+export function resetMockHandlersState() {
+  for (const key of Object.keys(adminSubmissions)) {
+    delete adminSubmissions[key];
+  }
+  const restored = JSON.parse(adminSubmissionSeed) as Record<
+    string,
+    Array<{ [key: string]: unknown }>
+  >;
+  for (const [key, queue] of Object.entries(restored)) {
+    adminSubmissions[key] = queue;
+  }
+}

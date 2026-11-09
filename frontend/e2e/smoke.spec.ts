@@ -11,11 +11,16 @@ test('home hero, board, and problem detail render with zero console errors', asy
   });
 
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('MANABI');
+  // The hero renders its headline as three animated spans; the trailing
+  // whitespace after each line makes the flattened text extra-spacey.
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    /Pick a project\.\s*Ship it\.\s*Prove it\./,
+  );
 
-  await page.getByRole('link', { name: 'Problems' }).first().click();
+  // Nav + board both use "Projects" as the label; scope to the banner nav.
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'Projects' }).click();
   await expect(
-    page.getByRole('heading', { name: 'Problems', level: 1 }),
+    page.getByRole('heading', { name: 'Projects', level: 1 }),
   ).toBeVisible();
   const firstCard = page.locator('a[href="/problems/1"]');
   await expect(firstCard).toBeVisible();

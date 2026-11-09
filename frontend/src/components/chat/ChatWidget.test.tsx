@@ -116,6 +116,62 @@ describe('ChatWidget', () => {
     expect(screen.queryByText(/\*\*/)).toBeNull();
   });
 
+  it('whitespace-only messages are never sent', async () => {
+    const user = userEvent.setup();
+    let called = 0;
+    server.use(
+      http.post('*/api/chat', () => {
+        called += 1;
+        return HttpResponse.json(CHAT_200);
+      }),
+    );
+    renderWithProviders(<ChatWidget />);
+
+    await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
+    await user.type(
+      screen.getByPlaceholderText(/What do you want to build/i),
+      '   ',
+    );
+    await user.click(screen.getByRole('button', { name: 'Send' }));
+
+    await waitFor(() => expect(called).toBe(0));
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(screen.getByText(/Tell it what you know/i)).toBeInTheDocument();
+  });
+
+  it('caps the wire history at 6 messages in long conversations', async () => {
+    const user = userEvent.setup();
+    const historyLengths: number[] = [];
+    server.use(
+      http.post('*/api/chat', async ({ request }) => {
+        const body = (await request.json()) as {
+          messages?: Array<{ role: string; content: string }>;
+        };
+        historyLengths.push(body.messages!.length);
+        const latest = body.messages![body.messages!.length - 1]!.content;
+        return HttpResponse.json({
+          reply: `echo: ${latest}`,
+          problems: [],
+        });
+      }),
+    );
+    renderWithProviders(<ChatWidget />);
+
+    await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
+    const box = screen.getByPlaceholderText(/What do you want to build/i);
+    for (let i = 0; i < 4; i += 1) {
+      await user.type(box, `question number ${i + 1}`);
+      await user.click(screen.getByRole('button', { name: 'Send' }));
+      // waiting for this turn's reply guarantees the mutation completed, so
+      // the recorded history lengths line up with turns.
+      expect(
+        await screen.findByText(`echo: question number ${i + 1}`),
+      ).toBeInTheDocument();
+    }
+
+    expect(historyLengths).toEqual([1, 3, 5, 6]);
+  });
+
   it('shows honest errors when the chat API is rate limited', async () => {
     server.use(
       http.post('*/api/chat', () =>

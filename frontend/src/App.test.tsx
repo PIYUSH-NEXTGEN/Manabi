@@ -26,29 +26,31 @@ const DEAD_TARGETS = [
   '/projects/workflows',
 ];
 
+// Every test here mounts the entire <App /> and resolves lazy route chunks.
+// Under a fully parallel suite run on a loaded machine a single render can
+// outlive the 5s default test timeout, which flagged as a flake twice; give
+// these integration-style tests explicit headroom instead.
 describe('Route table (no dead links)', () => {
   it.each(STATIC_ROUTE_TARGETS)('%s renders %s', async (path, title) => {
     window.history.pushState({}, '', path);
 
     render(<App />);
 
-    // Lazy routes resolve a chunk; under a full parallel suite that can take
-    // longer than the 1s default.
     expect(
       await screen.findByRole(
         'heading',
         { name: title, level: 1 },
-        { timeout: 5000 },
+        { timeout: 15000 },
       ),
     ).toBeInTheDocument();
-  });
+  }, 20000);
 
   it('/problems renders the board', async () => {
     window.history.pushState({}, '', '/problems');
 
     render(<App />);
 
-    expect(await screen.findByRole('heading', { name: 'Projects', level: 1 }))
+    expect(await screen.findByRole('heading', { name: 'Projects', level: 1 }, { timeout: 15000 }))
       .toBeInTheDocument();
     expect(
       await screen.findByRole('heading', {
@@ -56,7 +58,7 @@ describe('Route table (no dead links)', () => {
         level: 3,
       }),
     ).toBeInTheDocument();
-  });
+  }, 20000);
 
   it('/problems/:id renders the problem detail', async () => {
     window.history.pushState({}, '', '/problems/1');
@@ -67,9 +69,9 @@ describe('Route table (no dead links)', () => {
       await screen.findByRole('heading', {
         name: 'Crop disease triage for small farms',
         level: 1,
-      }),
+      }, { timeout: 15000 }),
     ).toBeInTheDocument();
-  });
+  }, 20000);
 
   it('/projects/:id renders the project page', async () => {
     window.history.pushState({}, '', '/projects/1');
@@ -77,10 +79,10 @@ describe('Route table (no dead links)', () => {
     render(<App />);
 
     expect(
-      await screen.findByRole('heading', { name: 'crop-triage', level: 1 }),
+      await screen.findByRole('heading', { name: 'crop-triage', level: 1 }, { timeout: 15000 }),
     ).toBeInTheDocument();
     expect(screen.queryByText('404')).not.toBeInTheDocument();
-  });
+  }, 20000);
 
   it('/me redirects to home when logged out', async () => {
     window.history.pushState({}, '', '/me');

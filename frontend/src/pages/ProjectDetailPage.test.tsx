@@ -178,4 +178,127 @@ describe('ProjectDetailPage', () => {
       await screen.findByRole('heading', { name: /404/i, level: 1 }),
     ).toBeInTheDocument();
   });
+
+  it('reports a submission: client validation, success toast, then a clean form', async () => {
+    const user = userEvent.setup();
+    let bodies: Array<Record<string, unknown>> = [];
+    server.use(
+      http.get('*/api/auth/me', () =>
+        HttpResponse.json(ME_LOGGED_IN_VIEWER),
+      ),
+      http.post('*/api/projects/1/report', async ({ request }) => {
+        bodies.push((await request.json()) as Record<string, unknown>);
+        return HttpResponse.json({ ok: true, report_count: 1 }, { status: 201 });
+      }),
+    );
+    renderProject('/projects/1');
+
+    await screen.findByRole('heading', { name: 'crop-triage', level: 1 });
+    const reportButton = screen.getByRole('button', { name: 'Report submission' });
+
+    // viewer is not the owner -> the report row is visible
+    await user.type(screen.getByLabelText(/Something wrong with this submission/i), 'short');
+    await user.click(reportButton);
+    expect(
+      await screen.findByText(/Add a short reason \(10\+ characters\)/i),
+    ).toBeInTheDocument();
+    expect(bodies).toEqual([]);
+
+    await user.clear(screen.getByLabelText(/Something wrong with this submission/i));
+    await user.type(
+      screen.getByLabelText(/Something wrong with this submission/i),
+      'The demo link goes to a parking page.',
+    );
+    await user.click(reportButton);
+
+    expect(
+      await screen.findByRole('status'),
+    ).toHaveTextContent('Report sent — thanks. A maintainer will take a look.');
+    expect(bodies).toEqual([
+      { reason: 'The demo link goes to a parking page.' },
+    ]);
+    expect(screen.getByLabelText(/Something wrong with this submission/i)).toHaveValue('');
+  });
+
+  it('maps report errors honestly: 409 already reported, 429 rate limited', async () => {
+    const user = userEvent.setup();
+    let attempts = 0;
+    server.use(
+      http.get('*/api/auth/me', () =>
+        HttpResponse.json(ME_LOGGED_IN_VIEWER),
+      ),
+      http.post('*/api/projects/1/report', () => {
+        attempts += 1;
+        if (attempts === 1) {
+          return HttpResponse.json(
+            { detail: { code: 'already_reported', message: 'You already reported this project.' } },
+            { status: 409 },
+          );
+        }
+        return HttpResponse.json(
+          { detail: { code: 'rate_limited', message: 'Too many reports this hour - try again later.' } },
+          { status: 429 },
+        );
+      }),
+    );
+    renderProject('/projects/1');
+
+    await screen.findByRole('heading', { name: 'crop-triage', level: 1 });
+    await user.type(
+      screen.getByLabelText(/Something wrong with this submission/i),
+      'The progress numbers look stale to me.',
+    );
+    await user.click(screen.getByRole('button', { name: 'Report submission' }));
+
+    expect(
+      await screen.findByText('You already reported this project.'),
+    ).toBeInTheDocument();
+
+    await user.clear(screen.getByLabelText(/Something wrong with this submission/i));
+    await user.type(
+      screen.getByLabelText(/Something wrong with this submission/i),
+      'Another concrete reason to try again.',
+    );
+    await user.click(screen.getByRole('button', { name: 'Report submission' }));
+
+    expect(
+      await screen.findByText('Too many reports this hour — try again later.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('hides the report row from the owner and from logged-out visitors', async () => {
+    renderProject('/projects/1');
+
+    await screen.findByRole('heading', { name: 'crop-triage', level: 1 });
+    expect(
+      screen.queryByLabelText(/Something wrong with this submission/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it('hides the report row from the project owner even when logged in', async () => {
+    server.use(
+      http.get('*/api/auth/me', () =>
+        HttpResponse.json({
+          id: 5,
+          username: 'demo-farmer',
+          name: 'Demo Farmer',
+          avatar_url: null,
+        }),
+      ),
+    );
+    renderProject('/projects/1');
+
+    await screen.findByRole('heading', { name: 'crop-triage', level: 1 });
+    expect(
+      screen.queryByLabelText(/Something wrong with this submission/i),
+    ).not.toBeInTheDocument();
+  });
 });
+
+const ME_LOGGED_IN_VIEWER = {
+  id: 9,
+  username: 'just-looking',
+  name: 'Just Looking',
+  avatar_url: null,
+};

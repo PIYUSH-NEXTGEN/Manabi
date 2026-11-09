@@ -170,6 +170,166 @@ describe('DashboardPage', () => {
     );
   });
 
+  it('marks a verified project complete and shows the success toast', async () => {
+    const user = userEvent.setup();
+    const bodies: Array<Record<string, unknown>> = [];
+    let completed = false;
+    server.use(
+      http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
+      http.get('*/api/me/projects', () =>
+        HttpResponse.json([
+          {
+            ...MY_PROJECTS[0],
+            completed_at: completed ? '2026-11-09T09:00:00Z' : null,
+          },
+        ]),
+      ),
+      http.get('*/api/projects/1/progress', () =>
+        HttpResponse.json({
+          status: 'active',
+          commit_count: 14,
+          last_commit_at: '2026-10-16T09:24:00Z',
+          has_readme: true,
+          recent_commits: [],
+          open_issues: [],
+        }),
+      ),
+      http.post('*/api/projects/1/complete', async ({ request }) => {
+        bodies.push((await request.json()) as Record<string, unknown>);
+        completed = true;
+        return HttpResponse.json({
+          ...MY_PROJECTS[0],
+          completed_at: '2026-11-09T09:00:00Z',
+        });
+      }),
+    );
+    renderDashboard();
+
+    await user.click(await screen.findByRole('button', { name: 'Mark complete' }));
+    expect(screen.getByRole('dialog')).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Mark completed' }));
+
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+    );
+    expect(bodies).toEqual([{}]);
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Marked as completed. Nice ship.',
+    );
+    expect(await screen.findByText('✓ Completed')).toBeInTheDocument();
+  });
+
+  it('hides the complete button for projects that are not verified', async () => {
+    const pending = { ...MY_PROJECTS[0], verification_status: 'needs_review' };
+    server.use(
+      http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
+      http.get('*/api/me/projects', () => HttpResponse.json([pending])),
+      http.get('*/api/projects/1/progress', () =>
+        HttpResponse.json({
+          status: 'active',
+          commit_count: 14,
+          last_commit_at: '2026-10-16T09:24:00Z',
+          has_readme: true,
+          recent_commits: [],
+          open_issues: [],
+        }),
+      ),
+    );
+    renderDashboard();
+
+    await screen.findByText('Logged in as Ml Learner');
+    expect(
+      screen.queryByRole('button', { name: 'Mark complete' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders the backend completion checklist when GitHub says not ready', async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
+      http.get('*/api/me/projects', () => HttpResponse.json(MY_PROJECTS)),
+      http.get('*/api/projects/1/progress', () =>
+        HttpResponse.json({
+          status: 'active',
+          commit_count: 14,
+          last_commit_at: '2026-10-16T09:24:00Z',
+          has_readme: true,
+          recent_commits: [],
+          open_issues: [],
+        }),
+      ),
+      http.post('*/api/projects/1/complete', () =>
+        HttpResponse.json(
+          {
+            detail: {
+              code: 'not_ready_to_complete',
+              message: 'Not ready to mark this project as completed yet.',
+              checklist: [
+                { item: 'Verified submission', ok: false },
+                { item: 'README', ok: true },
+                { item: 'At least 5 commits', ok: true },
+              ],
+            },
+          },
+          { status: 422 },
+        ),
+      ),
+    );
+    renderDashboard();
+
+    await user.click(await screen.findByRole('button', { name: 'Mark complete' }));
+    await user.click(screen.getByRole('button', { name: 'Mark completed' }));
+
+    expect(await screen.findByText('Not ready yet — missing:')).toBeInTheDocument();
+    expect(screen.getByText('Verified submission')).toBeInTheDocument();
+    expect(screen.getByText('At least 5 commits')).toBeInTheDocument();
+    // the dialog stays open so the user can read the checklist
+    expect(screen.getByRole('dialog')).toBeVisible();
+    expect(screen.queryByText('Marked as completed. Nice ship.')).not.toBeInTheDocument();
+  });
+
+  it('reopens a completed project', async () => {
+    const user = userEvent.setup();
+    let reopened = false;
+    server.use(
+      http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
+      http.get('*/api/me/projects', () =>
+        HttpResponse.json([
+          {
+            ...MY_PROJECTS[0],
+            completed_at: reopened ? null : '2026-11-01T10:00:00Z',
+          },
+        ]),
+      ),
+      http.get('*/api/projects/1/progress', () =>
+        HttpResponse.json({
+          status: 'stale',
+          commit_count: 14,
+          last_commit_at: '2026-10-16T09:24:00Z',
+          has_readme: true,
+          recent_commits: [],
+          open_issues: [],
+        }),
+      ),
+      http.post('*/api/projects/1/reopen', () => {
+        reopened = true;
+        return HttpResponse.json({
+          ...MY_PROJECTS[0],
+          completed_at: null,
+        });
+      }),
+    );
+    renderDashboard();
+
+    expect(await screen.findByText('✓ Completed')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Reopen' }));
+    expect(await screen.findByRole('status')).toHaveTextContent('Back to building.');
+
+    await waitFor(() =>
+      expect(screen.queryByText('✓ Completed')).not.toBeInTheDocument(),
+    );
+  });
+
   it('redirects anonymous visitors to the home catalog and never renders the dashboard', async () => {
     renderWithProviders(
       <ToastProvider>
