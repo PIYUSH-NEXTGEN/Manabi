@@ -97,7 +97,7 @@ export function ChatWidget() {
     const content = draft.trim();
     if (content.length === 0) return;
     if (content.length > MAX_MESSAGE_LENGTH) {
-      setError('Keep each message under 1000 characters.');
+      setError('Keep each message under 500 characters.');
       return;
     }
 

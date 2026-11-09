@@ -178,9 +178,11 @@ def test_downgrade_last_step_recreates_schema_empty(sqlite_url):
     cfg = alembic_config(sqlite_url)
     _seed_baseline_rows(cfg, sqlite_url)
     command.upgrade(cfg, "head")
-    # head used to be 0004; since 0005 the 0004-downgrade tail is reached via -2.
-    # (0005's own downgrade is covered by the dedicated tests below.)
-    command.downgrade(cfg, "-2")  # 0005 -> 0004 -> 0003
+    # head used to be 0004; since 0005 the 0004-downgrade tail is reached via a
+    # relative step, which grows by one with every appended migration
+    # (0006: -3 == 0006 -> 0005 -> 0004 -> 0003).
+    # (0005/0006 own downgrades are covered by the dedicated tests below.)
+    command.downgrade(cfg, "-3")  # -> 0003
     engine = create_engine(sqlite_url)
     names = set(inspect(engine).get_table_names())
     cols = {c["name"] for c in inspect(engine).get_columns("problems")}
@@ -227,6 +229,53 @@ def test_models_match_migrated_schema(sqlite_url):
 # ---------------- 0005_project_verification ----------------
 
 
+def _seed_pre0006_rows(cfg, sqlite_url) -> None:
+    """Create the schema up to 0005 plus one problem row to survive 0006."""
+    command.upgrade(cfg, "0005_project_verification")
+    engine = create_engine(sqlite_url)
+    with engine.begin() as conn:
+        conn.execute(text(BASELINE_PROBLEM_SQL))
+    engine.dispose()
+
+
+def test_0006_upgrade_adds_nullable_goal(sqlite_url):
+    cfg = alembic_config(sqlite_url)
+    _seed_pre0006_rows(cfg, sqlite_url)
+    command.upgrade(cfg, "head")
+    engine = create_engine(sqlite_url)
+    with engine.begin() as conn:
+        title, goal = conn.execute(text("SELECT title, goal FROM problems ORDER BY id LIMIT 1")).one()
+        nullable = next(
+            c["nullable"] for c in inspect(engine).get_columns("problems") if c["name"] == "goal"
+        )
+        # one row per problem means the column was added without dropping data
+        problem_count = conn.execute(text("SELECT COUNT(*) FROM problems")).one()[0]
+    engine.dispose()
+    assert problem_count == 1  # rows survive the (batch) column add
+    assert title == "Old problem" and goal is None  # unlabelled by default
+    assert nullable  # NULL means "never appears under a track filter"
+
+
+def test_0006_upgrade_from_empty_then_downgrade(sqlite_url):
+    cfg = alembic_config(sqlite_url)
+    command.upgrade(cfg, "0005_project_verification")
+    command.upgrade(cfg, "head")
+    command.downgrade(cfg, "-1")  # back to 0005: the goal column is gone again
+    engine = create_engine(sqlite_url)
+    cols = {c["name"] for c in inspect(engine).get_columns("problems")}
+    engine.dispose()
+    assert "goal" not in cols
+    # forward again works
+    command.upgrade(cfg, "head")
+    engine = create_engine(sqlite_url)
+    cols = {c["name"] for c in inspect(engine).get_columns("problems")}
+    engine.dispose()
+    assert "goal" in cols
+
+
+# ---------------- 0005_project_verification ----------------
+
+
 def test_0005_upgrade_keeps_rows_and_backfills_needs_review(sqlite_url):
     """Pre-0005 rows survive with verification_status='needs_review'."""
     cfg = alembic_config(sqlite_url)
@@ -255,21 +304,25 @@ def test_0005_upgrade_from_empty_then_downgrade(sqlite_url):
     cfg = alembic_config(sqlite_url)
     command.upgrade(cfg, "0004_cleanup")
     command.upgrade(cfg, "head")
-    command.downgrade(cfg, "-1")  # back to 0004: 0005 objects gone again
+    command.downgrade(cfg, "0004_cleanup")  # explicit: 0006 and 0005 objects gone again
     engine = create_engine(sqlite_url)
-    cols = {c["name"] for c in inspect(engine).get_columns("projects")}
+    problem_cols = {c["name"] for c in inspect(engine).get_columns("problems")}
+    project_cols = {c["name"] for c in inspect(engine).get_columns("projects")}
     names = set(inspect(engine).get_table_names())
     engine.dispose()
     assert not ("project_reports" in names)
-    assert not (PROJECT_0005_COLUMNS & cols)
+    assert not (PROJECT_0005_COLUMNS & project_cols)
+    assert not ("goal" in problem_cols)  # 0006 must not survive an earlier downgrade
     # forward again works
     command.upgrade(cfg, "head")
     engine = create_engine(sqlite_url)
-    cols = {c["name"] for c in inspect(engine).get_columns("projects")}
+    problem_cols = {c["name"] for c in inspect(engine).get_columns("problems")}
+    project_cols = {c["name"] for c in inspect(engine).get_columns("projects")}
     names = set(inspect(engine).get_table_names())
     engine.dispose()
     assert "project_reports" in names
-    assert len(PROJECT_0005_COLUMNS & cols) == len(PROJECT_0005_COLUMNS)
+    assert len(PROJECT_0005_COLUMNS & project_cols) == len(PROJECT_0005_COLUMNS)
+    assert "goal" in problem_cols
 
 
 def test_0005_reports_table_unique_and_cascade(sqlite_url):

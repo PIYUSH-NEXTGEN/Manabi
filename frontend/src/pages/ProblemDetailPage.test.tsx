@@ -120,6 +120,91 @@ describe('ProblemDetailPage', () => {
     expect(login).toHaveAttribute('href', '/api/auth/github/login');
   });
 
+  it('lists every later-addition idea, even past an accidental z in the text', async () => {
+    server.use(
+      http.get('*/api/problems/:id', () =>
+        HttpResponse.json({
+          id: 1,
+          title: 'Crop disease triage for small farms',
+          summary: 'Farmers photograph leaf blight.',
+          who_affected: 'Smallholder farmers',
+          why_matters: 'Late detection destroys a season of income.',
+          field: 'computer-vision',
+          domain: 'agriculture',
+          difficulty: 'beginner',
+          est_hours: 20,
+          tech_tags: ['python'],
+          datasets: [],
+          approaches: [],
+          source_name: 'SIH 2026',
+          source_id: 'SIH26017',
+          source_url: null,
+          source_note: null,
+          project_count: 0,
+          completed_count: 0,
+          ai_fields: [],
+          original_text:
+            '## Overview\nBuild the triage flow.\n\n' +
+            '## Stretch goals\n' +
+            '- Add zebra-proof night mode\n' +
+            '- Export CSV reports\n\n' +
+            '## Limitations\nRuns offline.\n',
+          projects: [],
+        }),
+      ),
+    );
+
+    renderDetail('/problems/1');
+    await screen.findByRole('heading', { level: 1 });
+
+    expect(
+      await screen.findByText('Add zebra-proof night mode'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Export CSV reports')).toBeInTheDocument();
+  });
+
+  it('lists later-addition ideas when the ideas section is the last one', async () => {
+    server.use(
+      http.get('*/api/problems/:id', () =>
+        HttpResponse.json({
+          id: 1,
+          title: 'Crop disease triage for small farms',
+          summary: 'Farmers photograph leaf blight.',
+          who_affected: 'Smallholder farmers',
+          why_matters: 'Late detection destroys a season of income.',
+          field: 'computer-vision',
+          domain: 'agriculture',
+          difficulty: 'beginner',
+          est_hours: 20,
+          tech_tags: ['python'],
+          datasets: [],
+          approaches: [],
+          source_name: 'SIH 2026',
+          source_id: 'SIH26017',
+          source_url: null,
+          source_note: null,
+          project_count: 0,
+          completed_count: 0,
+          ai_fields: [],
+          original_text:
+            '## Overview\nPlan the capture flow first.\n\n' +
+            '## Possible future improvements\n' +
+            '- Invite collaborators\n' +
+            '- Weekly recap email',
+          projects: [],
+        }),
+      ),
+    );
+
+    renderDetail('/problems/1');
+    await screen.findByRole('heading', { level: 1 });
+
+    expect(
+      await screen.findByText('Invite collaborators'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Weekly recap email')).toBeInTheDocument();
+  });
+
   it('rejects non-GitHub URLs on the client without a network call', async () => {
     let postCalls = 0;
     server.use(

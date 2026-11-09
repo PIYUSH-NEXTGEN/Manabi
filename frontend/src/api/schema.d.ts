@@ -282,6 +282,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/problems/{problem_id}/goal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Set Problem Goal
+         * @description Label (or unlabel) a problem as resume / hackathon / learning material.
+         *
+         *     Only admins can curate; null clears the label. Invalid values are rejected
+         *     by the schema as 422.
+         */
+        post: operations["set_problem_goal_api_admin_problems__problem_id__goal_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/github/login": {
         parameters: {
             query?: never;
@@ -428,6 +451,20 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AdminGoalOut */
+        AdminGoalOut: {
+            /** Ok */
+            ok: boolean;
+            /** Problem Id */
+            problem_id: number;
+            /** Goal */
+            goal?: ("resume" | "hackathon" | "learning") | null;
+        };
+        /** AdminGoalSetIn */
+        AdminGoalSetIn: {
+            /** Goal */
+            goal?: ("resume" | "hackathon" | "learning") | null;
+        };
         /** AdminSubmissionActionOut */
         AdminSubmissionActionOut: {
             /** Ok */
@@ -658,6 +695,8 @@ export interface components {
             organisation?: string | null;
             /** Deadline */
             deadline?: string | null;
+            /** Goal */
+            goal?: ("resume" | "hackathon" | "learning") | null;
             /** Original Text */
             original_text: string;
             /** Projects */
@@ -788,6 +827,8 @@ export interface components {
             organisation?: string | null;
             /** Deadline */
             deadline?: string | null;
+            /** Goal */
+            goal?: ("resume" | "hackathon" | "learning") | null;
         };
         /** ProblemsListOut */
         ProblemsListOut: {
@@ -1505,6 +1546,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminSubmissionActionOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_problem_goal_api_admin_problems__problem_id__goal_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                problem_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminGoalSetIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminGoalOut"];
                 };
             };
             /** @description Validation Error */

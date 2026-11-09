@@ -8,11 +8,30 @@ from sqlalchemy.orm import joinedload
 
 from app import schemas
 from app.deps import AdminUser, DB
-from app.models import Project, ProjectReport, VERIFICATION_NEEDS_REVIEW, VERIFICATION_REJECTED, VERIFICATION_VERIFIED
+from app.models import Problem, Project, ProjectReport, VERIFICATION_NEEDS_REVIEW, VERIFICATION_REJECTED, VERIFICATION_VERIFIED
 from app.services import verification
 from app.services.verification import SubmissionError
 
 router = APIRouter(prefix="/api/admin/submissions", tags=["admin"])
+
+# Manual track curation (§ board "Browse by goal"). Separate router so the
+# submissions-only contract above stays untouched.
+problems_router = APIRouter(prefix="/api/admin/problems", tags=["admin"])
+
+
+@problems_router.post("/{problem_id}/goal", response_model=schemas.AdminGoalOut)
+def set_problem_goal(problem_id: int, body: schemas.AdminGoalSetIn, user: AdminUser, db: DB):
+    """Label (or unlabel) a problem as resume / hackathon / learning material.
+
+    Only admins can curate; null clears the label. Invalid values are rejected
+    by the schema as 422.
+    """
+    problem = db.scalar(select(Problem).where(Problem.id == problem_id))
+    if problem is None:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    problem.goal = body.goal
+    db.commit()
+    return schemas.AdminGoalOut(ok=True, problem_id=problem.id, goal=problem.goal)
 
 
 def _submission_to_out(db, project: Project) -> schemas.AdminSubmissionOut:

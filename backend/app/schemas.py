@@ -52,6 +52,7 @@ class ProblemOut(ProblemCard):
     edition: str | None = None
     organisation: str | None = None
     deadline: date | None = None
+    goal: GoalEnum | None = None
 
 
 class ProjectCreate(BaseModel):
@@ -274,5 +275,18 @@ class StatsOut(BaseModel):
 class ProblemsListOut(BaseModel):
     items: list[ProblemOut]
     total: int
+
+
+GoalEnum = Literal["resume", "hackathon", "learning"]
+
+
+class AdminGoalSetIn(BaseModel):
+    goal: GoalEnum | None = None
+
+
+class AdminGoalOut(BaseModel):
+    ok: bool
+    problem_id: int
+    goal: GoalEnum | None = None
 
 

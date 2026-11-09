@@ -33,7 +33,7 @@ function ProjectSkeleton() {
 function futureIdeas(originalText: string | null | undefined): string[] {
   if (!originalText) return [];
   const section = originalText.match(
-    /## (Possible future improvements|Stretch goals)[\s\S]*?(?=\n## |\z)/i,
+    /## (Possible future improvements|Stretch goals)[\s\S]*?(?=\n## |$)/i,
   );
   if (!section) return [];
   return section[0]

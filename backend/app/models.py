@@ -31,6 +31,13 @@ OWNERSHIP_OWNER = "owner"
 OWNERSHIP_PUSH_ACCESS = "push_access"
 OWNERSHIP_CONTRIBUTOR = "contributor"
 
+# Manual track curation (§ board "Browse by goal"): admins label a problem as
+# resume / hackathon / learning material. Null = unlabelled (never filtered in).
+GOAL_RESUME = "resume"
+GOAL_HACKATHON = "hackathon"
+GOAL_LEARNING = "learning"
+GOAL_VALUES = (GOAL_RESUME, GOAL_HACKATHON, GOAL_LEARNING)
+
 
 class User(Base):
     __tablename__ = "users"
@@ -81,6 +88,7 @@ class Problem(Base):
     edition: Mapped[str | None] = mapped_column(String(100), nullable=True)
     organisation: Mapped[str | None] = mapped_column(String(255), nullable=True)
     deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
+    goal: Mapped[str | None] = mapped_column(String(20), nullable=True)
 
     creator: Mapped[User | None] = relationship()
     projects: Mapped[list["Project"]] = relationship(back_populates="problem")

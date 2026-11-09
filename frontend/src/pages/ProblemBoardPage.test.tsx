@@ -102,6 +102,50 @@ describe('ProblemBoardPage', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('shows curated track counts on the browse-by-track chips', async () => {
+    renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
+
+    await screen.findAllByRole('heading', { level: 3 });
+
+    expect(
+      screen.getByRole('button', { name: /Resume/i }),
+    ).toHaveTextContent('1 projects');
+    expect(
+      screen.getByRole('button', { name: /Hackathon/i }),
+    ).toHaveTextContent('1 projects');
+    expect(
+      screen.getByRole('button', { name: /Learning/i }),
+    ).toHaveTextContent('1 projects');
+  });
+
+  it('clicking a track chip filters the board to that goal', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
+
+    await screen.findAllByRole('heading', { level: 3 });
+    await user.click(screen.getByRole('button', { name: /Hackathon/i }));
+
+    const chip = screen.getByRole('button', { name: /Hackathon/i });
+    expect(chip).toHaveAttribute('aria-pressed', 'true');
+    expect(
+      await screen.findByText(/1 projects in the index/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Streetlight outage tracker'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Crop disease triage for small farms'),
+    ).not.toBeInTheDocument();
+
+    await user.click(chip);
+    expect(
+      await screen.findByText(/6 projects in the index/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText('Crop disease triage for small farms'),
+    ).toBeInTheDocument();
+  });
+
   it('load more fetches the next page and then disappears', async () => {
     server.use(
       http.get('*/api/problems', ({ request }) => {

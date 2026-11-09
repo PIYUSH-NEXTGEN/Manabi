@@ -32,6 +32,7 @@ const problems = [
     project_count: 1,
     completed_count: 0,
     ai_fields: ['approaches'],
+    goal: 'resume',
   },
   {
     id: 2,
@@ -57,6 +58,7 @@ const problems = [
     project_count: 1,
     completed_count: 1,
     ai_fields: ['approaches', 'est_hours'],
+    goal: 'hackathon',
   },
   {
     id: 3,
@@ -82,6 +84,7 @@ const problems = [
     project_count: 0,
     completed_count: 0,
     ai_fields: ['approaches'],
+    goal: 'learning',
   },
   {
     id: 4,
@@ -107,6 +110,7 @@ const problems = [
     project_count: 0,
     completed_count: 0,
     ai_fields: ['approaches', 'est_hours'],
+    goal: null,
   },
   {
     id: 5,
@@ -132,6 +136,7 @@ const problems = [
     project_count: 0,
     completed_count: 0,
     ai_fields: ['approaches'],
+    goal: null,
   },
   {
     id: 6,
@@ -157,6 +162,7 @@ const problems = [
     project_count: 0,
     completed_count: 0,
     ai_fields: ['approaches', 'who_affected'],
+    goal: null,
   },
 ];
 

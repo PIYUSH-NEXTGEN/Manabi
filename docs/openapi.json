@@ -1003,6 +1003,59 @@
         }
       }
     },
+    "/api/admin/problems/{problem_id}/goal": {
+      "post": {
+        "tags": [
+          "admin"
+        ],
+        "summary": "Set Problem Goal",
+        "description": "Label (or unlabel) a problem as resume / hackathon / learning material.\n\nOnly admins can curate; null clears the label. Invalid values are rejected\nby the schema as 422.",
+        "operationId": "set_problem_goal_api_admin_problems__problem_id__goal_post",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminGoalSetIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminGoalOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/github/login": {
       "get": {
         "tags": [
@@ -1206,6 +1259,62 @@
   },
   "components": {
     "schemas": {
+      "AdminGoalOut": {
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "title": "Ok"
+          },
+          "problem_id": {
+            "type": "integer",
+            "title": "Problem Id"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "resume",
+                  "hackathon",
+                  "learning"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ok",
+          "problem_id"
+        ],
+        "title": "AdminGoalOut"
+      },
+      "AdminGoalSetIn": {
+        "properties": {
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "resume",
+                  "hackathon",
+                  "learning"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal"
+          }
+        },
+        "type": "object",
+        "title": "AdminGoalSetIn"
+      },
       "AdminSubmissionActionOut": {
         "properties": {
           "ok": {
@@ -1956,6 +2065,22 @@
             ],
             "title": "Deadline"
           },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "resume",
+                  "hackathon",
+                  "learning"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal"
+          },
           "original_text": {
             "type": "string",
             "title": "Original Text"
@@ -2423,6 +2548,22 @@
               }
             ],
             "title": "Deadline"
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "resume",
+                  "hackathon",
+                  "learning"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal"
           }
         },
         "type": "object",
