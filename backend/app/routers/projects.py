@@ -31,7 +31,10 @@ REPORT_LIMITER = RateLimiter("REPORT_RATE_LIMIT_PER_HOUR")  # per-user, hourly
 
 
 def _error(err: SubmissionError) -> HTTPException:
-    return HTTPException(status_code=err.status, detail={"code": err.code, "message": err.message})
+    detail = {"code": err.code, "message": err.message}
+    if err.reasons:
+        detail["reasons"] = err.reasons
+    return HTTPException(status_code=err.status, detail=detail)
 
 
 def _project_or_404(db, project_id: int) -> Project:

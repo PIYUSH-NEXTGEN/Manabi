@@ -11,6 +11,7 @@ Design rules (brief §6):
   {"code": ..., "message": ...} bodies.
 """
 
+import asyncio
 import logging
 import re
 from dataclasses import dataclass, field
@@ -44,13 +45,20 @@ SUMMARY_MAX = 400
 
 
 class SubmissionError(Exception):
-    """Maps to HTTP {status} with a {"code", "message"} body."""
+    """Maps to HTTP {status} with a {"code", "message", "reasons"} body."""
 
-    def __init__(self, status: int, code: str, message: str):
+    def __init__(self, status: int, code: str, message: str, reasons: list[str] | None = None):
         self.status = status
         self.code = code
         self.message = message
+        self.reasons = reasons
         super().__init__(message)
+
+
+# A submission claims real work, and five or more commits is the smallest
+# footprint a real project leaves on GitHub. Nothing here measures quality —
+# this only prevents a repo that was opened five minutes ago from riding along.
+MIN_COMMIT_COUNT = 5
 
 
 @dataclass
@@ -535,19 +543,59 @@ async def create_submission(
 
     facts = await _repo_facts(owner, name, user.github_token)
 
-    basis = await check_ownership(facts, user, user.github_token)
+    # Ownership, README and commit count are independent once facts exist, so
+    # they run concurrently instead of as three serial GitHub round trips.
+    readme, commit_count, basis = await asyncio.gather(
+        github.fetch_readme_text(facts.owner_login, facts.name, user.github_token),
+        _commit_count(facts, user.github_token),
+        check_ownership(facts, user, user.github_token),
+    )
     if basis is None:
         raise reject_not_owner()
 
     assert_duplicates(db, problem, facts, user)
 
-    readme = await github.fetch_readme_text(facts.owner_login, facts.name, user.github_token)
-    commit_count = await _commit_count(facts, user.github_token)
+    # Hard rule: a repo that cannot explain itself cannot be verified. The AI
+    # judges relevance largely through the README, so a missing one means the
+    # submission is rejected before any row is created.
+    if not readme:
+        raise SubmissionError(
+            422,
+            "readme_required",
+            "This repository has no README. Add one that explains the project, then submit again.",
+        )
 
-    evaluation = evaluate_relevance(problem, summary, facts, readme, commit_count)
+    if commit_count < MIN_COMMIT_COUNT:
+        raise SubmissionError(
+            422,
+            "too_few_commits",
+            f"This repository has only {commit_count} commit{'s' if commit_count != 1 else ''}. "
+            f"MANABI accepts projects with at least {MIN_COMMIT_COUNT} commits.",
+            reasons=[
+                "Fewer than "
+                f"{MIN_COMMIT_COUNT} commits usually means the project was just created and is not a working solution yet.",
+                "Push your real work to GitHub — every meaningful change should land as its own commit.",
+                "The commit count only needs real history; commits made just to reach the number can be rejected after review.",
+            ],
+        )
+
+    # evaluate_relevance makes a synchronous LLM HTTP call: run it in a worker
+    # thread so it cannot stall the asyncio event loop (every other request).
+    evaluation = await asyncio.to_thread(
+        evaluate_relevance, problem, summary, facts, readme, commit_count
+    )
     if evaluation.status == VERIFICATION_REJECTED:
         raise SubmissionError(
-            422, "not_relevant", evaluation.reason or "This repository does not relate to this problem."
+            422,
+            "not_relevant",
+            evaluation.reason or "This repository does not relate to this problem.",
+            reasons=[
+                "The AI compared the problem with the README, the repo description, and your description and found them unrelated.",
+                "Your description is optional but helps: say explicitly what the repo does and how it solves the problem.",
+                "Grow the README too: it is the main thing the AI reads to judge relevance.",
+                "Submissions are also rejected when the repo is a fork, has no README, has fewer than "
+                f"{MIN_COMMIT_COUNT} commits, is not owned by you, or was already linked to another problem.",
+            ],
         )
 
     project = Project(
@@ -580,9 +628,12 @@ async def create_submission(
 async def _commit_count(facts: RepoFacts, token: str | None) -> int:
     try:
         commits = await github.fetch_commits(facts.owner_login, facts.name, token)
-    except Exception:  # noqa: BLE001 - best effort; empty-repo gate only needs certainty
-        return 1  # assume activity so a transient GitHub failure cannot mark 'Waiting for README/commits'
-    return len(commits) if isinstance(commits, list) else 1
+    except Exception:  # noqa: BLE001
+        # Transient GitHub trouble must not turn into a hard rejection, so
+        # fail open at the minimum: only a readable, genuinely short history
+        # fails the MIN_COMMIT_COUNT gate.
+        return MIN_COMMIT_COUNT
+    return len(commits) if isinstance(commits, list) else MIN_COMMIT_COUNT
 
 
 # ---------------------------------------------------------------------------
@@ -667,7 +718,9 @@ async def auto_reverify(db, project: Project, problem: Problem, user: User) -> b
     except GitHubError:
         return False
     facts = RepoFacts.from_repo(repo)
-    evaluation = evaluate_relevance(problem, project.solution_summary or "", facts, readme, commit_count)
+    evaluation = await asyncio.to_thread(
+        evaluate_relevance, problem, project.solution_summary or "", facts, readme, commit_count
+    )
     if evaluation.status == VERIFICATION_REJECTED:
         # The auto path stays conservative: park rejected candidates for an
         # admin instead of silently unpublishing a submitted project.
@@ -707,7 +760,9 @@ async def reverify_after_summary_edit(db, project: Project, problem: Problem, us
     facts = RepoFacts.from_repo(repo)
     readme = await github.fetch_readme_text(facts.owner_login, facts.name, token)
     commit_count = await _commit_count(facts, token)
-    evaluation = evaluate_relevance(problem, summary, facts, readme, commit_count)
+    evaluation = await asyncio.to_thread(
+        evaluate_relevance, problem, summary, facts, readme, commit_count
+    )
     if evaluation.status == VERIFICATION_REJECTED:
         project.relevance_score = evaluation.score
         project.relevance_reason = "Re-check found the repository unrelated — admin review required"

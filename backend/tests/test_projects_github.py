@@ -117,7 +117,12 @@ def github_repo_mock():
             return_value=HTTPResponse(403, json={"message": "rate limit"})
         )
         mock.get("https://api.github.com/repos/octocat/triage/readme").mock(
-            return_value=HTTPResponse(404, json={})
+            return_value=HTTPResponse(
+                200,
+                json={"content": __import__("base64").b64encode(
+                    b"Flood alert triage pipeline that ranks incoming reports and alerts the field ministry."
+                ).decode()},
+            )
         )
         yield mock
 
