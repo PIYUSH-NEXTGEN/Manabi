@@ -1,8 +1,9 @@
+import { useQuery } from '@tanstack/react-query';
 import type { ProjectOut } from '@/api/client';
+import { getProblem, getProblems } from '@/api/client';
 import { Stamp } from '@/design/primitives';
 import { EASE_SNAP, slideUpReveal } from '@/design/motion';
 import { cx } from '@/lib/cx';
-import { useProject } from '@/hooks/useProject';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import {
@@ -129,8 +130,38 @@ function ProgressPanel({ project }: { project: ProjectOut }) {
   );
 }
 
+/**
+ * Find a real project record to show in the panel without a hard-coded id:
+ * the board's first problem that has any public project, then that problem's
+ * detail (which embeds the projects). Prefers a record that already carries
+ * GitHub progress so the meter has data to render.
+ */
+function useShowcaseProject() {
+  const problems = useQuery({
+    queryKey: ['problems', 'showcase'],
+    queryFn: () => getProblems({ limit: 20 }),
+  });
+
+  const candidate = problems.data?.items.find((p) => p.project_count > 0);
+  const detail = useQuery({
+    queryKey: ['problem', 'showcase', candidate?.id],
+    queryFn: () => getProblem(candidate!.id),
+    enabled: candidate != null,
+  });
+
+  const projects = detail.data?.projects ?? [];
+  const project =
+    projects.find((p) => p.progress != null) ?? projects[0] ?? null;
+
+  return {
+    isLoading: problems.isLoading || (candidate != null && detail.isLoading),
+    isError: problems.isError || (candidate != null && detail.isError),
+    project,
+  };
+}
+
 export function BuildInPublic() {
-  const query = useProject(1);
+  const query = useShowcaseProject();
 
   return (
     <section className="relative overflow-hidden border-b border-ink bg-olive text-paper">
@@ -212,12 +243,25 @@ export function BuildInPublic() {
           >
             {query.isLoading ? (
               <div className="skeleton h-64 border border-paper/40" aria-hidden />
-            ) : query.data ? (
-              <ProgressPanel project={query.data} />
-            ) : (
+            ) : query.isError ? (
               <div className="border border-paper/40 p-5">
                 <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-paper/70">
                   Progress panel loads when the projects API is up.
+                </p>
+                <Link
+                  to="/problems"
+                  className="mt-4 inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-accent-soft underline underline-offset-4 hover:text-paper"
+                >
+                  Browse the index
+                  <ArrowUpRight aria-hidden size={12} strokeWidth={2.6} />
+                </Link>
+              </div>
+            ) : query.project ? (
+              <ProgressPanel project={query.project} />
+            ) : (
+              <div className="border border-paper/40 p-5">
+                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-paper/70">
+                  No project records on the board yet. Be the first.
                 </p>
                 <Link
                   to="/problems"

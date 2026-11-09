@@ -12,6 +12,7 @@ export function useSubmitProject(problemId: number) {
     mutationFn: (body) => submitProject(problemId, body),
     onSuccess: (project) => {
       queryClient.invalidateQueries({ queryKey: ['problem', problemId] });
+      queryClient.invalidateQueries({ queryKey: ['me', 'projects'] });
       queryClient.setQueryData(['project', project.id], project);
     },
   });
