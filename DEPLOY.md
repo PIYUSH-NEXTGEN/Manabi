@@ -124,12 +124,14 @@ On Render/Railway a `Procfile` is included (`web: uvicorn app.main:app --host 0.
 4. `curl -I https://<domain>/assets/<asset from dist>` → `200` + correct `content-type`
 5. `curl https://<domain>/api/problems/<known id>` → 200; the response must not
    contain crawler fields (`content_hash`, `crawl_source_key`, `source_status`, …)
-6. `alembic current` → `0004_cleanup (head)`; log in with GitHub in the browser → redirected home, username in the nav
+6. `alembic current` → `0006_problem_goal (head)`; log in with GitHub in the browser → redirected home, username in the nav
 7. Chat dock → ask → reply links point at real catalog problems
 
 ## Rate limits (env-tunable)
 
-`CHAT_RATE_LIMIT_ANON_PER_HOUR=10`, `CHAT_RATE_LIMIT_USER_PER_HOUR=30`. The UI shows the backend's raw limit messages honestly when they trip.
+`CHAT_RATE_LIMIT_ANON_PER_HOUR=10`, `CHAT_RATE_LIMIT_USER_PER_HOUR=30`, and
+`PROBLEM_CREATE_PER_HOUR=5` (problem creation per user per hour; admins are
+exempt). The UI shows the backend's raw limit messages honestly when they trip.
 
 ## 6. The submission-verification system (0005) — production checklist
 

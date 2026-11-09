@@ -11,12 +11,15 @@ from sqlalchemy.orm import aliased, joinedload
 from app import schemas
 from app.deps import DB, CurrentUser, OptionalUser
 from app.models import Problem, Project, STATUS_PUBLISHED, VERIFICATION_VERIFIED
+from app.services.ratelimit import RateLimiter
 from app.services.visibility import can_view_project, is_admin
 
 router = APIRouter(prefix="/api/problems", tags=["problems"])
 
 SortParam = Literal["newest", "popular"]
 DistinctParam = Literal["field", "domain"]
+
+PROBLEM_CREATE_LIMITER = RateLimiter("PROBLEM_CREATE_PER_HOUR")
 
 
 def problem_to_out(problem: Problem, project_count: int, completed_count: int = 0) -> schemas.ProblemOut:
@@ -213,6 +216,22 @@ def facets(db: DB):
     )
 
 
+_FORMULA_PREFIX = re.compile(r"^[=+\-@\t\r]")
+
+
+def _safe_cell(value):
+    """Neutralise spreadsheet formulae that could execute when opened.
+
+    A string cell starting with = + - @ or a tab/CR is treated as a formula
+    by Excel/LibreOffice when a user opens the exported file. Prefixing with
+    an apostrophe keeps the text literal. User-controlled problem text can
+    reach these cells, so every string cell passes through here.
+    """
+    if isinstance(value, str) and _FORMULA_PREFIX.match(value):
+        return "'" + value
+    return value
+
+
 @router.get("/{problem_id}/export.xlsx")
 def export_problem(problem_id: int, db: DB):
     """One-problem XLSX built from MANABI's structured summary (never verbatim text)."""
@@ -250,7 +269,7 @@ def export_problem(problem_id: int, db: DB):
         ),
     ]
     for row in rows:
-        sheet.append(row)
+        sheet.append([_safe_cell(cell) for cell in row])
     sheet.column_dimensions["A"].width = 34
     sheet.column_dimensions["B"].width = 100
 
@@ -296,6 +315,13 @@ def get_problem(problem_id: int, db: DB, user: OptionalUser):
 
 @router.post("", response_model=schemas.ProblemOut, status_code=201)
 def create_problem(body: schemas.ProblemIn, user: CurrentUser, db: DB):
+    # Publishing content on the public board is an abuse-prone, unbounded
+    # action: rate-limit ordinary users (admins curate and are exempt).
+    if not is_admin(user) and not PROBLEM_CREATE_LIMITER.allowed(f"problem-create:{user.id}"):
+        raise HTTPException(
+            status_code=429,
+            detail={"code": "rate_limited", "message": "Too many problems created this hour — try again later."},
+        )
     if body.source_id:
         existing = db.scalar(
             select(Problem).where(Problem.source_name == body.source_name, Problem.source_id == body.source_id)

@@ -79,3 +79,23 @@ def test_export_returns_one_statement_sheet(client, db_session):
 def test_export_hides_non_published_problems(client, db_session):
     problem = _problem(db_session, status="pending_review")
     assert client.get(f"/api/problems/{problem.id}/export.xlsx").status_code == 404
+
+
+def test_export_neutralises_formula_injection(client, db_session):
+    """User-controlled text must never become a spreadsheet formula: a victim
+    opening the exported sheet otherwise executes e.g. =HYPERLINK(...)"""
+    problem = _problem(db_session)
+    problem.summary = "=HYPERLINK(\"http://evil.example.com\",\"click\")"
+    problem.who_affected = "+1 exploit"
+    problem.organisation = "@SUM(1)"
+    db_session.commit()
+
+    response = client.get(f"/api/problems/{problem.id}/export.xlsx")
+    assert response.status_code == 200
+    workbook = load_workbook(BytesIO(response.content), read_only=True)
+    cells = [cell for row in workbook.active.iter_rows(values_only=True) for cell in row if cell]
+    flat = [str(cell) for cell in cells]
+    assert not any(cell.startswith(("=", "+", "@")) for cell in flat)
+    assert any(cell.startswith("'=HYPERLINK") for cell in flat)  # literal text, not a formula
+    assert any(cell.startswith("'+1 exploit") for cell in flat)
+    assert any(cell.startswith("'@SUM(1)") for cell in flat)

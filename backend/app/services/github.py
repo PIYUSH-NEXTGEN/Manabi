@@ -1,7 +1,8 @@
 import asyncio
 import base64
+import re
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse
+from urllib.parse import unquote, urlparse
 from collections import Counter
 
 import httpx
@@ -9,6 +10,11 @@ import httpx
 API_BASE = "https://api.github.com"
 STATUS_WINDOW_DAYS = 7
 SIGNAL_TOPIC_SAMPLE = 10
+
+# GitHub owner names are [A-Za-z0-9-], repo names additionally use . and _;
+# anything else (spaces, %xx, unicode lookalikes) never comes from a real
+# github.com URL and would smuggle separators into API paths.
+_SEGMENT_RE = re.compile(r"^[A-Za-z0-9_.-]+$")
 
 
 class GitHubError(Exception):
@@ -27,6 +33,27 @@ def get_client() -> httpx.AsyncClient:
     return _shared_client
 
 
+def _segment_is_literally_github_name(segment: str) -> bool:
+    """True when the path segment is exactly what GitHub would name it.
+
+    Rejects percent-encodings that change when decoded (e.g. %2F -> '/'),
+    double encodings, dot-segments and characters GitHub never allows, so a
+    crafted URL cannot make our API-path fetch resolve to a different
+    repository than the URL the visitor actually sees.
+    """
+    if not _SEGMENT_RE.match(segment):
+        return False
+    decoded = segment
+    for _round in range(3):
+        try:
+            if unquote(decoded) == decoded:
+                break
+        except Exception:  # noqa: BLE001 - malformed escapes: reject outright
+            return False
+        decoded = unquote(decoded)
+    return decoded == segment
+
+
 def parse_repo_url(url: str) -> tuple[str, str] | None:
     if not url:
         return None
@@ -42,6 +69,8 @@ def parse_repo_url(url: str) -> tuple[str, str] | None:
     if name.endswith(".git"):
         name = name[: -len(".git")]
     if not name:
+        return None
+    if not _segment_is_literally_github_name(owner) or not _segment_is_literally_github_name(name):
         return None
     return owner, name
 

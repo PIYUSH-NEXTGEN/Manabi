@@ -19,6 +19,12 @@ class Settings(BaseSettings):
     CHAT_RATE_LIMIT_ANON_PER_HOUR: int = 10
     CHAT_RATE_LIMIT_USER_PER_HOUR: int = 30
 
+    # --- Content curation ---
+    # Problem creation is an authenticated publishing action with LLM/AI cost
+    # imports only for ingest; the catalog is admin-curated, so user limits
+    # track the moderation posture (admins exempt below).
+    PROBLEM_CREATE_PER_HOUR: int = 5
+
     # --- Admin ---
     ADMIN_GITHUB_USERNAMES: str = ""
 

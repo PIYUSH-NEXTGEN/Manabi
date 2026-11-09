@@ -171,6 +171,22 @@ def test_parse_repo_url_rejects_garbage():
     assert parse_repo_url("https://github.com/octocat/.git") is None
 
 
+def test_parse_repo_url_rejects_encoded_separators():
+    """Percent-encodings that change when decoded must not smuggle path
+    separators: e.g. /repos/a%2Fb/c on api.github.com actually resolves to
+    /repos/a/b/c — a different repository than the URL the visitor saw."""
+    assert parse_repo_url("https://github.com/a%2Fb/c") is None
+    assert parse_repo_url("https://github.com/octocat/triage%2Fx") is None
+    assert parse_repo_url("https://github.com/octocat/tra%252Fiage") is None  # double encoding
+    assert parse_repo_url("https://github.com/octocat/tr%69age") is None
+    assert parse_repo_url("https://github.com/../boss/c") is None
+
+
+def test_parse_repo_url_still_accepts_plain_names():
+    assert parse_repo_url("https://github.com/octocat/triage.web") == ("octocat", "triage.web")
+    assert parse_repo_url("https://github.com/octocat/triage_2.0") == ("octocat", "triage_2.0")
+
+
 def test_parse_repo_url_case_insensitive_host():
     assert parse_repo_url("https://GITHUB.com/octocat/triage") == ("octocat", "triage")
 

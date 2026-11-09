@@ -173,6 +173,42 @@ def test_problem_create_accepts_boundary_sizes(client, db_session, user):
     )
     assert res.status_code == 201, res.json()
 
+
+def test_problem_create_rate_limited_for_regular_users(client, db_session, user, monkeypatch):
+    from app.routers.problems import PROBLEM_CREATE_LIMITER
+
+    monkeypatch.setenv("PROBLEM_CREATE_PER_HOUR", "2")
+    config.get_settings.cache_clear()
+    PROBLEM_CREATE_LIMITER._hits.clear()
+    try:
+        assert client.post("/api/problems", json=draft_card_factory()).status_code == 201
+        assert client.post("/api/problems", json=draft_card_factory()).status_code == 201
+        res = client.post("/api/problems", json=draft_card_factory())
+        assert res.status_code == 429
+        assert res.json()["detail"]["code"] == "rate_limited"
+    finally:
+        config.get_settings.cache_clear()
+        PROBLEM_CREATE_LIMITER._hits.clear()
+
+
+def test_problem_create_admins_are_exempt(client, db_session, user, monkeypatch):
+    from app.routers.problems import PROBLEM_CREATE_LIMITER
+
+    monkeypatch.setenv("PROBLEM_CREATE_PER_HOUR", "1")
+    monkeypatch.setenv("ADMIN_GITHUB_USERNAMES", "fixer")
+    config.get_settings.cache_clear()
+    PROBLEM_CREATE_LIMITER._hits.clear()
+    try:
+        for index in range(3):
+            res = client.post(
+                "/api/problems",
+                json=draft_card_factory(source_id=f"ADM{index}"),
+            )
+            assert res.status_code == 201, res.json()
+    finally:
+        config.get_settings.cache_clear()
+        PROBLEM_CREATE_LIMITER._hits.clear()
+
 @pytest.fixture
 def _escape_probe_dist(tmp_path, monkeypatch):
     """A clean, isolated dist tree for the path-escape probes.
