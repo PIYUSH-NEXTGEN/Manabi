@@ -13,6 +13,7 @@
   --accent: #c2451c;
   --accent-soft: #e4d5c6;
   --danger: #9f2c14;
+  --danger-soft: #efdcd2;
   --muted: #6f695b;
   --line: rgba(23, 21, 15, 0.22);
   --line-strong: var(--ink);
@@ -44,6 +45,7 @@
   --accent: #ec6a34;
   --accent-soft: #33241a;
   --danger: #ff8a68;
+  --danger-soft: #3a2018;
   --muted: #a39c8d;
   --line: rgba(239, 233, 221, 0.22);
   --line-strong: var(--ink);

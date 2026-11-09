@@ -12,6 +12,7 @@ import { useMe } from '@/hooks/useMe';
 import { useSubmitProject } from '@/hooks/useSubmitProject';
 import { GITHUB_REPO_URL_PATTERN, stripGitSuffix } from '@/lib/repoUrl';
 import { SOLUTION_SUMMARY_MAX } from '@/lib/limits';
+import { SubmittingCard } from './SubmittingCard';
 
 const panelHeading =
   'font-mono text-xs font-bold uppercase tracking-widest';
@@ -28,7 +29,9 @@ const ERROR_MESSAGES: Record<string, string> = {
   not_repo_owner: 'You can only submit repositories you own',
   github_rate_limited: 'GitHub rate limit reached — try again in a few minutes.',
   github_unavailable: 'GitHub is not reachable right now — try again shortly.',
-  not_relevant: 'Automatic check: this repo does not relate to the problem. You can edit and resubmit if that is wrong.',
+  not_relevant: 'Your project was rejected by the automatic relevance check. The reasons below explain everything that can cause a rejection.',
+  readme_required: 'Your project was rejected: the repository has no README. Add one that explains the project, then submit again.',
+  too_few_commits: 'Your project was rejected: the repository does not have enough commit history yet.',
   already_submitted: 'You already linked this repository to this problem.',
   repo_already_used: 'This repository is already linked to another problem.',
   repo_already_used_other_problem: 'This repository is already linked to another problem.',
@@ -44,12 +47,25 @@ function errorMessageFor(error: unknown): string {
   return 'Something went wrong while submitting. Try again.';
 }
 
+function rejectReasons(error: unknown): string[] {
+  if (error instanceof ApiError && error.payload && typeof error.payload === 'object') {
+    const detail = (error.payload as { detail?: unknown }).detail;
+    if (detail && typeof detail === 'object') {
+      const candidates = (detail as { reasons?: unknown }).reasons;
+      if (Array.isArray(candidates)) {
+        return candidates.filter((reason): reason is string => typeof reason === 'string');
+      }
+    }
+  }
+  return [];
+}
+
 function statusLabel(status: ProjectOut['verification_status']): string {
   switch (status) {
     case 'verified':
-      return 'Verified against the problem — it is public.';
+      return 'Verified against the problem. It is now public.';
     case 'needs_review':
-      return 'Submitted — an automatic check is pending human confirmation.';
+      return 'Submitted. It is awaiting review and will go public once the check confirms it.';
     case 'rejected':
       return 'Rejected by the automatic relevance check.';
     default:
@@ -67,6 +83,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
   const [openForContributors, setOpenForContributors] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitReasons, setSubmitReasons] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState<ProjectOut | null>(null);
 
   const submit = useSubmitProject(problemId);
@@ -112,6 +129,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitError(null);
+    setSubmitReasons([]);
 
     const normalized = stripGitSuffix(
       repoUrl.trim().replace(/\/+$/, ''),
@@ -146,6 +164,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
         },
         onError: (error) => {
           setSubmitError(errorMessageFor(error));
+          setSubmitReasons(rejectReasons(error));
         },
       },
     );
@@ -157,7 +176,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
         <h2 className={panelHeading}>Submitted</h2>
         <p className="text-sm leading-snug">{statusLabel(submitted.verification_status)}</p>
         <p className="text-sm leading-snug">
-          {submitted.repo_url} is on the board with a progress badge.
+          Your repository has been added to the problem board with a progress badge.
         </p>
         <Link
           to={`/projects/${submitted.id}`}
@@ -172,6 +191,9 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
   return (
     <aside className="flex flex-col gap-3 border border-ink bg-sheet p-4">
       <h2 className={panelHeading}>Submit a project</h2>
+      {submit.isPending ? (
+        <SubmittingCard />
+      ) : (
       <form
         noValidate
         onSubmit={handleSubmit}
@@ -232,21 +254,37 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           </p>
         ) : null}
         {submitError ? (
-          <p
+          <div
             role="alert"
-            className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
+            className="flex flex-col gap-2 border border-danger bg-danger-soft p-3"
           >
-            {submitError}
-          </p>
+            <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
+              {submitReasons.length > 0 ? 'Your project was rejected' : 'Submission failed'}
+            </p>
+            <p className="text-sm leading-snug">{submitError}</p>
+            {submitReasons.length > 0 ? (
+              <div className="flex flex-col gap-1.5">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-ink-soft">
+                  Why this can happen
+                </p>
+                <ul className="flex list-disc flex-col gap-1.5 pl-5 text-sm leading-snug">
+                  {submitReasons.map((reason) => (
+                    <li key={reason}>{reason}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
         ) : null}
         <button
           type="submit"
           disabled={submit.isPending}
           className={cx(buttonClasses('primary'), 'self-start')}
         >
-          {submit.isPending ? 'Submitting…' : 'Submit project'}
+          Submit project
         </button>
       </form>
+      )}
     </aside>
   );
 }

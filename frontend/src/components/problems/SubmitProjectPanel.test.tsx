@@ -101,19 +101,23 @@ describe('SubmitProjectPanel', () => {
 
     await screen.findByLabelText(REPO_LABEL);
     await user.type(screen.getByLabelText(REPO_LABEL), 'https://github.com/owner/name');
-    const submit = screen.getByRole('button', { name: 'Submit project' });
-
-    await user.click(submit);
+    await user.click(await screen.findByRole('button', { name: 'Submit project' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'You can only submit repositories you own',
     );
 
-    await user.click(submit);
+    // The form is swapped for the progress card while pending, so the button
+    // is remounted each time the panel returns to the submission state.
+    await user.click(
+      await screen.findByRole('button', { name: 'Submit project' }),
+    );
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'You already linked this repository to this problem.',
     );
 
-    await user.click(submit);
+    await user.click(
+      await screen.findByRole('button', { name: 'Submit project' }),
+    );
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'The deployed link must be a plain http(s) URL, at most 500 characters.',
     );
@@ -178,7 +182,9 @@ describe('SubmitProjectPanel', () => {
     await user.click(screen.getByRole('button', { name: 'Submit project' }));
 
     expect(await screen.findByRole('heading', { name: 'Submitted' })).toBeInTheDocument();
-    expect(screen.getByText(/an automatic check is pending human confirmation/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/awaiting review and will go public once the check confirms it/i),
+    ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open project page' })).toHaveAttribute(
       'href',
       '/projects/77',

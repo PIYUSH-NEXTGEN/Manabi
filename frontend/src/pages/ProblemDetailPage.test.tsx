@@ -285,10 +285,9 @@ describe('ProblemDetailPage', () => {
     await user.click(screen.getByLabelText('Open for contributors'));
     await user.click(screen.getByRole('button', { name: 'Submit project' }));
 
-    expect(await screen.findByText(/is on the board/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/github\.com\/tester\/new-thing/i),
-    ).toHaveTextContent('https://github.com/tester/new-thing');
+      await screen.findByText(/added to the problem board with a progress badge/i),
+    ).toBeInTheDocument();
     expect(postCalls).toBe(1);
     expect(
       screen.getByRole('link', { name: 'Open project page' }),
