@@ -9,7 +9,8 @@ import {
 } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import { EASE_SNAP, slideUpReveal } from '@/design/motion';
-import { buttonClasses, Skeleton, Tag } from '@/design/primitives';
+import { buttonClasses, Tag } from '@/design/primitives';
+import { LoadErrorPanel, PageSkeleton } from '@/pages/detailStates';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
 import { SubmitProjectPanel } from '@/components/problems/SubmitProjectPanel';
@@ -19,16 +20,6 @@ import { projectOwnerUsername } from '@/api/client';
 
 const panelHeading = 'font-mono text-[10px] font-bold uppercase tracking-[0.18em]';
 const microLabel = 'font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted';
-
-function ProjectSkeleton() {
-  return (
-    <div className="mx-auto w-[min(1240px,96vw)] space-y-4 py-16">
-      <Skeleton className="h-3 w-40" />
-      <Skeleton className="h-16 w-2/3" />
-      <Skeleton className="h-40 w-full" />
-    </div>
-  );
-}
 
 function futureIdeas(originalText: string | null | undefined): string[] {
   if (!originalText) return [];
@@ -104,7 +95,7 @@ function DetailView({ problemId }: { problemId: number }) {
   if (problem.isPending) {
     return (
       <main className="border-b border-ink bg-paper">
-        <ProjectSkeleton />
+        <PageSkeleton width="w-[min(1240px,96vw)]" />
       </main>
     );
   }
@@ -114,17 +105,12 @@ function DetailView({ problemId }: { problemId: number }) {
       return <NotFoundPage />;
     }
     return (
-      <main className="border-b border-ink">
-        <div className="mx-auto w-[min(760px,96vw)] space-y-4 py-16">
-          <h1 className="font-display text-3xl uppercase">
-            Could not load this problem
-          </h1>
-          <p>{problem.error.message}</p>
-          <Link to="/problems" className="font-mono text-xs font-bold underline">
-            Back to the board
-          </Link>
-        </div>
-      </main>
+      <LoadErrorPanel
+        title="Could not load this problem"
+        message={problem.error.message}
+        backTo="/problems"
+        backLabel="Back to the board"
+      />
     );
   }
 

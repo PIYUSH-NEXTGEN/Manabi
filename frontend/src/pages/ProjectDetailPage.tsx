@@ -3,7 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { cx } from '@/lib/cx';
 import { safeExternalUrl } from '@/lib/url';
-import { buttonClasses, Skeleton, Stamp, Tag, useToast } from '@/design/primitives';
+import { buttonClasses, Stamp, Tag, useToast } from '@/design/primitives';
+import { LoadErrorPanel, PageSkeleton } from '@/pages/detailStates';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
 import { useProject } from '@/hooks/useProject';
@@ -91,16 +92,6 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
   );
 }
 
-function ProjectSkeleton() {
-  return (
-    <div className="mx-auto w-[min(900px,96vw)] space-y-4 py-16">
-      <Skeleton className="h-3 w-40" />
-      <Skeleton className="h-10 w-1/2" />
-      <Skeleton className="h-40 w-full" />
-    </div>
-  );
-}
-
 export function ProjectDetailPage() {
   const { id } = useParams();
   const projectId = Number(id);
@@ -121,7 +112,7 @@ function ProjectView({ projectId }: { projectId: number }) {
   if (project.isPending) {
     return (
       <main className="border-b border-ink bg-paper">
-        <ProjectSkeleton />
+        <PageSkeleton width="w-[min(900px,96vw)]" />
       </main>
     );
   }
@@ -131,20 +122,12 @@ function ProjectView({ projectId }: { projectId: number }) {
       return <NotFoundPage />;
     }
     return (
-      <main className="border-b border-ink">
-        <div className="mx-auto w-[min(760px,96vw)] space-y-4 py-16">
-          <h1 className="font-display text-3xl uppercase">
-            Could not load this project
-          </h1>
-          <p>{project.error.message}</p>
-          <Link
-            to="/problems"
-            className="font-mono text-xs font-bold underline"
-          >
-            Back to the board
-          </Link>
-        </div>
-      </main>
+      <LoadErrorPanel
+        title="Could not load this project"
+        message={project.error.message}
+        backTo="/problems"
+        backLabel="Back to the board"
+      />
     );
   }
 

@@ -1,11 +1,6 @@
 import type { Progress } from '@/api/client';
+import { PROGRESS_STAMPS } from '@/design/status';
 import { Stamp } from '@/design/primitives';
-
-const STATUS_STAMP = {
-  not_started: { tone: 'not-started', label: 'not started' },
-  active: { tone: 'active', label: 'active' },
-  stale: { tone: 'stale', label: 'stale' },
-} as const;
 
 export function ProjectProgressBadge({
   progress,
@@ -20,7 +15,7 @@ export function ProjectProgressBadge({
     );
   }
 
-  const stamp = STATUS_STAMP[progress.status];
+  const stamp = PROGRESS_STAMPS[progress.status];
 
   return (
     <span className="inline-flex items-center gap-1.5">

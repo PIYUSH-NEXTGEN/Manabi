@@ -19,8 +19,7 @@ import {
 } from '@/hooks/useMyProjects';
 import { useProjectProgress } from '@/hooks/useProjectProgress';
 import { cx } from '@/lib/cx';
-
-const SUMMARY_MAX = 400;
+import { SOLUTION_SUMMARY_MAX } from '@/lib/limits';
 
 const STATUS_TAGS: Record<ProjectOut['verification_status'], { label: string; tone: string }> = {
   verified: { label: 'verified · public', tone: 'text-accent' },
@@ -31,7 +30,12 @@ const STATUS_TAGS: Record<ProjectOut['verification_status'], { label: string; to
 function checkCompletionError(error: unknown): CompletionChecklistItem[] | null {
   if (error instanceof ApiError && error.status === 422 && error.code === 'not_ready_to_complete') {
     const detail = (error.payload as { detail?: { checklist?: unknown } } | undefined)?.detail;
-    if (Array.isArray(detail?.checklist)) return detail.checklist as CompletionChecklistItem[];
+    if (Array.isArray(detail?.checklist)) {
+      return detail.checklist.filter(
+        (item): item is CompletionChecklistItem =>
+          typeof item?.item === 'string' && typeof item?.ok === 'boolean',
+      );
+    }
   }
   return null;
 }
@@ -115,7 +119,7 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
             value={summary}
             onChange={(event) => setSummary(event.target.value)}
             rows={5}
-            maxLength={SUMMARY_MAX}
+            maxLength={SOLUTION_SUMMARY_MAX}
             className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-sm"
           />
           <span className="mt-1 block text-xs text-ink-soft">

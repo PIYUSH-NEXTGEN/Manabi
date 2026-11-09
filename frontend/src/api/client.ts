@@ -1,4 +1,4 @@
-import type { components, paths } from './schema';
+import type { components } from './schema';
 
 type Schemas = components['schemas'];
 
@@ -88,13 +88,6 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   return (await response.json()) as T;
 }
 
-export type HealthResponse =
-  paths['/api/health']['get']['responses']['200']['content']['application/json'];
-
-export function getHealth(): Promise<HealthResponse> {
-  return apiFetch<HealthResponse>('/api/health');
-}
-
 export interface ProblemsQuery {
   q?: string;
   field?: string;
@@ -152,13 +145,6 @@ export function logout(): Promise<void> {
   return apiFetch<void>('/api/auth/logout', { method: 'POST' });
 }
 
-export function createProblem(body: ProblemIn): Promise<ProblemOut> {
-  return apiFetch<ProblemOut>('/api/problems', {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-}
-
 export function postChat(body: ChatIn): Promise<ChatOut> {
   return apiFetch<ChatOut>('/api/chat', {
     method: 'POST',
@@ -166,31 +152,17 @@ export function postChat(body: ChatIn): Promise<ChatOut> {
   });
 }
 
-export function getRecommendations(): Promise<RecommendationsOut> {
-  return apiFetch<RecommendationsOut>('/api/recommendations');
-}
-
 export function getMyProjects(): Promise<ProjectOut[]> {
   return apiFetch<ProjectOut[]>('/api/me/projects');
-}
-
-export type HeatmapOut = Schemas['HeatmapOut'];
-
-export function getGithubHeatmap(): Promise<HeatmapOut> {
-  return apiFetch<HeatmapOut>('/api/me/github-heatmap');
 }
 
 export type Progress = NonNullable<Schemas['ProjectOut']['progress']>;
 export type ProjectOut = Schemas['ProjectOut'];
 export type ProjectCreate = Schemas['ProjectCreate'];
-export type ProblemIn = Schemas['ProblemIn'];
 export type ChatIn = Schemas['ChatIn'];
 export type ChatMessage = Schemas['ChatMessage'];
 export type ChatOut = Schemas['ChatOut'];
-export type ChatPageContext = Schemas['ChatPageContext'];
 export type ChatProblemItem = Schemas['ChatProblemItem'];
-export type RecommendationsOut = Schemas['RecommendationsOut'];
-export type RecommendationItem = Schemas['RecommendationItem'];
 export type AdminSubmissionOut = Schemas['AdminSubmissionOut'];
 export type AdminSubmissionsOut = Schemas['AdminSubmissionsOut'];
 export type AdminSubmissionActionOut = Schemas['AdminSubmissionActionOut'];

@@ -16,8 +16,6 @@ const STATIC_ROUTE_TARGETS: Array<[string, string]> = [
   ['/terms', 'Terms, in plain English'],
 ];
 
-const PLACEHOLDER_ROUTE_TARGETS: Array<[string, string]> = [];
-
 const DEAD_TARGETS = [
   '/nope',
   '/problems/1/extra',
@@ -43,17 +41,6 @@ describe('Route table (no dead links)', () => {
         { timeout: 5000 },
       ),
     ).toBeInTheDocument();
-  });
-
-  it.each(PLACEHOLDER_ROUTE_TARGETS)('%s resolves to a placeholder page', (path, title) => {
-    window.history.pushState({}, '', path);
-
-    render(<App />);
-
-    expect(
-      screen.getByRole('heading', { name: title, level: 1 }),
-    ).toBeInTheDocument();
-    expect(screen.queryByText('404')).not.toBeInTheDocument();
   });
 
   it('/problems renders the board', async () => {

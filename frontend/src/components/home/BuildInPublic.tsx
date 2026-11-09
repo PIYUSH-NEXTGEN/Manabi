@@ -12,12 +12,7 @@ import {
   GitCommitHorizontal,
 } from 'lucide-react';
 import { GithubMark } from '@/components/icons/GithubMark';
-
-const STATUS_TONE = {
-  active: 'active',
-  stale: 'stale',
-  not_started: 'not-started',
-} as const;
+import { PROGRESS_STAMPS } from '@/design/status';
 
 const FEATURES = [
   {
@@ -71,7 +66,7 @@ function ProgressPanel({ project }: { project: ProjectOut }) {
           Project record
         </span>
         {progress ? (
-          <Stamp tone={STATUS_TONE[progress.status]} />
+          <Stamp tone={PROGRESS_STAMPS[progress.status].tone} />
         ) : (
           <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
             No data

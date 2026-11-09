@@ -1,4 +1,6 @@
 ﻿import { http, HttpResponse } from 'msw';
+import { GITHUB_REPO_URL_PATTERN, stripGitSuffix } from '@/lib/repoUrl';
+import { SOLUTION_SUMMARY_MAX } from '@/lib/limits';
 
 const stats = {
   problems: 6,
@@ -387,14 +389,14 @@ export const handlers = [
       open_for_contributors?: boolean;
     };
     const repoUrl = body.repo_url ?? '';
-    if (!/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/.test(repoUrl)) {
+    if (!GITHUB_REPO_URL_PATTERN.test(repoUrl)) {
       return HttpResponse.json(
         { detail: { code: 'invalid_repo_url', message: 'Use a GitHub repo URL like https://github.com/owner/name' } },
         { status: 422 },
       );
     }
     const summary = (body.solution_summary ?? '').trim();
-    if (summary.length > 400) {
+    if (summary.length > SOLUTION_SUMMARY_MAX) {
       return HttpResponse.json(
         { detail: { code: 'invalid_summary', message: 'Keep the description to at most 400 characters.' } },
         { status: 422 },
@@ -419,7 +421,7 @@ export const handlers = [
       );
     }
 
-    const clean = repoUrl.replace(/\.git$/, '');
+    const clean = stripGitSuffix(repoUrl);
     const parts = clean.split('/');
     const owner = parts[3];
     const name = parts[4];
@@ -494,9 +496,6 @@ export const handlers = [
         })),
     });
   }),
-  http.get('*/api/recommendations', () =>
-    HttpResponse.json({ detail: 'Not logged in' }, { status: 401 }),
-  ),
   http.get('*/api/me/projects', () =>
     HttpResponse.json({ detail: 'Not logged in' }, { status: 401 }),
   ),
@@ -522,23 +521,6 @@ export const handlers = [
   http.delete('*/api/projects/:id', () =>
     new HttpResponse(null, { status: 204 }),
   ),
-  http.get('*/api/me/github-heatmap', () => {
-    const today = new Date();
-    const days: Array<{ date: string; count: number }> = [];
-    let total = 0;
-    for (let i = 90; i >= 0; i -= 1) {
-      const date = new Date(today);
-      date.setUTCDate(today.getUTCDate() - i);
-      // sparse deterministic activity, like the real backlog: only recent weeks
-      const seeded = (i * 7 + 13) % 31;
-      if (i < 14 && seeded % 3 === 0) {
-        const count = (seeded % 9) + 1;
-        total += count;
-        days.push({ date: date.toISOString().slice(0, 10), count });
-      }
-    }
-    return HttpResponse.json({ days, total, window_days: 91 });
-  }),
   http.patch('*/api/projects/:id', async ({ request, params }) => {
     const body = (await request.json()) as {
       demo_url?: string;
@@ -599,36 +581,6 @@ export const handlers = [
       );
     }
     return HttpResponse.json({ ok: true, report_count: 1 }, { status: 201 });
-  }),
-  http.post('*/api/problems', async ({ request }) => {
-    const body = (await request.json()) as { title?: string };
-    const title = typeof body.title === 'string' ? body.title : 'Pasted problem';
-    return HttpResponse.json(
-      {
-        id: 9,
-        title,
-        summary: 'Pasted.',
-        who_affected: 'Someone',
-        why_matters: 'It matters',
-        field: 'ml',
-        domain: 'education',
-        difficulty: 'beginner',
-        est_hours: 20,
-        tech_tags: [],
-        datasets: [],
-        approaches: [],
-        source_name: 'Pasted statement',
-        source_id: null,
-        source_url: null,
-        source_note: null,
-        project_count: 0,
-        completed_count: 0,
-        ai_fields: [],
-        projects: [],
-        original_text: title,
-      },
-      { status: 201 },
-    );
   }),
   http.get('*/api/projects/:id', ({ params }) => {
     const id = Number(params.id);

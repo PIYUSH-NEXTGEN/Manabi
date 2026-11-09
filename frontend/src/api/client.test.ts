@@ -1,12 +1,12 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { server } from '@/api/mocks/server';
-import { ApiError, apiFetch, deleteProject, getHealth, getProblems, getStats } from './client';
+import { ApiError, apiFetch, deleteProject, getProblems, getStats } from './client';
 
 describe('apiFetch', () => {
   it('parses JSON on success', async () => {
-    const health = await getHealth();
-    expect(health).toEqual({ status: 'ok' });
+    const response = await apiFetch<{ status: string }>('/api/health');
+    expect(response).toEqual({ status: 'ok' });
   });
 
   it('resolves without parsing a body on 204 no content (project delete)', async () => {

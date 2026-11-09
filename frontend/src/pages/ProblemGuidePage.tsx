@@ -10,7 +10,8 @@ import {
 } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import { slideUpReveal } from '@/design/motion';
-import { Skeleton, Tag } from '@/design/primitives';
+import { Tag } from '@/design/primitives';
+import { LoadErrorPanel, PageSkeleton } from '@/pages/detailStates';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { useProblem } from '@/hooks/useProblem';
 
@@ -22,16 +23,6 @@ const PHASE_LINKS = [
   { index: 2, label: 'Implement' },
   { index: 3, label: 'Ship' },
 ];
-
-function GuideSkeleton() {
-  return (
-    <div className="mx-auto w-[min(1240px,96vw)] space-y-4 py-16">
-      <Skeleton className="h-3 w-40" />
-      <Skeleton className="h-10 w-1/2" />
-      <Skeleton className="h-40 w-full" />
-    </div>
-  );
-}
 
 function Phase({
   id,
@@ -104,7 +95,7 @@ function GuideView({ problemId }: { problemId: number }) {
   if (problem.isPending) {
     return (
       <main className="border-b border-ink bg-paper">
-        <GuideSkeleton />
+        <PageSkeleton width="w-[min(1240px,96vw)]" />
       </main>
     );
   }
@@ -114,20 +105,12 @@ function GuideView({ problemId }: { problemId: number }) {
       return <NotFoundPage />;
     }
     return (
-      <main className="border-b border-ink">
-        <div className="mx-auto w-[min(760px,96vw)] space-y-4 py-16">
-          <h1 className="font-display text-3xl uppercase">
-            Could not load this guide
-          </h1>
-          <p>{problem.error.message}</p>
-          <Link
-            to={`/problems/${problemId}`}
-            className="font-mono text-xs font-bold underline"
-          >
-            Back to the problem
-          </Link>
-        </div>
-      </main>
+      <LoadErrorPanel
+        title="Could not load this guide"
+        message={problem.error.message}
+        backTo={`/problems/${problemId}`}
+        backLabel="Back to the problem"
+      />
     );
   }
 

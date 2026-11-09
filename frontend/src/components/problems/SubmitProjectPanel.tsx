@@ -10,14 +10,13 @@ import {
 import { ApiError, type ProjectOut } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
 import { useSubmitProject } from '@/hooks/useSubmitProject';
+import { GITHUB_REPO_URL_PATTERN, stripGitSuffix } from '@/lib/repoUrl';
+import { SOLUTION_SUMMARY_MAX } from '@/lib/limits';
 
-const GITHUB_REPO_URL_PATTERN =
-  /^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/;
 const panelHeading =
   'font-mono text-xs font-bold uppercase tracking-widest';
 const invalidReason =
   'Use a GitHub repo URL like https://github.com/owner/name';
-const SUMMARY_MAX = 400;
 
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_repo_url: 'Use a GitHub repo URL like https://github.com/owner/name.',
@@ -114,10 +113,9 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
     event.preventDefault();
     setSubmitError(null);
 
-    const normalized = repoUrl
-      .trim()
-      .replace(/\/+$/, '')
-      .replace(/\.git$/, '');
+    const normalized = stripGitSuffix(
+      repoUrl.trim().replace(/\/+$/, ''),
+    );
     if (!GITHUB_REPO_URL_PATTERN.test(normalized)) {
       setValidationError(invalidReason);
       return;
@@ -194,10 +192,10 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           <span
             className={cx(
               'normal-case tracking-normal',
-              summary.trim().length > SUMMARY_MAX ? 'text-danger' : 'text-ink/40',
+              summary.trim().length > SOLUTION_SUMMARY_MAX ? 'text-danger' : 'text-ink/40',
             )}
           >
-            {summary.trim().length}/400
+            {summary.trim().length}/{SOLUTION_SUMMARY_MAX}
           </span>
         </label>
         <textarea
@@ -205,7 +203,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           value={summary}
           onChange={handleSummaryChange}
           rows={5}
-          maxLength={400}
+          maxLength={SOLUTION_SUMMARY_MAX}
           placeholder="Optional up to 400 characters: what the repo does, how it addresses the problem, and where the data comes from."
           className="border border-ink bg-paper px-3 py-2 text-sm"
         />

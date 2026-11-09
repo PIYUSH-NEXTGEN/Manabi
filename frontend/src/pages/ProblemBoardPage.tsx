@@ -10,6 +10,7 @@ import {
   FileBadge,
 } from 'lucide-react';
 import { cx } from '@/lib/cx';
+import type { ProblemOut } from '@/api/client';
 import { EASE_SNAP } from '@/design/motion';
 import { buttonClasses, Input, Skeleton } from '@/design/primitives';
 import { ProblemCard } from '@/components/problems/ProblemCard';
@@ -47,8 +48,8 @@ const GOAL_OPTIONS: {
   },
 ];
 
-function goalOf(problem: unknown): GoalKey | undefined {
-  return (problem as { goal?: GoalKey }).goal;
+function goalOf(problem: ProblemOut): GoalKey | undefined {
+  return problem.goal ?? undefined;
 }
 
 function BoardSkeletons() {
@@ -82,11 +83,8 @@ export function ProblemBoardPage() {
   const difficulty = searchParams.get('difficulty') ?? '';
   const source = searchParams.get('source') ?? '';
   const goalParam = searchParams.get('goal');
-  const goal: GoalKey | '' = GOAL_OPTIONS.some(
-    (option) => option.value === goalParam,
-  )
-    ? (goalParam as GoalKey)
-    : '';
+  const goal =
+    GOAL_OPTIONS.find((option) => option.value === goalParam)?.value ?? '';
 
   const filterKey = [q, field, domain, difficulty, source].join('|');
   const filters = useMemo(

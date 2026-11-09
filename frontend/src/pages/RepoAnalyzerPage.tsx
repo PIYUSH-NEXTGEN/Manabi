@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cx } from '@/lib/cx';
+import { GITHUB_REPO_URL_PATTERN } from '@/lib/repoUrl';
 import { buttonClasses, Input } from '@/design/primitives';
 import { StaticShell } from './StaticShell';
 
@@ -12,11 +13,9 @@ export function RepoAnalyzerPage() {
     event.preventDefault();
     setError(undefined);
     const normalized = repoUrl.trim().replace(/\/$/, '');
-    if (!/^https:\/\/github\.com\/[\w.-]+\/[\w.-]+$/.test(normalized)) {
+    if (!GITHUB_REPO_URL_PATTERN.test(normalized)) {
       setError('Enter a valid GitHub repo URL like https://github.com/owner/name');
-      return;
     }
-    setError(undefined);
   }
 
   return (

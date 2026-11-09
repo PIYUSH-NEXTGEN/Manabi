@@ -52,7 +52,7 @@ function renderDashboard() {
 }
 
 describe('DashboardPage', () => {
-  it('shows greeting, own projects by name with progress badges, and the GitHub heatmap', async () => {
+  it('shows greeting and own projects by name with progress badges', async () => {
     server.use(
       http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
       http.get('*/api/me/projects', () => HttpResponse.json(MY_PROJECTS)),
@@ -64,16 +64,6 @@ describe('DashboardPage', () => {
           has_readme: true,
           recent_commits: [],
           open_issues: [],
-        }),
-      ),
-      http.get('*/api/me/github-heatmap', () =>
-        HttpResponse.json({
-          days: [
-            { date: '2026-11-01', count: 3 },
-            { date: '2026-11-02', count: 0 },
-          ],
-          total: 3,
-          window_days: 91,
         }),
       ),
     );
@@ -98,9 +88,6 @@ describe('DashboardPage', () => {
     server.use(
       http.get('*/api/auth/me', () => HttpResponse.json(ME_200)),
       http.get('*/api/me/projects', () => HttpResponse.json([])),
-      http.get('*/api/me/github-heatmap', () =>
-        HttpResponse.json({ days: [], total: 0, window_days: 91 }),
-      ),
     );
     renderDashboard();
 
