@@ -7,14 +7,14 @@ describe('IndexCard', () => {
     render(
       <IndexCard
         sourceId="SIH26017"
-        field="computer-vision"
+        field="aiml"
         title="Crop disease triage"
         difficulty="beginner"
       />,
     );
 
     expect(screen.getByText('SIH26017')).toBeInTheDocument();
-    expect(screen.getByText('computer-vision')).toBeInTheDocument();
+    expect(screen.getByText('aiml')).toBeInTheDocument();
     expect(
       screen.getByRole('heading', { name: 'Crop disease triage' }),
     ).toBeInTheDocument();
@@ -22,7 +22,7 @@ describe('IndexCard', () => {
 
   it('shows difficulty as filled squares with a screen-reader label', () => {
     render(
-      <IndexCard field="ml" title="Drift detector" difficulty="intermediate" />,
+      <IndexCard field="data-science" title="Drift detector" difficulty="intermediate" />,
     );
 
     const label = screen.getByText('intermediate');
@@ -34,7 +34,7 @@ describe('IndexCard', () => {
   });
 
   it('falls back to NO-ID when the source has no ID', () => {
-    render(<IndexCard field="ml" title="Untitled draft" difficulty="advanced" />);
+    render(<IndexCard field="data-science" title="Untitled draft" difficulty="advanced" />);
     expect(screen.getByText('NO-ID')).toBeInTheDocument();
     expect(screen.getByText('advanced')).toBeInTheDocument();
   });
@@ -42,7 +42,7 @@ describe('IndexCard', () => {
   it('renders summary, domain and est hours when present', () => {
     render(
       <IndexCard
-        field="web-fullstack"
+        field="web-dev"
         title="Permit tracker"
         summary="Track applications end to end."
         difficulty="beginner"
