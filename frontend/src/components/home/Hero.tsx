@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
+import { Clock } from 'lucide-react';
 import { buttonClasses } from '@/design';
 import { EASE_SNAP } from '@/design/motion';
 import { cx } from '@/lib/cx';
@@ -8,40 +9,13 @@ import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import { useProblems } from '@/hooks/useProblems';
 import { useStats } from '@/hooks/useStats';
 import { fieldLabel } from '@/lib/fields';
-import type { ProblemOut } from '@/api/client';
 import { CountUp } from './CountUp';
 
 const SHOWCASE_LIMIT = 6;
 const CYCLE_MS = 3000;
 
-const DIFFICULTY_FILL: Record<ProblemOut['difficulty'], number> = {
-  beginner: 1,
-  intermediate: 2,
-  advanced: 3,
-};
-
 function pad(value: number) {
   return String(value).padStart(2, '0');
-}
-
-function DifficultyMeter({ difficulty }: { difficulty: ProblemOut['difficulty'] }) {
-  const filled = DIFFICULTY_FILL[difficulty];
-  return (
-    <span className="flex items-center gap-1.5" title={difficulty}>
-      <span aria-hidden className="flex gap-0.5">
-        {Array.from({ length: 3 }, (_, index) => (
-          <span
-            key={index}
-            className={cx(
-              'block size-2 border border-ink',
-              index < filled ? 'bg-ink' : 'bg-transparent',
-            )}
-          />
-        ))}
-      </span>
-      <span className="sr-only">{difficulty}</span>
-    </span>
-  );
 }
 
 function BriefShowcase() {
@@ -77,15 +51,15 @@ function BriefShowcase() {
       onMouseLeave={() => setHeld(false)}
     >
       <div className="flex items-center justify-between gap-3 border-b border-ink px-4 py-2.5">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em]">
-          Brief in focus
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
+          {active ? fieldLabel(active.field) : null}
         </span>
         <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
           {count > 0 ? `${pad(current + 1)} / ${pad(count)}` : 'No data'}
         </span>
       </div>
 
-      <div className="min-h-[300px] p-5 sm:p-6" aria-busy={query.isLoading}>
+      <div className="flex min-h-[300px] flex-col p-5 sm:p-6" aria-busy={query.isLoading}>
         {query.isLoading ? (
           <div className="space-y-3" aria-hidden>
             <div className="skeleton h-2.5 w-20" />
@@ -102,24 +76,35 @@ function BriefShowcase() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -12 }}
               transition={{ duration: reduced ? 0 : 0.42, ease: EASE_SNAP }}
+              className="flex flex-1 flex-col"
             >
-              <Link to={`/problems/${active.id}`} className="group block">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-accent">
-                    {active.source_id ?? `BRIEF-${active.id}`}
-                  </p>
-                  <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-                    {fieldLabel(active.field)}
-                  </p>
-                </div>
-                <h2 className="mt-2 line-clamp-3 font-display text-2xl uppercase leading-[0.98] tracking-tight sm:text-3xl">
+              <Link
+                to={`/problems/${active.id}`}
+                className="group flex h-full flex-col"
+              >
+                <h2 className="line-clamp-3 font-display text-2xl uppercase leading-[0.98] tracking-tight sm:text-3xl">
                   {active.title}
                 </h2>
                 <p className="mt-3 line-clamp-3 text-sm leading-snug text-ink-soft">
                   {active.summary}
                 </p>
-                <div className="mt-6 flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-[9px] font-bold uppercase tracking-[0.16em]">
-                  <DifficultyMeter difficulty={active.difficulty} />
+                {active.tech_tags.length > 0 ? (
+                  <ul className="mt-4 flex flex-wrap gap-1.5">
+                    {active.tech_tags.slice(0, 4).map((tag) => (
+                      <li
+                        key={tag}
+                        className="border border-line px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-ink-soft"
+                      >
+                        {tag}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+                <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-[9px] font-bold uppercase tracking-[0.16em]">
+                  <span className="flex items-center gap-1 text-muted">
+                    <Clock aria-hidden size={11} strokeWidth={2.4} />
+                    ~{active.est_hours}h
+                  </span>
                   <span className="text-accent transition-colors group-hover:text-ink">
                     Open brief →
                   </span>
@@ -149,8 +134,7 @@ function BriefShowcase() {
         )}
       </div>
 
-      <figcaption className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-        <span>Curated by MANABI</span>
+      <figcaption className="flex flex-wrap items-center justify-end gap-2 border-t border-line px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
         {count > 1 ? (
           <span className="flex items-center gap-3">
             <span className="flex items-center gap-1">

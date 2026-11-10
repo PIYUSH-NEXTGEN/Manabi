@@ -8,28 +8,39 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import {
   ArrowUpRight,
-  CircleDot,
+  BrainCircuit,
   FileText,
-  GitCommitHorizontal,
+  RefreshCw,
+  ShieldCheck,
 } from 'lucide-react';
 import { GithubMark } from '@/components/icons/GithubMark';
 import { PROGRESS_STAMPS } from '@/design/status';
+import { VerificationConsole } from './VerificationConsole';
 
-const FEATURES = [
+const STEPS = [
   {
-    icon: GitCommitHorizontal,
-    title: 'Commits',
-    copy: 'Pulled from the repo on every sync.',
+    step: '01',
+    icon: ShieldCheck,
+    title: 'Your own repo',
+    copy: 'A public GitHub repo you own. Forks and other people’s repos don’t count.',
   },
   {
+    step: '02',
     icon: FileText,
-    title: 'README',
-    copy: 'Checked so the project documents itself.',
+    title: 'README + 5 commits',
+    copy: 'Your repo needs a README and at least 5 commits.',
   },
   {
-    icon: CircleDot,
-    title: 'Open issues',
-    copy: 'Contributors see where they can help.',
+    step: '03',
+    icon: BrainCircuit,
+    title: 'AI checks relevance',
+    copy: 'AI reads your README and checks it matches the brief.',
+  },
+  {
+    step: '04',
+    icon: RefreshCw,
+    title: 'Tracked after approval',
+    copy: 'Commits, README and open issues update from GitHub.',
   },
 ];
 
@@ -184,32 +195,38 @@ export function BuildInPublic() {
           >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-paper/25 pb-3">
               <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-paper/60">
-                <span className="text-accent-soft">02</span> / Public record
+                <span className="text-accent-soft">02</span> / Submission
               </p>
               <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-paper/45">
-                Proof, not promises
+                Checked, not claimed
               </p>
             </div>
 
             <h2 className="mt-7 font-display text-4xl uppercase leading-[0.9] tracking-tight sm:text-5xl">
-              Link a repo.
+              Submit a repo.
               <br />
-              <span className="text-accent-soft">MANABI tracks it.</span>
+              <span className="text-accent-soft">We check the work.</span>
             </h2>
             <p className="mt-5 max-w-md text-sm leading-relaxed text-paper/75">
-              Commits, README, and good-first-issues update themselves. Visitors
-              see proof of work, not a claim of it.
+              Every project is checked before it goes public: your own repo, a
+              README, real commits, then an AI relevance check. Only what passes
+              gets tracked.
             </p>
 
-            <ul className="mt-8 grid gap-px border border-paper/25 bg-paper/25 sm:grid-cols-3">
-              {FEATURES.map(({ icon: Icon, title, copy }) => (
-                <li key={title} className="bg-olive p-4">
-                  <Icon
-                    aria-hidden
-                    size={18}
-                    strokeWidth={2.2}
-                    className="text-accent-soft"
-                  />
+            <ul className="mt-8 grid gap-px border border-paper/25 bg-paper/25 sm:grid-cols-2">
+              {STEPS.map(({ step, icon: Icon, title, copy }) => (
+                <li key={step} className="bg-olive p-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <Icon
+                      aria-hidden
+                      size={18}
+                      strokeWidth={2.2}
+                      className="text-accent-soft"
+                    />
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/35">
+                      {step}
+                    </span>
+                  </div>
                   <h3 className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
                     {title}
                   </h3>
@@ -219,6 +236,11 @@ export function BuildInPublic() {
                 </li>
               ))}
             </ul>
+
+            <p className="mt-4 border-l-2 border-accent-soft/60 pl-3 text-[12px] leading-relaxed text-paper/60">
+              If the AI can’t judge, a keyword check takes over. It can send work
+              to human review, but never mark it verified.
+            </p>
 
             <Link
               to="/problems"
@@ -241,37 +263,18 @@ export function BuildInPublic() {
             viewport={{ once: true, amount: 0.25 }}
             transition={{ delay: 0.1 }}
           >
-            {query.isLoading ? (
-              <div className="skeleton h-64 border border-paper/40" aria-hidden />
-            ) : query.isError ? (
-              <div className="border border-paper/40 p-5">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-paper/70">
-                  Progress panel loads when the projects API is up.
+            <div className="flex flex-col gap-5">
+              <VerificationConsole />
+              {query.isLoading ? (
+                <div className="skeleton h-52 border border-paper/40" aria-hidden />
+              ) : query.project ? (
+                <ProgressPanel project={query.project} />
+              ) : query.isError ? (
+                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/45">
+                  Live example unavailable — the projects API is down.
                 </p>
-                <Link
-                  to="/problems"
-                  className="mt-4 inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-accent-soft underline underline-offset-4 hover:text-paper"
-                >
-                  Browse the index
-                  <ArrowUpRight aria-hidden size={12} strokeWidth={2.6} />
-                </Link>
-              </div>
-            ) : query.project ? (
-              <ProgressPanel project={query.project} />
-            ) : (
-              <div className="border border-paper/40 p-5">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-paper/70">
-                  No project records on the board yet. Be the first.
-                </p>
-                <Link
-                  to="/problems"
-                  className="mt-4 inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-accent-soft underline underline-offset-4 hover:text-paper"
-                >
-                  Browse the index
-                  <ArrowUpRight aria-hidden size={12} strokeWidth={2.6} />
-                </Link>
-              </div>
-            )}
+              ) : null}
+            </div>
           </motion.div>
         </div>
       </div>

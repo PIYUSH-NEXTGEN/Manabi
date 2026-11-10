@@ -1,9 +1,9 @@
 import { NavLink, Link } from 'react-router-dom';
 import {
-  FolderKanban,
   LayoutDashboard,
+  Layers3,
+  Microscope,
   Moon,
-  ScanSearch,
   ShieldCheck,
   Sun,
 } from 'lucide-react';
@@ -15,8 +15,8 @@ import { useTheme } from '@/lib/useTheme';
 import { cx } from '@/lib/cx';
 
 const NAV_LINKS = [
-  { to: '/problems', label: 'Projects', icon: FolderKanban },
-  { to: '/repo-analyzer', label: 'Repo Analyzer', icon: ScanSearch },
+  { to: '/problems', label: 'Projects', icon: Layers3 },
+  { to: '/repo-analyzer', label: 'Repo Analyzer', icon: Microscope },
   { to: '/me', label: 'Dashboard', icon: LayoutDashboard },
 ];
 
@@ -57,7 +57,12 @@ export function Nav() {
           {links.map((link) => (
             <li key={link.to}>
               <NavLink to={link.to} className={navLinkClasses}>
-                <link.icon aria-hidden size={13} strokeWidth={2.4} />
+                <link.icon
+                  aria-hidden
+                  size={14}
+                  strokeWidth={2.2}
+                  className="shrink-0"
+                />
                 {link.label}
               </NavLink>
             </li>
@@ -115,7 +120,12 @@ export function Nav() {
           {links.map((link) => (
             <li key={link.to} className="shrink-0">
               <NavLink to={link.to} className={navLinkClasses}>
-                <link.icon aria-hidden size={13} strokeWidth={2.4} />
+                <link.icon
+                  aria-hidden
+                  size={14}
+                  strokeWidth={2.2}
+                  className="shrink-0"
+                />
                 {link.label}
               </NavLink>
             </li>

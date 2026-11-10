@@ -20,7 +20,7 @@ describe('BuildInPublic', () => {
     ).toHaveAttribute('href', '/problems');
   });
 
-  it('shows the honest empty state when the board has no project records', async () => {
+  it('explains the pipeline when the board has no project records', async () => {
     server.use(
       http.get('*/api/problems', () =>
         HttpResponse.json({ items: [], total: 0 }),
@@ -28,18 +28,14 @@ describe('BuildInPublic', () => {
     );
     renderWithProviders(<BuildInPublic />);
 
+    expect(await screen.findByText('Verification console')).toBeInTheDocument();
+    expect(screen.getByText('Sample run')).toBeInTheDocument();
     expect(
-      await screen.findByText('No project records on the board yet. Be the first.'),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByRole('link', { name: 'Browse the index' }),
-    ).toHaveAttribute('href', '/problems');
-    expect(
-      screen.queryByText(/the projects API is up/),
+      screen.queryByText('demo-farmer / crop-triage'),
     ).not.toBeInTheDocument();
   });
 
-  it('keeps the API-down fallback when the projects API errors', async () => {
+  it('keeps the console and says so when the projects API errors', async () => {
     server.use(
       http.get('*/api/problems', () =>
         HttpResponse.json({ detail: 'Internal server error' }, { status: 500 }),
@@ -47,8 +43,11 @@ describe('BuildInPublic', () => {
     );
     renderWithProviders(<BuildInPublic />);
 
+    expect(await screen.findByText('Verification console')).toBeInTheDocument();
     expect(
-      await screen.findByText('Progress panel loads when the projects API is up.'),
+      await screen.findByText(
+        'Live example unavailable — the projects API is down.',
+      ),
     ).toBeInTheDocument();
   });
 });
