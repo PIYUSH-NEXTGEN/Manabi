@@ -6,7 +6,7 @@ here stops the response shape from drifting between endpoints.
 """
 
 from app import schemas
-from app.models import Problem, Project
+from app.models import Problem, Project, User
 
 
 def _validated(model, raw):
@@ -69,13 +69,17 @@ def problem_to_out(problem: Problem, project_count: int, completed_count: int = 
     )
 
 
-def project_to_out(project: Project, include_private: bool = False) -> schemas.ProjectOut:
+def project_to_out(
+    project: Project, include_private: bool = False, viewer: User | None = None
+) -> schemas.ProjectOut:
     """Public shape for a project row.
 
     include_private adds the owner/admin-only fields (relevance reason,
     ownership basis, review note). relevance_score is never part of this
-    schema — it is not exposed publicly beyond the admin queue.
+    schema — it is not exposed publicly beyond the admin queue. viewer
+    sets starred_by_me for the logged-in viewer (False when anonymous).
     """
+    stars = project.stars
     out = schemas.ProjectOut(
         id=project.id,
         problem_id=project.problem_id,
@@ -92,6 +96,8 @@ def project_to_out(project: Project, include_private: bool = False) -> schemas.P
         completed_at=project.completed_at,
         demo_url=project.demo_url,
         reflection=project.reflection,
+        star_count=len(stars),
+        starred_by_me=viewer is not None and any(star.user_id == viewer.id for star in stars),
     )
     if include_private:
         out.relevance_reason = project.relevance_reason
@@ -100,10 +106,12 @@ def project_to_out(project: Project, include_private: bool = False) -> schemas.P
     return out
 
 
-def project_out_safely(project: Project, include_private: bool = False) -> schemas.ProjectOut:
+def project_out_safely(
+    project: Project, include_private: bool = False, viewer: User | None = None
+) -> schemas.ProjectOut:
     """project_to_out with the cached progress JSON re-validated, so a
     hand-edited or stale progress blob cannot fail response validation."""
-    out = project_to_out(project, include_private=include_private)
+    out = project_to_out(project, include_private=include_private, viewer=viewer)
     if out.progress is not None:
         out.progress = schemas.Progress.model_validate(out.progress)
     return out

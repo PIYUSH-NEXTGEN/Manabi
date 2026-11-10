@@ -270,6 +270,8 @@ const sampleProject = {
     ],
   },
   progress_updated_at: '2026-10-16T10:00:00Z',
+  star_count: 2,
+  starred_by_me: false,
 };
 
 const secondProject = {
@@ -301,6 +303,8 @@ const secondProject = {
     open_issues: [],
   },
   progress_updated_at: '2026-10-02T19:00:00Z',
+  star_count: 0,
+  starred_by_me: false,
 };
 
 const adminSubmissions: Record<string, Array<{ [key: string]: unknown }>> = {
@@ -629,6 +633,14 @@ export const handlers = [
     }
     return HttpResponse.json({ detail: 'Project not found' }, { status: 404 });
   }),
+  http.post('*/api/projects/:id/star', ({ params }) => {
+    const id = Number(params.id);
+    if (id !== sampleProject.id && id !== secondProject.id) {
+      return HttpResponse.json({ detail: 'Project not found' }, { status: 404 });
+    }
+    return HttpResponse.json({ ok: true, star_count: 3 }, { status: 201 });
+  }),
+  http.delete('*/api/projects/:id/star', () => new HttpResponse(null, { status: 204 })),
   http.get('*/api/projects/:id/progress', ({ params, request }) => {
     const id = Number(params.id);
     const refresh = new URL(request.url).searchParams.get('refresh') === 'true';

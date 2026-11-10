@@ -1,16 +1,21 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { ReactNode } from 'react';
+import { Star } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import { safeExternalUrl } from '@/lib/url';
-import { buttonClasses, Stamp, Tag, useToast } from '@/design/primitives';
+import { buttonClasses, Button, Stamp, Tag, useToast } from '@/design/primitives';
 import { LoadErrorPanel, PageSkeleton } from '@/pages/detailStates';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
 import { useProject } from '@/hooks/useProject';
 import { useRefreshProgress } from '@/hooks/useRefreshProgress';
 import { useMe } from '@/hooks/useMe';
-import { useReportProject } from '@/hooks/useMyProjects';
+import {
+  useReportProject,
+  useStarProject,
+  useUnstarProject,
+} from '@/hooks/useMyProjects';
 import {
   asCommitSummary,
   asIssueSummary,
@@ -20,6 +25,72 @@ import {
 
 const panelHeading = 'font-mono text-xs font-bold uppercase tracking-widest';
 const smallMono = 'font-mono text-[10px] font-bold uppercase tracking-widest';
+
+function StarButton({
+  projectId,
+  starCount,
+  starredByMe,
+}: {
+  projectId: number;
+  starCount: number;
+  starredByMe: boolean;
+}) {
+  const me = useMe();
+  const star = useStarProject(projectId);
+  const unstar = useUnstarProject(projectId);
+  const toast = useToast();
+
+  function toggle() {
+    if (starredByMe) {
+      unstar.mutate(undefined, {
+        onError: () => toast('Could not un-star the project. Try again.', 'error'),
+      });
+      return;
+    }
+    star.mutate(undefined, {
+      onSuccess: () => toast('Starred. Thanks for the signal.'),
+      onError: (err) => {
+        if (err instanceof ApiError && err.status === 409) {
+          toast('You already starred this project.', 'error');
+        } else {
+          toast('Could not star the project. Try again.', 'error');
+        }
+      },
+    });
+  }
+
+  if (!me.data) {
+    return (
+      <a
+        href="/api/auth/github/login"
+        title="Log in to star this project"
+        aria-label="Log in to star this project"
+        className={cx(buttonClasses('secondary', 'px-3 py-2'), 'press')}
+      >
+        <Star aria-hidden className="size-3.5" />
+        {starCount > 0 ? starCount : 'Star'}
+      </a>
+    );
+  }
+
+  return (
+    <Button
+      variant="secondary"
+      size="small"
+      onClick={toggle}
+      disabled={star.isPending || unstar.isPending}
+      aria-pressed={starredByMe}
+      aria-label={starredByMe ? 'Un-star this project' : 'Star this project'}
+      title={starredByMe ? 'Click to remove your star' : 'Click to star this project'}
+    >
+      <Star
+        aria-hidden
+        className={cx('size-3.5', starredByMe && 'fill-accent text-accent')}
+      />
+      {starCount > 0 ? starCount : 'Star'}
+    </Button>
+  );
+}
 
 function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolean }) {
   const me = useMe();
@@ -161,6 +232,11 @@ function ProjectView({ projectId }: { projectId: number }) {
         </h1>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
+          <StarButton
+            projectId={projectId}
+            starCount={data.star_count ?? 0}
+            starredByMe={Boolean(data.starred_by_me)}
+          />
           <ProjectProgressBadge progress={progress} />
           {data.completed_at != null ? (
             <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">

@@ -163,6 +163,9 @@ class Project(Base):
     reports: Mapped[list["ProjectReport"]] = relationship(
         back_populates="project", cascade="all, delete-orphan"
     )
+    stars: Mapped[list["ProjectStar"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
 
 
 class ProjectReport(Base):
@@ -178,3 +181,19 @@ class ProjectReport(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
 
     project: Mapped[Project] = relationship(back_populates="reports")
+
+
+class ProjectStar(Base):
+    """A star on a submitted project. One per (project, user) pair."""
+
+    __tablename__ = "project_stars"
+    __table_args__ = (UniqueConstraint("project_id", "user_id", name="uq_project_star_project_user"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    project_id: Mapped[int] = mapped_column(
+        ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+
+    project: Mapped[Project] = relationship(back_populates="stars")

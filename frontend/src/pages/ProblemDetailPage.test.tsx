@@ -492,6 +492,89 @@ describe('ProblemDetailPage', () => {
     expect(numberedTitles[numberedTitles.length - 1]).toBe('Build guide');
   });
 
+  it('stars a submitted project straight from the brief page', async () => {
+    const user = userEvent.setup();
+    let starCalls = 0;
+    server.use(
+      http.get('*/api/auth/me', () =>
+        HttpResponse.json({
+          id: 9,
+          username: 'just-looking',
+          name: 'Just Looking',
+          avatar_url: null,
+        }),
+      ),
+      http.get('*/api/problems/:id', () =>
+        HttpResponse.json({
+          id: 42,
+          title: 'Attendance pipeline that fails loudly',
+          summary: 'Biometric attendance CSVs go silent when rows drop.',
+          who_affected: 'School network administrators',
+          why_matters: 'Silent data loss hides absent children.',
+          field: 'data-science',
+          domain: 'developer-tools',
+          difficulty: 'advanced',
+          est_hours: 90,
+          tech_tags: ['python'],
+          datasets: [],
+          approaches: ['Row-count reconciliation'],
+          source_name: 'MANABI Curated',
+          source_id: 'manabi-ds-advanced-007',
+          source_url: null,
+          source_note: null,
+          project_count: 1,
+          completed_count: 0,
+          ai_fields: [],
+          goal: null,
+          projects: [
+            {
+              id: 11,
+              problem_id: 42,
+              problem_title: 'Attendance pipeline that fails loudly',
+              repo_url: 'https://github.com/school-ops/attendance-loud',
+              repo_owner: 'school-ops',
+              repo_name: 'attendance-loud',
+              open_for_contributors: true,
+              owner: { username: 'school-ops', avatar_url: null },
+              progress: null,
+              progress_updated_at: null,
+              verification_status: 'verified',
+              solution_summary: null,
+              completed_at: null,
+              demo_url: null,
+              reflection: null,
+              relevance_reason: null,
+              ownership_basis: null,
+              review_note: null,
+              star_count: 1,
+              starred_by_me: false,
+            },
+          ],
+          display_policy: 'summary_plus_excerpt',
+          original_text: 'verbatim',
+        }),
+      ),
+      http.post('*/api/projects/11/star', () => {
+        starCalls += 1;
+        return HttpResponse.json({ ok: true, star_count: 2 }, { status: 201 });
+      }),
+    );
+
+    renderDetail('/problems/42');
+    await screen.findByRole('heading', { level: 1 });
+
+    const button = await screen.findByRole('button', {
+      name: 'Star this project',
+    });
+    expect(screen.getByText('1')).toBeInTheDocument();
+    await user.click(button);
+
+    expect(
+      await screen.findByRole('status'),
+    ).toHaveTextContent('Starred. Thanks for the signal.');
+    expect(starCalls).toBe(1);
+  });
+
   it('keeps the paragraph description and no pitch sections for the learning brief', async () => {
     server.use(
       http.get('*/api/problems/:id', () =>

@@ -244,6 +244,10 @@ class ProjectOut(BaseModel):
     completed_at: datetime | None = None
     demo_url: str | None = None
     reflection: str | None = None
+    # stars: total count is public; starred_by_me needs a logged-in viewer
+    # (False for anonymous requests)
+    star_count: int = 0
+    starred_by_me: bool = False
     # owner/admin-only fields: never shown to anonymous viewers or other users
     relevance_reason: str | None = None
     ownership_basis: str | None = None

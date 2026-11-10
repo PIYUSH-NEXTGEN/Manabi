@@ -1,24 +1,100 @@
 import type { ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { motion } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Star } from "lucide-react";
 import { cx } from "@/lib/cx";
 import { EASE_SNAP, slideUpReveal } from "@/design/motion";
-import { Tag } from "@/design/primitives";
+import { Tag, useToast } from "@/design/primitives";
 import { LoadErrorPanel, PageSkeleton } from "@/pages/detailStates";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ProjectProgressBadge } from "@/components/problems/ProjectProgressBadge";
 import { SubmitProjectPanel } from "@/components/problems/SubmitProjectPanel";
 import { GithubMark } from "@/components/icons/GithubMark";
 import { useProblem } from "@/hooks/useProblem";
+import { useMe } from "@/hooks/useMe";
+import { useStarProject, useUnstarProject } from "@/hooks/useMyProjects";
 import { fieldLabel } from "@/lib/fields";
-import { projectOwnerUsername } from "@/api/client";
-import type { ProblemOut } from "@/api/client";
+import { ApiError, projectOwnerUsername } from "@/api/client";
+import type { ProblemDetail, ProblemOut } from "@/api/client";
 
 const panelHeading =
   "font-mono text-[10px] font-bold uppercase tracking-[0.18em]";
 const microLabel =
   "font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted";
+
+const miniStarButton =
+  "inline-flex items-center gap-1.5 border border-line bg-transparent px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-ink transition-colors hover:border-ink disabled:opacity-45";
+
+function MiniStarButton({
+  project,
+}: {
+  project: NonNullable<ProblemDetail["projects"]>[number];
+}) {
+  const me = useMe();
+  const star = useStarProject(project.id);
+  const unstar = useUnstarProject(project.id);
+  const toast = useToast();
+  const starredByMe = Boolean(project.starred_by_me);
+  const count = project.star_count ?? 0;
+
+  function toggle() {
+    if (starredByMe) {
+      unstar.mutate(undefined, {
+        onError: () => toast("Could not un-star the project. Try again.", "error"),
+      });
+      return;
+    }
+    star.mutate(undefined, {
+      onSuccess: () => toast("Starred. Thanks for the signal."),
+      onError: (err) => {
+        if (err instanceof ApiError && err.status === 409) {
+          toast("You already starred this project.", "error");
+        } else {
+          toast("Could not star the project. Try again.", "error");
+        }
+      },
+    });
+  }
+
+  const label = (
+    <>
+      <Star
+        aria-hidden
+        size={11}
+        strokeWidth={2.6}
+        className={cx(starredByMe && "fill-accent text-accent")}
+      />
+      {count > 0 ? count : "star"}
+    </>
+  );
+
+  if (!me.data) {
+    return (
+      <a
+        href="/api/auth/github/login"
+        title="Log in to star this project"
+        aria-label="Log in to star this project"
+        className={miniStarButton}
+      >
+        {label}
+      </a>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      disabled={star.isPending || unstar.isPending}
+      aria-pressed={starredByMe}
+      aria-label={starredByMe ? "Un-star this project" : "Star this project"}
+      title={starredByMe ? "Click to remove your star" : "Click to star this project"}
+      className={miniStarButton}
+    >
+      {label}
+    </button>
+  );
+}
 
 type BuildGuidePhase = NonNullable<ProblemOut["build_guide"]>[number];
 
@@ -584,7 +660,10 @@ function DetailView({ problemId }: { problemId: number }) {
                             </span>
                           ) : null}
                         </span>
-                        <ProjectProgressBadge progress={project.progress} />
+                        <span className="flex items-center gap-2">
+                          <MiniStarButton project={project} />
+                          <ProjectProgressBadge progress={project.progress} />
+                        </span>
                       </div>
                       {owner ? (
                         <p

@@ -812,6 +812,79 @@
         }
       }
     },
+    "/api/projects/{project_id}/star": {
+      "post": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Star Project",
+        "operationId": "star_project_api_projects__project_id__star_post",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Unstar Project",
+        "operationId": "unstar_project_api_projects__project_id__star_delete",
+        "parameters": [
+          {
+            "name": "project_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Project Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/submissions": {
       "get": {
         "tags": [
@@ -2996,6 +3069,16 @@
               }
             ],
             "title": "Reflection"
+          },
+          "star_count": {
+            "type": "integer",
+            "title": "Star Count",
+            "default": 0
+          },
+          "starred_by_me": {
+            "type": "boolean",
+            "title": "Starred By Me",
+            "default": false
           },
           "relevance_reason": {
             "anyOf": [

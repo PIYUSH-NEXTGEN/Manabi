@@ -1,3 +1,4 @@
+import { Component, type ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
@@ -48,9 +49,31 @@ describe('Toast', () => {
 
   it('throws if useToast is used outside the provider', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    expect(() => render(<ToastTrigger />)).toThrow(
-      'useToast must be used within ToastProvider',
+    // The hook throws during render. Catching it with an error boundary
+    // keeps the throw inside React — a bare expect(() => render(...))
+    // rethrows through React's guarded callback, and jsdom then reports it
+    // as an uncaught error that fails whichever test is running when it
+    // surfaces (a cross-file flake in full-suite runs).
+    let captured: Error | null = null;
+    class CaptureBoundary extends Component<
+      { children: ReactNode },
+      { error: Error | null }
+    > {
+      state = { error: null };
+      static getDerivedStateFromError(error: Error) {
+        captured = error;
+        return { error };
+      }
+      render() {
+        return this.state.error ? null : this.props.children;
+      }
+    }
+    render(
+      <CaptureBoundary>
+        <ToastTrigger />
+      </CaptureBoundary>,
     );
     spy.mockRestore();
+    expect(captured?.message).toBe('useToast must be used within ToastProvider');
   });
 });

@@ -312,3 +312,14 @@ export function reportProject(
     { method: 'POST', body: JSON.stringify(body) },
   );
 }
+
+export function starProject(id: number): Promise<{ ok: boolean; star_count: number }> {
+  return apiFetch<{ ok: boolean; star_count: number }>(
+    `/api/projects/${id}/star`,
+    { method: 'POST' },
+  );
+}
+
+export function unstarProject(id: number): Promise<void> {
+  return apiFetch<void>(`/api/projects/${id}/star`, { method: 'DELETE' });
+}

@@ -12,6 +12,7 @@ from app.models import (
     Problem,
     Project,
     ProjectReport,
+    ProjectStar,
     User,
     VERIFICATION_NEEDS_REVIEW,
     VERIFICATION_VERIFIED,
@@ -71,7 +72,7 @@ async def submit_project(problem_id: int, body: schemas.ProjectCreate, user: Cur
         )
     except SubmissionError as err:
         raise _error(err)
-    return project_out_safely(project, include_private=True)
+    return project_out_safely(project, include_private=True, viewer=user)
 
 
 # ---------------------------------------------------------------------------
@@ -86,7 +87,7 @@ def get_project(project_id: int, db: DB, user: OptionalUser):
         # Never reveal the existence of a non-verified project to others.
         raise HTTPException(status_code=404, detail="Project not found")
     include_private = user is not None and (user.id == project.user_id or visibility.is_admin(user))
-    return project_out_safely(project, include_private=include_private)
+    return project_out_safely(project, include_private=include_private, viewer=user)
 
 
 @router.get("/api/projects/{project_id}/progress", response_model=schemas.Progress)
@@ -146,7 +147,7 @@ def my_projects(user: CurrentUser, db: DB):
         select(Project).options(joinedload(Project.problem)).where(Project.user_id == user.id).order_by(Project.created_at.desc())
     ).all()
     # The owner sees every status of their own rows, with the private fields.
-    return [project_out_safely(p, include_private=True) for p in rows]
+    return [project_out_safely(p, include_private=True, viewer=user) for p in rows]
 
 
 # ---------------------------------------------------------------------------
@@ -194,7 +195,7 @@ async def edit_project(project_id: int, body: schemas.ProjectPatch, user: Curren
     except Exception:  # noqa: BLE001 - verification must never break the PATCH
         db.rollback()
     db.refresh(project)
-    return project_out_safely(project, include_private=True)
+    return project_out_safely(project, include_private=True, viewer=user)
 
 
 async def _completion_checklist(project: Project, user: User) -> tuple[list[schemas.CompletionChecklistItem], dict | None]:
@@ -252,7 +253,7 @@ async def complete_project(project_id: int, body: schemas.CompleteIn, user: Curr
     project.completed_at = utcnow()
     db.commit()
     db.refresh(project)
-    return project_out_safely(project, include_private=True)
+    return project_out_safely(project, include_private=True, viewer=user)
 
 
 @router.post("/api/projects/{project_id}/reopen", response_model=schemas.ProjectOut)
@@ -263,7 +264,7 @@ def reopen_project(project_id: int, user: CurrentUser, db: DB):
     project.completed_at = None
     db.commit()
     db.refresh(project)
-    return project_out_safely(project, include_private=True)
+    return project_out_safely(project, include_private=True, viewer=user)
 
 
 # ---------------------------------------------------------------------------
@@ -303,3 +304,46 @@ def report_project(project_id: int, body: schemas.ReportIn, user: CurrentUser, d
     if count >= settings.REPORTS_BEFORE_REVIEW:
         verification.needs_review_state(db, project, "Reported by users")
     return {"ok": True, "report_count": int(count)}
+
+
+# ---------------------------------------------------------------------------
+# Stars (§8b) — logged-in users, one per user per project, visible to everyone
+# ---------------------------------------------------------------------------
+
+
+def _star_count(db, project_id: int) -> int:
+    return int(
+        db.scalar(select(func.count(ProjectStar.id)).where(ProjectStar.project_id == project_id)) or 0
+    )
+
+
+@router.post("/api/projects/{project_id}/star", status_code=201)
+def star_project(project_id: int, user: CurrentUser, db: DB):
+    project = _project_or_404(db, project_id)
+    if not visibility.can_view_project(project, user):
+        raise HTTPException(status_code=404, detail="Project not found")
+    existing = db.scalar(
+        select(ProjectStar).where(
+            ProjectStar.project_id == project.id, ProjectStar.user_id == user.id
+        )
+    )
+    if existing is not None:
+        raise HTTPException(
+            status_code=409, detail={"code": "already_starred", "message": "You already starred this project."}
+        )
+    db.add(ProjectStar(project_id=project.id, user_id=user.id))
+    db.commit()
+    return {"ok": True, "star_count": _star_count(db, project.id)}
+
+
+@router.delete("/api/projects/{project_id}/star", status_code=204)
+def unstar_project(project_id: int, user: CurrentUser, db: DB):
+    project = _project_or_404(db, project_id)
+    star = db.scalar(
+        select(ProjectStar).where(
+            ProjectStar.project_id == project.id, ProjectStar.user_id == user.id
+        )
+    )
+    if star is not None:
+        db.delete(star)
+        db.commit()

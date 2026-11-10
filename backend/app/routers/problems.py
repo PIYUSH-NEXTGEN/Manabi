@@ -273,7 +273,11 @@ def get_problem(problem_id: int, db: DB, user: OptionalUser):
     detail["original_text"] = problem.original_text
     detail["display_policy"] = "summary_plus_excerpt"
     detail["projects"] = [
-        project_to_out(p, include_private=(user is not None and (user.id == p.user_id or is_admin(user)))).model_dump(mode="json")
+        project_to_out(
+            p,
+            include_private=(user is not None and (user.id == p.user_id or is_admin(user))),
+            viewer=user,
+        ).model_dump(mode="json")
         for p in visible
     ]
     return schemas.ProblemDetail(**detail)

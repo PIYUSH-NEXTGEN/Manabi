@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
@@ -294,7 +294,94 @@ describe('ProjectDetailPage', () => {
       screen.queryByLabelText(/Something wrong with this submission/i),
     ).not.toBeInTheDocument();
   });
+
+  it('sends a logged-out visitor to GitHub login when they try to star', async () => {
+    renderProject('/projects/1');
+
+    expect(
+      await screen.findByRole('heading', { name: 'crop-triage', level: 1 }),
+    ).toBeInTheDocument();
+    const loginLink = screen.getByRole('link', {
+      name: 'Log in to star this project',
+    });
+    expect(loginLink).toHaveAttribute('href', '/api/auth/github/login');
+  });
+
+  it('stars a project once the visitor is logged in', async () => {
+    const user = userEvent.setup();
+    let starCalls = 0;
+    server.use(
+      http.get('*/api/auth/me', () =>
+        HttpResponse.json(ME_LOGGED_IN_VIEWER),
+      ),
+      http.post('*/api/projects/1/star', () => {
+        starCalls += 1;
+        return HttpResponse.json({ ok: true, star_count: 3 }, { status: 201 });
+      }),
+    );
+    renderProject('/projects/1');
+
+    await screen.findByRole('heading', { name: 'crop-triage', level: 1 });
+    await user.click(screen.getByRole('button', { name: 'Star this project' }));
+
+    expect(
+      await screen.findByRole('status'),
+    ).toHaveTextContent('Starred. Thanks for the signal.');
+    expect(starCalls).toBe(1);
+  });
+
+  it('marks the project as starred and un-stars it on a second click', async () => {
+    const user = userEvent.setup();
+    const deleteCalls: number[] = [];
+    server.use(
+      http.get('*/api/auth/me', () =>
+        HttpResponse.json(ME_LOGGED_IN_VIEWER),
+      ),
+      http.get('*/api/projects/1', () =>
+        HttpResponse.json({
+          ...sampleStarredProject(),
+        }),
+      ),
+      http.delete('*/api/projects/1/star', () => {
+        deleteCalls.push(1);
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+    renderProject('/projects/1');
+
+    await screen.findByRole('heading', { name: 'crop-triage', level: 1 });
+    const button = screen.getByRole('button', { name: 'Un-star this project' });
+    expect(button).toHaveAttribute('aria-pressed', 'true');
+
+    await user.click(button);
+    await waitFor(() => expect(deleteCalls).toEqual([1]));
+  });
 });
+
+function sampleStarredProject() {
+  return {
+    id: 1,
+    problem_id: 1,
+    problem_title: 'Crop disease triage for small farms',
+    repo_url: 'https://github.com/demo-farmer/crop-triage',
+    repo_owner: 'demo-farmer',
+    repo_name: 'crop-triage',
+    open_for_contributors: true,
+    verification_status: 'verified',
+    solution_summary: 'A phone-first triage flow with an offline capture queue.',
+    completed_at: null,
+    demo_url: null,
+    reflection: null,
+    relevance_reason: null,
+    ownership_basis: null,
+    review_note: null,
+    owner: { username: 'demo-farmer', avatar_url: null },
+    progress: null,
+    progress_updated_at: null,
+    star_count: 3,
+    starred_by_me: true,
+  };
+}
 
 const ME_LOGGED_IN_VIEWER = {
   id: 9,
