@@ -1,41 +1,50 @@
-import type { ReactNode } from 'react';
-import { Link, useParams } from 'react-router-dom';
-import { motion } from 'motion/react';
-import {
-  ArrowUpRight,
-  GitBranch,
-} from 'lucide-react';
-import { cx } from '@/lib/cx';
-import { EASE_SNAP, slideUpReveal } from '@/design/motion';
-import { Tag } from '@/design/primitives';
-import { LoadErrorPanel, PageSkeleton } from '@/pages/detailStates';
-import { NotFoundPage } from '@/pages/NotFoundPage';
-import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
-import { SubmitProjectPanel } from '@/components/problems/SubmitProjectPanel';
-import { GithubMark } from '@/components/icons/GithubMark';
-import { useProblem } from '@/hooks/useProblem';
-import { fieldLabel } from '@/lib/fields';
-import { projectOwnerUsername } from '@/api/client';
+import type { ReactNode } from "react";
+import { Link, useParams } from "react-router-dom";
+import { motion } from "motion/react";
+import { ArrowUpRight } from "lucide-react";
+import { cx } from "@/lib/cx";
+import { EASE_SNAP, slideUpReveal } from "@/design/motion";
+import { Tag } from "@/design/primitives";
+import { LoadErrorPanel, PageSkeleton } from "@/pages/detailStates";
+import { NotFoundPage } from "@/pages/NotFoundPage";
+import { ProjectProgressBadge } from "@/components/problems/ProjectProgressBadge";
+import { SubmitProjectPanel } from "@/components/problems/SubmitProjectPanel";
+import { GithubMark } from "@/components/icons/GithubMark";
+import { useProblem } from "@/hooks/useProblem";
+import { fieldLabel } from "@/lib/fields";
+import { projectOwnerUsername } from "@/api/client";
+import type { ProblemOut } from "@/api/client";
 
-const panelHeading = 'font-mono text-[10px] font-bold uppercase tracking-[0.18em]';
-const microLabel = 'font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted';
+const panelHeading =
+  "font-mono text-[10px] font-bold uppercase tracking-[0.18em]";
+const microLabel =
+  "font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted";
 
-function futureIdeas(originalText: string | null | undefined): string[] {
-  if (!originalText) return [];
-  const section = originalText.match(
-    /## (Possible future improvements|Stretch goals)[\s\S]*?(?=\n## |$)/i,
-  );
-  if (!section) return [];
-  return section[0]
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.startsWith('-'))
-    .map((line) => line.slice(1).trim())
+type BuildGuidePhase = NonNullable<ProblemOut["build_guide"]>[number];
+
+function descriptionParagraphs(
+  summary: string,
+  whoAffected: string,
+  whyMatters: string,
+): string[] {
+  const paragraphs = summary
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim().replace(/\s+/g, " "))
     .filter(Boolean);
+  paragraphs.push(
+    `This project is for ${whoAffected.toLowerCase()}. ${whyMatters}`,
+  );
+  return paragraphs;
 }
 
-function fullDescription(summary: string, whoAffected: string, whyMatters: string): string {
-  return `${summary} This project is for ${whoAffected.toLowerCase()}. ${whyMatters}`;
+// Briefs without a curated guide get a stack-agnostic phase roadmap built
+// from the existing approaches steps.
+function guideFromApproaches(approaches: string[]): BuildGuidePhase[] {
+  return approaches.map((step, index) => ({
+    title: `Phase ${index + 1}`,
+    summary: step,
+    steps: [],
+  }));
 }
 
 function Section({
@@ -114,17 +123,27 @@ function DetailView({ problemId }: { problemId: number }) {
   }
 
   const data = problem.data;
-  const ideas = futureIdeas(data.original_text);
-  const description = fullDescription(data.summary, data.who_affected, data.why_matters);
+  const isHackathon = data.goal === "hackathon";
+  const paragraphs = descriptionParagraphs(
+    data.summary,
+    data.who_affected,
+    data.why_matters,
+  );
   const projectCount = data.project_count ?? data.projects.length;
   const completedCount = data.completed_count ?? 0;
   const buildingCount = projectCount - completedCount;
   const learningConcepts = data.learning_concepts ?? [];
+  const guide = data.build_guide?.length
+    ? data.build_guide
+    : guideFromApproaches(data.approaches);
+  const teamPlan = isHackathon ? data.team_plan : undefined;
+  const pitchGuide = isHackathon ? data.pitch_guide : undefined;
 
   // Section numbers are assigned in render order, so the optional "what
   // you'll learn" section never leaves a gap in the numbering.
   let sectionCounter = 0;
-  const nextSectionNumber = () => String((sectionCounter += 1)).padStart(2, '0');
+  const nextSectionNumber = () =>
+    String((sectionCounter += 1)).padStart(2, "0");
 
   return (
     <main className="border-b border-ink bg-paper">
@@ -143,48 +162,77 @@ function DetailView({ problemId }: { problemId: number }) {
             </p>
             <h1
               className="mt-4 font-display uppercase leading-[0.9] tracking-[-0.02em]"
-              style={{ fontSize: 'clamp(2.25rem, 5vw, 4rem)' }}
+              style={{ fontSize: "clamp(2.25rem, 5vw, 4rem)" }}
             >
               {data.title}
             </h1>
 
-            <p className="mt-6 max-w-3xl border-l-2 border-accent/50 pl-5 text-base leading-relaxed text-ink-soft md:text-lg">
-              {description}
-            </p>
-
-            <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-              <span className="flex items-center gap-1.5">
-                <GitBranch aria-hidden size={12} strokeWidth={2.4} />
-                {buildingCount === 1
-                  ? `1 building${completedCount === 1 ? ' · 1 completed' : ''}`
-                  : `${buildingCount} building${completedCount > 0 ? ` · ${completedCount} completed` : ''}`}
-              </span>
-            </div>
+            {isHackathon ? (
+              <div className="mt-6 max-w-3xl space-y-6 border-l-2 border-accent/50 pl-5 text-base leading-relaxed text-ink-soft md:text-lg">
+                <div>
+                  <p className={cx(microLabel, "text-accent")}>The problem</p>
+                  <p className="mt-2">{data.summary}</p>
+                </div>
+                <div>
+                  <p className={cx(microLabel, "text-accent")}>
+                    Who faces it, and how
+                  </p>
+                  <p className="mt-2">
+                    {data.who_affected} {data.why_matters}
+                  </p>
+                </div>
+                {data.approaches.length > 0 ? (
+                  <div>
+                    <p className={cx(microLabel, "text-accent")}>
+                      How it gets fixed
+                    </p>
+                    <ul className="mt-2 space-y-2">
+                      {data.approaches.map((approach) => (
+                        <li key={approach} className="flex gap-3">
+                          <span
+                            aria-hidden
+                            className="mt-[0.7em] block size-1.5 shrink-0 bg-accent/70"
+                          />
+                          {approach}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+              </div>
+            ) : (
+              <div className="mt-6 max-w-3xl space-y-4 border-l-2 border-accent/50 pl-5 text-base leading-relaxed text-ink-soft md:text-lg">
+                {paragraphs.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            )}
           </div>
 
           <dl className="self-start border border-ink bg-sheet px-4 py-3">
             <div className="flex items-center justify-between border-b border-line pb-2.5">
               <dt className={microLabel}>File no.</dt>
               <dd className="font-mono text-sm font-bold tracking-[0.08em]">
-                M-{String(data.id).padStart(3, '0')}
+                M-{String(data.id).padStart(3, "0")}
               </dd>
             </div>
             <SpecRow label="Field">{fieldLabel(data.field)}</SpecRow>
-            <SpecRow label="Domain">{data.domain.replace(/-/g, ' ')}</SpecRow>
+            <SpecRow label="Domain">{data.domain.replace(/-/g, " ")}</SpecRow>
             <SpecRow label="Difficulty">{data.difficulty}</SpecRow>
           </dl>
         </motion.header>
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
           <article>
-            <Section number={nextSectionNumber()} title="Why it matters">
-              <p className="max-w-3xl border-l-2 border-line pl-5 text-base leading-relaxed text-ink-soft">
-                {data.why_matters}
-              </p>
+            {isHackathon ? null : (
+              <Section number={nextSectionNumber()} title="Why it matters">
+                <p className="max-w-3xl border-l-2 border-line pl-5 text-base leading-relaxed text-ink-soft">
+                  {data.why_matters}
+                </p>
+              </Section>
+            )}
 
-            </Section>
-
-            {learningConcepts.length > 0 ? (
+            {!isHackathon && learningConcepts.length > 0 ? (
               <Section
                 number={nextSectionNumber()}
                 title="What concepts you'll learn"
@@ -221,20 +269,152 @@ function DetailView({ problemId }: { problemId: number }) {
               )}
             </Section>
 
-            <Section number={nextSectionNumber()} title="What you can add later">
-              {ideas.length > 0 ? (
-                <ul className="max-w-3xl space-y-2 text-sm leading-relaxed text-ink-soft">
-                  {ideas.map((idea) => (
-                    <li key={idea} className="flex gap-3">
-                      <span aria-hidden className="mt-2 block size-1.5 shrink-0 bg-accent" />
-                      {idea}
+            {teamPlan ? (
+              <Section number={nextSectionNumber()} title="Team plan">
+                {teamPlan.note ? (
+                  <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+                    {teamPlan.note}
+                  </p>
+                ) : null}
+                {(teamPlan.roles ?? []).length > 0 ? (
+                  <dl className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {(teamPlan.roles ?? []).map((teamRole) => (
+                      <div
+                        key={teamRole.role}
+                        className="border border-line bg-sheet p-4"
+                      >
+                        <dt className="font-display text-sm uppercase tracking-tight text-ink">
+                          {teamRole.role}
+                        </dt>
+                        <dd className="mt-2 text-sm leading-relaxed text-ink-soft">
+                          {teamRole.covers}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
+                {(teamPlan.milestones ?? []).length > 0 ? (
+                  <ol className="mt-5 max-w-3xl space-y-2.5">
+                    {(teamPlan.milestones ?? []).map((milestone, index) => (
+                      <li
+                        key={milestone}
+                        className="flex gap-3 text-sm leading-relaxed text-ink-soft"
+                      >
+                        <span className="shrink-0 font-mono text-[10px] font-bold leading-relaxed text-accent">
+                          T+{String(index + 1).padStart(1, "0")}
+                        </span>
+                        {milestone}
+                      </li>
+                    ))}
+                  </ol>
+                ) : null}
+              </Section>
+            ) : null}
+
+            {pitchGuide ? (
+              <Section number={nextSectionNumber()} title="Pitch guide">
+                {pitchGuide.one_liner ? (
+                  <p className="max-w-3xl border-l-2 border-accent/60 pl-5 text-base font-bold leading-relaxed md:text-lg">
+                    {pitchGuide.one_liner}
+                  </p>
+                ) : null}
+                {(pitchGuide.beats ?? []).length > 0 ? (
+                  <ol className="mt-5 flex list-none flex-col gap-4">
+                    {(pitchGuide.beats ?? []).map((beat, index) => (
+                      <li
+                        key={`${beat.heading}-${index}`}
+                        className="border border-line bg-sheet p-5"
+                      >
+                        <p className="flex items-baseline gap-3">
+                          <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-accent">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
+                          <span className="font-display text-sm uppercase tracking-tight text-ink">
+                            {beat.heading}
+                          </span>
+                        </p>
+                        <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-ink-soft">
+                          {beat.text}
+                        </p>
+                      </li>
+                    ))}
+                  </ol>
+                ) : null}
+                {(pitchGuide.judge_questions ?? []).length > 0 ? (
+                  <div className="mt-6">
+                    <p className={panelHeading}>Questions the judges may ask</p>
+                    <ul className="mt-4 max-w-3xl space-y-4">
+                      {(pitchGuide.judge_questions ?? []).map(
+                        (judgeQuestion) => (
+                          <li
+                            key={judgeQuestion.question}
+                            className="border-t border-line pt-4 first:border-t-0 first:pt-0"
+                          >
+                            <p className="text-sm font-bold leading-snug text-ink">
+                              {judgeQuestion.question}
+                            </p>
+                            <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
+                              {judgeQuestion.answer}
+                            </p>
+                          </li>
+                        ),
+                      )}
+                    </ul>
+                  </div>
+                ) : null}
+              </Section>
+            ) : null}
+
+            <Section number={nextSectionNumber()} title="Build guide">
+              <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+                Work through the phases in order - each one ends with something
+                working. No phase assumes a particular language, framework, or
+                database; pick tools you already know or want to learn, and swap
+                anything at any point.
+              </p>
+              {guide.length > 0 ? (
+                <ol className="mt-5 flex list-none flex-col gap-6">
+                  {guide.map((phase, index) => (
+                    <li
+                      key={`${phase.title}-${index}`}
+                      className="border border-line bg-sheet p-5"
+                    >
+                      <p className="flex items-baseline gap-3">
+                        <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-accent">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <span className="font-display text-base uppercase tracking-tight text-ink">
+                          {phase.title}
+                        </span>
+                      </p>
+                      {phase.summary ? (
+                        <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-ink-soft">
+                          {phase.summary}
+                        </p>
+                      ) : null}
+                      {(phase.steps ?? []).length > 0 ? (
+                        <ol className="mt-4 flex list-none flex-col gap-2.5">
+                          {(phase.steps ?? []).map((step, stepIndex) => (
+                            <li
+                              key={step}
+                              className="flex gap-3 text-sm leading-relaxed text-ink-soft"
+                            >
+                              <span className="shrink-0 font-mono text-[10px] font-bold leading-relaxed text-accent">
+                                {index + 1}.{stepIndex + 1}
+                              </span>
+                              {step}
+                            </li>
+                          ))}
+                        </ol>
+                      ) : null}
                     </li>
                   ))}
-                </ul>
+                </ol>
               ) : (
-                <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
-                  Ship the MVP first, then add whatever matters to you. Build
-                  what you want to learn and ship it.
+                <p className="mt-4 max-w-3xl text-sm leading-relaxed text-ink-soft">
+                  No phased guide for this brief yet. Start with the smallest
+                  version where one core flow works end to end, then keep
+                  iterating on what annoys you most.
                 </p>
               )}
             </Section>
@@ -244,12 +424,12 @@ function DetailView({ problemId }: { problemId: number }) {
             <SubmitProjectPanel problemId={data.id} />
 
             <section>
-              <h2 className={cx(panelHeading, 'border-b border-ink pb-2')}>
+              <h2 className={cx(panelHeading, "border-b border-ink pb-2")}>
                 Projects in the wild
                 {buildingCount === 1 && completedCount === 0
-                  ? ' (1)'
+                  ? " (1)"
                   : ` (${buildingCount} building${
-                      completedCount > 0 ? ` · ${completedCount} completed` : ''
+                      completedCount > 0 ? ` · ${completedCount} completed` : ""
                     })`}
               </h2>
               <ul className="flex list-none flex-col">
@@ -263,7 +443,10 @@ function DetailView({ problemId }: { problemId: number }) {
                     >
                       <div className="flex items-center justify-between gap-2">
                         <span className="flex min-w-0 items-center gap-2">
-                          <GithubMark size={13} className="shrink-0 text-muted" />
+                          <GithubMark
+                            size={13}
+                            className="shrink-0 text-muted"
+                          />
                           <span className="truncate font-mono text-xs font-bold">
                             {project.repo_name}
                           </span>
@@ -272,7 +455,7 @@ function DetailView({ problemId }: { problemId: number }) {
                               title={
                                 project.demo_url != null
                                   ? `Demo: ${project.demo_url}`
-                                  : 'Marked as completed'
+                                  : "Marked as completed"
                               }
                               className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent"
                             >
@@ -283,11 +466,16 @@ function DetailView({ problemId }: { problemId: number }) {
                         <ProjectProgressBadge progress={project.progress} />
                       </div>
                       {owner ? (
-                        <p className={cx(microLabel, 'normal-case tracking-normal')}>
-                          by {owner} ·{' '}
+                        <p
+                          className={cx(
+                            microLabel,
+                            "normal-case tracking-normal",
+                          )}
+                        >
+                          by {owner} ·{" "}
                           {project.open_for_contributors
-                            ? 'open to contributors'
-                            : 'solo run'}
+                            ? "open to contributors"
+                            : "solo run"}
                         </p>
                       ) : null}
                       <Link

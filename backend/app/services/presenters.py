@@ -9,6 +9,31 @@ from app import schemas
 from app.models import Problem, Project
 
 
+def _validated(model, raw):
+    """Validate hand-editable JSON against its schema; None on any problem so a
+    broken blob degrades to 'section hidden' instead of a 500."""
+    if not raw:
+        return None
+    try:
+        return model.model_validate(raw)
+    except Exception:
+        return None
+
+
+def _build_guide(problem: Problem) -> list[schemas.BuildGuidePhase] | None:
+    """Curated guide phases, or None when absent/invalid. Never 500 on a
+    hand-edited JSON blob — it degrades to the approaches-derived roadmap."""
+    if not problem.build_guide:
+        return None
+    phases = []
+    for phase in problem.build_guide:
+        try:
+            phases.append(schemas.BuildGuidePhase.model_validate(phase))
+        except Exception:
+            return None
+    return phases
+
+
 def problem_to_out(problem: Problem, project_count: int, completed_count: int = 0) -> schemas.ProblemOut:
     return schemas.ProblemOut(
         id=problem.id,
@@ -37,6 +62,9 @@ def problem_to_out(problem: Problem, project_count: int, completed_count: int = 
         deadline=problem.deadline,
         goal=problem.goal,
         learning_concepts=problem.learning_concepts or [],
+        build_guide=_build_guide(problem),
+        team_plan=_validated(schemas.TeamPlan, problem.team_plan),
+        pitch_guide=_validated(schemas.PitchGuide, problem.pitch_guide),
     )
 
 

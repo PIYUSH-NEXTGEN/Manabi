@@ -1514,6 +1514,38 @@
         ],
         "title": "AdminSubmissionsOut"
       },
+      "BuildGuidePhase": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Summary",
+            "default": ""
+          },
+          "steps": {
+            "items": {
+              "type": "string",
+              "maxLength": 600,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 12,
+            "title": "Steps"
+          }
+        },
+        "type": "object",
+        "required": [
+          "title"
+        ],
+        "title": "BuildGuidePhase",
+        "description": "One phase of a curated build guide (stack-agnostic roadmap)."
+      },
       "ChatIn": {
         "properties": {
           "messages": {
@@ -1813,6 +1845,77 @@
         ],
         "title": "HeatmapOut"
       },
+      "JudgeQuestion": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Question"
+          },
+          "answer": {
+            "type": "string",
+            "maxLength": 3000,
+            "title": "Answer",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "JudgeQuestion"
+      },
+      "PitchBeat": {
+        "properties": {
+          "heading": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Heading"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 3000,
+            "title": "Text",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "heading"
+        ],
+        "title": "PitchBeat",
+        "description": "One spoken part of the pitch, in order."
+      },
+      "PitchGuide": {
+        "properties": {
+          "one_liner": {
+            "type": "string",
+            "maxLength": 600,
+            "title": "One Liner",
+            "default": ""
+          },
+          "beats": {
+            "items": {
+              "$ref": "#/components/schemas/PitchBeat"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Beats"
+          },
+          "judge_questions": {
+            "items": {
+              "$ref": "#/components/schemas/JudgeQuestion"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Judge Questions"
+          }
+        },
+        "type": "object",
+        "title": "PitchGuide"
+      },
       "ProblemDetail": {
         "properties": {
           "title": {
@@ -2061,6 +2164,40 @@
             "type": "array",
             "title": "Learning Concepts",
             "default": []
+          },
+          "build_guide": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BuildGuidePhase"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Build Guide"
+          },
+          "team_plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TeamPlan"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pitch_guide": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PitchGuide"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "original_text": {
             "type": "string",
@@ -2535,6 +2672,40 @@
             "type": "array",
             "title": "Learning Concepts",
             "default": []
+          },
+          "build_guide": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/BuildGuidePhase"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Build Guide"
+          },
+          "team_plan": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TeamPlan"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pitch_guide": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PitchGuide"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -2959,6 +3130,58 @@
           "projects"
         ],
         "title": "StatsOut"
+      },
+      "TeamPlan": {
+        "properties": {
+          "note": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Note",
+            "default": ""
+          },
+          "roles": {
+            "items": {
+              "$ref": "#/components/schemas/TeamRole"
+            },
+            "type": "array",
+            "maxItems": 6,
+            "title": "Roles"
+          },
+          "milestones": {
+            "items": {
+              "type": "string",
+              "maxLength": 600,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Milestones"
+          }
+        },
+        "type": "object",
+        "title": "TeamPlan"
+      },
+      "TeamRole": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Role"
+          },
+          "covers": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "Covers",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "role"
+        ],
+        "title": "TeamRole",
+        "description": "One person's job on a hackathon team."
       },
       "ValidationError": {
         "properties": {

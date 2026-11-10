@@ -23,6 +23,49 @@ MAX_DATASET_URL = 500
 _problem_tag_item = Annotated[str, Field(min_length=1, max_length=MAX_TAG)]
 
 
+class BuildGuidePhase(BaseModel):
+    """One phase of a curated build guide (stack-agnostic roadmap)."""
+
+    title: str = Field(min_length=1, max_length=200)
+    summary: str = Field(default="", max_length=2000)
+    steps: list[Annotated[str, Field(min_length=1, max_length=600)]] = Field(
+        default_factory=list, max_length=12
+    )
+
+
+class TeamRole(BaseModel):
+    """One person's job on a hackathon team."""
+
+    role: str = Field(min_length=1, max_length=120)
+    covers: str = Field(default="", max_length=2000)
+
+
+class TeamPlan(BaseModel):
+    note: str = Field(default="", max_length=2000)
+    roles: list[TeamRole] = Field(default_factory=list, max_length=6)
+    milestones: list[Annotated[str, Field(min_length=1, max_length=600)]] = (
+        Field(default_factory=list, max_length=8)
+    )
+
+
+class PitchBeat(BaseModel):
+    """One spoken part of the pitch, in order."""
+
+    heading: str = Field(min_length=1, max_length=120)
+    text: str = Field(default="", max_length=3000)
+
+
+class JudgeQuestion(BaseModel):
+    question: str = Field(min_length=1, max_length=600)
+    answer: str = Field(default="", max_length=3000)
+
+
+class PitchGuide(BaseModel):
+    one_liner: str = Field(default="", max_length=600)
+    beats: list[PitchBeat] = Field(default_factory=list, max_length=8)
+    judge_questions: list[JudgeQuestion] = Field(default_factory=list, max_length=8)
+
+
 class ProblemCard(BaseModel):
     title: str = Field(min_length=1, max_length=MAX_TITLE)
     summary: str = Field(min_length=1, max_length=MAX_SUMMARY)
@@ -53,6 +96,9 @@ class ProblemOut(ProblemCard):
     deadline: date | None = None
     goal: GoalEnum | None = None
     learning_concepts: list[str] = []
+    build_guide: list[BuildGuidePhase] | None = None
+    team_plan: TeamPlan | None = None
+    pitch_guide: PitchGuide | None = None
 
 
 class ProjectCreate(BaseModel):

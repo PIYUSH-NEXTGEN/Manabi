@@ -97,6 +97,15 @@ class Problem(Base):
     # Learning-track extras: concepts the builder picks up while finishing the
     # brief. Empty for non-learning (and older learning) rows.
     learning_concepts: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
+    # Optional curated build guide: an ordered list of phase dicts
+    # ({title, summary, steps}). Null = no curated guide; the UI derives a
+    # lightweight phase roadmap from `approaches` instead.
+    build_guide: Mapped[list | None] = mapped_column(JSON, nullable=True)
+    # Hackathon extras (one curated row so far): a role/time-boxed team plan
+    # and a pitch script with likely judge questions. Null for non-hackathon
+    # rows.
+    team_plan: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    pitch_guide: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     creator: Mapped[User | None] = relationship()
     projects: Mapped[list["Project"]] = relationship(back_populates="problem")

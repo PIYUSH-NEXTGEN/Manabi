@@ -36,8 +36,10 @@ def _project(
     datasets: list[dict],
     approaches: list[str],
     original_text: str,
+    team_plan: dict | None = None,
+    pitch_guide: dict | None = None,
 ) -> dict:
-    return {
+    entry = {
         "source_id": source_id,
         "title": title,
         "summary": summary,
@@ -59,7 +61,13 @@ def _project(
         "original_text": original_text,
         "ai_fields": [],  # Manually curated; nothing here was AI-generated.
         "created_by": None,
+        "goal": "hackathon",
     }
+    if team_plan is not None:
+        entry["team_plan"] = team_plan
+    if pitch_guide is not None:
+        entry["pitch_guide"] = pitch_guide
+    return entry
 
 
 PROJECTS = [
@@ -465,6 +473,156 @@ PROJECTS = [
             "MVP stores photos as files/URLs; no AI triage. Status updates are "
             "manual by staff, not automatic."
         ),
+        team_plan={
+            "note": (
+                "3 people, one weekend (24-36 focused hours). Roles overlap on "
+                "purpose - when something catches fire, everyone helps."
+            ),
+            "roles": [
+                {
+                    "role": "API and database",
+                    "covers": (
+                        "Reports table, status history, photo storage, and "
+                        "authentication. Owns every endpoint the other two call."
+                    ),
+                },
+                {
+                    "role": "Web app",
+                    "covers": (
+                        "The report form (photo + map pin), the public tracking "
+                        "page, and the staff dashboard."
+                    ),
+                },
+                {
+                    "role": "Demo and fixes",
+                    "covers": (
+                        "Seed data, slides, screenshots, and end-to-end testing "
+                        "of the demo path. Joins whoever is most behind."
+                    ),
+                },
+            ],
+            "milestones": [
+                "Hour 8: a report can be created and stored with a photo and location.",
+                "Hour 16: staff can change a status and the public page shows it.",
+                "Hour 24: all three roles log in; the full demo path is usable.",
+                "Hour 30: demo script frozen - only bug fixes after this point.",
+            ],
+        },
+        pitch_guide={
+            "one_liner": (
+                "Every civic complaint becomes a numbered, trackable ticket, so "
+                "residents stop wondering what happened to their report."
+            ),
+            "beats": [
+                {
+                    "heading": "Hook",
+                    "text": (
+                        "Ask the judges: have you ever reported a pothole and "
+                        "never heard back? That silence is what we fix."
+                    ),
+                },
+                {
+                    "heading": "The problem",
+                    "text": (
+                        "Complaints come in by phone and email. A clerk notes "
+                        "them somewhere that is not a system. Two weeks later, "
+                        "nobody can say who is handling what, or whether it "
+                        "was fixed."
+                    ),
+                },
+                {
+                    "heading": "Who feels it",
+                    "text": (
+                        "Residents repeat the same phone call and stop trusting "
+                        "the office. Staff retype paper complaints and answer "
+                        "'any update?' calls they have no way to check."
+                    ),
+                },
+                {
+                    "heading": "Our solution",
+                    "text": (
+                        "File a report with a photo and a map pin. It gets a "
+                        "tracking number and a status: received, in-progress, "
+                        "resolved, rejected. Staff get one dashboard to assign "
+                        "and close reports. The resident needs nothing more "
+                        "than a browser."
+                    ),
+                },
+                {
+                    "heading": "Live demo",
+                    "text": (
+                        "File a streetlight report, open a second tab as staff, "
+                        "move the status, then show the resident's tab updating. "
+                        "If the venue network dies: screenshots and locally "
+                        "seeded data, no apology needed."
+                    ),
+                },
+                {
+                    "heading": "What's next",
+                    "text": (
+                        "Auto-assign reports by ward, deadline escalations, and "
+                        "an open export of resolved issues for the public data "
+                        "portal."
+                    ),
+                },
+            ],
+            "judge_questions": [
+                {
+                    "question": "Why would a municipality actually adopt this?",
+                    "answer": (
+                        "It replaces a phone-and-paper log with a tracked ticket "
+                        "at zero cost to try. Staff need a browser and one "
+                        "dashboard - onboarding is one screen, which we kept "
+                        "small on purpose because adoption is the real risk."
+                    ),
+                },
+                {
+                    "question": "How do you stop duplicate reports for the same issue?",
+                    "answer": (
+                        "MVP shows 'similar reports nearby' on submit, matched by "
+                        "category and area. We didn't silently merge - exact "
+                        "dedupe is a hard problem and hiding reports is worse "
+                        "than showing them."
+                    ),
+                },
+                {
+                    "question": "Is this just a CRUD app?",
+                    "answer": (
+                        "Deliberately, yes. The value is the workflow: status "
+                        "transitions that cannot skip steps, assignment, and a "
+                        "public tracking trail. Boring, well-run tech is what "
+                        "a municipal office can actually maintain."
+                    ),
+                },
+                {
+                    "question": "Anyone can upload files - how is that safe?",
+                    "answer": (
+                        "Uploads are checked for type and size, stored under "
+                        "generated names, and a report's photos are only served "
+                        "with the report. Roles are enforced in the API, not by "
+                        "hiding buttons in the UI."
+                    ),
+                },
+                {
+                    "question": "What does your demo not handle?",
+                    "answer": (
+                        "Bulk imports of past complaints, automatic triage, and "
+                        "offline submissions. We cut those to make the core "
+                        "loop solid, because that is the part that has to work."
+                    ),
+                },
+                {
+                    "question": "How do you know resolution complaints will drop?",
+                    "answer": (
+                        "The claim we can defend today: every report now has a "
+                        "status and a timestamp, so 'where is my case' is answerable. "
+                        "Measuring the trust effect needs pilot data - that is "
+                        "exactly what the escalation and reports features are "
+                        "for next."
+                    ),
+                },
+            ],
+        },
     ),
     _project(
         source_id="manabi-web-intermediate-005",

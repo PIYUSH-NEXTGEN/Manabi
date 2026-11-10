@@ -530,6 +530,21 @@ export interface components {
             /** Total */
             total: number;
         };
+        /**
+         * BuildGuidePhase
+         * @description One phase of a curated build guide (stack-agnostic roadmap).
+         */
+        BuildGuidePhase: {
+            /** Title */
+            title: string;
+            /**
+             * Summary
+             * @default
+             */
+            summary: string;
+            /** Steps */
+            steps?: string[];
+        };
         /** ChatIn */
         ChatIn: {
             /** Messages */
@@ -628,6 +643,41 @@ export interface components {
             /** Window Days */
             window_days: number;
         };
+        /** JudgeQuestion */
+        JudgeQuestion: {
+            /** Question */
+            question: string;
+            /**
+             * Answer
+             * @default
+             */
+            answer: string;
+        };
+        /**
+         * PitchBeat
+         * @description One spoken part of the pitch, in order.
+         */
+        PitchBeat: {
+            /** Heading */
+            heading: string;
+            /**
+             * Text
+             * @default
+             */
+            text: string;
+        };
+        /** PitchGuide */
+        PitchGuide: {
+            /**
+             * One Liner
+             * @default
+             */
+            one_liner: string;
+            /** Beats */
+            beats?: components["schemas"]["PitchBeat"][];
+            /** Judge Questions */
+            judge_questions?: components["schemas"]["JudgeQuestion"][];
+        };
         /** ProblemDetail */
         ProblemDetail: {
             /** Title */
@@ -702,6 +752,10 @@ export interface components {
              * @default []
              */
             learning_concepts: string[];
+            /** Build Guide */
+            build_guide?: components["schemas"]["BuildGuidePhase"][] | null;
+            team_plan?: components["schemas"]["TeamPlan"] | null;
+            pitch_guide?: components["schemas"]["PitchGuide"] | null;
             /** Original Text */
             original_text: string;
             /** Projects */
@@ -840,6 +894,10 @@ export interface components {
              * @default []
              */
             learning_concepts: string[];
+            /** Build Guide */
+            build_guide?: components["schemas"]["BuildGuidePhase"][] | null;
+            team_plan?: components["schemas"]["TeamPlan"] | null;
+            pitch_guide?: components["schemas"]["PitchGuide"] | null;
         };
         /** ProblemsListOut */
         ProblemsListOut: {
@@ -967,6 +1025,31 @@ export interface components {
             fields: number;
             /** Projects */
             projects: number;
+        };
+        /** TeamPlan */
+        TeamPlan: {
+            /**
+             * Note
+             * @default
+             */
+            note: string;
+            /** Roles */
+            roles?: components["schemas"]["TeamRole"][];
+            /** Milestones */
+            milestones?: string[];
+        };
+        /**
+         * TeamRole
+         * @description One person's job on a hackathon team.
+         */
+        TeamRole: {
+            /** Role */
+            role: string;
+            /**
+             * Covers
+             * @default
+             */
+            covers: string;
         };
         /** ValidationError */
         ValidationError: {

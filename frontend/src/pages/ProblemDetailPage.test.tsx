@@ -20,6 +20,14 @@ function renderDetail(route: string) {
 }
 
 describe('ProblemDetailPage', () => {
+  const TECH_SECTION_TITLES = new Set([
+    'Why it matters',
+    "What concepts you'll learn",
+    'Tech stack',
+    'Team plan',
+    'Pitch guide',
+  ]);
+
   it('renders the problem title, fuller description and why it matters in one card', async () => {
     renderDetail('/problems/1');
 
@@ -54,15 +62,112 @@ describe('ProblemDetailPage', () => {
     expect(screen.getByText(/Python or Go/i)).toBeInTheDocument();
   });
 
-  it('shows what you can add later with a fallback when none is listed', async () => {
+  it('derives build-guide phases from approaches when there is no curated guide', async () => {
     renderDetail('/problems/1');
 
     await screen.findByRole('heading', { level: 1 });
+    expect(
+      await screen.findByRole('heading', { name: 'Build guide' }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText('Fine-tune a small CNN on public leaf datasets'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Build an offline-first mobile capture flow'),
+    ).toBeInTheDocument();
+  });
+
+  it('renders the curated build guide with numbered phase steps', async () => {
+    server.use(
+      http.get('*/api/problems/:id', () =>
+        HttpResponse.json({
+          id: 1,
+          title: 'Crop disease triage for small farms',
+          summary: 'Farmers photograph leaf blight.',
+          who_affected: 'Smallholder farmers',
+          why_matters: 'Late detection destroys a season of income.',
+          field: 'aiml',
+          domain: 'agriculture',
+          difficulty: 'beginner',
+          est_hours: 20,
+          tech_tags: ['python'],
+          datasets: [],
+          approaches: [],
+          source_name: 'SIH 2026',
+          source_id: 'SIH26017',
+          source_url: null,
+          source_note: null,
+          project_count: 0,
+          completed_count: 0,
+          ai_fields: [],
+          build_guide: [
+            {
+              title: 'Model the data',
+              summary: 'Decide what a report and a case look like.',
+              steps: ['List the fields a report needs', 'Design the log as append-only'],
+            },
+            {
+              title: 'Build the scheduler',
+              summary: '',
+              steps: [],
+            },
+          ],
+          projects: [],
+        }),
+      ),
+    );
+
+    renderDetail('/problems/1');
+    await screen.findByRole('heading', { level: 1 });
+    expect(
+      await screen.findByRole('heading', { name: 'Build guide' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Model the data')).toBeInTheDocument();
+    expect(
+      screen.getByText('Decide what a report and a case look like.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Design the log as append-only'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Build the scheduler')).toBeInTheDocument();
+    expect(
+      screen.queryByText(/No phased guide for this brief yet/i),
+    ).not.toBeInTheDocument();
+  });
+
+  it('shows the no-guide fallback when there is neither a curated guide nor approaches', async () => {
+    server.use(
+      http.get('*/api/problems/:id', () =>
+        HttpResponse.json({
+          id: 1,
+          title: 'Crop disease triage for small farms',
+          summary: 'Farmers photograph leaf blight.',
+          who_affected: 'Smallholder farmers',
+          why_matters: 'Late detection destroys a season of income.',
+          field: 'aiml',
+          domain: 'agriculture',
+          difficulty: 'beginner',
+          est_hours: 20,
+          tech_tags: ['python'],
+          datasets: [],
+          approaches: [],
+          source_name: 'SIH 2026',
+          source_id: 'SIH26017',
+          source_url: null,
+          source_note: null,
+          project_count: 0,
+          completed_count: 0,
+          ai_fields: [],
+          projects: [],
+        }),
+      ),
+    );
+
+    renderDetail('/problems/1');
+    await screen.findByRole('heading', { level: 1 });
 
     expect(
-      await screen.findByText(
-        /Ship the MVP first, then add whatever matters to you/i,
-      ),
+      await screen.findByText(/No phased guide for this brief yet/i),
     ).toBeInTheDocument();
   });
 
@@ -91,13 +196,15 @@ describe('ProblemDetailPage', () => {
     expect(login).toHaveAttribute('href', '/api/auth/github/login');
   });
 
-  it('lists every later-addition idea, even past an accidental z in the text', async () => {
+  it('renders a multi-paragraph description from the summary', async () => {
     server.use(
       http.get('*/api/problems/:id', () =>
         HttpResponse.json({
           id: 1,
           title: 'Crop disease triage for small farms',
-          summary: 'Farmers photograph leaf blight.',
+          summary:
+            'Farmers photograph leaf blight; a triage flow routes cases.\n\n' +
+            'Wire the capture flow to the officer queue so nothing is retryped.',
           who_affected: 'Smallholder farmers',
           why_matters: 'Late detection destroys a season of income.',
           field: 'aiml',
@@ -114,12 +221,6 @@ describe('ProblemDetailPage', () => {
           project_count: 0,
           completed_count: 0,
           ai_fields: [],
-          original_text:
-            '## Overview\nBuild the triage flow.\n\n' +
-            '## Stretch goals\n' +
-            '- Add zebra-proof night mode\n' +
-            '- Export CSV reports\n\n' +
-            '## Limitations\nRuns offline.\n',
           projects: [],
         }),
       ),
@@ -129,51 +230,221 @@ describe('ProblemDetailPage', () => {
     await screen.findByRole('heading', { level: 1 });
 
     expect(
-      await screen.findByText('Add zebra-proof night mode'),
+      await screen.findByText(
+        /Farmers photograph leaf blight; a triage flow routes cases\./,
+      ),
     ).toBeInTheDocument();
-    expect(screen.getByText('Export CSV reports')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Wire the capture flow to the officer queue so nothing is retryped\./,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/This project is for smallholder farmers\./),
+    ).toBeInTheDocument();
   });
 
-  it('lists later-addition ideas when the ideas section is the last one', async () => {
+  it('does not render a building count line under the description', async () => {
+    renderDetail('/problems/1');
+    await screen.findByRole('heading', { level: 1 });
+
+    expect(screen.queryByText(/0 building/i)).not.toBeInTheDocument();
+  });
+
+  it('replaces the description with problem-statement blocks for a hackathon brief', async () => {
     server.use(
       http.get('*/api/problems/:id', () =>
         HttpResponse.json({
-          id: 1,
-          title: 'Crop disease triage for small farms',
-          summary: 'Farmers photograph leaf blight.',
-          who_affected: 'Smallholder farmers',
-          why_matters: 'Late detection destroys a season of income.',
-          field: 'aiml',
-          domain: 'agriculture',
-          difficulty: 'beginner',
-          est_hours: 20,
-          tech_tags: ['python'],
+          id: 42,
+          title: 'Streetlight outage tracker',
+          summary: 'Citizens report dead streetlights and nothing comes back.',
+          who_affected: 'Municipal ward offices',
+          why_matters: 'Dark streets cost money and feel unsafe.',
+          field: 'web-dev',
+          domain: 'governance',
+          difficulty: 'intermediate',
+          est_hours: 40,
+          tech_tags: ['typescript', 'react', 'postgres'],
           datasets: [],
-          approaches: [],
-          source_name: 'SIH 2026',
-          source_id: 'SIH26017',
+          approaches: ['Dedupe reports by pole', 'Escalate stale SLAs'],
+          source_name: 'TCOE',
+          source_id: 'TCOE PS12',
           source_url: null,
           source_note: null,
           project_count: 0,
           completed_count: 0,
           ai_fields: [],
-          original_text:
-            '## Overview\nPlan the capture flow first.\n\n' +
-            '## Possible future improvements\n' +
-            '- Invite collaborators\n' +
-            '- Weekly recap email',
+          goal: 'hackathon',
+          team_plan: null,
+          pitch_guide: null,
           projects: [],
         }),
       ),
     );
 
-    renderDetail('/problems/1');
+    renderDetail('/problems/42');
+    await screen.findByRole('heading', { level: 1 });
+
+    expect(await screen.findByText('The problem')).toBeInTheDocument();
+    expect(screen.getByText('Who faces it, and how')).toBeInTheDocument();
+    expect(screen.getByText('How it gets fixed')).toBeInTheDocument();
+    expect(screen.getByText('Citizens report dead streetlights and nothing comes back.')).toBeInTheDocument();
+    expect(
+      screen.getAllByText('Dedupe reports by pole').length,
+    ).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText(/This project is for/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Why it matters' }),
+    ).not.toBeInTheDocument();
+    // Team plan and pitch guide stay hidden when there is no curated data.
+    expect(
+      screen.queryByRole('heading', { name: 'Team plan' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Pitch guide' }),
+    ).not.toBeInTheDocument();
+    // Build guide is still there and comes after the tech stack.
+    expect(
+      screen.getByRole('heading', { name: 'Build guide' }),
+    ).toBeInTheDocument();
+  });
+
+  it('renders the team plan and pitch guide for a hackathon brief with a pitch kit', async () => {
+    server.use(
+      http.get('*/api/problems/:id', () =>
+        HttpResponse.json({
+          id: 42,
+          title: 'Streetlight outage tracker',
+          summary: 'Citizens report dead streetlights and nothing comes back.',
+          who_affected: 'Municipal ward offices',
+          why_matters: 'Dark streets cost money and feel unsafe.',
+          field: 'web-dev',
+          domain: 'governance',
+          difficulty: 'intermediate',
+          est_hours: 40,
+          tech_tags: ['typescript', 'react', 'postgres'],
+          datasets: [],
+          approaches: ['Dedupe reports by pole'],
+          source_name: 'TCOE',
+          source_id: 'TCOE PS12',
+          source_url: null,
+          source_note: null,
+          project_count: 0,
+          completed_count: 0,
+          ai_fields: [],
+          goal: 'hackathon',
+          team_plan: {
+            note: '3 people, 24 hours.',
+            roles: [
+              { role: 'API', covers: 'Reports + statuses.' },
+              { role: 'Web app', covers: 'Forms and dashboards.' },
+            ],
+            milestones: ['Hour 8: demo path works.'],
+          },
+          pitch_guide: {
+            one_liner: 'Complaints become trackable tickets.',
+            beats: [
+              { heading: 'Hook', text: 'Have you reported a pothole and never heard back?' },
+              { heading: 'Demo', text: 'File, assign, resolve, live.' },
+            ],
+            judge_questions: [
+              {
+                question: 'Why would a municipality adopt this?',
+                answer: 'It replaces a phone log at zero cost to try.',
+              },
+            ],
+          },
+          projects: [],
+        }),
+      ),
+    );
+
+    renderDetail('/problems/42');
     await screen.findByRole('heading', { level: 1 });
 
     expect(
-      await screen.findByText('Invite collaborators'),
+      await screen.findByRole('heading', { name: 'Team plan' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Weekly recap email')).toBeInTheDocument();
+    expect(screen.getByText('3 people, 24 hours.')).toBeInTheDocument();
+    expect(screen.getByText('API')).toBeInTheDocument();
+    expect(screen.getByText('Reports + statuses.')).toBeInTheDocument();
+    expect(screen.getByText('Hour 8: demo path works.')).toBeInTheDocument();
+
+    expect(
+      screen.getByRole('heading', { name: 'Pitch guide' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Complaints become trackable tickets.')).toBeInTheDocument();
+    expect(screen.getByText('Have you reported a pothole and never heard back?')).toBeInTheDocument();
+    expect(
+      screen.getByText('Questions the judges may ask'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Why would a municipality adopt this?'),
+    ).toBeInTheDocument();
+
+    // Build guide renders last among the numbered article sections.
+    const headings = screen.getAllByRole('heading', { level: 2 });
+    const numberedTitles = headings
+      .map((heading) => heading.textContent ?? '')
+      .filter((title) => TECH_SECTION_TITLES.has(title) || title === 'Build guide');
+    expect(numberedTitles[numberedTitles.length - 1]).toBe('Build guide');
+  });
+
+  it('keeps the paragraph description and no pitch sections for the learning brief', async () => {
+    server.use(
+      http.get('*/api/problems/:id', () =>
+        HttpResponse.json({
+          id: 3,
+          title: 'Study Flashcards App',
+          summary: 'Cards return right before you forget them.',
+          who_affected: 'Self-learners',
+          why_matters: 'Cramming fades; spacing sticks.',
+          field: 'web-dev',
+          domain: 'education',
+          difficulty: 'beginner',
+          est_hours: 30,
+          tech_tags: ['react'],
+          datasets: [],
+          approaches: ['Implement SM-2'],
+          source_name: 'MANABI Curated',
+          source_id: 'manabi-learning-001',
+          source_url: null,
+          source_note: null,
+          project_count: 0,
+          completed_count: 0,
+          ai_fields: [],
+          goal: 'learning',
+          team_plan: {
+            note: 'Should not show on learning briefs.',
+            roles: [],
+            milestones: [],
+          },
+          pitch_guide: {
+            one_liner: 'Should not show on learning briefs.',
+            beats: [],
+            judge_questions: [],
+          },
+          build_guide: [
+            { title: 'Model the data', summary: 'Three shapes.', steps: ['Card', 'Deck'] },
+          ],
+          projects: [],
+        }),
+      ),
+    );
+
+    renderDetail('/problems/3');
+    await screen.findByRole('heading', { level: 1 });
+
+    expect(
+      await screen.findByText(/This project is for self-learners/),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Team plan' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Pitch guide' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('Model the data')).toBeInTheDocument();
   });
 
   it('rejects non-GitHub URLs on the client without a network call', async () => {
