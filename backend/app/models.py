@@ -94,6 +94,9 @@ class Problem(Base):
     organisation: Mapped[str | None] = mapped_column(String(255), nullable=True)
     deadline: Mapped[date | None] = mapped_column(Date, nullable=True)
     goal: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    # Learning-track extras: concepts the builder picks up while finishing the
+    # brief. Empty for non-learning (and older learning) rows.
+    learning_concepts: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
 
     creator: Mapped[User | None] = relationship()
     projects: Mapped[list["Project"]] = relationship(back_populates="problem")

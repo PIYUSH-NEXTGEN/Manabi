@@ -697,6 +697,11 @@ export interface components {
             deadline?: string | null;
             /** Goal */
             goal?: ("resume" | "hackathon" | "learning") | null;
+            /**
+             * Learning Concepts
+             * @default []
+             */
+            learning_concepts: string[];
             /** Original Text */
             original_text: string;
             /** Projects */
@@ -830,6 +835,11 @@ export interface components {
             deadline?: string | null;
             /** Goal */
             goal?: ("resume" | "hackathon" | "learning") | null;
+            /**
+             * Learning Concepts
+             * @default []
+             */
+            learning_concepts: string[];
         };
         /** ProblemsListOut */
         ProblemsListOut: {

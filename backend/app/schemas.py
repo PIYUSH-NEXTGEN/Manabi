@@ -52,6 +52,7 @@ class ProblemOut(ProblemCard):
     organisation: str | None = None
     deadline: date | None = None
     goal: GoalEnum | None = None
+    learning_concepts: list[str] = []
 
 
 class ProjectCreate(BaseModel):

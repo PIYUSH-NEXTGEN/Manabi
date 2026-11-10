@@ -171,10 +171,10 @@ export function ProblemBoardPage() {
                   aria-pressed={active}
                   onClick={() => setParam('goal', active ? '' : option.value)}
                   className={cx(
-                    'flex flex-col gap-2 border border-ink bg-sheet px-5 py-5 text-left transition-colors',
+                    'flex flex-col gap-2 border border-ink px-5 py-5 text-left transition-colors',
                     active
                       ? 'bg-ink text-paper'
-                      : 'text-ink hover:bg-tint',
+                      : 'bg-sheet text-ink hover:bg-tint',
                   )}
                 >
                   <span className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em]">

@@ -2054,6 +2054,14 @@
             ],
             "title": "Goal"
           },
+          "learning_concepts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Learning Concepts",
+            "default": []
+          },
           "original_text": {
             "type": "string",
             "title": "Original Text"
@@ -2519,6 +2527,14 @@
               }
             ],
             "title": "Goal"
+          },
+          "learning_concepts": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Learning Concepts",
+            "default": []
           }
         },
         "type": "object",

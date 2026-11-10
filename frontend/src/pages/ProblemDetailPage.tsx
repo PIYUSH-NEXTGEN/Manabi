@@ -119,6 +119,12 @@ function DetailView({ problemId }: { problemId: number }) {
   const projectCount = data.project_count ?? data.projects.length;
   const completedCount = data.completed_count ?? 0;
   const buildingCount = projectCount - completedCount;
+  const learningConcepts = data.learning_concepts ?? [];
+
+  // Section numbers are assigned in render order, so the optional "what
+  // you'll learn" section never leaves a gap in the numbering.
+  let sectionCounter = 0;
+  const nextSectionNumber = () => String((sectionCounter += 1)).padStart(2, '0');
 
   return (
     <main className="border-b border-ink bg-paper">
@@ -171,14 +177,33 @@ function DetailView({ problemId }: { problemId: number }) {
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
           <article>
-            <Section number="01" title="Why it matters">
+            <Section number={nextSectionNumber()} title="Why it matters">
               <p className="max-w-3xl border-l-2 border-line pl-5 text-base leading-relaxed text-ink-soft">
                 {data.why_matters}
               </p>
 
             </Section>
 
-            <Section number="02" title="Tech stack">
+            {learningConcepts.length > 0 ? (
+              <Section
+                number={nextSectionNumber()}
+                title="What concepts you'll learn"
+              >
+                <ul className="max-w-3xl space-y-2.5 text-sm leading-relaxed text-ink-soft">
+                  {learningConcepts.map((concept) => (
+                    <li key={concept} className="flex gap-3">
+                      <span
+                        aria-hidden
+                        className="mt-2 block size-1.5 shrink-0 bg-accent"
+                      />
+                      {concept}
+                    </li>
+                  ))}
+                </ul>
+              </Section>
+            ) : null}
+
+            <Section number={nextSectionNumber()} title="Tech stack">
               <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
                 The stack below is a starting point, not a rule. If it lists a
                 backend language you can swap it for another one - Python or Go,
@@ -196,7 +221,7 @@ function DetailView({ problemId }: { problemId: number }) {
               )}
             </Section>
 
-            <Section number="03" title="What you can add later">
+            <Section number={nextSectionNumber()} title="What you can add later">
               {ideas.length > 0 ? (
                 <ul className="max-w-3xl space-y-2 text-sm leading-relaxed text-ink-soft">
                   {ideas.map((idea) => (

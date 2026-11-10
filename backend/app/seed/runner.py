@@ -45,6 +45,8 @@ def seed_problems(problems: list[dict], label: str = "problems") -> None:
                 ai_fields=p["ai_fields"],
                 created_by=None,
                 status=STATUS_PUBLISHED,
+                goal=p.get("goal"),
+                learning_concepts=p.get("learning_concepts", []),
             )
             session.add(problem)
             inserted += 1

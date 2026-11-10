@@ -36,6 +36,7 @@ def problem_to_out(problem: Problem, project_count: int, completed_count: int = 
         organisation=problem.organisation,
         deadline=problem.deadline,
         goal=problem.goal,
+        learning_concepts=problem.learning_concepts or [],
     )
 
 
