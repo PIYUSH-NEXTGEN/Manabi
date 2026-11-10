@@ -144,7 +144,7 @@ def test_0004_upgrade_preserves_existing_row_values(sqlite_url):
         )).all()
     engine.dispose()
 
-    command.upgrade(cfg, "head")
+    command.upgrade(cfg, "0004_cleanup")  # absolute: 0007 later rewrites field values
 
     engine = create_engine(sqlite_url)
     with engine.begin() as conn:
@@ -179,7 +179,7 @@ def test_downgrade_last_step_recreates_schema_empty(sqlite_url):
     # relative step, which grows by one with every appended migration
     # (0006: -3 == 0006 -> 0005 -> 0004 -> 0003).
     # (0005/0006 own downgrades are covered by the dedicated tests below.)
-    command.downgrade(cfg, "-3")  # -> 0003
+    command.downgrade(cfg, "0003")  # absolute: 0006 and 0005 undone
     engine = create_engine(sqlite_url)
     names = set(inspect(engine).get_table_names())
     cols = {c["name"] for c in inspect(engine).get_columns("problems")}
@@ -257,7 +257,7 @@ def test_0006_upgrade_from_empty_then_downgrade(sqlite_url):
     cfg = alembic_config(sqlite_url)
     command.upgrade(cfg, "0005_project_verification")
     command.upgrade(cfg, "head")
-    command.downgrade(cfg, "-1")  # back to 0005: the goal column is gone again
+    command.downgrade(cfg, "0005_project_verification")  # absolute: 0007, 0006 undone
     engine = create_engine(sqlite_url)
     cols = {c["name"] for c in inspect(engine).get_columns("problems")}
     engine.dispose()

@@ -66,7 +66,7 @@ def make_problem(db_session, **overrides) -> Problem:
         summary="Predict floods",
         who_affected="Ministry X",
         why_matters="Saves people",
-        field="ml",
+        field="aiml",
         domain="disaster-management",
         difficulty="intermediate",
         est_hours=30,

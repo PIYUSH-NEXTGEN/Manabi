@@ -13,25 +13,42 @@ DEFAULT_EST_HOURS = 40
 
 FIELD_KEYWORDS = [
     ("blockchain", "blockchain"),
-    ("distributed systems", "distributed-systems"),
-    ("cybersecurity", "cybersecurity"),
-    ("cryptography", "cybersecurity"),
-    ("computer vision", "computer-vision"),
-    ("llm", "nlp-llm"),
-    ("document ai", "nlp-llm"),
-    ("nlp", "nlp-llm"),
-    ("ocr", "computer-vision"),
-    ("geospatial", "geospatial"),
-    ("optimization", "optimization"),
-    ("data engineering", "data-engineering"),
-    ("full-stack", "web-fullstack"),
-    ("full stack", "web-fullstack"),
-    ("web app", "web-fullstack"),
-    ("web", "web-fullstack"),
-    ("mobile", "mobile"),
-    ("iot", "iot-embedded"),
-    ("ml", "ml"),
-    ("machine learning", "ml"),
+    ("web3", "blockchain"),
+    ("cybersecurity", "cyber-security"),
+    ("cyber security", "cyber-security"),
+    ("cryptography", "cyber-security"),
+    ("computer vision", "aiml"),
+    ("document ai", "aiml"),
+    ("llm", "aiml"),
+    ("document processing", "aiml"),
+    ("nlp", "aiml"),
+    ("ocr", "aiml"),
+    ("machine learning", "aiml"),
+    ("ml", "aiml"),
+    ("optimization", "aiml"),
+    ("prediction", "aiml"),
+    ("data engineering", "data-science"),
+    ("data science", "data-science"),
+    ("analytics", "data-science"),
+    ("geospatial", "data-science"),
+    ("time series", "data-science"),
+    ("devops", "devops-cloud"),
+    ("cloud", "devops-cloud"),
+    ("kubernetes", "devops-cloud"),
+    ("docker", "devops-cloud"),
+    ("distributed systems", "devops-cloud"),
+    ("observability", "devops-cloud"),
+    ("full-stack", "web-dev"),
+    ("full stack", "web-dev"),
+    ("web app", "web-dev"),
+    ("web", "web-dev"),
+    ("dashboard", "web-dev"),
+    ("portal", "web-dev"),
+    ("mobile", "app-dev"),
+    ("app", "app-dev"),
+    ("android", "app-dev"),
+    ("iot", "app-dev"),
+    ("embedded", "app-dev"),
 ]
 
 DOMAIN_KEYWORDS = [
@@ -95,7 +112,7 @@ class ParsedEntry:
     ai_fields: list[str] = field(default_factory=list)
     tech_tags: list[str] = field(default_factory=list)
     datasets: list[dict] = field(default_factory=list)
-    field: str = "other"
+    field: str = "web-dev"
     domain: str = "other"
     difficulty: str = "intermediate"
     est_hours: int = DEFAULT_EST_HOURS
@@ -157,7 +174,7 @@ def _build_entry(match: re.Match, original: str) -> ParsedEntry:
             tech_tags.append(tag)
     tech_tags = sorted(set(tech_tags))
 
-    entry_field = "other"
+    entry_field = "web-dev"
     tech_lower_no_punct = re.sub(r"[+/,]", " ", tech_lower)
     for keyword, value in FIELD_KEYWORDS:
         if _hits(keyword, tech_lower) or _hits(keyword, tech_lower_no_punct):

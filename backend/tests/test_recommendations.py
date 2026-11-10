@@ -34,7 +34,7 @@ def db_session():
                 title="Pandas flood model",
                 summary="Predict flood risk with rainfall data.",
                 who_affected="Villages", why_matters="Deaths",
-                field="ml", domain="disaster-management", difficulty="intermediate",
+                field="aiml", domain="disaster-management", difficulty="intermediate",
                 est_hours=40, tech_tags=["python", "pandas"], datasets=[], approaches=[],
                 source_name="S", source_id="S1", original_text="verbatim",
             ),
@@ -42,7 +42,7 @@ def db_session():
                 title="Rust vuln scanner",
                 summary="Static analysis for vulnerable crates.",
                 who_affected="Maintainers", why_matters="Supply chain",
-                field="cybersecurity", domain="developer-tools", difficulty="advanced",
+                field="cyber-security", domain="developer-tools", difficulty="advanced",
                 est_hours=80, tech_tags=["rust"], datasets=[], approaches=[],
                 source_name="S", source_id="S2", original_text="verbatim",
             ),
@@ -50,7 +50,7 @@ def db_session():
                 title="Simple quiz app",
                 summary="Attendance and quiz web app for schools.",
                 who_affected="Teachers", why_matters="Time",
-                field="web-fullstack", domain="education", difficulty="beginner",
+                field="web-dev", domain="education", difficulty="beginner",
                 est_hours=16, tech_tags=["javascript"], datasets=[], approaches=[],
                 source_name="S", source_id="S3", original_text="verbatim",
             ),
@@ -66,7 +66,7 @@ def db_session():
 def user(db_session):
     u = User(
         github_id=1, username="octocat", name="O", avatar_url=None, github_token=None,
-        signals_json={"languages": {"Python": 12}, "topics": ["ml", "pandas"]},
+        signals_json={"languages": {"Python": 12}, "topics": ["aiml", "pandas"]},
         signals_updated_at=None,
     )
     db_session.add(u)
@@ -103,7 +103,7 @@ def test_tag_matches_dominate(db_session, user):
 def test_field_topic_match_reason(db_session, user):
     recs = recommender.recommendations_for_user(db_session, user)
     flood = next(r for r in recs if r[0].source_id == "S1")
-    assert any("You explore ml" in r for r in flood[2])
+    assert any("You explore aiml" in r for r in flood[2])
     # field match + 2 tags + intermediate bonus = 3*2 + 2 + 1 = 9
     assert flood[1] == 9
 
@@ -144,7 +144,7 @@ def test_limit_eight(db_session):
         db_session.add(
             Problem(
                 title=f"P{i}", summary="s", who_affected="w", why_matters="y",
-                field="ml", domain="other", difficulty="beginner", est_hours=10,
+                field="aiml", domain="other", difficulty="beginner", est_hours=10,
                 tech_tags=["python"], datasets=[], approaches=[],
                 source_name="S", source_id=f"SX{i}", original_text="verbatim",
             )
@@ -164,7 +164,7 @@ def test_recommendations_requires_auth(client, db_session, anon):
 
 def test_recommendations_shape(client, db_session, user, monkeypatch):
     async def fresh(token):
-        return {"languages": {"Python": 12}, "topics": ["ml", "pandas"]}
+        return {"languages": {"Python": 12}, "topics": ["aiml", "pandas"]}
 
     monkeypatch.setattr("app.routers.recommendations.github.get_user_signals", fresh)
     res = client.get("/api/recommendations")

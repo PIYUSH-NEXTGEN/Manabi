@@ -30,7 +30,7 @@ def make_problem(session: Session, source_id: str = "SIH26017", title: str = "Fl
         summary="A summary",
         who_affected="Coastal districts",
         why_matters="Flooding costs lives",
-        field="ml",
+        field="aiml",
         domain="disaster-management",
         difficulty="intermediate",
         est_hours=40,

@@ -56,7 +56,7 @@ def seeded(db_session):
     db_session.add(jane)
     db_session.commit()
     problem = Problem(
-        title="Flood model", summary="s", who_affected="w", why_matters="y", field="ml",
+        title="Flood model", summary="s", who_affected="w", why_matters="y", field="aiml",
         domain="other", difficulty="beginner", est_hours=10, tech_tags=[], datasets=[],
         approaches=[], source_name="S", source_id="S1", original_text="verbatim",
     )
@@ -137,7 +137,7 @@ def draft_card_factory(**overrides):
         "summary": "A summary that is long enough.",
         "who_affected": "Someone affected",
         "why_matters": "It matters somehow",
-        "field": "other",
+        "field": "web-dev",
         "domain": "other",
         "difficulty": "beginner",
         "est_hours": 10,

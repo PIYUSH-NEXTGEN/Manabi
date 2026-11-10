@@ -46,7 +46,7 @@ def test_all_curated_projects_are_intermediate_web(_client):
     rows = session.scalars(select(Problem).where(Problem.source_name == SOURCE_NAME)).all()
     assert len(rows) == 10
     for row in rows:
-        assert row.field == "web-fullstack"
+        assert row.field == "web-dev"
         assert row.difficulty == "intermediate"
         assert row.status == "published"
         assert row.origin == "manual"
@@ -59,19 +59,19 @@ def test_curated_discoverable_via_filters(_client):
     _seed_curated(session)
     session.add(Problem(
         title="Old beginner problem", summary="s", who_affected="w", why_matters="m",
-        field="ml", domain="healthcare", difficulty="beginner",
+        field="aiml", domain="healthcare", difficulty="beginner",
         est_hours=20, tech_tags=["html"], datasets=[], approaches=[],
         source_name="Other", source_id="old-beginner-001", original_text="ot",
         ai_fields=[], created_by=None,
     ))
     session.commit()
 
-    r = client.get("/api/problems", params={"field": "web-fullstack", "difficulty": "intermediate"})
+    r = client.get("/api/problems", params={"field": "web-dev", "difficulty": "intermediate"})
     data = r.json()
     assert data["total"] == 10
     assert len(data["items"]) == 10
     for it in data["items"]:
-        assert it["field"] == "web-fullstack"
+        assert it["field"] == "web-dev"
         assert it["difficulty"] == "intermediate"
 
     f = client.get("/api/problems/facets").json()
@@ -92,7 +92,7 @@ def test_curated_search_and_detail(_client):
     r2 = client.get(f"/api/problems/{row.id}")
     assert r2.status_code == 200
     assert r2.json()["title"] == first_title
-    assert r2.json()["field"] == "web-fullstack"
+    assert r2.json()["field"] == "web-dev"
     assert r2.json()["domain"] == PROJECTS[0]["domain"]
     assert r2.json()["original_text"]
 

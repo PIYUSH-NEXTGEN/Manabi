@@ -59,22 +59,13 @@
               "anyOf": [
                 {
                   "enum": [
-                    "ml",
-                    "computer-vision",
-                    "nlp-llm",
-                    "cybersecurity",
-                    "web-fullstack",
-                    "mobile",
-                    "data-engineering",
-                    "geospatial",
-                    "optimization",
-                    "iot-embedded",
-                    "distributed-systems",
-                    "blockchain",
-                    "devops-cloud",
+                    "web-dev",
+                    "app-dev",
+                    "aiml",
                     "data-science",
-                    "developer-tools",
-                    "other"
+                    "cyber-security",
+                    "devops-cloud",
+                    "blockchain"
                   ],
                   "type": "string"
                 },
@@ -1627,22 +1618,13 @@
           "field": {
             "type": "string",
             "enum": [
-              "ml",
-              "computer-vision",
-              "nlp-llm",
-              "cybersecurity",
-              "web-fullstack",
-              "mobile",
-              "data-engineering",
-              "geospatial",
-              "optimization",
-              "iot-embedded",
-              "distributed-systems",
-              "blockchain",
-              "devops-cloud",
+              "web-dev",
+              "app-dev",
+              "aiml",
               "data-science",
-              "developer-tools",
-              "other"
+              "cyber-security",
+              "devops-cloud",
+              "blockchain"
             ],
             "title": "Field"
           },
@@ -1860,22 +1842,13 @@
           "field": {
             "type": "string",
             "enum": [
-              "ml",
-              "computer-vision",
-              "nlp-llm",
-              "cybersecurity",
-              "web-fullstack",
-              "mobile",
-              "data-engineering",
-              "geospatial",
-              "optimization",
-              "iot-embedded",
-              "distributed-systems",
-              "blockchain",
-              "devops-cloud",
+              "web-dev",
+              "app-dev",
+              "aiml",
               "data-science",
-              "developer-tools",
-              "other"
+              "cyber-security",
+              "devops-cloud",
+              "blockchain"
             ],
             "title": "Field"
           },
@@ -2153,22 +2126,13 @@
           "field": {
             "type": "string",
             "enum": [
-              "ml",
-              "computer-vision",
-              "nlp-llm",
-              "cybersecurity",
-              "web-fullstack",
-              "mobile",
-              "data-engineering",
-              "geospatial",
-              "optimization",
-              "iot-embedded",
-              "distributed-systems",
-              "blockchain",
-              "devops-cloud",
+              "web-dev",
+              "app-dev",
+              "aiml",
               "data-science",
-              "developer-tools",
-              "other"
+              "cyber-security",
+              "devops-cloud",
+              "blockchain"
             ],
             "title": "Field"
           },
@@ -2313,7 +2277,7 @@
           "source_name"
         ],
         "title": "ProblemIn",
-        "description": "POST /api/problems body: ProblemCard per contract, plus optional ai_fields (see docs/REQUESTS.md)."
+        "description": "POST /api/problems body: the ProblemCard contract above, plus optional\nai_fields (a curated ingest may mark which fields the AI authored)."
       },
       "ProblemOut": {
         "properties": {
@@ -2344,22 +2308,13 @@
           "field": {
             "type": "string",
             "enum": [
-              "ml",
-              "computer-vision",
-              "nlp-llm",
-              "cybersecurity",
-              "web-fullstack",
-              "mobile",
-              "data-engineering",
-              "geospatial",
-              "optimization",
-              "iot-embedded",
-              "distributed-systems",
-              "blockchain",
-              "devops-cloud",
+              "web-dev",
+              "app-dev",
+              "aiml",
               "data-science",
-              "developer-tools",
-              "other"
+              "cyber-security",
+              "devops-cloud",
+              "blockchain"
             ],
             "title": "Field"
           },

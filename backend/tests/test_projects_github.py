@@ -70,7 +70,7 @@ def problem(db_session):
         summary="Predict floods",
         who_affected="Ministry X",
         why_matters="Saves people",
-        field="ml",
+        field="aiml",
         domain="disaster-management",
         difficulty="intermediate",
         est_hours=30,

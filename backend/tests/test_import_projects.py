@@ -75,12 +75,12 @@ def test_original_text_is_verbatim(fixture_text):
 
 def test_field_mapping_and_domain(fixture_text):
     entries = {e.source_id: e for e in parse_blocks(fixture_text)}
-    assert entries["SIH26017"].field == "ml"
+    assert entries["SIH26017"].field == "aiml"
     assert entries["SIH26017"].domain == "governance"
-    assert entries["SIH26153"].field == "cybersecurity"
-    assert entries["TCOE PS12"].field == "computer-vision"
+    assert entries["SIH26153"].field == "cyber-security"
+    assert entries["TCOE PS12"].field == "aiml"
     assert entries["TCOE PS12"].domain == "agriculture"
-    assert entries["SIH26032"].field == "web-fullstack"
+    assert entries["SIH26032"].field == "web-dev"
     assert entries["SIH26032"].domain == "agriculture"
 
 
@@ -189,8 +189,8 @@ def test_kaggle_entries_parse():
     assert len(entries) == 2
     wheat, fraud = entries
     assert wheat.source_id == "KAG01" and wheat.source_name == "Kaggle"
-    assert wheat.field == "computer-vision" and wheat.domain == "agriculture"
+    assert wheat.field == "aiml" and wheat.domain == "agriculture"
     assert wheat.tech_tags == ["computer-vision"]
     assert wheat.datasets == [{"name": "PlantVillage", "url": None}, {"name": "Global Wheat Rust monitoring open sets", "url": None}]
-    assert fraud.field == "ml" and fraud.domain == "fintech"  # new parser domain mapping
+    assert fraud.field == "aiml" and fraud.domain == "fintech"  # new parser domain mapping
     assert "sih" not in fraud.source_id

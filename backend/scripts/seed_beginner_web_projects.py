@@ -43,7 +43,7 @@ def _project(
         "summary": summary,
         "who_affected": who_affected,
         "why_matters": why_matters,
-        "field": "web-fullstack",
+        "field": "web-dev",
         "domain": domain,
         "difficulty": "beginner",
         "est_hours": est_hours,

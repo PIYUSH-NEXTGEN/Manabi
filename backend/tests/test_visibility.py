@@ -44,7 +44,7 @@ def _problem(db: Session, i: int, status: str) -> Problem:
         summary="s",
         who_affected="w",
         why_matters="y",
-        field="ml",
+        field="aiml",
         domain="other",
         difficulty="beginner",
         est_hours=5,
@@ -87,7 +87,7 @@ def test_facets_only_published(client, db_session, mixed):
     assert res.status_code == 200
     facets = res.json()
     # 4 same-valued problems; only the published one may be counted anywhere
-    assert facets["fields"] == [{"value": "ml", "count": 1}]
+    assert facets["fields"] == [{"value": "aiml", "count": 1}]
     assert facets["domains"] == [{"value": "other", "count": 1}]
     assert facets["difficulties"] == [{"value": "beginner", "count": 1}]
     assert facets["tech_tags"] == [{"value": "python", "count": 1}]

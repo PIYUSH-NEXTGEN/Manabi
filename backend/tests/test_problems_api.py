@@ -36,7 +36,7 @@ def seed(db_session: Session):
         summary="Predict floods early",
         who_affected="Ministry X",
         why_matters="Saves people",
-        field="ml",
+        field="aiml",
         domain="disaster-management",
         difficulty="intermediate",
         est_hours=30,
@@ -53,7 +53,7 @@ def seed(db_session: Session):
         summary="Grade onions from a photo",
         who_affected="Ministry Y",
         why_matters="Fair procurement",
-        field="computer-vision",
+        field="app-dev",
         domain="agriculture",
         difficulty="beginner",
         est_hours=20,
@@ -70,7 +70,7 @@ def seed(db_session: Session):
         summary="Route ambulances better",
         who_affected="Ministry Z",
         why_matters="Faster response",
-        field="ml",
+        field="aiml",
         domain="healthcare",
         difficulty="advanced",
         est_hours=60,
@@ -128,7 +128,7 @@ def test_q_search_matches_tech_tags(client, seed):
 
 
 def test_single_value_filters(client, seed):
-    res = client.get("/api/problems", params={"field": "ml"})
+    res = client.get("/api/problems", params={"field": "aiml"})
     assert res.json()["total"] == 2
     res = client.get("/api/problems", params={"domain": "agriculture"})
     assert {it["id"] for it in res.json()["items"]} == {seed["new"].id}
@@ -165,7 +165,7 @@ def test_distinct_keeps_one_brief_per_field_or_domain(client, seed):
     res = client.get("/api/problems", params={"sort": "popular", "distinct": "field"})
     data = res.json()
     assert data["total"] == 2
-    assert [item["field"] for item in data["items"]] == ["ml", "computer-vision"]
+    assert [item["field"] for item in data["items"]] == ["aiml", "app-dev"]
     assert data["items"][0]["id"] == seed["pop"].id
 
     domains = client.get("/api/problems", params={"distinct": "domain"}).json()
@@ -189,7 +189,7 @@ def test_facets_counts(client, seed):
     assert res.status_code == 200
     data = res.json()
     fields = {f["value"]: f["count"] for f in data["fields"]}
-    assert fields == {"ml": 2, "computer-vision": 1}
+    assert fields == {"aiml": 2, "app-dev": 1}
     domains = {f["value"]: f["count"] for f in data["domains"]}
     assert domains["agriculture"] == 1 and domains["healthcare"] == 1 and domains["disaster-management"] == 1
     difficulties = {f["value"]: f["count"] for f in data["difficulties"]}

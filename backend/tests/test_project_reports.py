@@ -44,7 +44,7 @@ def seeded(db_session):
     db_session.add_all([owner, reporter])
     db_session.commit()
     problem = Problem(
-        title="Flood model", summary="s", who_affected="w", why_matters="y", field="ml",
+        title="Flood model", summary="s", who_affected="w", why_matters="y", field="aiml",
         domain="other", difficulty="beginner", est_hours=10, tech_tags=[], datasets=[],
         approaches=[], source_name="S", source_id="S1", original_text="verbatim",
     )

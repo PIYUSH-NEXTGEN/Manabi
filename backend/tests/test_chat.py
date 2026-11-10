@@ -35,7 +35,7 @@ def db_session():
                 summary="Predict flood risk along rivers and alert villages 48 hours ahead using rainfall data.",
                 who_affected="Villages",
                 why_matters="Deaths",
-                field="ml",
+                field="aiml",
                 domain="disaster-management",
                 difficulty="intermediate",
                 est_hours=40,
@@ -51,7 +51,7 @@ def db_session():
                 summary="Simple attendance web app for schools with offline sync.",
                 who_affected="Teachers",
                 why_matters="Time",
-                field="web-fullstack",
+                field="web-dev",
                 domain="education",
                 difficulty="beginner",
                 est_hours=20,
@@ -142,7 +142,7 @@ def test_chat_reference_kept_when_real(client, db_session, anon, monkeypatch):
     patch_reply(monkeypatch, "Start with [P1] this weekend.")
     data = client.post("/api/chat", json={"messages": [msg()]}).json()
     assert data["problems"] == [
-        {"id": 1, "title": "Flood alert dashboard", "field": "ml", "difficulty": "intermediate"}
+        {"id": 1, "title": "Flood alert dashboard", "field": "aiml", "difficulty": "intermediate"}
     ]
     assert data["reply"].count("[P1]") == 1
 

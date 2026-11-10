@@ -5,9 +5,7 @@ from pydantic import BaseModel, Field
 
 Difficulty = Literal["beginner", "intermediate", "advanced"]
 FieldEnum = Literal[
-    "ml", "computer-vision", "nlp-llm", "cybersecurity", "web-fullstack", "mobile",
-    "data-engineering", "geospatial", "optimization", "iot-embedded",
-    "distributed-systems", "blockchain", "devops-cloud", "data-science", "developer-tools", "other",
+    "web-dev", "app-dev", "aiml", "data-science", "cyber-security", "devops-cloud", "blockchain",
 ]
 DomainEnum = Literal[
     "healthcare", "education", "agriculture", "fintech", "climate", "governance",
