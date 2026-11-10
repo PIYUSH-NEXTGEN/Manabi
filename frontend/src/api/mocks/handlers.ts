@@ -34,7 +34,7 @@ const problems = [
     project_count: 1,
     completed_count: 0,
     ai_fields: ['approaches'],
-    goal: 'resume',
+    goal: null,
   },
   {
     id: 2,
@@ -163,8 +163,41 @@ const problems = [
     source_note: null,
     project_count: 0,
     completed_count: 0,
-    ai_fields: ['approaches', 'who_affected'],
-    goal: null,
+    ai_fields: ['approaches'],
+    goal: 'resume',
+    resume_kit: {
+      scope_levels: [
+        {
+          level: 'Good enough (MVP)',
+          text: 'One pipeline wired to one alerts feed that says whether yesterday import is trustworthy.',
+          checks: ['Freshness check per table', 'Row counts stored per run'],
+        },
+        {
+          level: 'Impressive',
+          text: 'The monitor knows what normal looks like and names downstream impact.',
+          checks: ['Distribution checks', 'Schema-change detection'],
+        },
+      ],
+      target_roles: [
+        { role: 'Data engineer', how_it_helps: 'Monitoring and alerting is the day job.' },
+        { role: 'DevOps / SRE', how_it_helps: 'Alert fatigue and runbooks transfer directly.' },
+      ],
+      resume_bullets: [
+        {
+          bullet: 'Built a pipeline monitor covering {N} feeds, cutting time-to-detect from {days} to {minutes}.',
+          example: 'Built a pipeline monitor covering 5 feeds, cutting time-to-detect from 2 days to 10 minutes.',
+        },
+      ],
+      interview_points: [
+        {
+          question: "How do you decide what counts as 'bad data'?",
+          answer: 'Freshness, completeness, validity, distribution - each has its own thresholds.',
+        },
+      ],
+      differentiators: [
+        'Write the runbook for what on-call does when each check fires.',
+      ],
+    },
   },
 ];
 

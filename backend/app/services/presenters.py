@@ -65,6 +65,7 @@ def problem_to_out(problem: Problem, project_count: int, completed_count: int = 
         build_guide=_build_guide(problem),
         team_plan=_validated(schemas.TeamPlan, problem.team_plan),
         pitch_guide=_validated(schemas.PitchGuide, problem.pitch_guide),
+        resume_kit=_validated(schemas.ResumeKit, problem.resume_kit),
     )
 
 

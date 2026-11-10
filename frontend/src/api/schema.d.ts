@@ -643,6 +643,16 @@ export interface components {
             /** Window Days */
             window_days: number;
         };
+        /** InterviewPoint */
+        InterviewPoint: {
+            /** Question */
+            question: string;
+            /**
+             * Answer
+             * @default
+             */
+            answer: string;
+        };
         /** JudgeQuestion */
         JudgeQuestion: {
             /** Question */
@@ -756,6 +766,7 @@ export interface components {
             build_guide?: components["schemas"]["BuildGuidePhase"][] | null;
             team_plan?: components["schemas"]["TeamPlan"] | null;
             pitch_guide?: components["schemas"]["PitchGuide"] | null;
+            resume_kit?: components["schemas"]["ResumeKit"] | null;
             /** Original Text */
             original_text: string;
             /** Projects */
@@ -898,6 +909,7 @@ export interface components {
             build_guide?: components["schemas"]["BuildGuidePhase"][] | null;
             team_plan?: components["schemas"]["TeamPlan"] | null;
             pitch_guide?: components["schemas"]["PitchGuide"] | null;
+            resume_kit?: components["schemas"]["ResumeKit"] | null;
         };
         /** ProblemsListOut */
         ProblemsListOut: {
@@ -1015,6 +1027,47 @@ export interface components {
             /** Reason */
             reason: string;
         };
+        /**
+         * ResumeBullet
+         * @description Bullet template for a CV, with a filled example.
+         */
+        ResumeBullet: {
+            /** Bullet */
+            bullet: string;
+            /**
+             * Example
+             * @default
+             */
+            example: string;
+        };
+        /** ResumeKit */
+        ResumeKit: {
+            /** Scope Levels */
+            scope_levels?: components["schemas"]["ScopeLevel"][];
+            /** Target Roles */
+            target_roles?: components["schemas"]["TargetRole"][];
+            /** Resume Bullets */
+            resume_bullets?: components["schemas"]["ResumeBullet"][];
+            /** Interview Points */
+            interview_points?: components["schemas"]["InterviewPoint"][];
+            /** Differentiators */
+            differentiators?: string[];
+        };
+        /**
+         * ScopeLevel
+         * @description MVP vs standout bar for a resume-track brief.
+         */
+        ScopeLevel: {
+            /** Level */
+            level: string;
+            /**
+             * Text
+             * @default
+             */
+            text: string;
+            /** Checks */
+            checks?: string[];
+        };
         /** StatsOut */
         StatsOut: {
             /** Problems */
@@ -1025,6 +1078,19 @@ export interface components {
             fields: number;
             /** Projects */
             projects: number;
+        };
+        /**
+         * TargetRole
+         * @description Which job title this project signals, and how.
+         */
+        TargetRole: {
+            /** Role */
+            role: string;
+            /**
+             * How It Helps
+             * @default
+             */
+            how_it_helps: string;
         };
         /** TeamPlan */
         TeamPlan: {

@@ -66,6 +66,47 @@ class PitchGuide(BaseModel):
     judge_questions: list[JudgeQuestion] = Field(default_factory=list, max_length=8)
 
 
+class ScopeLevel(BaseModel):
+    """MVP vs standout bar for a resume-track brief."""
+
+    level: str = Field(min_length=1, max_length=120)
+    text: str = Field(default="", max_length=3000)
+    checks: list[Annotated[str, Field(min_length=1, max_length=600)]] = (
+        Field(default_factory=list, max_length=10)
+    )
+
+
+class TargetRole(BaseModel):
+    """Which job title this project signals, and how."""
+
+    role: str = Field(min_length=1, max_length=120)
+    how_it_helps: str = Field(default="", max_length=2000)
+
+
+class ResumeBullet(BaseModel):
+    """Bullet template for a CV, with a filled example."""
+
+    bullet: str = Field(min_length=1, max_length=800)
+    example: str = Field(default="", max_length=800)
+
+
+class InterviewPoint(BaseModel):
+    question: str = Field(min_length=1, max_length=600)
+    answer: str = Field(default="", max_length=3000)
+
+
+class ResumeKit(BaseModel):
+    scope_levels: list[ScopeLevel] = Field(default_factory=list, max_length=2)
+    target_roles: list[TargetRole] = Field(default_factory=list, max_length=6)
+    resume_bullets: list[ResumeBullet] = Field(default_factory=list, max_length=4)
+    interview_points: list[InterviewPoint] = Field(
+        default_factory=list, max_length=8
+    )
+    differentiators: list[Annotated[str, Field(min_length=1, max_length=600)]] = (
+        Field(default_factory=list, max_length=6)
+    )
+
+
 class ProblemCard(BaseModel):
     title: str = Field(min_length=1, max_length=MAX_TITLE)
     summary: str = Field(min_length=1, max_length=MAX_SUMMARY)
@@ -99,6 +140,7 @@ class ProblemOut(ProblemCard):
     build_guide: list[BuildGuidePhase] | None = None
     team_plan: TeamPlan | None = None
     pitch_guide: PitchGuide | None = None
+    resume_kit: ResumeKit | None = None
 
 
 class ProjectCreate(BaseModel):

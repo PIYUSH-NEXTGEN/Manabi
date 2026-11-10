@@ -1845,6 +1845,27 @@
         ],
         "title": "HeatmapOut"
       },
+      "InterviewPoint": {
+        "properties": {
+          "question": {
+            "type": "string",
+            "maxLength": 600,
+            "minLength": 1,
+            "title": "Question"
+          },
+          "answer": {
+            "type": "string",
+            "maxLength": 3000,
+            "title": "Answer",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "question"
+        ],
+        "title": "InterviewPoint"
+      },
       "JudgeQuestion": {
         "properties": {
           "question": {
@@ -2193,6 +2214,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/PitchGuide"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "resume_kit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResumeKit"
               },
               {
                 "type": "null"
@@ -2706,6 +2737,16 @@
                 "type": "null"
               }
             ]
+          },
+          "resume_kit": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResumeKit"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "type": "object",
@@ -3103,6 +3144,108 @@
         ],
         "title": "ReportIn"
       },
+      "ResumeBullet": {
+        "properties": {
+          "bullet": {
+            "type": "string",
+            "maxLength": 800,
+            "minLength": 1,
+            "title": "Bullet"
+          },
+          "example": {
+            "type": "string",
+            "maxLength": 800,
+            "title": "Example",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "bullet"
+        ],
+        "title": "ResumeBullet",
+        "description": "Bullet template for a CV, with a filled example."
+      },
+      "ResumeKit": {
+        "properties": {
+          "scope_levels": {
+            "items": {
+              "$ref": "#/components/schemas/ScopeLevel"
+            },
+            "type": "array",
+            "maxItems": 2,
+            "title": "Scope Levels"
+          },
+          "target_roles": {
+            "items": {
+              "$ref": "#/components/schemas/TargetRole"
+            },
+            "type": "array",
+            "maxItems": 6,
+            "title": "Target Roles"
+          },
+          "resume_bullets": {
+            "items": {
+              "$ref": "#/components/schemas/ResumeBullet"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "title": "Resume Bullets"
+          },
+          "interview_points": {
+            "items": {
+              "$ref": "#/components/schemas/InterviewPoint"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "title": "Interview Points"
+          },
+          "differentiators": {
+            "items": {
+              "type": "string",
+              "maxLength": 600,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 6,
+            "title": "Differentiators"
+          }
+        },
+        "type": "object",
+        "title": "ResumeKit"
+      },
+      "ScopeLevel": {
+        "properties": {
+          "level": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Level"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 3000,
+            "title": "Text",
+            "default": ""
+          },
+          "checks": {
+            "items": {
+              "type": "string",
+              "maxLength": 600,
+              "minLength": 1
+            },
+            "type": "array",
+            "maxItems": 10,
+            "title": "Checks"
+          }
+        },
+        "type": "object",
+        "required": [
+          "level"
+        ],
+        "title": "ScopeLevel",
+        "description": "MVP vs standout bar for a resume-track brief."
+      },
       "StatsOut": {
         "properties": {
           "problems": {
@@ -3130,6 +3273,28 @@
           "projects"
         ],
         "title": "StatsOut"
+      },
+      "TargetRole": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Role"
+          },
+          "how_it_helps": {
+            "type": "string",
+            "maxLength": 2000,
+            "title": "How It Helps",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "role"
+        ],
+        "title": "TargetRole",
+        "description": "Which job title this project signals, and how."
       },
       "TeamPlan": {
         "properties": {

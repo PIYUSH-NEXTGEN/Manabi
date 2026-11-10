@@ -50,6 +50,7 @@ def seed_problems(problems: list[dict], label: str = "problems") -> None:
                 build_guide=p.get("build_guide"),
                 team_plan=p.get("team_plan"),
                 pitch_guide=p.get("pitch_guide"),
+                resume_kit=p.get("resume_kit"),
             )
             session.add(problem)
             inserted += 1

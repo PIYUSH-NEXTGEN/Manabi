@@ -608,7 +608,32 @@ PROBLEMS = [
     dict(
         source_id="manabi-ds-advanced-007",
         title="Data Observability & Pipeline Reliability Platform",
-        summary="Monitor analytical pipelines for freshness, schema changes, distribution shifts, data quality regressions, and unexpected metric changes.",
+        summary=(
+            "Data breaks quietly. A feed stops updating, a column gets renamed "
+            "upstream, a sales spike is actually a reporting bug - and nobody "
+            "finds out until a dashboard looks wrong to a decision maker. This "
+            "project is the watchdog against that silence: a platform that "
+            "checks data constantly, notices when normal turns abnormal, and "
+            "says precisely what broke, where, and who is downstream.\n\n"
+            "You build it in layers. First the reader: a scheduler that pulls "
+            "table metadata and samples after each pipeline run - last refresh "
+            "time, row count, NULL rates, schema shape. Then the checks: "
+            "freshness against a staleness threshold, completeness against "
+            "expected volumes per time window, and validity against column "
+            "types. Each run's results get stored, not just shown, so history "
+            "is queryable and the trend lines are real.\n\n"
+            "Then the interesting layer: baselines. The platform records what "
+            "normal looks like per column and per weekday - Tuesday dips are "
+            "normal, Tuesday zeros are not - and flags distribution shifts "
+            "using simple statistics before they turn into broken dashboards. "
+            "When a check fails, an alert lands in one channel with the failing "
+            "table, the check, the failing value, and the list of downstream "
+            "things that consume this table.\n\n"
+            "On top sits a run history UI: which pipelines passed today, which "
+            "are stale, which checks fire repeatedly, and which changed "
+            "behavior this week. The whole loop imitates what senior data teams "
+            "run in production, which is exactly what makes it worth a resume."
+        ),
         who_affected="Data engineers, analytics engineers, and platform teams.",
         why_matters="Silent data pipeline failures corrupt dashboards and decisions. Observability catches issues before stakeholders notice.",
         field="data-science",
@@ -627,6 +652,259 @@ PROBLEMS = [
         source_note="Curated data science project idea.",
         original_text="Monitor analytical pipelines for freshness, schema changes, distribution shifts, data quality regressions, and unexpected metric changes.",
         ai_fields=["field", "domain", "difficulty", "est_hours", "who_affected", "why_matters", "tech_tags"],
+        goal="resume",
+        resume_kit={
+            "scope_levels": [
+                {
+                    "level": "Good enough (MVP)",
+                    "text": (
+                        "One pipeline wired to one dashboard that says whether "
+                        "yesterday's data is trustworthy: freshness, row counts, "
+                        "NULL rates, and an alert that fires when a check fails."
+                    ),
+                    "checks": [
+                        "Freshness check per table with a configurable staleness threshold.",
+                        "Row count and NULL rate checks stored per run, so you can graph them.",
+                        "Alerts land in one channel and name the failing table and check.",
+                        "A run history page showing when pipelines last passed or failed.",
+                    ],
+                },
+                {
+                    "level": "Impressive",
+                    "text": (
+                        "The monitor knows what normal looks like. It flags "
+                        "distribution shifts and schema changes before "
+                        "stakeholders email you, and it says what breaks "
+                        "downstream when a table goes bad."
+                    ),
+                    "checks": [
+                        "Distribution checks on key columns: baseline mean/std or a two-sample test.",
+                        "Schema-change detection that logs added, dropped, or retyped columns.",
+                        "Impact view: which dashboards or models eat this table, so a red check names its blast radius.",
+                        "Anomaly detection on the monitored metrics themselves, not just the raw data.",
+                        "A rerun or backfill hook so the fix is one click after the alert.",
+                    ],
+                },
+            ],
+            "target_roles": [
+                {
+                    "role": "Data engineer",
+                    "how_it_helps": (
+                        "This is a data engineer's actual job: monitoring, "
+                        "schemas, SLAs. You can talk check design, alert "
+                        "routing, and incident handling from real experience."
+                    ),
+                },
+                {
+                    "role": "Analytics engineer",
+                    "how_it_helps": (
+                        "You built the trust layer for dashboards: freshness "
+                        "and quality checks that gate bad data before it hits "
+                        "metrics teams quote in meetings."
+                    ),
+                },
+                {
+                    "role": "ML / MLOps engineer",
+                    "how_it_helps": (
+                        "Data drift monitoring is half of model health. Point "
+                        "at your distribution-shift checks and explain how "
+                        "retraining triggers connect to them."
+                    ),
+                },
+                {
+                    "role": "Backend engineer",
+                    "how_it_helps": (
+                        "The platform side is real backend work: a scheduler, "
+                        "idempotent run recording, alert delivery, and an API "
+                        "over run history."
+                    ),
+                },
+                {
+                    "role": "DevOps / SRE",
+                    "how_it_helps": (
+                        "Observability thinking applied to data: thresholds, "
+                        "alert fatigue, runbooks, and post-incident review. "
+                        "The concepts transfer from servers to pipelines."
+                    ),
+                },
+            ],
+            "resume_bullets": [
+                {
+                    "bullet": (
+                        "Built a data observability platform monitoring {N} "
+                        "pipelines and cut time-to-detect for bad data from "
+                        "{days} to {minutes}."
+                    ),
+                    "example": (
+                        "Built a data observability platform monitoring 6 "
+                        "pipelines; time-to-detect for stale or broken feeds "
+                        "dropped from 2 days to under 10 minutes."
+                    ),
+                },
+                {
+                    "bullet": (
+                        "Cut false-positive data alerts by {X}% using per-column, "
+                        "per-weekday baselines instead of global thresholds."
+                    ),
+                    "example": (
+                        "Cut false-positive alerts 60% by baselining each "
+                        "column against its own weekday pattern; a Tuesday "
+                        "sales dip no longer pages anyone."
+                    ),
+                },
+                {
+                    "bullet": (
+                        "Detected {M} breaking schema changes across {N} tables "
+                        "before they broke downstream dashboards."
+                    ),
+                    "example": (
+                        "Caught 9 breaking schema changes in 3 months before "
+                        "any dashboard failed; each alert listed the merged "
+                        "columns and the affected reports."
+                    ),
+                },
+            ],
+            "interview_points": [
+                {
+                    "question": "How do you decide what counts as 'bad data'?",
+                    "answer": (
+                        "Split it into types you can actually check: freshness "
+                        "(are timestamps recent), completeness (row counts per "
+                        "window, NULL rates), validity (schema and dtypes), and "
+                        "distribution (stats drifting from baseline). Each type "
+                        "has different thresholds and different failure modes - "
+                        "saying that taxonomy out loud is the answer."
+                    ),
+                },
+                {
+                    "question": "How do you avoid alert fatigue?",
+                    "answer": (
+                        "Baseline per table and per weekday, deduplicate "
+                        "cascading failures (one upstream break floods twenty "
+                        "downstream checks), and rate-limit repeat alerts. Ship "
+                        "few checks that are always worth acting on."
+                    ),
+                },
+                {
+                    "question": "What happens when an anomaly is a real business change, not a bug?",
+                    "answer": (
+                        "Annotate it: promotions, migrations, new markets landed "
+                        "as events next to the metrics. When you can't annotate, "
+                        "the alert body links related recent events and a human "
+                        "triages. The monitor's job is fewer, clearer alerts - "
+                        "not zero-touch truth."
+                    ),
+                },
+                {
+                    "question": "Which test do you use for distribution shift, and why?",
+                    "answer": (
+                        "Start simple: compare a fresh window's mean, std, and "
+                        "quantiles to a trailing baseline. Move to two-sample "
+                        "tests (KS for numeric, chi-square for categorical) on "
+                        "high-value columns. The tradeoff to discuss is "
+                        "sensitivity versus noise - a test nobody reads is worse "
+                        "than a test that's coarse."
+                    ),
+                },
+                {
+                    "question": "Why build this when Great Expectations and dbt tests exist?",
+                    "answer": (
+                        "They cover a lot; nobody needs a worse rewrite. Building "
+                        "one teaches why those tools are shaped the way they are "
+                        "- check routing, baselines, lineage. In interviews the "
+                        "value is explaining those design decisions, not "
+                        "claiming novelty."
+                    ),
+                },
+                {
+                    "question": "How do you keep the checks cheap to run?",
+                    "answer": (
+                        "Sample large tables, check aggregates instead of rows, "
+                        "test incremental windows only, and hang checks off the "
+                        "pipeline scheduler so nothing scans a warehouse twice. "
+                        "Cost per check is a design constraint, not an afterthought."
+                    ),
+                },
+            ],
+            "differentiators": [
+                "Write the runbook: what on-call does when each check fires. A repo with a runbook reads like production experience, not course work.",
+                "Store per-column history so thresholds come from data instead of guesses, and say so in the README - self-tuning baselines are rare in student projects.",
+                "Add lineage-lite: a small map of which table feeds which dashboard, and have each failed check name its downstream victims.",
+                "Log every alert as true positive or false positive and graph your alerting precision over weeks. It turns 'I built a monitor' into 'I tuned and owned a monitor'.",
+                "Ship a docker-compose demo with a fake flaky pipeline, so a reviewer watches alerts fire without wiring up a real warehouse.",
+            ],
+        },
+        build_guide=[
+            {
+                "title": "Pick one pipeline and record its metadata",
+                "summary": (
+                    "Observability starts with capture, not checking. One "
+                    "pipeline, fully instrumented, beats five barely "
+                    "monitored ones."
+                ),
+                "steps": [
+                    "Choose a pipeline you can actually observe: a CSV feed into storage, a scheduled SQL job, or a public dataset refresh. Fake flaky failures into it later by appending a bad file.",
+                    "After every run, capture the shape: last refresh timestamp, row count, NULL rate per column, and the schema (column names plus types). Store each run as one append-only row.",
+                    "Design the storage first: runs keyed by pipeline id, table, and started_at. You will graph and diff these rows later, so no aggregation yet - raw results only.",
+                    "Hook the capture into scheduler events if the pipeline has one (or a cron wrapper); capture must fire even when the run fails.",
+                ],
+            },
+            {
+                "title": "Ship the first checks and one alert channel",
+                "summary": (
+                    "Three boring checks, one loud channel. The goal is "
+                    "trustworthy signal, not clever detections."
+                ),
+                "steps": [
+                    "Freshness: compare the table's last refresh time against a configurable staleness threshold per table.",
+                    "Completeness: row counts per time window against expected ranges, plus NULL rates per column against tolerance.",
+                    "Validity: column presence and type enforcement - a dropped or retyped column is automatically a failure.",
+                    "Wire all failures to one channel (email or a webhook) and keep the alert body honest: failing table, check name, expected versus actual, and a run link.",
+                ],
+            },
+            {
+                "title": "Build the run history UI",
+                "summary": (
+                    "History turns checks into a product. This is the part "
+                    "interviewers can see and click, so make it fast and "
+                    "readable."
+                ),
+                "steps": [
+                    "One page answering three questions: what passed today, what is stale, what failed last night.",
+                    "Per-pipeline view: check timelines graphed from the stored rows - row count over runs, NULL rate over runs.",
+                    "Every alert links to this view; a check that fails should be explainable in one click, not by re-querying the warehouse.",
+                    "Add a manual 'snooze check' button that records who snoozed and until when - audit even the mute action.",
+                ],
+            },
+            {
+                "title": "Baselines and distribution shifts",
+                "summary": (
+                    "This layer is what separates a toy from honest "
+                    "monitoring: comparing today against what normal looks "
+                    "like, learned from data."
+                ),
+                "steps": [
+                    "For each monitored column, build a trailing baseline: mean, std, and quantiles per column per weekday - Tuesday dips are normal, Tuesday zeros are not.",
+                    "Flag distribution shifts and surface them as alerts: a fresh window's stats outside baseline bands, or a two-sample test (KS for numeric, chi-square for categorical) on key columns.",
+                    "Tune on real history and count false positives; a threshold nobody reads is worse than a coarse one.",
+                    "Deduplicate cascades: one upstream failure floods downstream checks. Group alerts by root table so one incident sends one alert.",
+                ],
+            },
+            {
+                "title": "Impact, backfill, and the demo story",
+                "summary": (
+                    "Make the platform finish the incident loop: what breaks "
+                    "downstream, how to fix, and a reviewer able to watch it "
+                    "all fire without touching a real warehouse."
+                ),
+                "steps": [
+                    "Add lineage-lite: a small config file mapping which table feeds which dashboard or model, and have failed checks name their downstream victims in the alert.",
+                    "Add a rerun or backfill hook for one-click remediation after an alert, logged like any other action.",
+                    "Log every alert as true positive or false positive and graph alerting precision over time - it proves you tuned it, not just built it.",
+                    "Package a docker-compose demo with the fake flaky pipeline so alerts fire in minutes; write the runbook README explaining what on-call does per check.",
+                ],
+            },
+        ],
     ),
     dict(
         source_id="manabi-ds-advanced-008",

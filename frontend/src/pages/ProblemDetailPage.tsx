@@ -124,6 +124,7 @@ function DetailView({ problemId }: { problemId: number }) {
 
   const data = problem.data;
   const isHackathon = data.goal === "hackathon";
+  const isResume = data.goal === "resume";
   const paragraphs = descriptionParagraphs(
     data.summary,
     data.who_affected,
@@ -138,6 +139,7 @@ function DetailView({ problemId }: { problemId: number }) {
     : guideFromApproaches(data.approaches);
   const teamPlan = isHackathon ? data.team_plan : undefined;
   const pitchGuide = isHackathon ? data.pitch_guide : undefined;
+  const resumeKit = isResume ? data.resume_kit : undefined;
 
   // Section numbers are assigned in render order, so the optional "what
   // you'll learn" section never leaves a gap in the numbering.
@@ -224,7 +226,7 @@ function DetailView({ problemId }: { problemId: number }) {
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
           <article>
-            {isHackathon ? null : (
+            {isHackathon || isResume ? null : (
               <Section number={nextSectionNumber()} title="Why it matters">
                 <p className="max-w-3xl border-l-2 border-line pl-5 text-base leading-relaxed text-ink-soft">
                   {data.why_matters}
@@ -232,7 +234,9 @@ function DetailView({ problemId }: { problemId: number }) {
               </Section>
             )}
 
-            {!isHackathon && learningConcepts.length > 0 ? (
+            {!isHackathon &&
+            !isResume &&
+            learningConcepts.length > 0 ? (
               <Section
                 number={nextSectionNumber()}
                 title="What concepts you'll learn"
@@ -251,23 +255,140 @@ function DetailView({ problemId }: { problemId: number }) {
               </Section>
             ) : null}
 
-            <Section number={nextSectionNumber()} title="Tech stack">
-              <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
-                The stack below is a starting point, not a rule. If it lists a
-                backend language you can swap it for another one - Python or Go,
-                for example - and the same goes for the database, frontend, and
-                anything else. Use what fits you.
-              </p>
-              {data.tech_tags.length > 0 ? (
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {data.tech_tags.map((tag) => (
-                    <Tag key={tag}>{tag}</Tag>
-                  ))}
-                </div>
-              ) : (
-                <p className="mt-3 text-sm">No stack listed.</p>
-              )}
-            </Section>
+            {isResume ? null : (
+              <Section number={nextSectionNumber()} title="Tech stack">
+                <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+                  The stack below is a starting point, not a rule. If it lists a
+                  backend language you can swap it for another one - Python or
+                  Go, for example - and the same goes for the database,
+                  frontend, and anything else. Use what fits you.
+                </p>
+                {data.tech_tags.length > 0 ? (
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {data.tech_tags.map((tag) => (
+                      <Tag key={tag}>{tag}</Tag>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm">No stack listed.</p>
+                )}
+              </Section>
+            )}
+
+            {resumeKit ? (
+              <>
+                <Section number={nextSectionNumber()} title="MVP vs standout">
+                  <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+                    Two bars for the same project. The first level ships with
+                    honest numbers; the second one is what most people skip -
+                    and what makes a recruiter stop scrolling.
+                  </p>
+                  <div className="mt-5 grid gap-4 md:grid-cols-2">
+                    {(resumeKit.scope_levels ?? []).map((scopeLevel) => (
+                      <div
+                        key={scopeLevel.level}
+                        className="border border-ink bg-sheet p-5"
+                      >
+                        <p className={cx(microLabel, "text-accent")}>
+                          {scopeLevel.level}
+                        </p>
+                        <p className="mt-2.5 text-sm leading-relaxed text-ink-soft">
+                          {scopeLevel.text}
+                        </p>
+                        {(scopeLevel.checks ?? []).length > 0 ? (
+                          <ul className="mt-4 max-w-2xl space-y-2">
+                            {(scopeLevel.checks ?? []).map((check) => (
+                              <li
+                                key={check}
+                                className="flex gap-3 text-sm leading-relaxed text-ink-soft"
+                              >
+                                <span
+                                  aria-hidden
+                                  className="mt-2 block size-1.5 shrink-0 bg-accent"
+                                />
+                                {check}
+                              </li>
+                            ))}
+                          </ul>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+
+                <Section number={nextSectionNumber()} title="Roles it helps with">
+                  <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {(resumeKit.target_roles ?? []).map((targetRole) => (
+                      <div
+                        key={targetRole.role}
+                        className="border border-line bg-sheet p-4"
+                      >
+                        <dt className="font-display text-sm uppercase tracking-tight text-ink">
+                          {targetRole.role}
+                        </dt>
+                        <dd className="mt-2 text-sm leading-relaxed text-ink-soft">
+                          {targetRole.how_it_helps}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                </Section>
+
+                <Section
+                  number={nextSectionNumber()}
+                  title="Resume bullet template"
+                >
+                  <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+                    Fill the braces with your own numbers from the run - never
+                    invent them. The example shows what a filled bullet looks
+                    like.
+                  </p>
+                  <ul className="mt-4 max-w-3xl space-y-4">
+                    {(resumeKit.resume_bullets ?? []).map((resumeBullet) => (
+                      <li
+                        key={resumeBullet.bullet}
+                        className="border border-line bg-sheet p-4"
+                      >
+                        <p className="font-mono text-[13px] leading-relaxed text-ink">
+                          {resumeBullet.bullet}
+                        </p>
+                        {resumeBullet.example ? (
+                          <p className="mt-2.5 text-sm leading-relaxed text-ink-soft">
+                            <span
+                              className={cx(microLabel, "mr-2 text-muted")}
+                            >
+                              Example
+                            </span>
+                            {resumeBullet.example}
+                          </p>
+                        ) : null}
+                      </li>
+                    ))}
+                  </ul>
+                </Section>
+
+                <Section
+                  number={nextSectionNumber()}
+                  title="Interview talking points"
+                >
+                  <ul className="max-w-3xl space-y-4">
+                    {(resumeKit.interview_points ?? []).map((interviewPoint) => (
+                      <li
+                        key={interviewPoint.question}
+                        className="border-t border-line pt-4 first:border-t-0 first:pt-0"
+                      >
+                        <p className="text-sm font-bold leading-snug text-ink">
+                          {interviewPoint.question}
+                        </p>
+                        <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
+                          {interviewPoint.answer}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </Section>
+              </>
+            ) : null}
 
             {teamPlan ? (
               <Section number={nextSectionNumber()} title="Team plan">

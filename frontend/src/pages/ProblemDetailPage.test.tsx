@@ -390,6 +390,108 @@ describe('ProblemDetailPage', () => {
     expect(numberedTitles[numberedTitles.length - 1]).toBe('Build guide');
   });
 
+  it('renders the resume kit sections for a resume brief in order', async () => {
+    server.use(
+      http.get('*/api/problems/:id', () =>
+        HttpResponse.json({
+          id: 42,
+          title: 'Attendance pipeline that fails loudly',
+          summary:
+            'Biometric attendance CSVs go silent when rows drop mid-way.',
+          who_affected: 'School network administrators',
+          why_matters: 'Silent data loss hides absent children.',
+          field: 'data-science',
+          domain: 'developer-tools',
+          difficulty: 'advanced',
+          est_hours: 90,
+          tech_tags: ['python', 'alerting'],
+          datasets: [],
+          approaches: ['Row-count reconciliation'],
+          source_name: 'MANABI Curated',
+          source_id: 'manabi-ds-advanced-007',
+          source_url: null,
+          source_note: null,
+          project_count: 0,
+          completed_count: 0,
+          ai_fields: [],
+          goal: 'resume',
+          resume_kit: {
+            scope_levels: [
+              {
+                level: 'Good enough (MVP)',
+                text: 'One pipeline wired to one alerts feed.',
+                checks: ['Freshness check per table', 'Row counts stored per run'],
+              },
+              {
+                level: 'Impressive',
+                text: 'Baselines and named downstream impact.',
+                checks: ['Distribution checks'],
+              },
+            ],
+            target_roles: [
+              { role: 'Data engineer', how_it_helps: 'Monitoring is the day job.' },
+              { role: 'DevOps / SRE', how_it_helps: 'Alert fatigue, runbooks.' },
+            ],
+            resume_bullets: [
+              {
+                bullet: 'Built a monitor covering {N} feeds.',
+                example: 'Built a monitor covering 5 feeds.',
+              },
+            ],
+            interview_points: [
+              {
+                question: "How do you decide what counts as 'bad data'?",
+                answer: 'Freshness, completeness, validity, distribution.',
+              },
+            ],
+            differentiators: ['Write the runbook.'],
+          },
+          projects: [],
+        }),
+      ),
+    );
+
+    renderDetail('/problems/42');
+    await screen.findByRole('heading', { level: 1 });
+
+    // Section headings appear in the fixed resume order...
+    const headline = await screen.findByText('Good enough (MVP)');
+    expect(headline).toBeInTheDocument();
+
+    expect(
+      screen.getByRole('heading', { name: 'MVP vs standout' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Roles it helps with' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Resume bullet template' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: 'Interview talking points' }),
+    ).toBeInTheDocument();
+
+    // ...nothing renders for the removed or non-resume sections...
+    expect(
+      screen.queryByRole('heading', { name: 'How to stand out' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Why it matters' }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('heading', { name: 'Tech stack' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText('Monitoring is the day job.')).toBeInTheDocument();
+    expect(screen.getByText('Built a monitor covering 5 feeds.')).toBeInTheDocument();
+
+    // ...and Build guide is the last numbered section.
+    const headings = screen.getAllByRole('heading', { level: 2 });
+    const numberedTitles = headings
+      .map((heading) => heading.textContent ?? '')
+      .filter((title) => TECH_SECTION_TITLES.has(title) || title === 'Build guide');
+    expect(numberedTitles[numberedTitles.length - 1]).toBe('Build guide');
+  });
+
   it('keeps the paragraph description and no pitch sections for the learning brief', async () => {
     server.use(
       http.get('*/api/problems/:id', () =>

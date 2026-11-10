@@ -106,6 +106,10 @@ class Problem(Base):
     # rows.
     team_plan: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     pitch_guide: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    # Resume-track extras (one curated row so far): scope levels, target
+    # roles, resume bullets, interview points, and differentiators. Null
+    # for non-resume rows.
+    resume_kit: Mapped[dict | None] = mapped_column(JSON, nullable=True)
 
     creator: Mapped[User | None] = relationship()
     projects: Mapped[list["Project"]] = relationship(back_populates="problem")

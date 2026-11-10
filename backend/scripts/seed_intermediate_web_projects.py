@@ -38,6 +38,7 @@ def _project(
     original_text: str,
     team_plan: dict | None = None,
     pitch_guide: dict | None = None,
+    build_guide: list[dict] | None = None,
 ) -> dict:
     entry = {
         "source_id": source_id,
@@ -67,6 +68,8 @@ def _project(
         entry["team_plan"] = team_plan
     if pitch_guide is not None:
         entry["pitch_guide"] = pitch_guide
+    if build_guide is not None:
+        entry["build_guide"] = build_guide
     return entry
 
 
@@ -623,6 +626,77 @@ PROJECTS = [
                 },
             ],
         },
+        build_guide=[
+            {
+                "title": "Model the report lifecycle before any UI",
+                "summary": (
+                    "The whole product is one workflow, so get the workflow "
+                    "right on paper first. Everything else hangs off these "
+                    "decisions."
+                ),
+                "steps": [
+                    "Write the status enum: received, in-progress, resolved, rejected. Put the allowed transitions next to it (received to in-progress, in-progress to resolved or rejected...) and what is forbidden - no skipping steps.",
+                    "Design the history as append-only: report id, old status, new status, changed by, timestamp. Every status change is one row here; nothing is ever edited in place.",
+                    "Decide the tracking reference format (INC-104 style: prefix plus zero-padded counter) and check it is unique.",
+                    "Sketch the three roles - reporter, staff, administrator - as a simple table of who can do what. This table later becomes API middleware, not UI hiding.",
+                ],
+            },
+            {
+                "title": "Get reports in: form, photo, map pin",
+                "summary": (
+                    "The submit form is the front door. Make it work on a "
+                    "phone before anything else, because that is where "
+                    "residents will actually use it."
+                ),
+                "steps": [
+                    "Build the form: title, description, photo, and location (map pin or address). Show errors inline, not in an alert.",
+                    "Validate uploads server-side by content type and size before storage; save files under generated names, never the user's filename.",
+                    "For location, read geolocation if the browser offers it and let the user adjust the pin by clicking the map; store lat/lng only.",
+                    "On success, return the tracking reference on the confirmation screen itself - the reporter must not need an account to know their case is logged.",
+                ],
+            },
+            {
+                "title": "Public tracking page",
+                "summary": (
+                    "This page makes the 'no status' problem disappear. It is "
+                    "read-only and anonymous - a stranger should only be able "
+                    "to see progress by knowing the tracking reference."
+                ),
+                "steps": [
+                    "Let anyone enter a tracking reference and see the status plus a timeline built straight from the history table.",
+                    "Show only what is safe in public: status, timestamps, category. No reporter contact details, no internal notes.",
+                    "Handle the unknown case politely: wrong or deleted reference says exactly that, with one line of contact fallback.",
+                ],
+            },
+            {
+                "title": "Staff dashboard with real roles",
+                "summary": (
+                    "The admin side is a queue plus a transition button set. "
+                    "Roles get enforced in the API here, not by hiding "
+                    "buttons in the UI."
+                ),
+                "steps": [
+                    "Add three role levels; the endpoints for assignment and status change reject anyone without the staff role, verified server-side.",
+                    "Get the dashboard listing working: reports filtered by status, oldest first, with the one action that matters - move to the next valid status.",
+                    "Reject invalid transitions with a clear error; the status history rows must tell the full story after any sequence of clicks.",
+                    "Let staff filter by assigned-to and unassigned; assignment is a field on the report, set only by staff in the transition call.",
+                ],
+            },
+            {
+                "title": "Photos, escalation, demo readiness",
+                "summary": (
+                    "Finish the loop and make it demoable. Photo security "
+                    "here doubles as the fairness fix: residents' images "
+                    "should never leak between cases."
+                ),
+                "steps": [
+                    "Serve photos only through an authenticated route tied to the report id - never by raw file path from a URL.",
+                    "Add one escalation signal: if a report sits in 'received' past N hours, flag it in the staff queue so nothing rots.",
+                    "Seed realistic demo data (10-20 reports in varied states) and delete your console.log lines.",
+                    "Run the full cycle twice: submit from a phone browser, track publicly, assign as staff, resolve, verify timeline. Then rehearse it once more before you demo.",
+                ],
+            },
+        ],
     ),
     _project(
         source_id="manabi-web-intermediate-005",
