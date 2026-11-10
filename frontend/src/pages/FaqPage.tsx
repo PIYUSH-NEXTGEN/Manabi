@@ -24,10 +24,6 @@ const FAQS = [
     a: 'After you link a public repo, MANABI reads commits, README status, and open issues through the GitHub API and caches the result for 10 minutes. You can refresh manually.',
   },
   {
-    q: 'What is the build guide?',
-    a: 'Every brief has a three-phase guide — Start, Implement, Ship — listing what to do and what you should leave each phase with. It is a starting path, not a fixed spec.',
-  },
-  {
     q: 'What does Ask MANABI do?',
     a: 'It answers from the catalog only: tell it your stack and the time you have, and it suggests briefs that exist, with a link to each one. It will say so plainly when nothing fits.',
   },

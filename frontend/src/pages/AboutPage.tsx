@@ -11,7 +11,7 @@ const PRINCIPLES = [
   {
     number: '02',
     title: 'A path to execution',
-    copy: 'Each brief comes with a three-phase build guide — Start, Implement, Ship — and a suggested stack you can swap for your own.',
+    copy: 'Every brief lists the approaches to take and a suggested stack you can swap for your own. Claim it, build it, ship it.',
   },
   {
     number: '03',
@@ -24,10 +24,6 @@ const IN_THE_INDEX = [
   {
     title: 'Problem index',
     copy: 'Briefs across the seven fields: Web Dev, App Dev, AIML, Data Science, Cyber Security, DevOps Cloud, and Blockchain — filterable by field, difficulty, and tech stack.',
-  },
-  {
-    title: 'Build guides',
-    copy: 'Three phases per brief, with the approach list and the deliverable you should be holding at the end of each phase.',
   },
   {
     title: 'Your dashboard',
@@ -44,8 +40,8 @@ export function AboutPage() {
     <StaticShell kicker="About" title="About MANABI">
       <p>
         MANABI is a catalog of real-world problems — from governments,
-        companies, hackathons, and public programs — with a build path
-        attached. Pick a brief, follow its guide, link your GitHub repository,
+        companies, hackathons, and public programs — with a suggested stack
+        attached. Pick a brief, build it your way, link your GitHub repository,
         and let the commits prove the work.
       </p>
 
@@ -86,7 +82,7 @@ export function AboutPage() {
       </section>
 
       <p className="border-l-[6px] border-accent pl-4">
-        Built as a hackathon prototype: the index, build guides, GitHub
+        Built as a hackathon prototype: the index, GitHub
         tracking, and the chat are live. The Repo
         Analyzer is still being built, so its form does not submit yet.
       </p>

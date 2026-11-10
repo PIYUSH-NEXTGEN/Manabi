@@ -2,14 +2,12 @@ import type { ReactNode } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import {
-  ArrowRight,
   ArrowUpRight,
-  BookOpen,
   GitBranch,
 } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import { EASE_SNAP, slideUpReveal } from '@/design/motion';
-import { buttonClasses, Tag } from '@/design/primitives';
+import { Tag } from '@/design/primitives';
 import { LoadErrorPanel, PageSkeleton } from '@/pages/detailStates';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
@@ -215,38 +213,6 @@ function DetailView({ problemId }: { problemId: number }) {
                 </p>
               )}
             </Section>
-
-            <motion.section
-              variants={slideUpReveal}
-              initial="hidden"
-              whileInView="show"
-              viewport={{ once: true, amount: 0.2 }}
-              className="mt-2 flex flex-wrap items-center justify-between gap-5 border border-ink bg-sheet p-5 sm:p-6"
-            >
-              <div className="max-w-md">
-                <p className={cx(microLabel, 'flex items-center gap-2')}>
-                  <BookOpen aria-hidden size={12} strokeWidth={2.4} className="text-accent" />
-                  Field manual
-                </p>
-                <h2 className={cx(panelHeading, 'mt-2')}>Three phases to ship</h2>
-                <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                  Start, implement, ship. The approaches above become your
-                  checklist, with a place to stop at each phase.
-                </p>
-              </div>
-              <Link
-                to={`/problems/${data.id}/guide`}
-                className={buttonClasses('primary', 'group shrink-0')}
-              >
-                Build guide
-                <ArrowRight
-                  aria-hidden
-                  size={14}
-                  strokeWidth={2.6}
-                  className="transition-transform group-hover:translate-x-0.5"
-                />
-              </Link>
-            </motion.section>
           </article>
 
           <aside className="flex flex-col gap-9 lg:sticky lg:top-24 lg:self-start">

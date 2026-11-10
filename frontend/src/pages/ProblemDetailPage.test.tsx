@@ -6,7 +6,6 @@ import { describe, expect, it } from 'vitest';
 import { server } from '@/api/mocks/server';
 import { ToastProvider } from '@/design/primitives';
 import { ProblemDetailPage } from './ProblemDetailPage';
-import { ProblemGuidePage } from './ProblemGuidePage';
 import { renderWithProviders } from '@/test/renderWithProviders';
 
 function renderDetail(route: string) {
@@ -14,7 +13,6 @@ function renderDetail(route: string) {
     <ToastProvider>
       <Routes>
         <Route path="/problems/:id" element={<ProblemDetailPage />} />
-        <Route path="/problems/:id/guide" element={<ProblemGuidePage />} />
       </Routes>
     </ToastProvider>,
     { route },
@@ -64,33 +62,6 @@ describe('ProblemDetailPage', () => {
     expect(
       await screen.findByText(
         /Ship the MVP first, then add whatever matters to you/i,
-      ),
-    ).toBeInTheDocument();
-  });
-
-  it('links to a separate build guide page', async () => {
-    renderDetail('/problems/1');
-
-    await screen.findByRole('heading', { level: 1 });
-    const link = await screen.findByRole('link', { name: 'Build guide' });
-    expect(link).toHaveAttribute('href', '/problems/1/guide');
-  });
-
-  it('opens the build guide page with phases', async () => {
-    renderDetail('/problems/1/guide');
-
-    expect(
-      await screen.findByRole('heading', {
-        name: /build guide · crop disease triage for small farms/i,
-        level: 1,
-      }),
-    ).toBeInTheDocument();
-    expect(await screen.findByText(/Phase 1 · Start/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Phase 2 · Implement/i)).toBeInTheDocument();
-    expect(await screen.findByText(/Phase 3 · Ship/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        'Fine-tune a small CNN on public leaf datasets',
       ),
     ).toBeInTheDocument();
   });

@@ -43,8 +43,8 @@ export function ContributePage() {
       </ol>
 
       <p>
-        No project yet for a problem you like? Claim it, follow its build guide,
-        and be the first — then tick 'open for contributors' when you submit.
+        No project yet for a problem you like? Claim it and be the first —
+        then tick 'open for contributors' when you submit.
       </p>
 
       <div className="flex flex-wrap gap-4">
