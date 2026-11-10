@@ -16,6 +16,7 @@ import { buttonClasses, Input, Skeleton } from '@/design/primitives';
 import { ProblemCard } from '@/components/problems/ProblemCard';
 import { FilterSelect } from '@/components/problems/FilterSelect';
 import { useFacets } from '@/hooks/useFacets';
+import { fieldLabel } from '@/lib/fields';
 import { useInfiniteProblems } from '@/hooks/useInfiniteProblems';
 
 const microLabel = 'font-mono text-[9px] font-bold uppercase tracking-[0.16em]';
@@ -103,7 +104,7 @@ export function ProblemBoardPage() {
 
   const activeFilters: { key: string; label: string; value: string }[] = [
     ...(q ? [{ key: 'q', label: 'search', value: q }] : []),
-    ...(field ? [{ key: 'field', label: 'field', value: field }] : []),
+    ...(field ? [{ key: 'field', label: 'field', value: fieldLabel(field) }] : []),
     ...(domain ? [{ key: 'domain', label: 'domain', value: domain }] : []),
     ...(difficulty
       ? [{ key: 'difficulty', label: 'difficulty', value: difficulty }]
@@ -250,9 +251,8 @@ export function ProblemBoardPage() {
                     label="Field"
                     value={field}
                     onChange={(value) => setParam('field', value)}
-                    options={(facets.data?.fields ?? []).filter(
-                      (f) => f.value !== 'developer-tools',
-                    )}
+                    options={facets.data?.fields ?? []}
+                    labelFor={fieldLabel}
                   />
                   <FilterSelect
                     label="Difficulty"

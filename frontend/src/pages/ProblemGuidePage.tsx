@@ -14,6 +14,7 @@ import { Tag } from '@/design/primitives';
 import { LoadErrorPanel, PageSkeleton } from '@/pages/detailStates';
 import { NotFoundPage } from '@/pages/NotFoundPage';
 import { useProblem } from '@/hooks/useProblem';
+import { fieldLabel } from '@/lib/fields';
 
 const panelHeading = 'font-mono text-[10px] font-bold uppercase tracking-[0.18em]';
 const microLabel = 'font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted';
@@ -157,7 +158,7 @@ function GuideView({ problemId }: { problemId: number }) {
             </div>
             <div className="flex items-center justify-between border-b border-line py-2.5">
               <dt className="text-[9px] tracking-[0.16em] text-muted">Field</dt>
-              <dd>{data.field.replace(/-/g, ' ')}</dd>
+              <dd>{fieldLabel(data.field)}</dd>
             </div>
             <div className="flex items-center justify-between py-2.5">
               <dt className="text-[9px] tracking-[0.16em] text-muted">Est. time</dt>

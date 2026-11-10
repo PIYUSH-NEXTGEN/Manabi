@@ -2,6 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cx } from '@/lib/cx';
+import { fieldLabel } from '@/lib/fields';
 import { buttonClasses, Stamp } from '@/design/primitives';
 import {
   ApiError,
@@ -43,7 +44,7 @@ function ReplyProblems({ problems }: { problems: ChatProblemItem[] }) {
         >
           {problem.title}
           <span className="ml-2 text-ink/60">
-            {problem.field} · {problem.difficulty}
+            {fieldLabel(problem.field)} · {problem.difficulty}
           </span>
         </Link>
       ))}

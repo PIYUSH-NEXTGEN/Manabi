@@ -23,7 +23,7 @@ const PRINCIPLES = [
 const IN_THE_INDEX = [
   {
     title: 'Problem index',
-    copy: 'Briefs across web, mobile, ML and data, cloud, cybersecurity, systems, and blockchain — filterable by field, difficulty, and tech stack.',
+    copy: 'Briefs across the seven fields: Web Dev, App Dev, AIML, Data Science, Cyber Security, DevOps Cloud, and Blockchain — filterable by field, difficulty, and tech stack.',
   },
   {
     title: 'Build guides',

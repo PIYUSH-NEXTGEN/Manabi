@@ -16,6 +16,7 @@ import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge
 import { SubmitProjectPanel } from '@/components/problems/SubmitProjectPanel';
 import { GithubMark } from '@/components/icons/GithubMark';
 import { useProblem } from '@/hooks/useProblem';
+import { fieldLabel } from '@/lib/fields';
 import { projectOwnerUsername } from '@/api/client';
 
 const panelHeading = 'font-mono text-[10px] font-bold uppercase tracking-[0.18em]';
@@ -164,7 +165,7 @@ function DetailView({ problemId }: { problemId: number }) {
                 M-{String(data.id).padStart(3, '0')}
               </dd>
             </div>
-            <SpecRow label="Field">{data.field.replace(/-/g, ' ')}</SpecRow>
+            <SpecRow label="Field">{fieldLabel(data.field)}</SpecRow>
             <SpecRow label="Domain">{data.domain.replace(/-/g, ' ')}</SpecRow>
             <SpecRow label="Difficulty">{data.difficulty}</SpecRow>
           </dl>

@@ -14,7 +14,7 @@ const CHAT_200 = {
     {
       id: 5,
       title: 'Attendance pipeline that fails loudly',
-      field: 'data-engineering',
+      field: 'data-science',
       difficulty: 'beginner',
     },
   ],
@@ -72,7 +72,7 @@ describe('ChatWidget', () => {
       'href',
       '/problems/5',
     );
-    expect(screen.getByText(/data-engineering · beginner/i)).toBeInTheDocument();
+    expect(screen.getByText(/data science · beginner/i)).toBeInTheDocument();
   });
 
   it('renders markdown replies as formatted elements with inline problem links', async () => {
@@ -85,7 +85,7 @@ describe('ChatWidget', () => {
             {
               id: 17,
               title: 'Sepsis early-warning from ICU vitals',
-              field: 'ml',
+              field: 'aiml',
               difficulty: 'advanced',
             },
           ],

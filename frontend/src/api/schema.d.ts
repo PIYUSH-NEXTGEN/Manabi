@@ -568,7 +568,7 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "data-science" | "developer-tools" | "other";
+            field: "web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain";
             /**
              * Difficulty
              * @enum {string}
@@ -642,7 +642,7 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "data-science" | "developer-tools" | "other";
+            field: "web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain";
             /**
              * Domain
              * @enum {string}
@@ -710,7 +710,8 @@ export interface components {
         };
         /**
          * ProblemIn
-         * @description POST /api/problems body: ProblemCard per contract, plus optional ai_fields (see docs/REQUESTS.md).
+         * @description POST /api/problems body: the ProblemCard contract above, plus optional
+         *     ai_fields (a curated ingest may mark which fields the AI authored).
          */
         ProblemIn: {
             /** Title */
@@ -725,7 +726,7 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "data-science" | "developer-tools" | "other";
+            field: "web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain";
             /**
              * Domain
              * @enum {string}
@@ -774,7 +775,7 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "data-science" | "developer-tools" | "other";
+            field: "web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain";
             /**
              * Domain
              * @enum {string}
@@ -1005,7 +1006,7 @@ export interface operations {
         parameters: {
             query?: {
                 q?: string | null;
-                field?: ("ml" | "computer-vision" | "nlp-llm" | "cybersecurity" | "web-fullstack" | "mobile" | "data-engineering" | "geospatial" | "optimization" | "iot-embedded" | "distributed-systems" | "blockchain" | "devops-cloud" | "data-science" | "developer-tools" | "other") | null;
+                field?: ("web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain") | null;
                 domain?: ("healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "cybersecurity" | "computer-vision" | "iot-embedded" | "distributed-systems" | "ml" | "devops-cloud" | "nlp-llm" | "cloud" | "blockchain" | "web3" | "databases" | "systems" | "other") | null;
                 difficulty?: ("beginner" | "intermediate" | "advanced") | null;
                 tech?: string[];

@@ -1,11 +1,11 @@
-﻿import { http, HttpResponse } from 'msw';
+import { http, HttpResponse } from 'msw';
 import { GITHUB_REPO_URL_PATTERN, stripGitSuffix } from '@/lib/repoUrl';
 import { SOLUTION_SUMMARY_MAX } from '@/lib/limits';
 
 const stats = {
   problems: 6,
   sources: 3,
-  fields: 5,
+  fields: 3,
   projects: 2,
 };
 
@@ -17,7 +17,7 @@ const problems = [
       'Farmers photograph leaf blight; a phone-first triage flow routes cases to the right extension officer.',
     who_affected: 'Smallholder farmers',
     why_matters: 'Late detection destroys a season of income.',
-    field: 'computer-vision',
+    field: 'aiml',
     domain: 'agriculture',
     difficulty: 'beginner',
     est_hours: 20,
@@ -43,7 +43,7 @@ const problems = [
       'Citizens report dead streetlights; the civic ops desk needs a queue that dedupes by pole and escalates SLAs.',
     who_affected: 'Municipal ward offices',
     why_matters: 'Dark streets cost money and feel unsafe.',
-    field: 'web-fullstack',
+    field: 'web-dev',
     domain: 'governance',
     difficulty: 'intermediate',
     est_hours: 40,
@@ -69,7 +69,7 @@ const problems = [
       'A payment ops team samples 40k daily micro-transactions and needs a reproducible drift and rule-tuning notebook.',
     who_affected: 'Payment ops analysts',
     why_matters: 'Rule drift silently lets fraud through.',
-    field: 'ml',
+    field: 'aiml',
     domain: 'fintech',
     difficulty: 'advanced',
     est_hours: 60,
@@ -95,7 +95,7 @@ const problems = [
       'District control rooms see stale ambulance locations; a live ETA board with honest uncertainty bands.',
     who_affected: 'District emergency controllers',
     why_matters: 'Minutes decide outcomes in emergencies.',
-    field: 'geospatial',
+    field: 'data-science',
     domain: 'disaster-management',
     difficulty: 'intermediate',
     est_hours: 35,
@@ -121,7 +121,7 @@ const problems = [
       'A school network imports biometric attendance CSVs; silent row drops must become alerts with a dry-run mode.',
     who_affected: 'School network administrators',
     why_matters: 'Silent data loss hides absent children.',
-    field: 'data-engineering',
+    field: 'data-science',
     domain: 'education',
     difficulty: 'beginner',
     est_hours: 24,
@@ -147,7 +147,7 @@ const problems = [
       'Primary health centres report weekly stock cards; predict stock-outs two weeks out with a rules-first baseline.',
     who_affected: 'Primary health centre pharmacists',
     why_matters: 'A stock-out means no treatment that day.',
-    field: 'ml',
+    field: 'aiml',
     domain: 'healthcare',
     difficulty: 'intermediate',
     est_hours: 30,
@@ -170,11 +170,9 @@ const problems = [
 
 const facets = {
   fields: [
-    { value: 'ml', count: 2 },
-    { value: 'computer-vision', count: 1 },
-    { value: 'web-fullstack', count: 1 },
-    { value: 'geospatial', count: 1 },
-    { value: 'data-engineering', count: 1 },
+    { value: 'aiml', count: 3 },
+    { value: 'web-dev', count: 1 },
+    { value: 'data-science', count: 2 },
   ],
   domains: [
     { value: 'agriculture', count: 1 },
@@ -487,7 +485,7 @@ export const handlers = [
 
     return HttpResponse.json({
       reply:
-        'Based on what you told me, the closest problems from the catalog are linked under this reply. Nothing here was invented â€” both are already in the index.',
+        'Based on what you told me, the closest problems from the catalog are linked under this reply. Nothing here was invented — both are already in the index.',
       problems: [
         ...problemMatches,
         problems.find((p) => p.id === 5),

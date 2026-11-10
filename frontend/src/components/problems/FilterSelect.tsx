@@ -10,6 +10,8 @@ interface FilterSelectProps {
   value: string;
   onChange: (value: string) => void;
   options: FilterOption[];
+  /** Optional display-label resolver (e.g. the field catalog's labels). */
+  labelFor?: (value: string) => string;
 }
 
 export function FilterSelect({
@@ -17,6 +19,7 @@ export function FilterSelect({
   value,
   onChange,
   options,
+  labelFor,
 }: FilterSelectProps) {
   const id = useId();
 
@@ -41,7 +44,7 @@ export function FilterSelect({
         <option value="">All</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
-            {option.value}
+            {labelFor ? labelFor(option.value) : option.value}
             {option.count != null ? ` (${option.count})` : ''}
           </option>
         ))}

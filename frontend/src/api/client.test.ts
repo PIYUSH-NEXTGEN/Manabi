@@ -68,7 +68,7 @@ describe('apiFetch', () => {
     expect(stats).toMatchObject({
       problems: 6,
       sources: 3,
-      fields: 5,
+      fields: 3,
       projects: 2,
     });
   });

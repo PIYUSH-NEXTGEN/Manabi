@@ -2,9 +2,8 @@ import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, GitBranch } from 'lucide-react';
 import { cx } from '@/lib/cx';
+import { fieldLabel } from '@/lib/fields';
 import type { ProblemOut } from '@/api/client';
-
-const prettify = (value: string) => value.replace(/-/g, ' ').trim();
 
 interface ProblemCardProps {
   problem: ProblemOut;
@@ -13,7 +12,7 @@ interface ProblemCardProps {
 
 function ProblemCardComponent({ problem, className }: ProblemCardProps) {
   // Show the problem's field so card labels match the Field filter.
-  const field = prettify(String(problem.field ?? ''));
+  const field = fieldLabel(String(problem.field ?? ''));
 
   const projectLabel =
     problem.project_count === 1

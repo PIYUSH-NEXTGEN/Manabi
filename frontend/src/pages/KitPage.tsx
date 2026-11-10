@@ -99,7 +99,7 @@ export function KitPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <IndexCard
             sourceId="SIH26017"
-            field="computer-vision"
+            field="aiml"
             title="Crop disease triage"
             summary="Sample card for the design kit. Real cards come from the API."
             difficulty="beginner"
@@ -108,7 +108,7 @@ export function KitPage() {
           />
           <IndexCard
             sourceId="TCOE PS12"
-            field="data-engineering"
+            field="data-science"
             title="Streetlight outage tracker"
             difficulty="intermediate"
             domain="governance"

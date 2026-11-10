@@ -7,6 +7,7 @@ import { cx } from '@/lib/cx';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import { useProblems } from '@/hooks/useProblems';
 import { useStats } from '@/hooks/useStats';
+import { fieldLabel } from '@/lib/fields';
 import type { ProblemOut } from '@/api/client';
 import { CountUp } from './CountUp';
 
@@ -108,7 +109,7 @@ function BriefShowcase() {
                     {active.source_id ?? `BRIEF-${active.id}`}
                   </p>
                   <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-                    {active.field}
+                    {fieldLabel(active.field)}
                   </p>
                 </div>
                 <h2 className="mt-2 line-clamp-3 font-display text-2xl uppercase leading-[0.98] tracking-tight sm:text-3xl">
