@@ -393,6 +393,79 @@
         }
       }
     },
+    "/api/problems/{problem_id}/star": {
+      "post": {
+        "tags": [
+          "problems"
+        ],
+        "summary": "Star Problem",
+        "operationId": "star_problem_api_problems__problem_id__star_post",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "problems"
+        ],
+        "summary": "Unstar Problem",
+        "operationId": "unstar_problem_api_problems__problem_id__star_delete",
+        "parameters": [
+          {
+            "name": "problem_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Problem Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/stats": {
       "get": {
         "tags": [
@@ -2201,6 +2274,16 @@
             ],
             "title": "Source Year"
           },
+          "star_count": {
+            "type": "integer",
+            "title": "Star Count",
+            "default": 0
+          },
+          "starred_by_me": {
+            "type": "boolean",
+            "title": "Starred By Me",
+            "default": false
+          },
           "edition": {
             "anyOf": [
               {
@@ -2718,6 +2801,16 @@
               }
             ],
             "title": "Source Year"
+          },
+          "star_count": {
+            "type": "integer",
+            "title": "Star Count",
+            "default": 0
+          },
+          "starred_by_me": {
+            "type": "boolean",
+            "title": "Starred By Me",
+            "default": false
           },
           "edition": {
             "anyOf": [

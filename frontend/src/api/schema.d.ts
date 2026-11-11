@@ -93,6 +93,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/problems/{problem_id}/star": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Star Problem */
+        post: operations["star_problem_api_problems__problem_id__star_post"];
+        /** Unstar Problem */
+        delete: operations["unstar_problem_api_problems__problem_id__star_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/stats": {
         parameters: {
             query?: never;
@@ -767,6 +785,16 @@ export interface components {
             origin: string;
             /** Source Year */
             source_year?: number | null;
+            /**
+             * Star Count
+             * @default 0
+             */
+            star_count: number;
+            /**
+             * Starred By Me
+             * @default false
+             */
+            starred_by_me: boolean;
             /** Edition */
             edition?: string | null;
             /** Organisation */
@@ -910,6 +938,16 @@ export interface components {
             origin: string;
             /** Source Year */
             source_year?: number | null;
+            /**
+             * Star Count
+             * @default 0
+             */
+            star_count: number;
+            /**
+             * Starred By Me
+             * @default false
+             */
+            starred_by_me: boolean;
             /** Edition */
             edition?: string | null;
             /** Organisation */
@@ -1332,6 +1370,66 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ProblemDetail"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    star_problem_api_problems__problem_id__star_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                problem_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    unstar_problem_api_problems__problem_id__star_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                problem_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

@@ -6,7 +6,9 @@ import {
   patchProject,
   reopenProject,
   reportProject,
+  starProblem,
   starProject,
+  unstarProblem,
   unstarProject,
   type ApiError,
   type ProjectOut,
@@ -84,6 +86,22 @@ export function useUnstarProject(projectId: number) {
   const invalidate = useInvalidateProjects();
   return useMutation({
     mutationFn: () => unstarProject(projectId),
+    onSuccess: invalidate,
+  });
+}
+
+export function useStarProblem(problemId: number) {
+  const invalidate = useInvalidateProjects();
+  return useMutation({
+    mutationFn: () => starProblem(problemId),
+    onSuccess: invalidate,
+  });
+}
+
+export function useUnstarProblem(problemId: number) {
+  const invalidate = useInvalidateProjects();
+  return useMutation({
+    mutationFn: () => unstarProblem(problemId),
     onSuccess: invalidate,
   });
 }

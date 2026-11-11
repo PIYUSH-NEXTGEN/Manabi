@@ -49,11 +49,15 @@ describe('Toast', () => {
 
   it('throws if useToast is used outside the provider', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    // The hook throws during render. Catching it with an error boundary
-    // keeps the throw inside React — a bare expect(() => render(...))
-    // rethrows through React's guarded callback, and jsdom then reports it
-    // as an uncaught error that fails whichever test is running when it
-    // surfaces (a cross-file flake in full-suite runs).
+    // The hook throws during render. React's development-mode error
+    // simulation re-dispatches the throw as a cancelable window "error"
+    // event even when an error boundary catches it, and jsdom then reports
+    // it as an uncaught error that fails whichever test is running when it
+    // surfaces (a cross-file flake in full-suite runs). Cancelling the
+    // event keeps it contained; the boundary below still records the error
+    // so we can assert its message.
+    const swallow = (event: Event) => event.preventDefault();
+    window.addEventListener('error', swallow);
     // A holder object instead of a plain `let`: TypeScript's control flow
     // cannot see the assignment inside getDerivedStateFromError and would
     // otherwise narrow the variable to `null`.
@@ -71,11 +75,15 @@ describe('Toast', () => {
         return this.state.error ? null : this.props.children;
       }
     }
-    render(
-      <CaptureBoundary>
-        <ToastTrigger />
-      </CaptureBoundary>,
-    );
+    try {
+      render(
+        <CaptureBoundary>
+          <ToastTrigger />
+        </CaptureBoundary>,
+      );
+    } finally {
+      window.removeEventListener('error', swallow);
+    }
     spy.mockRestore();
     expect(captured.error?.message).toBe(
       'useToast must be used within ToastProvider',

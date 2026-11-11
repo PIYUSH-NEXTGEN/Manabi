@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, GitBranch } from 'lucide-react';
+import { ArrowUpRight, GitBranch, Star } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import { fieldLabel } from '@/lib/fields';
 import type { ProblemOut } from '@/api/client';
@@ -18,6 +18,9 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
     problem.project_count === 1
       ? '1 project'
       : `${problem.project_count} projects`;
+
+  // Zero-star problems stay clean; the chip appears once someone stars.
+  const starCount = problem.star_count ?? 0;
 
   return (
     <Link
@@ -53,9 +56,25 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
         </p>
 
         <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-[9px] font-bold uppercase tracking-[0.14em]">
-          <span className="flex items-center gap-1 text-muted">
-            <GitBranch aria-hidden size={11} strokeWidth={2.4} />
-            {projectLabel}
+          <span className="flex items-center gap-2.5">
+            <span className="flex items-center gap-1 text-muted">
+              <GitBranch aria-hidden size={11} strokeWidth={2.4} />
+              {projectLabel}
+            </span>
+            {starCount > 0 ? (
+              <span
+                title={`${starCount} star${starCount === 1 ? '' : 's'}`}
+                className="flex items-center gap-1 text-accent"
+              >
+                <Star
+                  aria-hidden
+                  size={11}
+                  strokeWidth={2.4}
+                  className="fill-accent"
+                />
+                {starCount}
+              </span>
+            ) : null}
           </span>
           <span className="flex items-center gap-1 text-accent transition-colors group-hover:text-ink">
             Open brief

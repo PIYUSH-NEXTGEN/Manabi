@@ -34,7 +34,25 @@ def _build_guide(problem: Problem) -> list[schemas.BuildGuidePhase] | None:
     return phases
 
 
-def problem_to_out(problem: Problem, project_count: int, completed_count: int = 0) -> schemas.ProblemOut:
+def problem_to_out(
+    problem: Problem,
+    project_count: int,
+    completed_count: int = 0,
+    viewer: User | None = None,
+    star_count: int | None = None,
+    starred_by_me: bool | None = None,
+) -> schemas.ProblemOut:
+    """star_count/starred_by_me default to the problem's relationship data
+    (one lazy query each). List endpoints pass them in explicitly, computed
+    with batched queries, to avoid N+1 across the board."""
+    if star_count is None or starred_by_me is None:
+        stars = problem.stars
+        if star_count is None:
+            star_count = len(stars)
+        if starred_by_me is None:
+            starred_by_me = viewer is not None and any(
+                star.user_id == viewer.id for star in stars
+            )
     return schemas.ProblemOut(
         id=problem.id,
         title=problem.title,
@@ -55,6 +73,8 @@ def problem_to_out(problem: Problem, project_count: int, completed_count: int = 
         ai_fields=problem.ai_fields,
         project_count=project_count,
         completed_count=completed_count,
+        star_count=star_count,
+        starred_by_me=starred_by_me,
         origin=problem.origin,
         source_year=problem.source_year,
         edition=problem.edition,

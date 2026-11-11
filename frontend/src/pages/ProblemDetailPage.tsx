@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { ArrowUpRight, Star } from "lucide-react";
 import { cx } from "@/lib/cx";
 import { EASE_SNAP, slideUpReveal } from "@/design/motion";
-import { Tag, useToast } from "@/design/primitives";
+import { Button, buttonClasses, Tag, useToast } from "@/design/primitives";
 import { LoadErrorPanel, PageSkeleton } from "@/pages/detailStates";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ProjectProgressBadge } from "@/components/problems/ProjectProgressBadge";
@@ -12,7 +12,12 @@ import { SubmitProjectPanel } from "@/components/problems/SubmitProjectPanel";
 import { GithubMark } from "@/components/icons/GithubMark";
 import { useProblem } from "@/hooks/useProblem";
 import { useMe } from "@/hooks/useMe";
-import { useStarProject, useUnstarProject } from "@/hooks/useMyProjects";
+import {
+  useStarProblem,
+  useStarProject,
+  useUnstarProblem,
+  useUnstarProject,
+} from "@/hooks/useMyProjects";
 import { fieldLabel } from "@/lib/fields";
 import { ApiError, projectOwnerUsername } from "@/api/client";
 import type { ProblemDetail, ProblemOut } from "@/api/client";
@@ -93,6 +98,79 @@ function MiniStarButton({
     >
       {label}
     </button>
+  );
+}
+
+function ProblemStarButton({
+  problemId,
+  starCount,
+  starredByMe,
+}: {
+  problemId: number;
+  starCount: number;
+  starredByMe: boolean;
+}) {
+  const me = useMe();
+  const star = useStarProblem(problemId);
+  const unstar = useUnstarProblem(problemId);
+  const toast = useToast();
+
+  function toggle() {
+    if (starredByMe) {
+      unstar.mutate(undefined, {
+        onError: () => toast("Could not un-star the problem. Try again.", "error"),
+      });
+      return;
+    }
+    star.mutate(undefined, {
+      onSuccess: () => toast("Starred. Thanks for the signal."),
+      onError: (err) => {
+        if (err instanceof ApiError && err.status === 409) {
+          toast("You already starred this problem.", "error");
+        } else {
+          toast("Could not star the problem. Try again.", "error");
+        }
+      },
+    });
+  }
+
+  const label = (
+    <>
+      <Star
+        aria-hidden
+        size={13}
+        strokeWidth={2.6}
+        className={cx(starredByMe && "fill-accent text-accent")}
+      />
+      {starCount > 0 ? starCount : "star"}
+    </>
+  );
+
+  if (!me.data) {
+    return (
+      <a
+        href="/api/auth/github/login"
+        title="Log in to star this problem"
+        aria-label="Log in to star this problem"
+        className={cx(buttonClasses("secondary", "px-3 py-2"), "press")}
+      >
+        {label}
+      </a>
+    );
+  }
+
+  return (
+    <Button
+      variant="secondary"
+      size="small"
+      onClick={toggle}
+      disabled={star.isPending || unstar.isPending}
+      aria-pressed={starredByMe}
+      aria-label={starredByMe ? "Un-star this problem" : "Star this problem"}
+      title={starredByMe ? "Click to remove your star" : "Click to star this problem"}
+    >
+      {label}
+    </Button>
   );
 }
 
@@ -285,6 +363,14 @@ function DetailView({ problemId }: { problemId: number }) {
                 ))}
               </div>
             )}
+
+            <div className="mt-6">
+              <ProblemStarButton
+                problemId={data.id}
+                starCount={data.star_count ?? 0}
+                starredByMe={Boolean(data.starred_by_me)}
+              />
+            </div>
           </div>
 
           <dl className="self-start border border-ink bg-sheet px-4 py-3">

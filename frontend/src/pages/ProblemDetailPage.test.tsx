@@ -754,6 +754,48 @@ describe('ProblemDetailPage', () => {
     ).toBeInTheDocument();
   });
 
+  it('asks a logged-out visitor to log in when they try to star the problem', async () => {
+    renderDetail('/problems/1');
+
+    expect(
+      await screen.findByRole('heading', { level: 1 }),
+    ).toBeInTheDocument();
+    const loginLink = screen.getByRole('link', {
+      name: 'Log in to star this problem',
+    });
+    expect(loginLink).toHaveAttribute('href', '/api/auth/github/login');
+  });
+
+  it('stars the problem from the brief header once logged in', async () => {
+    const user = userEvent.setup();
+    let starCalls = 0;
+    server.use(
+      http.get('*/api/auth/me', () =>
+        HttpResponse.json({
+          id: 9,
+          username: 'just-looking',
+          name: 'Just Looking',
+          avatar_url: null,
+        }),
+      ),
+      http.post('*/api/problems/1/star', () => {
+        starCalls += 1;
+        return HttpResponse.json({ ok: true, star_count: 1 }, { status: 201 });
+      }),
+    );
+    renderDetail('/problems/1');
+
+    await screen.findByRole('heading', { level: 1 });
+    await user.click(
+      await screen.findByRole('button', { name: 'Star this problem' }),
+    );
+
+    expect(
+      await screen.findByRole('status'),
+    ).toHaveTextContent('Starred. Thanks for the signal.');
+    expect(starCalls).toBe(1);
+  });
+
   it('renders the 404 page for a missing problem', async () => {
     renderDetail('/problems/999');
 

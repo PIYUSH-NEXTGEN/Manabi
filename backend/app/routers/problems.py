@@ -10,7 +10,13 @@ from sqlalchemy.orm import aliased, joinedload
 
 from app import schemas
 from app.deps import DB, CurrentUser, OptionalUser
-from app.models import Problem, Project, STATUS_PUBLISHED, VERIFICATION_VERIFIED
+from app.models import (
+    STATUS_PUBLISHED,
+    Problem,
+    ProblemStar,
+    Project,
+    VERIFICATION_VERIFIED,
+)
 from app.services.presenters import problem_to_out, project_to_out
 from app.services.ratelimit import RateLimiter
 from app.services.visibility import can_view_project, is_admin
@@ -65,9 +71,35 @@ def _counts_by_column(db, column) -> list[tuple[str, int]]:
     return [(str(value), int(count)) for value, count in rows if value is not None]
 
 
+def _star_counts_by_problem(db, problem_ids: list[int]) -> dict[int, int]:
+    """One grouped query for the card list, instead of a lazy load per row."""
+    if not problem_ids:
+        return {}
+    rows = db.execute(
+        select(ProblemStar.problem_id, func.count(ProblemStar.id))
+        .where(ProblemStar.problem_id.in_(problem_ids))
+        .group_by(ProblemStar.problem_id)
+    ).all()
+    return {int(problem_id): int(count) for problem_id, count in rows}
+
+
+def _viewer_starred_ids(db, viewer, problem_ids: list[int]) -> set[int]:
+    if viewer is None or not problem_ids:
+        return set()
+    return set(
+        db.scalars(
+            select(ProblemStar.problem_id).where(
+                ProblemStar.user_id == viewer.id,
+                ProblemStar.problem_id.in_(problem_ids),
+            )
+        ).all()
+    )
+
+
 @router.get("", response_model=schemas.ProblemsListOut)
 def list_problems(
     db: DB,
+    user: OptionalUser,
     q: str | None = None,
     field: schemas.FieldEnum | None = None,
     domain: schemas.DomainEnum | None = None,
@@ -131,8 +163,18 @@ def list_problems(
             .limit(limit)
             .offset(offset)
         ).all()
+        ids = [p.id for p, _, _ in rows]
+        star_counts = _star_counts_by_problem(db, ids)
+        starred = _viewer_starred_ids(db, user, ids)
         items = [
-            problem_to_out(p, int(n or 0), int(c or 0)) for p, n, c in rows
+            problem_to_out(
+                p,
+                int(n or 0),
+                int(c or 0),
+                star_count=star_counts.get(p.id, 0),
+                starred_by_me=p.id in starred,
+            )
+            for p, n, c in rows
         ]
         return schemas.ProblemsListOut(items=items, total=total)
 
@@ -143,8 +185,18 @@ def list_problems(
         or 0
     )  # popularity/completed columns are carried but ignored by count(*)
     rows = db.execute(query.limit(limit).offset(offset)).all()
+    ids = [p.id for p, _, _ in rows]
+    star_counts = _star_counts_by_problem(db, ids)
+    starred = _viewer_starred_ids(db, user, ids)
     items = [
-        problem_to_out(p, int(n or 0), int(c or 0)) for p, n, c in rows
+        problem_to_out(
+            p,
+            int(n or 0),
+            int(c or 0),
+            star_count=star_counts.get(p.id, 0),
+            starred_by_me=p.id in starred,
+        )
+        for p, n, c in rows
     ]
     return schemas.ProblemsListOut(items=items, total=total)
 
@@ -268,7 +320,7 @@ def get_problem(problem_id: int, db: DB, user: OptionalUser):
     visible = [p for p in problem.projects if can_view_project(p, user)]
     project_count = len(visible)
     completed_count = sum(1 for p in visible if p.completed_at is not None and p.verification_status == VERIFICATION_VERIFIED)
-    base = problem_to_out(problem, project_count, completed_count)
+    base = problem_to_out(problem, project_count, completed_count, viewer=user)
     detail = base.model_dump()
     detail["original_text"] = problem.original_text
     detail["display_policy"] = "summary_plus_excerpt"
@@ -328,3 +380,51 @@ def create_problem(body: schemas.ProblemIn, user: CurrentUser, db: DB):
         raise HTTPException(status_code=409, detail="A problem with this source ID already exists")
     db.refresh(problem)
     return problem_to_out(problem, 0, 0)
+
+
+# ---------------------------------------------------------------------------
+# Stars — logged-in users, one per user per problem, visible to everyone
+# ---------------------------------------------------------------------------
+
+
+def _problem_star_count(db, problem_id: int) -> int:
+    return int(
+        db.scalar(
+            select(func.count(ProblemStar.id)).where(ProblemStar.problem_id == problem_id)
+        )
+        or 0
+    )
+
+
+@router.post("/{problem_id}/star", status_code=201)
+def star_problem(problem_id: int, user: CurrentUser, db: DB):
+    problem = db.scalar(
+        select(Problem).where(Problem.id == problem_id, Problem.status == STATUS_PUBLISHED)
+    )
+    if problem is None:
+        raise HTTPException(status_code=404, detail="Problem not found")
+    existing = db.scalar(
+        select(ProblemStar).where(
+            ProblemStar.problem_id == problem.id, ProblemStar.user_id == user.id
+        )
+    )
+    if existing is not None:
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "already_starred", "message": "You already starred this problem."},
+        )
+    db.add(ProblemStar(problem_id=problem.id, user_id=user.id))
+    db.commit()
+    return {"ok": True, "star_count": _problem_star_count(db, problem.id)}
+
+
+@router.delete("/{problem_id}/star", status_code=204)
+def unstar_problem(problem_id: int, user: CurrentUser, db: DB):
+    star = db.scalar(
+        select(ProblemStar).where(
+            ProblemStar.problem_id == problem_id, ProblemStar.user_id == user.id
+        )
+    )
+    if star is not None:
+        db.delete(star)
+        db.commit()

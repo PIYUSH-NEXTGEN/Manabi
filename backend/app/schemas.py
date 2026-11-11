@@ -132,6 +132,10 @@ class ProblemOut(ProblemCard):
     ai_fields: list[str]
     origin: str = "manual"
     source_year: int | None = None
+    # stars: total count is public; starred_by_me needs a logged-in viewer
+    # (False for anonymous requests)
+    star_count: int = 0
+    starred_by_me: bool = False
     edition: str | None = None
     organisation: str | None = None
     deadline: date | None = None

@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
@@ -50,6 +50,25 @@ describe('ProblemBoardPage', () => {
       name: /crop disease triage for small farms/i,
     });
     expect(link).toHaveAttribute('href', '/problems/1');
+  });
+
+  it('shows the star chip only on cards that have been starred', async () => {
+    renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
+
+    await screen.findAllByRole('heading', { level: 3 });
+
+    // Streetlight outage tracker carries star_count: 2 in the fixtures...
+    const starredCard = screen.getByRole('link', {
+      name: /streetlight outage tracker/i,
+    });
+    expect(within(starredCard).getByTitle('2 stars')).toBeInTheDocument();
+
+    // ...crop triage has zero stars, so no chip and no "0".
+    const unstarredCard = screen.getByRole('link', {
+      name: /crop disease triage for small farms/i,
+    });
+    expect(within(unstarredCard).queryByTitle(/stars?/)).not.toBeInTheDocument();
+    expect(within(unstarredCard).queryByText(/^0$/)).not.toBeInTheDocument();
   });
 
   it('typing in search filters the results', async () => {

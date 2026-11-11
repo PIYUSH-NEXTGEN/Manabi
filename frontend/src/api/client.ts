@@ -323,3 +323,14 @@ export function starProject(id: number): Promise<{ ok: boolean; star_count: numb
 export function unstarProject(id: number): Promise<void> {
   return apiFetch<void>(`/api/projects/${id}/star`, { method: 'DELETE' });
 }
+
+export function starProblem(id: number): Promise<{ ok: boolean; star_count: number }> {
+  return apiFetch<{ ok: boolean; star_count: number }>(
+    `/api/problems/${id}/star`,
+    { method: 'POST' },
+  );
+}
+
+export function unstarProblem(id: number): Promise<void> {
+  return apiFetch<void>(`/api/problems/${id}/star`, { method: 'DELETE' });
+}

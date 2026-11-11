@@ -35,6 +35,8 @@ const problems = [
     completed_count: 0,
     ai_fields: ['approaches'],
     goal: null,
+    star_count: 0,
+    starred_by_me: false,
   },
   {
     id: 2,
@@ -61,6 +63,8 @@ const problems = [
     completed_count: 1,
     ai_fields: ['approaches', 'est_hours'],
     goal: 'hackathon',
+    star_count: 2,
+    starred_by_me: false,
   },
   {
     id: 3,
@@ -87,6 +91,8 @@ const problems = [
     completed_count: 0,
     ai_fields: ['approaches'],
     goal: 'learning',
+    star_count: 0,
+    starred_by_me: false,
   },
   {
     id: 4,
@@ -113,6 +119,8 @@ const problems = [
     completed_count: 0,
     ai_fields: ['approaches', 'est_hours'],
     goal: null,
+    star_count: 0,
+    starred_by_me: false,
   },
   {
     id: 5,
@@ -139,6 +147,8 @@ const problems = [
     completed_count: 0,
     ai_fields: ['approaches'],
     goal: null,
+    star_count: 0,
+    starred_by_me: false,
   },
   {
     id: 6,
@@ -165,6 +175,8 @@ const problems = [
     completed_count: 0,
     ai_fields: ['approaches'],
     goal: 'resume',
+    star_count: 0,
+    starred_by_me: false,
     resume_kit: {
       scope_levels: [
         {
@@ -417,6 +429,19 @@ export const handlers = [
       projects: detailProjects,
     });
   }),
+  http.post('*/api/problems/:id/star', ({ params }) => {
+    const found = problems.find((p) => p.id === Number(params.id));
+    if (!found) {
+      return HttpResponse.json({ detail: 'Problem not found' }, { status: 404 });
+    }
+    return HttpResponse.json(
+      { ok: true, star_count: (found.star_count ?? 0) + 1 },
+      { status: 201 },
+    );
+  }),
+  http.delete('*/api/problems/:id/star', () =>
+    new HttpResponse(null, { status: 204 }),
+  ),
   http.post('*/api/problems/:id/projects', async ({ request, params }) => {
     const problem = problems.find((p) => p.id === Number(params.id));
     if (!problem) {
