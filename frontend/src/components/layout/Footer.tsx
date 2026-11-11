@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Info,
   Scale,
+  Star,
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { GithubMark } from '@/components/icons/GithubMark';
@@ -44,7 +45,7 @@ export function Footer() {
   return (
     <footer className="inverted-surface relative overflow-hidden border-t border-ink bg-ink text-paper">
       <div className="mx-auto w-[min(1240px,96vw)]">
-        <div className="grid gap-12 py-14 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
+        <div className="grid gap-10 py-11 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
           <div>
             <Link to="/" className="group inline-flex items-center gap-3">
               <Logo className="text-paper transition-colors group-hover:text-accent-soft" />
@@ -53,27 +54,23 @@ export function Footer() {
               </span>
             </Link>
 
-            <p className="mt-5 max-w-xs text-sm leading-relaxed text-paper/70">
-              Tired of Googling project ideas and still not knowing what to
-              build? MANABI gives you real problems across every domain,
-              filtered by difficulty. Pick one that fits your skills, from
-              beginner projects to Resume and Hackathons level projects. Link
-              your Repo and live demo show your work publicly.
-            </p>
-
-            <span className="mt-6 inline-flex items-center gap-2 border border-paper/25 px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/65">
-              <a
-                href="https://github.com/PIYUSH-NEXTGEN/Manabi"
-                target="_blank"
-                rel="noreferrer"
-                aria-label="MANABI on GitHub"
-                className="group inline-flex items-center gap-2 transition-colors hover:text-paper"
-              >
-                <span aria-hidden className="block size-1.5 bg-accent-soft" />
-                <GithubMark size={14} className="text-paper/65 transition-colors group-hover:text-accent-soft" />
-                Source on GitHub
-              </a>
-            </span>
+            <a
+              href="https://github.com/PIYUSH-NEXTGEN/Manabi"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="Star MANABI on GitHub"
+              className="github-star group mt-6 flex w-fit items-center gap-2 bg-ink px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper"
+            >
+              <Star
+                aria-hidden
+                size={12}
+                strokeWidth={2.4}
+                fill="currentColor"
+                className="text-paper"
+              />
+              <GithubMark size={14} className="text-paper/80 transition-colors group-hover:text-paper" />
+              Star on GitHub
+            </a>
 
           </div>
 
@@ -118,7 +115,7 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="flex flex-col gap-5 border-t border-paper/20 py-5 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-5 border-t border-paper/20 py-4 md:flex-row md:items-center md:justify-between">
           <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/55">
             © 2026 MANABI
           </p>
@@ -128,12 +125,12 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="relative bg-ink">
+      <div className="relative aspect-[16/6.2] overflow-hidden bg-ink">
         <img
           src="/footer-scene.png"
           alt=""
           draggable={false}
-          className="block h-80 w-full object-cover object-bottom [image-rendering:pixelated] sm:h-96 md:h-[480px] lg:h-[560px]"
+          className="absolute inset-0 size-full object-cover object-top [image-rendering:pixelated]"
         />
         <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink via-ink/70 to-transparent pointer-events-none" />
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-ink/40 to-transparent" />
