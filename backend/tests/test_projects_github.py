@@ -233,6 +233,41 @@ def test_submit_project_invalid_url_422(client, user, problem, github_repo_mock)
     assert res.json()["detail"]["code"] == "invalid_repo_url"
 
 
+def test_submit_rate_limited_after_hourly_attempts(
+    db_session, client, user, problem, github_repo_mock, monkeypatch
+):
+    """Every server-reaching attempt (stored or rejected) shares one hourly bucket."""
+    from app import config
+    from app.routers.projects import SUBMIT_LIMITER
+
+    monkeypatch.setenv("SUBMIT_RATE_LIMIT_PER_HOUR", "2")
+    monkeypatch.setenv("MAX_SUBMISSIONS_PER_DAY", "100")
+    config.get_settings.cache_clear()
+    SUBMIT_LIMITER.reset(db_session)
+    try:
+        codes = []
+        for _ in range(3):
+            res = client.post(
+                f"/api/problems/{problem.id}/projects",
+                json={"repo_url": "https://github.com/octocat/triage", "solution_summary": SUMMARY},
+            )
+            codes.append(res.status_code)
+        # Attempt 1 is stored; attempt 2 hits the duplicate guard (409) but
+        # still consumed a bucket slot; attempt 3 is rate limited.
+        assert codes == [201, 409, 429]
+        again = client.post(
+            f"/api/problems/{problem.id}/projects",
+            json={"repo_url": "https://github.com/octocat/triage", "solution_summary": SUMMARY},
+        )
+        assert again.json()["detail"]["code"] == "rate_limited"
+        assert "this hour" in again.json()["detail"]["message"]
+        assert int(again.headers["Retry-After"]) > 0
+    finally:
+        monkeypatch.undo()
+        config.get_settings.cache_clear()
+        SUBMIT_LIMITER.reset(db_session)
+
+
 def test_submit_project_invalid_summary_422(client, user, problem, github_repo_mock):
     res = client.post(
         f"/api/problems/{problem.id}/projects",

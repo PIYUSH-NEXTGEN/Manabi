@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     # a heavy user may spend the whole allowance in one session.
     CHAT_RATE_LIMIT_PER_DAY: int = 20
 
+    # Submit attempts on the "Submit project" button. Every attempt costs
+    # 2-3 GitHub API calls even when rejected, so failures and successes
+    # share one hourly bucket per account; stacked with the 5/day and
+    # 10-active-project quotas.
+    SUBMIT_RATE_LIMIT_PER_HOUR: int = 10
+
     # Login (both the redirect and the OAuth callback) hits GitHub's OAuth
     # infrastructure and creates session traffic; real users log in a few
     # times a day, so this only bites scripted hammering. Keyed per IP.

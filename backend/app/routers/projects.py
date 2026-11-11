@@ -31,6 +31,10 @@ CACHE_TTL = timedelta(minutes=10)
 REPORT_LIMITER = RateLimiter("REPORT_RATE_LIMIT_PER_HOUR")  # per-user, hourly
 STAR_LIMITER = RateLimiter("STAR_RATE_LIMIT_PER_HOUR")  # per-user, hourly
 REFRESH_LIMITER = RateLimiter("PROGRESS_REFRESH_RATE_LIMIT_PER_HOUR")
+# Every submit attempt that reaches the server costs 2-3 GitHub API calls
+# even when it is rejected, so all attempts (failed or successful) share one
+# hourly bucket per account. Stacked with the 5/day and 10-active caps.
+SUBMIT_LIMITER = RateLimiter("SUBMIT_RATE_LIMIT_PER_HOUR")
 
 
 def _error(err: SubmissionError) -> HTTPException:
@@ -60,7 +64,18 @@ async def submit_project(problem_id: int, body: schemas.ProjectCreate, user: Cur
         select(Problem).where(Problem.id == problem_id, Problem.status == STATUS_PUBLISHED)
     )
     if problem is None:
-        raise HTTPException(status_code=404, detail="Problem not found")
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    retry = SUBMIT_LIMITER.check(db, f"submit:{user.id}")
+    if retry is not None:
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "code": "rate_limited",
+                "message": f"You have made {SUBMIT_LIMITER._limit()} submit attempts this hour. Fix the reported issues, then come back in about {max(1, round(retry / 60))} minutes.",
+            },
+            headers={"Retry-After": str(retry)},
+        )
 
     try:
         project = await verification.create_submission(
