@@ -1,49 +1,6 @@
 import { useEffect, useState } from 'react';
-import { animate, createTimeline } from 'animejs';
 import { cx } from '@/lib/cx';
-import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
-
-/**
- * The mascot: a line-art cat (provided image, rendered with a transparent
- * background so it sits on the paper surfaces) that bobs gently while the
- * checks run. Inverted in dark mode so the ink lines stay visible.
- * Animated by anime.js.
- */
-function MascotCat({ className }: { className?: string }) {
-  const reduced = usePrefersReducedMotion();
-
-  useEffect(() => {
-    if (reduced) {
-      return;
-    }
-    const entrance = animate('.cat-figure', {
-      scale: [0.85, 1],
-      opacity: [0, 1],
-      duration: 400,
-      ease: 'outBack',
-    });
-    const idle = createTimeline({ loop: true, defaults: { ease: 'inOutSine' } });
-    idle
-      .add('.cat-cat', { translateY: [0, -3], duration: 1400 }, 0)
-      .add('.cat-cat', { translateY: [-3, 0], duration: 1400 }, 1400)
-      .add('.cat-cat', { rotate: [0, 1.4], duration: 2800 }, 0);
-    return () => {
-      entrance.pause();
-      idle.pause();
-    };
-  }, [reduced]);
-
-  return (
-    <span aria-hidden="true" className={cx('cat-figure block shrink-0', className)}>
-      <img
-        src="/cat.png"
-        alt=""
-        className="cat-cat h-[5.5rem] w-auto select-none object-contain dark:invert"
-        draggable={false}
-      />
-    </span>
-  );
-}
+import { SpaceShooter } from './SpaceShooter';
 
 interface Stage {
   at: number;
@@ -73,7 +30,7 @@ export function SubmittingCard() {
 
   return (
     <aside className="submit-card-enter flex flex-col gap-4 border border-ink bg-sheet p-4">
-      <MascotCat />
+      <SpaceShooter />
       <div>
         <h2 className="font-mono text-xs font-bold uppercase tracking-widest">
           Submission in progress

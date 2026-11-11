@@ -143,17 +143,23 @@ body {
   }
 }
 
-/* Submission-progress card: the ink cat batting a ball, animated by anime.js.
-   Transform origins pin the roll to the ball and the lean to the cat's base. */
-.cat-figure {
-  will-change: transform;
-  filter: drop-shadow(0 3px 0 var(--tint));
+/* Submission-progress card: a small arcade screen. The game itself is drawn in
+   SVG; these layers only add the CRT scanlines and corner falloff on top. */
+.arcade-scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.05) 0 1px,
+    transparent 1px 3px
+  );
+  opacity: 0.55;
 }
 
-.cat-cat {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  will-change: transform;
+.arcade-vignette {
+  background: radial-gradient(
+    ellipse at 50% 42%,
+    transparent 46%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
 }
 
 @keyframes card-enter {
@@ -208,10 +214,5 @@ body {
   .stage-dot,
   .submit-card-enter {
     animation: none;
-  }
-
-  .cat-figure,
-  .cat-cat {
-    transform: none;
   }
 }
