@@ -16,7 +16,12 @@ from app.services.llm import (
 def llm_env(monkeypatch):
     get_settings = config.get_settings
     monkeypatch.setenv("LLM_PROVIDER", "mock")
+    # Blank env entries override anything in the real backend/.env file,
+    # so developer machines with live keys cannot leak into tests.
     monkeypatch.setenv("GEMINI_API_KEY", "")
+    monkeypatch.setenv("GEMINI_API_KEY_CHAT", "")
+    monkeypatch.setenv("GEMINI_MODEL", "")
+    monkeypatch.setenv("GEMINI_MODEL_CHAT", "")
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     get_settings.cache_clear()
     yield
@@ -85,6 +90,76 @@ def test_chat_without_key_503(monkeypatch):
         chat("Sys", [{"role": "user", "content": "hi"}])
 
 
+def _recording_gemini(monkeypatch, used):
+    class Reply:
+        text = "gemini said"
+
+    class Client:
+        class models:
+            @staticmethod
+            def generate_content(**kwargs):
+                used.update(kwargs)
+                return Reply()
+
+    monkeypatch.setattr(
+        "app.services.llm._gemini",
+        lambda api_key: (used.setdefault("key", api_key), Client())[1],
+    )
+
+
+def test_chat_uses_dedicated_chat_key_and_model(monkeypatch):
+    set_provider(
+        monkeypatch,
+        "gemini",
+        GEMINI_API_KEY="shared",
+        GEMINI_API_KEY_CHAT="chatk",
+        GEMINI_MODEL_CHAT="lite",
+    )
+    used = {}
+    _recording_gemini(monkeypatch, used)
+
+    reply = chat("Sys", [{"role": "user", "content": "hi"}], purpose="chat")
+
+    assert reply == "gemini said"
+    assert used["key"] == "chatk"
+    assert used["model"] == "lite"
+
+
+def test_chat_falls_back_to_shared_key_without_chat_key(monkeypatch):
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEY="shared")
+    used = {}
+    _recording_gemini(monkeypatch, used)
+
+    chat("Sys", [{"role": "user", "content": "hi"}], purpose="chat")
+
+    assert used["key"] == "shared"
+    assert used["model"] == "gemini-3.5-flash-lite"
+
+
+def test_evaluation_keeps_the_shared_key(monkeypatch):
+    set_provider(
+        monkeypatch,
+        "gemini",
+        GEMINI_API_KEY="shared",
+        GEMINI_API_KEY_CHAT="chatk",
+    )
+    used = {}
+    _recording_gemini(monkeypatch, used)
+
+    chat("Sys", [{"role": "user", "content": "hi"}])
+
+    assert used["key"] == "shared"
+    assert used["model"] == "gemini-3.8-flash"
+
+
+def test_chat_only_key_configures_chat_but_not_evaluation(monkeypatch):
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEY="", GEMINI_API_KEY_CHAT="chatk")
+    assert is_configured("chat") is True
+    assert is_configured() is False
+    with pytest.raises(LLMConfigError):
+        chat("Sys", [{"role": "user", "content": "hi"}])
+
+
 def test_anthropic_happy_path_over_respx(monkeypatch):
     set_provider(monkeypatch, "anthropic", ANTHROPIC_API_KEY="key")
     with respx.mock(assert_all_called=True) as mock:
@@ -145,6 +220,62 @@ def test_gemini_api_error_maps_to_response_error(monkeypatch):
     monkeypatch.setattr("app.services.llm._gemini", lambda api_key: LimitedClient())
     with pytest.raises(LLMResponseError):
         chat("Sys", [{"role": "user", "content": "hi"}])
+
+
+def test_chat_purpose_retries_once_evaluation_twice(monkeypatch):
+    """Chat fails fast (1 retry, 1s); relevance grading retries longer."""
+    from google.genai import errors as genai_errors
+
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEY="k")
+    blip = genai_errors.APIError(503, {"error": {"message": "overloaded"}})
+    calls = []
+    sleeps = []
+
+    class FlakyClient:
+        class models:
+            @staticmethod
+            def generate_content(**_kwargs):
+                calls.append(1)
+                raise blip
+
+    monkeypatch.setattr("app.services.llm._gemini", lambda api_key: FlakyClient())
+    monkeypatch.setattr("app.services.llm.time.sleep", lambda s: sleeps.append(s))
+
+    with pytest.raises(LLMResponseError):
+        chat("Sys", [{"role": "user", "content": "hi"}], purpose="chat")
+    assert len(calls) == 2 and sleeps == [1]
+
+    calls.clear()
+    sleeps.clear()
+    with pytest.raises(LLMResponseError):
+        chat("Sys", [{"role": "user", "content": "hi"}])
+    assert len(calls) == 3 and sleeps == [2, 4]
+
+
+def test_chat_recovers_from_one_transient_blip(monkeypatch):
+    from google.genai import errors as genai_errors
+
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEY="k", GEMINI_API_KEY_CHAT="chatk")
+    blip = genai_errors.APIError(503, {"error": {"message": "overloaded"}})
+    calls = []
+
+    class RecoversClient:
+        class models:
+            @staticmethod
+            def generate_content(**_kwargs):
+                calls.append(1)
+                if len(calls) == 1:
+                    raise blip
+                return _Reply()
+
+    class _Reply:
+        text = "recovered"
+
+    monkeypatch.setattr("app.services.llm._gemini", lambda api_key: RecoversClient())
+    monkeypatch.setattr("app.services.llm.time.sleep", lambda _s: None)
+
+    assert chat("Sys", [{"role": "user", "content": "hi"}], purpose="chat") == "recovered"
+    assert len(calls) == 2
 
 
 def test_anthropic_transport_error_maps_to_response_error(monkeypatch):

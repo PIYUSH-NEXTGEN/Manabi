@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 ANTHROPIC_API_BASE = "https://api.anthropic.com/v1"
 ANTHROPIC_VERSION = "2023-06-01"
 DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
+DEFAULT_GEMINI_CHAT_MODEL = "gemini-3.5-flash-lite"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-5"
 MAX_TOKENS_CHAT = 512
 
@@ -26,16 +27,25 @@ def provider_name() -> str:
     return get_settings().LLM_PROVIDER.strip().lower()
 
 
-def is_configured() -> bool:
+def is_configured(purpose: str = "evaluation") -> bool:
     provider = provider_name()
     if provider == "mock":
         return True
     settings = get_settings()
     if provider == "gemini":
-        return bool(settings.GEMINI_API_KEY)
+        # The chat feature can carry its own project key; evaluation always
+        # rides on the shared key.
+        return bool(settings.GEMINI_API_KEY) or (
+            purpose == "chat" and bool(settings.GEMINI_API_KEY_CHAT)
+        )
     if provider == "anthropic":
         return bool(settings.ANTHROPIC_API_KEY)
     return False
+
+
+def gemini_chat_key() -> str | None:
+    """Key for the chat feature: the chat project's key or the shared one."""
+    return get_settings().GEMINI_API_KEY_CHAT or None
 
 
 def chat(
@@ -43,9 +53,14 @@ def chat(
     messages: list[dict],
     model: str | None = None,
     max_tokens: int | None = None,
+    purpose: str = "evaluation",
 ) -> str:
-    """Chat reply. Deterministic for the mock provider. Raises LLMConfigError -> 503."""
-    if not is_configured():
+    """Chat reply. Deterministic for the mock provider. Raises LLMConfigError -> 503.
+
+    purpose="chat" (the catalog assistant) may use a dedicated Gemini project
+    key/model; everything else (relevance grading) uses the shared key.
+    """
+    if not is_configured(purpose):
         raise LLMConfigError("AI is not configured yet")
     provider = provider_name()
     last_user = [m.get("content", "") for m in messages if m.get("role") == "user"]
@@ -53,7 +68,14 @@ def chat(
     if provider == "mock":
         return f"MOCK-CHAT-REPLY: saw: {last_user_text[:200]}".strip()
     if provider == "gemini":
-        return _call_gemini(system, last_user_text, model=model, max_tokens=max_tokens).strip()
+        return _call_gemini(
+            system,
+            last_user_text,
+            model=model,
+            max_tokens=max_tokens,
+            api_key=gemini_chat_key() if purpose == "chat" else None,
+            chat_purpose=purpose == "chat",
+        ).strip()
     if provider == "anthropic":
         return _call_anthropic(system, last_user_text, model=model, max_tokens=max_tokens).strip()
     raise LLMConfigError(f"Unknown LLM_PROVIDER: {provider}")
@@ -90,34 +112,50 @@ def _anthropic_http(api_key: str) -> httpx.Client:
     return _anthropic_client
 
 
-def _call_gemini(system: str, user: str, model: str | None, max_tokens: int | None = None) -> str:
+def _call_gemini(
+    system: str,
+    user: str,
+    model: str | None,
+    max_tokens: int | None = None,
+    api_key: str | None = None,
+    chat_purpose: bool = False,
+) -> str:
     settings = get_settings()
-    if not settings.GEMINI_API_KEY:
+    key = api_key or settings.GEMINI_API_KEY
+    if not key:
         raise LLMConfigError("AI is not configured yet")
-    model_name = model or settings.GEMINI_MODEL or DEFAULT_GEMINI_MODEL
+    if chat_purpose:
+        model_name = model or settings.GEMINI_MODEL_CHAT or DEFAULT_GEMINI_CHAT_MODEL
+    else:
+        model_name = model or settings.GEMINI_MODEL or DEFAULT_GEMINI_MODEL
     config = {
-        "temperature": 0,
+        # Chat wants warmth; grading wants determinism.
+        "temperature": 0.25 if chat_purpose else 0,
         "max_output_tokens": max_tokens or MAX_TOKENS_CHAT,
     }
     prompt = f"{system}\n\n{user}" if user else system
     try:
-        client = _gemini(settings.GEMINI_API_KEY)
+        client = _gemini(key)
     except Exception as exc:
         logger.exception("Gemini client init failed")
         raise LLMResponseError(f"Gemini request failed: {exc}") from exc
     # Free-tier capacity blips (503 overloaded, 504 deadline) recover within
     # seconds; retry briefly so occasional outages do not silently degrade
-    # every submission to the keyword fallback.
-    for attempt in range(3):
+    # every submission to the keyword fallback. Chat stays snappier: it
+    # retries once after 1s, evaluation waits longer because a failed check
+    # degrades a whole submission.
+    attempts = 2 if chat_purpose else 3
+    backoff = 1 if chat_purpose else 2
+    for attempt in range(attempts):
         try:
             response = client.models.generate_content(model=model_name, contents=[prompt], config=config)
             return response.text or ""
         except Exception as exc:
             transient = getattr(exc, "code", None) in (503, 504)
-            if not transient or attempt == 2:
+            if not transient or attempt == attempts - 1:
                 logger.exception("Gemini call failed (model=%s, attempt=%s)", model_name, attempt + 1)
                 raise LLMResponseError(f"Gemini request failed: {exc}") from exc
-            time.sleep(2 * (attempt + 1))
+            time.sleep(backoff * (attempt + 1))
 
 
 def _call_anthropic(system: str, user: str, model: str | None, max_tokens: int | None = None) -> str:

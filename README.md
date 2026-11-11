@@ -176,6 +176,7 @@ people touch:
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | empty | GitHub OAuth app for login |
 | `LLM_PROVIDER` | `mock` | `gemini`, `anthropic`, or `mock` |
 | `GEMINI_API_KEY` / `GEMINI_MODEL` / `ANTHROPIC_API_KEY` / `LLM_MODEL_FAST` | empty | Provider keys and optional model overrides |
+| `GEMINI_API_KEY_CHAT` / `GEMINI_MODEL_CHAT` | empty | Optional second Gemini project for the catalog chat, so chat shares no quota with evaluation; empty uses the shared key |
 | `CHAT_RATE_LIMIT_PER_DAY` | 20 | Chat messages per account per rolling 24 h (login-only) |
 | `SUBMIT_RATE_LIMIT_PER_HOUR` | 10 | Submit-button attempts per account per hour (failures count) |
 | `PROBLEM_CREATE_PER_HOUR` | 5 | Problem publishing per user per hour (admins get the sanity cap below) |

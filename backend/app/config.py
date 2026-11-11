@@ -14,6 +14,11 @@ class Settings(BaseSettings):
     LLM_PROVIDER: str = "mock"
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = ""
+    # Optional dedicated Gemini project for the catalog chat, so chat traffic
+    # shares no quota with submission evaluation. Empty falls back to the
+    # shared GEMINI_API_KEY (both features on one project's quota).
+    GEMINI_API_KEY_CHAT: str = ""
+    GEMINI_MODEL_CHAT: str = ""
     ANTHROPIC_API_KEY: str = ""
     LLM_MODEL_FAST: str = ""
     # Chat is login-only. The daily cap is the budget guard (each message is

@@ -55,6 +55,7 @@ against Postgres it runs `alembic upgrade head` itself, so prod never silently d
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app for login |
 | `LLM_PROVIDER` | `gemini` | `anthropic` | `mock` |
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | Gemini (default model in code: `gemini-3.8-flash`) |
+| `GEMINI_API_KEY_CHAT`, `GEMINI_MODEL_CHAT` | Optional second Gemini project for the chat (default model: `gemini-3.5-flash-lite`); empty falls back to the shared key |
 | `ANTHROPIC_API_KEY`, `LLM_MODEL_FAST` | Optional Anthropic provider |
 | `CHAT_RATE_LIMIT_PER_DAY` | Chat messages per account per rolling 24 h (login-only; anonymous users are rejected) |
 | `ADMIN_GITHUB_USERNAMES` | Comma separated GitHub logins allowed into the `/admin/review` page |

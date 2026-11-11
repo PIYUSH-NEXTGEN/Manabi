@@ -99,7 +99,7 @@ def msg(role="user", content="Which problem should I build first?"):
 
 
 def patch_reply(monkeypatch, reply):
-    monkeypatch.setattr("app.routers.chat.llm_chat", lambda system, messages: reply, raising=False)
+    monkeypatch.setattr("app.routers.chat.llm_chat", lambda system, messages, **kwargs: reply, raising=False)
 
 
 # ---------------- catalog search ----------------
@@ -123,6 +123,90 @@ def test_catalog_search_no_match_empty(db_session):
     from app.services.catalog_search import search_catalog
 
     assert search_catalog(db_session, "blockchain voting quantum") == []
+
+
+def test_catalog_search_understands_synonyms_and_plurals(db_session):
+    from app.services.catalog_search import search_catalog
+
+    # the flood brief never says "alerts monitoring system" verbatim, and the
+    # classroom app never says "webapps", but both should still be found
+    assert any(p.source_id == "SIH26001" for p, _ in search_catalog(db_session, "alert monitoring system"))
+    assert any(p.source_id == "TCOE PS12" for p, _ in search_catalog(db_session, "webapps for attendance"))
+
+
+def test_catalog_search_title_hit_outranks_summary_hit(db_session):
+    from app.services.catalog_search import search_catalog
+
+    # "attendance" appears in the classroom title AND summary; title hits score
+    # higher so ordering stays stable when more rows join the board
+    matches = search_catalog(db_session, "attendance app")
+    assert matches and matches[0][0].source_id == "TCOE PS12"
+
+
+def test_build_system_marks_empty_catalog_for_clarify(db_session):
+    from app.routers.chat import build_system
+    from app.schemas import ChatMessage
+
+    system = build_system(db_session, [ChatMessage(role="user", content="quantum blockchain")], None)
+    assert "no rows matched" in system
+    assert "Ask ONE short question" in system
+
+
+def test_build_system_injects_user_state_and_rejection_help(db_session, user):
+    from app.models import Project
+    from app.routers.chat import build_system
+    from app.schemas import ChatMessage
+
+    problem = db_session.query(Problem).first()
+    db_session.add(
+        Project(
+            problem_id=problem.id,
+            user_id=user.id,
+            repo_owner="octocat",
+            repo_name="triage",
+            repo_url="https://github.com/octocat/triage",
+            verification_status="rejected",
+            relevance_reason="No README found",
+        )
+    )
+    db_session.commit()
+
+    system = build_system(db_session, [ChatMessage(role="user", content="hi")], None, user=user)
+
+    assert "rejected=1" in system
+    assert "No README found" in system
+    assert "offer concrete next steps" in system
+
+
+def test_build_system_skips_user_block_for_projectless_user(db_session, user):
+    from app.routers.chat import build_system
+    from app.schemas import ChatMessage
+
+    system = build_system(db_session, [ChatMessage(role="user", content="hi")], None, user=user)
+    assert "USER CONTEXT" not in system
+
+
+# ---------------- system prompt ----------------
+
+def test_build_system_cites_live_stats(db_session):
+    from app.routers.chat import build_system
+    from app.schemas import ChatMessage
+
+    system = build_system(db_session, [ChatMessage(role="user", content="hello")], None)
+    assert "2 published problems" in system
+    assert "aiml=1" in system and "web-dev=1" in system
+    assert "beginner=1" in system and "intermediate=1" in system
+
+
+def test_build_system_empty_board_stats(db_session):
+    from app.routers.chat import build_system
+    from app.schemas import ChatMessage
+    from sqlalchemy import delete
+
+    db_session.execute(delete(Problem))
+    db_session.commit()
+    system = build_system(db_session, [ChatMessage(role="user", content="hello")], None)
+    assert "problem board is empty right now" in system
 
 
 # ---------------- endpoint ----------------
@@ -164,7 +248,7 @@ def test_chat_strips_inline_latex_but_keeps_money(client, db_session, user, monk
 def test_chat_catalog_in_system_prompt(client, db_session, user, monkeypatch):
     captured = {}
 
-    def fake(system, messages):
+    def fake(system, messages, **kwargs):
         captured["system"] = system
         return "re"
 
@@ -177,7 +261,7 @@ def test_chat_catalog_in_system_prompt(client, db_session, user, monkeypatch):
 def test_chat_system_prompt_requests_readable_markdown(client, db_session, user, monkeypatch):
     captured = {}
 
-    def fake(system, messages):
+    def fake(system, messages, **kwargs):
         captured["system"] = system
         return "re"
 
@@ -190,7 +274,7 @@ def test_chat_system_prompt_requests_readable_markdown(client, db_session, user,
 def test_chat_page_context_included(client, db_session, user, monkeypatch):
     captured = {}
 
-    def fake(system, messages):
+    def fake(system, messages, **kwargs):
         captured["system"] = system
         return "re"
 
@@ -248,7 +332,7 @@ def test_chat_empty_messages_422(client, db_session, user):
 def test_chat_not_configured_503(client, db_session, user, monkeypatch):
     from app.services.llm import LLMConfigError as _LCE
 
-    def boom(system, messages):
+    def boom(system, messages, **kwargs):
         raise _LCE("AI is not configured yet")
 
     monkeypatch.setattr("app.routers.chat.llm_chat", boom, raising=False)
@@ -260,7 +344,7 @@ def test_chat_not_configured_503(client, db_session, user, monkeypatch):
 def test_chat_provider_error_502(client, db_session, user, monkeypatch):
     from app.services.llm import LLMResponseError as _LRE
 
-    def boom(system, messages):
+    def boom(system, messages, **kwargs):
         raise _LRE("x")
 
     monkeypatch.setattr("app.routers.chat.llm_chat", boom, raising=False)
@@ -270,7 +354,7 @@ def test_chat_provider_error_502(client, db_session, user, monkeypatch):
 
 def test_chat_unexpected_exception_maps_to_502(client, db_session, user, monkeypatch):
     """Any non-LLM crash must still answer JSON with 502. Never a bare 500."""
-    def boom(system, messages):
+    def boom(system, messages, **kwargs):
         raise RuntimeError("unexpected provider crash")
 
     monkeypatch.setattr("app.routers.chat.llm_chat", boom, raising=False)

@@ -14,6 +14,7 @@ import {
 } from '@/api/client';
 import { Markdown } from '@/components/markdown/Markdown';
 import { RetryCountdown } from '@/components/common/RetryCountdown';
+import { ThinkingIndicator } from './ThinkingIndicator';
 
 const OPEN_CHAT_EVENT = 'manabi:open-chat';
 const MAX_HISTORY = 6;
@@ -182,7 +183,7 @@ export function ChatWidget() {
       ) : (
         <>
           <div className="flex-1 overflow-y-auto p-3" role="log" aria-live="polite">
-            {entries.length === 0 ? (
+            {entries.length === 0 && !chat.isPending ? (
             <p className="text-sm leading-snug">
               Tell it what you know and what you want to build. It finds problems
               that fit, scoped for a weekend, and it only ever points at real
@@ -212,6 +213,7 @@ export function ChatWidget() {
                     ) : null}
                   </li>
                 ))}
+                {chat.isPending ? <ThinkingIndicator /> : null}
               </ul>
             )}
           </div>
@@ -237,7 +239,14 @@ export function ChatWidget() {
               rows={2}
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
-              placeholder="What do you want to build? Which side is your strongest?"
+              onKeyDown={(event) => {
+                // Enter sends, Shift+Enter inserts a newline.
+                if (event.key === 'Enter' && !event.shiftKey) {
+                  event.preventDefault();
+                  send();
+                }
+              }}
+              placeholder="What do you want to build? Which side is your strongest? (Shift+Enter for a new line)"
               maxLength={MAX_MESSAGE_LENGTH}
               className="field flex-1 text-sm"
             />

@@ -82,6 +82,28 @@ describe('ChatWidget', () => {
     expect(screen.getByLabelText('MANABI chat')).toBeInTheDocument();
   });
 
+  it('sends on Enter and inserts a newline on Shift+Enter', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ChatWidget />);
+
+    await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
+    const box = screen.getByPlaceholderText(/What do you want to build/i);
+
+    await user.type(box, 'first line');
+    await user.keyboard('{Enter}');
+    expect(await screen.findByText('first line')).toBeInTheDocument();
+
+    await user.type(box, 'second message, part a');
+    await user.keyboard('{Shift>}{Enter}{/Shift}');
+    await user.keyboard('part b');
+    expect(box).toHaveValue('second message, part a\npart b');
+
+    await user.keyboard('{Enter}');
+    // sending clears the draft and posts the full two-line message
+    expect(await screen.findByText(/part b/)).toBeInTheDocument();
+    expect(box).toHaveValue('');
+  });
+
   it('sends a message and renders the reply with catalog problem links', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ChatWidget />);
@@ -230,6 +252,41 @@ describe('ChatWidget', () => {
       'Try again in 5:00',
     );
     expect(screen.queryByText(/linked under this/i)).not.toBeInTheDocument();
+  });
+
+  it('shows a typing indicator while the reply is being generated', async () => {
+    let release!: (response: ReturnType<typeof HttpResponse.json>) => void;
+    server.use(
+      http.post(
+        '*/api/chat',
+        () =>
+          new Promise((resolve) => {
+            release = resolve as typeof release;
+          }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<ChatWidget />);
+
+    await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
+    await user.type(
+      screen.getByPlaceholderText(/What do you want to build/i),
+      'a question that takes a while',
+    );
+    await user.click(screen.getByRole('button', { name: 'Send' }));
+
+    expect(
+      await screen.findByText('Manabi is typing a reply'),
+    ).toBeInTheDocument();
+
+    release(HttpResponse.json(CHAT_200));
+    expect(await screen.findByText(/linked under this/i)).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.queryByText('Manabi is typing a reply'),
+      ).not.toBeInTheDocument(),
+    );
+    expect(screen.getByRole('button', { name: 'Send' })).toBeInTheDocument();
   });
 
   it('passes the current problem page as page_context when chatting there', async () => {
