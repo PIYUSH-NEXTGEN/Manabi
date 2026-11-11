@@ -54,14 +54,17 @@ describe('Toast', () => {
     // rethrows through React's guarded callback, and jsdom then reports it
     // as an uncaught error that fails whichever test is running when it
     // surfaces (a cross-file flake in full-suite runs).
-    let captured: Error | null = null;
+    // A holder object instead of a plain `let`: TypeScript's control flow
+    // cannot see the assignment inside getDerivedStateFromError and would
+    // otherwise narrow the variable to `null`.
+    const captured = { error: null as Error | null };
     class CaptureBoundary extends Component<
       { children: ReactNode },
       { error: Error | null }
     > {
       state = { error: null };
       static getDerivedStateFromError(error: Error) {
-        captured = error;
+        captured.error = error;
         return { error };
       }
       render() {
@@ -74,6 +77,8 @@ describe('Toast', () => {
       </CaptureBoundary>,
     );
     spy.mockRestore();
-    expect(captured?.message).toBe('useToast must be used within ToastProvider');
+    expect(captured.error?.message).toBe(
+      'useToast must be used within ToastProvider',
+    );
   });
 });
