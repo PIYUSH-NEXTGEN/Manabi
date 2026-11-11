@@ -229,9 +229,9 @@ export function Hero() {
                 filtered by difficulty.
               </p>
               <p>
-                Pick one that fits your skills, from beginner projects to
-                final-year and Hackathons project. Track your progress through
-                your GitHub repo and show your work publicly on MANABI.
+                Pick one that fits your skills, from learning projects to
+                resume and hackathon builds. Submit your repo on MANABI and
+                show your work publicly.
               </p>
             </div>
 

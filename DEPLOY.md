@@ -199,8 +199,7 @@ additive and safe: `0005.downgrade` only removes what it added.
   to `needs_review` (repo gone, renamed — tracked by the immutable GitHub id —
   or ownership lost); a `needs_review` row auto-re-checks once per
   `AUTO_REVERIFY_MIN_INTERVAL_HOURS` (24) when the repo gains a README + 3
-  commits; editing the solution summary re-runs the check at most once per
-  that interval (429 `verification_rate_limited` otherwise).
+  commits; editing the solution summary always re-runs the check on demand.
 - **Human review**: admins run the submissions queue at `/admin/review`
   (approve → `verified`, reject → `rejected`). Reports: any viewer may report
   a verified project once; ≥ `REPORTS_BEFORE_REVIEW` (3) reports flips the row

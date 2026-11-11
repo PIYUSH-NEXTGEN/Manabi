@@ -84,9 +84,9 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
       },
       onError: (error) => {
         // The backend commits the edit before re-running the relevance check,
-        // so rate-limit/GitHub errors mean saved-but-not-reverified.
+        // so GitHub errors mean saved-but-not-reverified.
         const savedAnyway =
-          error instanceof ApiError && (error.status === 429 || error.status === 503);
+          error instanceof ApiError && error.status === 503;
         if (savedAnyway) {
           setOpen(false);
           toast(`${error.detail} Your changes were saved.`);

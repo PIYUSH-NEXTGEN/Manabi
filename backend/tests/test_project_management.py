@@ -239,6 +239,24 @@ def test_patch_summary_triggers_reverify(db_session, client, user):
     assert res.json()["verification_status"] in ("needs_review", "verified")
 
 
+def test_patch_summary_never_blocks_on_the_reverify_interval(db_session, client, user):
+    """Two edits back to back: both save, both re-verify immediately."""
+    problem = make_problem(db_session)
+    project = make_project(db_session, user, problem)
+    with mock_repo_for_reverify():
+        first = client.patch(
+            f"/api/projects/{project.id}",
+            json={"solution_summary": "First edited summary of the flood triage pipeline for alerts."},
+        )
+        second = client.patch(
+            f"/api/projects/{project.id}",
+            json={"solution_summary": "Second edited summary of the flood triage pipeline for alerts."},
+        )
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert second.json()["solution_summary"].startswith("Second")
+
+
 def test_patch_other_project_404(db_session, client, user, other):
     problem = make_problem(db_session)
     project = make_project(db_session, other, problem)

@@ -74,7 +74,7 @@ The design rule is failure safety: any LLM or GitHub outage degrades to human
 review, never to an unearned verified badge. Pre-existing repos (older than
 180 days) need a higher score to auto-verify, a project in needs-review
 re-checks itself at most once per day on progress refresh, and editing the
-summary re-runs the check under the same interval cap. All knobs are
+summary re-runs the check right away. All knobs are
 documented in `backend/.env.example` with their defaults, and the rules live
 in `backend/app/services/verification.py`.
 

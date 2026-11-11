@@ -740,13 +740,12 @@ async def auto_reverify(db, project: Project, problem: Problem, user: User) -> b
 
 
 async def reverify_after_summary_edit(db, project: Project, problem: Problem, user: User, summary: str) -> None:
-    """PATCH solution_summary: re-run relevance, subject to the auto interval."""
-    if not _interval_elapsed(project):
-        raise SubmissionError(
-            429,
-            "verification_rate_limited",
-            "Verification was updated recently. Try again in a few hours.",
-        )
+    """PATCH solution_summary: always re-run the relevance check now.
+
+    The user explicitly changed their pitch, so the check runs on demand;
+    the auto-reverify interval only applies to silent background re-checks
+    during progress refresh.
+    """
     token = user.github_token if user else None
     try:
         repo = await github.get_repo(project.repo_owner, project.repo_name, token)
