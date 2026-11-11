@@ -322,7 +322,6 @@ CORE_API_ROUTES = (
     "/api/health",
     "/api/problems",
     "/api/problems/facets",
-    "/api/problems/{problem_id}/export.xlsx",
     "/api/problems/{problem_id}",
     "/api/problems/{problem_id}/projects",
     "/api/stats",

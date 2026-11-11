@@ -9,9 +9,23 @@ from authlib.integrations.starlette_client import OAuth
 from app.config import get_settings
 from app.deps import CurrentUser, DB
 from app.models import User
+from app.services.ratelimit import RateLimiter
 from app.services.visibility import is_admin
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+# Login touches GitHub's OAuth infrastructure on every hit and creates
+# session traffic. Keyed per IP: one shared NAT may hold a whole campus, so
+# the cap stays generous but still stops scripted hammering.
+LOGIN_LIMITER = RateLimiter("AUTH_LOGIN_RATE_LIMIT_PER_HOUR")
+
+
+def _client_ip(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
+
+
+def _login_allowed(request: Request) -> bool:
+    return LOGIN_LIMITER.allowed(f"login-ip:{_client_ip(request)}")
 
 oauth = OAuth()
 
@@ -47,6 +61,11 @@ def get_github_client():
 
 @router.get("/github/login")
 async def github_login(request: Request):
+    if not _login_allowed(request):
+        raise HTTPException(
+            status_code=429,
+            detail={"code": "rate_limited", "message": "Too many login attempts — try again later."},
+        )
     client = get_github_client()
     if client is None:
         raise HTTPException(status_code=503, detail="GitHub login is not configured yet")
@@ -56,6 +75,11 @@ async def github_login(request: Request):
 
 @router.get("/github/callback")
 async def github_callback(request: Request, db: DB):
+    if not _login_allowed(request):
+        raise HTTPException(
+            status_code=429,
+            detail={"code": "rate_limited", "message": "Too many login attempts — try again later."},
+        )
     client = get_github_client()
     if client is None:
         raise HTTPException(status_code=503, detail="GitHub login is not configured yet")

@@ -19,6 +19,21 @@ class Settings(BaseSettings):
     CHAT_RATE_LIMIT_ANON_PER_HOUR: int = 10
     CHAT_RATE_LIMIT_USER_PER_HOUR: int = 30
 
+    # Login (both the redirect and the OAuth callback) hits GitHub's OAuth
+    # infrastructure and creates session traffic; real users log in a few
+    # times a day, so this only bites scripted hammering. Keyed per IP.
+    AUTH_LOGIN_RATE_LIMIT_PER_HOUR: int = 20
+
+    # Star/unstar toggles on projects and problems; each click is a DB write.
+    # Manual users never approach this; it stops accidental loops and scripts.
+    STAR_RATE_LIMIT_PER_HOUR: int = 60
+
+    # Forcing a progress refresh (refresh=true) makes the server call GitHub's
+    # API and can write back to the DB. Project owners are exempt; everyone
+    # else (including anonymous visitors) shares this modest quota because
+    # GitHub API quota is the finite resource being protected.
+    PROGRESS_REFRESH_RATE_LIMIT_PER_HOUR: int = 10
+
     # --- Content curation ---
     # Problem creation is an authenticated publishing action with LLM/AI cost
     # imports only for ingest; the catalog is admin-curated, so user limits

@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload
@@ -29,6 +29,8 @@ router = APIRouter(tags=["projects"])
 CACHE_TTL = timedelta(minutes=10)
 
 REPORT_LIMITER = RateLimiter("REPORT_RATE_LIMIT_PER_HOUR")  # per-user, hourly
+STAR_LIMITER = RateLimiter("STAR_RATE_LIMIT_PER_HOUR")  # per-user, hourly
+REFRESH_LIMITER = RateLimiter("PROGRESS_REFRESH_RATE_LIMIT_PER_HOUR")
 
 
 def _error(err: SubmissionError) -> HTTPException:
@@ -93,11 +95,28 @@ def get_project(project_id: int, db: DB, user: OptionalUser):
 @router.get("/api/projects/{project_id}/progress", response_model=schemas.Progress)
 async def get_project_progress(
     project_id: int,
+    request: Request,
     db: DB,
     refresh: bool = Query(default=False),
     user: OptionalUser = None,
 ):
     project = _project_or_404(db, project_id)
+    # refresh=true forces a GitHub API call and can write back to the DB, so
+    # it is quota-sensitive. Owners and admins refresh freely; everyone else
+    # (including anonymous visitors) gets a modest hourly cap.
+    is_owner = user is not None and (
+        user.id == project.user_id or visibility.is_admin(user)
+    )
+    if refresh and not is_owner:
+        viewer_key = user.id if user else f"ip:{request.client.host if request.client else 'unknown'}"
+        if not REFRESH_LIMITER.allowed(f"refresh:{viewer_key}"):
+            raise HTTPException(
+                status_code=429,
+                detail={
+                    "code": "rate_limited",
+                    "message": "Too many progress refreshes this hour — open the repo on GitHub for the latest state.",
+                },
+            )
     now = datetime.now(timezone.utc)
     cached = project.progress_json
     cache_fresh = (
@@ -322,6 +341,11 @@ def star_project(project_id: int, user: CurrentUser, db: DB):
     project = _project_or_404(db, project_id)
     if not visibility.can_view_project(project, user):
         raise HTTPException(status_code=404, detail="Project not found")
+    if not STAR_LIMITER.allowed(f"star:{user.id}"):
+        raise HTTPException(
+            status_code=429,
+            detail={"code": "rate_limited", "message": "Too many star actions this hour — try again later."},
+        )
     existing = db.scalar(
         select(ProjectStar).where(
             ProjectStar.project_id == project.id, ProjectStar.user_id == user.id
@@ -339,6 +363,13 @@ def star_project(project_id: int, user: CurrentUser, db: DB):
 @router.delete("/api/projects/{project_id}/star", status_code=204)
 def unstar_project(project_id: int, user: CurrentUser, db: DB):
     project = _project_or_404(db, project_id)
+    if not visibility.can_view_project(project, user):
+        raise HTTPException(status_code=404, detail="Project not found")
+    if not STAR_LIMITER.allowed(f"star:{user.id}"):
+        raise HTTPException(
+            status_code=429,
+            detail={"code": "rate_limited", "message": "Too many star actions this hour — try again later."},
+        )
     star = db.scalar(
         select(ProjectStar).where(
             ProjectStar.project_id == project.id, ProjectStar.user_id == user.id

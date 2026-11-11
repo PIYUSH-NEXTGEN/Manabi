@@ -310,47 +310,6 @@
         }
       }
     },
-    "/api/problems/{problem_id}/export.xlsx": {
-      "get": {
-        "tags": [
-          "problems"
-        ],
-        "summary": "Export Problem",
-        "description": "One-problem XLSX built from MANABI's structured summary (never verbatim text).",
-        "operationId": "export_problem_api_problems__problem_id__export_xlsx_get",
-        "parameters": [
-          {
-            "name": "problem_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Problem Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/problems/{problem_id}": {
       "get": {
         "tags": [
