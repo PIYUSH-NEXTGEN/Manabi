@@ -758,10 +758,10 @@ function DetailView({ problemId }: { problemId: number }) {
                             "normal-case tracking-normal",
                           )}
                         >
-                          by {owner} ·{" "}
+                          by {owner}
                           {project.open_for_contributors
-                            ? "open to contributors"
-                            : "solo run"}
+                            ? " · open to contributors"
+                            : null}
                         </p>
                       ) : null}
                       <Link

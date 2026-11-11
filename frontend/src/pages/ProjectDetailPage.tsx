@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { Star } from 'lucide-react';
@@ -179,6 +179,15 @@ function ProjectView({ projectId }: { projectId: number }) {
   const refresh = useRefreshProgress(projectId);
   const toast = useToast();
   const me = useMe();
+  // A just-submitted project has no stored progress yet, so pull it from
+  // GitHub once on arrival instead of waiting for a manual refresh.
+  const autoRefreshed = useRef(false);
+  useEffect(() => {
+    if (project.isPending || project.isError) return;
+    if (project.data.progress || autoRefreshed.current) return;
+    autoRefreshed.current = true;
+    refresh.mutate(undefined, { onError: () => {} });
+  }, [project.isPending, project.isError, project.data, refresh]);
 
   if (project.isPending) {
     return (
@@ -315,7 +324,13 @@ function ProjectView({ projectId }: { projectId: number }) {
             </button>
           </div>
 
-          {progress ? null : (
+          {refresh.isPending ? (
+            <p className="mt-3 text-sm leading-snug">
+              {progress
+                ? null
+                : 'Pulling the latest progress from GitHub. This can take a few seconds.'}
+            </p>
+          ) : progress ? null : (
             <p className="mt-3 text-sm leading-snug">
               Progress unknown. Hit refresh to pull the latest data from
               GitHub.

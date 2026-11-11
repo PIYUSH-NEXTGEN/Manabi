@@ -226,7 +226,6 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           onChange={handleSummaryChange}
           rows={5}
           maxLength={SOLUTION_SUMMARY_MAX}
-          placeholder="Optional up to 400 characters: what the repo does, how it addresses the problem, and where the data comes from."
           className="border border-ink bg-paper px-3 py-2 text-sm"
         />
         <Input

@@ -87,6 +87,11 @@ describe('ProjectDetailPage', () => {
           progress_updated_at: null,
         }),
       ),
+      // The automatic first fetch also fails, so the page falls back to
+      // the honest "unknown" line.
+      http.get('*/api/projects/2/progress', () =>
+        HttpResponse.json({ detail: 'Project not found' }, { status: 404 }),
+      ),
     );
 
     renderProject('/projects/2');
@@ -94,6 +99,43 @@ describe('ProjectDetailPage', () => {
     expect(
       await screen.findByText(/Progress unknown. Hit refresh/i),
     ).toBeInTheDocument();
+  });
+
+  it('pulls progress from GitHub automatically when no stored progress exists', async () => {
+    server.use(
+      http.get('*/api/projects/:id', () =>
+        HttpResponse.json({
+          id: 2,
+          problem_id: 1,
+          problem_title: 'Crop disease triage for small farms',
+          repo_url: 'https://github.com/fresh/new-repo',
+          repo_owner: 'fresh',
+          repo_name: 'new-repo',
+          open_for_contributors: false,
+          owner: { username: 'fresh', avatar_url: null },
+          progress: null,
+          progress_updated_at: null,
+        }),
+      ),
+      http.get('*/api/projects/2/progress', () =>
+        HttpResponse.json({
+          status: 'active',
+          commit_count: 6,
+          last_commit_at: '2026-11-11T09:00:00Z',
+          has_readme: true,
+          recent_commits: [],
+          open_issues: [],
+        }),
+      ),
+    );
+
+    renderProject('/projects/2');
+
+    // No manual click: the page fetches the missing progress on arrival.
+    expect(await screen.findByText(/6 commits/i)).toBeInTheDocument();
+    expect(
+      screen.queryByText(/Progress unknown. Hit refresh/i),
+    ).not.toBeInTheDocument();
   });
 
   it('empty commits and issues render the honest lines', async () => {
