@@ -1,4 +1,4 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { cx } from '@/lib/cx';
 import {
@@ -40,7 +40,10 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 function errorMessageFor(error: unknown): string {
   if (error instanceof ApiError) {
-    if (error.status === 429) return 'Too many attempts. Wait a bit before trying again.';
+    if (error.status === 429) {
+      // The backend's 429 message already says when to come back.
+      return error.detail || 'Too many attempts. Wait a bit before trying again.';
+    }
     if (error.code && ERROR_MESSAGES[error.code]) return ERROR_MESSAGES[error.code];
     return error.detail;
   }
@@ -87,6 +90,22 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
   const [submitted, setSubmitted] = useState<ProjectOut | null>(null);
 
   const submit = useSubmitProject(problemId);
+
+  // On narrow screens the panel sits below the whole brief, so a rejection
+  // would otherwise sit at the very bottom out of view. Pull the panel back
+  // into sight as soon as a result lands (and while the checks run).
+  const panelRef = useRef<HTMLElement | null>(null);
+  const scrollToPanel = () =>
+    panelRef.current?.scrollIntoView?.({ behavior: 'smooth', block: 'center' });
+  useEffect(() => {
+    if (submit.isPending) scrollToPanel();
+  }, [submit.isPending]);
+  useEffect(() => {
+    if (submitError) scrollToPanel();
+  }, [submitError]);
+  useEffect(() => {
+    if (submitted) scrollToPanel();
+  }, [submitted]);
 
   if (me.isPending) {
     return (
@@ -172,7 +191,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
 
   if (submitted) {
     return (
-      <aside className="flex flex-col gap-3 border border-ink bg-sheet p-4">
+      <aside ref={panelRef} className="flex flex-col gap-3 border border-ink bg-sheet p-4">
         <h2 className={panelHeading}>Submitted</h2>
         <p className="text-sm leading-snug">{statusLabel(submitted.verification_status)}</p>
         <p className="text-sm leading-snug">
@@ -189,7 +208,10 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
   }
 
   return (
-    <aside className="flex flex-col gap-3 border border-ink bg-sheet p-4">
+    <aside
+      ref={panelRef}
+      className="flex flex-col gap-3 border border-ink bg-sheet p-4"
+    >
       <h2 className={panelHeading}>Submit a project</h2>
       {submit.isPending ? (
         <SubmittingCard />

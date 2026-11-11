@@ -386,7 +386,7 @@ function DetailView({ problemId }: { problemId: number }) {
           </dl>
         </motion.header>
 
-        <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
+        <div className="mt-10 grid gap-12 md:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
           <article>
             {isHackathon || isResume ? null : (
               <Section number={nextSectionNumber()} title="Why it matters">
@@ -703,7 +703,7 @@ function DetailView({ problemId }: { problemId: number }) {
             </Section>
           </article>
 
-          <aside className="flex flex-col gap-9 lg:sticky lg:top-24 lg:self-start">
+          <aside className="flex flex-col gap-9 md:sticky md:top-24 md:self-start">
             <SubmitProjectPanel problemId={data.id} />
 
             <section>

@@ -1,7 +1,7 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { server } from '@/api/mocks/server';
 import { ToastProvider } from '@/design/primitives';
 import { SubmitProjectPanel } from './SubmitProjectPanel';
@@ -79,6 +79,39 @@ describe('SubmitProjectPanel', () => {
       'The deployed link must start with http:// or https://',
     );
     await waitFor(() => expect(networkCalled).toBe(false));
+  });
+
+  it('scrolls itself into view when a submission is rejected', async () => {
+    const user = userEvent.setup();
+    const scrollIntoView = vi
+      .spyOn(Element.prototype, 'scrollIntoView')
+      .mockImplementation(() => {});
+    server.use(
+      http.get('*/api/auth/me', () => HttpResponse.json(LOGGED_IN)),
+      http.post('*/api/problems/1/projects', () =>
+        HttpResponse.json(
+          {
+            detail: {
+              code: 'not_relevant',
+              message: 'Your project was rejected by the automatic relevance check.',
+              reasons: ['No README found'],
+            },
+          },
+          { status: 422 },
+        ),
+      ),
+    );
+    renderPanel();
+
+    await screen.findByLabelText(REPO_LABEL);
+    await user.type(screen.getByLabelText(REPO_LABEL), 'https://github.com/owner/name');
+    await user.click(screen.getByRole('button', { name: 'Submit project' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Your project was rejected',
+    );
+    await waitFor(() => expect(scrollIntoView).toHaveBeenCalled());
+    scrollIntoView.mockRestore();
   });
 
   it('maps the backend error codes to plain language per case', async () => {
