@@ -8,7 +8,6 @@ import {
   RefreshCw,
   ShieldCheck,
 } from 'lucide-react';
-import { VerificationConsole } from './VerificationConsole';
 
 const STEPS = [
   {
@@ -63,10 +62,6 @@ export function BuildInPublic() {
             'repeating-linear-gradient(90deg, rgba(234,229,219,0.07) 0 1px, transparent 1px 96px)',
         }}
       />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-32 top-1/2 hidden size-[520px] -translate-y-1/2 border border-paper/10 lg:block dark:border-ink/10"
-      />
 
       <div className="relative mx-auto w-[min(1240px,96vw)] py-14 md:py-20">
         <motion.div
@@ -84,7 +79,7 @@ export function BuildInPublic() {
           </p>
         </motion.div>
 
-        <div className="mt-10 grid items-center gap-12 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] lg:gap-16 xl:gap-20">
+        <div className="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16 xl:gap-20">
           <motion.div
             variants={LEFT_REVEAL}
             initial="hidden"
@@ -104,53 +99,22 @@ export function BuildInPublic() {
 
             <motion.p
               variants={ITEM_REVEAL}
-              className="mt-5 max-w-md text-sm leading-relaxed text-paper/75 dark:text-ink/75"
+              className="mt-5 max-w-lg text-sm leading-relaxed text-paper/75 sm:text-base dark:text-ink/75"
             >
               Every project is checked before it goes public: your own repo, a
               README, real commits, then an AI relevance check. Only what passes
               gets tracked.
             </motion.p>
 
-            <motion.ul
-              variants={LIST_REVEAL}
-              className="mt-8 border-t border-paper/20 dark:border-ink/20"
-            >
-              {STEPS.map(({ step, icon: Icon, title, copy }) => (
-                <motion.li
-                  key={step}
-                  variants={ITEM_REVEAL}
-                  className="flex items-start gap-4 border-b border-paper/20 py-4 dark:border-ink/20"
-                >
-                  <span className="mt-0.5 font-mono text-[9px] font-bold tracking-[0.16em] text-paper/35 dark:text-ink/35">
-                    {step}
-                  </span>
-                  <Icon
-                    aria-hidden
-                    size={17}
-                    strokeWidth={2.1}
-                    className="mt-0.5 shrink-0 text-accent-soft dark:text-ink"
-                  />
-                  <div className="min-w-0">
-                    <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
-                      {title}
-                    </h3>
-                    <p className="mt-1 text-[13px] leading-snug text-paper/65 dark:text-ink/65">
-                      {copy}
-                    </p>
-                  </div>
-                </motion.li>
-              ))}
-            </motion.ul>
-
             <motion.p
               variants={ITEM_REVEAL}
-              className="mt-5 border-l-2 border-accent-soft/60 pl-3 text-[12px] leading-relaxed text-paper/60 dark:border-ink/40 dark:text-ink/60"
+              className="mt-6 border-l-2 border-accent-soft/60 pl-4 text-[12px] leading-relaxed text-paper/60 dark:border-ink/40 dark:text-ink/60 sm:text-[13px]"
             >
               If the AI can’t judge, a keyword check takes over. It can send work
               to human review, but never mark it verified.
             </motion.p>
 
-            <motion.div variants={ITEM_REVEAL} className="mt-8">
+            <motion.div variants={ITEM_REVEAL} className="mt-9">
               <Link
                 to="/problems"
                 className="group inline-flex items-center gap-2 border border-paper bg-paper px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-ink transition-colors hover:border-accent hover:bg-accent hover:text-paper dark:border-ink dark:bg-transparent dark:text-ink dark:hover:border-accent dark:hover:bg-accent dark:hover:text-[#f4f0e7]"
@@ -166,30 +130,40 @@ export function BuildInPublic() {
             </motion.div>
           </motion.div>
 
-          <motion.div
-            variants={slideUpReveal}
+          <motion.ul
+            variants={LIST_REVEAL}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.25 }}
             transition={{ delay: 0.1 }}
+            className="border-t border-paper/20 lg:mt-1 dark:border-ink/20"
           >
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-paper/45 dark:text-ink/45">
-              <span className="flex items-center gap-2">
-                <span
+            {STEPS.map(({ step, icon: Icon, title, copy }) => (
+              <motion.li
+                key={step}
+                variants={ITEM_REVEAL}
+                className="flex items-start gap-4 border-b border-paper/20 py-4 dark:border-ink/20"
+              >
+                <span className="mt-1 w-5 shrink-0 font-mono text-[9px] font-bold tracking-[0.16em] text-paper/35 dark:text-ink/35">
+                  {step}
+                </span>
+                <Icon
                   aria-hidden
-                  className="block size-1.5 bg-accent-soft motion-safe:animate-pulse dark:bg-accent"
+                  size={17}
+                  strokeWidth={2.1}
+                  className="mt-1 shrink-0 text-accent-soft dark:text-ink"
                 />
-                Live sample
-              </span>
-              <span>Auto-loops while in view</span>
-            </div>
-
-            <VerificationConsole />
-
-            <p className="mt-3 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/40 dark:text-ink/40">
-              Sample run only — no repo is submitted.
-            </p>
-          </motion.div>
+                <div className="min-w-0">
+                  <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
+                    {title}
+                  </h3>
+                  <p className="mt-1.5 text-sm leading-relaxed text-paper/65 dark:text-ink/65">
+                    {copy}
+                  </p>
+                </div>
+              </motion.li>
+            ))}
+          </motion.ul>
         </div>
       </div>
     </section>

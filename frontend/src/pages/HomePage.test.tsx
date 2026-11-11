@@ -48,11 +48,11 @@ describe('HomePage', () => {
     10000,
   );
 
-  it('shows the submission console as the only sample panel', async () => {
+  it('shows the submission rules without the animated console', async () => {
     renderWithProviders(<HomePage />, { route: '/' });
 
-    expect(await screen.findByText('Verification console')).toBeInTheDocument();
-    expect(screen.getByText('Sample run')).toBeInTheDocument();
-    expect(screen.queryByText('Project record')).not.toBeInTheDocument();
+    expect(await screen.findByText('Your own repo')).toBeInTheDocument();
+    expect(screen.queryByText('Verification console')).not.toBeInTheDocument();
+    expect(screen.queryByText('Live sample')).not.toBeInTheDocument();
   });
 });

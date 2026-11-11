@@ -4,15 +4,14 @@ import { BuildInPublic } from './BuildInPublic';
 import { renderWithProviders } from '@/test/renderWithProviders';
 
 describe('BuildInPublic', () => {
-  it('renders the verification console as the only sample panel', () => {
+  it('renders the submission rules without the animated console', () => {
     renderWithProviders(<BuildInPublic />);
 
-    expect(screen.getByText('Verification console')).toBeInTheDocument();
-    expect(screen.getByText('Sample run')).toBeInTheDocument();
-    expect(screen.getByText('Ownership')).toBeInTheDocument();
-    expect(screen.getByText('README')).toBeInTheDocument();
-    expect(screen.getAllByText('Commits').length).toBeGreaterThanOrEqual(1);
-    expect(screen.queryByText('Project record')).not.toBeInTheDocument();
+    expect(screen.getByText('Your own repo')).toBeInTheDocument();
+    expect(screen.getByText('README + 5 commits')).toBeInTheDocument();
+    expect(screen.getByText('AI checks relevance')).toBeInTheDocument();
+    expect(screen.queryByText('Verification console')).not.toBeInTheDocument();
+    expect(screen.queryByText('Live sample')).not.toBeInTheDocument();
   });
 
   it('links to the board to claim a problem', () => {
