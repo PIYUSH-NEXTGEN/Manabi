@@ -11,7 +11,7 @@ describe('BuildInPublic', () => {
     expect(screen.getByText('Sample run')).toBeInTheDocument();
     expect(screen.getByText('Ownership')).toBeInTheDocument();
     expect(screen.getByText('README')).toBeInTheDocument();
-    expect(screen.getByText('Commits')).toBeInTheDocument();
+    expect(screen.getAllByText('Commits').length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText('Project record')).not.toBeInTheDocument();
   });
 

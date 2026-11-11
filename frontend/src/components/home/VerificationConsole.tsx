@@ -16,23 +16,84 @@ import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 
 const REPO_URL = 'github.com/you/your-repo';
 const VERIFIED_SCORE = 0.82;
+const SAMPLE_BRIEF = 'Crop disease triage for small farms';
 
-const GATES: { icon: LucideIcon; label: string; detail: string }[] = [
-  { icon: ShieldCheck, label: 'Ownership', detail: 'you are the owner' },
-  { icon: FileText, label: 'README', detail: 'found · explains it' },
-  { icon: GitCommitHorizontal, label: 'Commits', detail: '14 · 5 needed' },
+const README_EXCERPT: { text: string; match?: boolean }[][] = [
+  [{ text: 'Offline-first ' }, { text: 'mobile app', match: true }],
+  [
+    { text: 'Reads ' },
+    { text: 'leaf photos', match: true },
+    { text: ' for crop blight' },
+  ],
+  [
+    { text: 'Routes cases to ' },
+    { text: 'extension officers', match: true },
+  ],
+  [{ text: 'Built for ' }, { text: 'small farms', match: true }],
+];
+
+type GateState = 'idle' | 'active' | 'pass';
+
+const GATES: {
+  icon: LucideIcon;
+  label: string;
+  detail: Record<GateState, string>;
+}[] = [
+  {
+    icon: ShieldCheck,
+    label: 'Ownership',
+    detail: {
+      idle: 'must be yours',
+      active: 'checking owner…',
+      pass: 'you are the owner',
+    },
+  },
+  {
+    icon: FileText,
+    label: 'README',
+    detail: {
+      idle: 'must exist',
+      active: 'opening readme…',
+      pass: 'found · explains the brief',
+    },
+  },
+  {
+    icon: GitCommitHorizontal,
+    label: 'Commits',
+    detail: {
+      idle: '5 needed',
+      active: 'counting commits…',
+      pass: '14 commits',
+    },
+  },
 ];
 
 const STATUS = [
-  'Paste a public repo',
-  'Checking ownership',
-  'Reading the README',
-  'Counting commits',
-  'AI relevance pass',
-  'Verified · live on the board',
+  {
+    text: 'Paste a public repo',
+    hint: 'We only accept repos you own.',
+  },
+  {
+    text: 'Checking ownership',
+    hint: 'Forks and other people’s repos are rejected.',
+  },
+  {
+    text: 'Reading the README',
+    hint: 'It has to explain what you built.',
+  },
+  {
+    text: 'Counting commits',
+    hint: 'At least five commits are required.',
+  },
+  {
+    text: 'AI relevance pass',
+    hint: 'The README is matched against the brief.',
+  },
+  {
+    text: 'Verified · live on the board',
+    hint: 'Commits, README and issues now update from GitHub.',
+  },
 ] as const;
-
-const README_LINES = ['w-[94%]', 'w-[71%]', 'w-[86%]', 'w-[58%]'];
 
 const GATES_REVEAL = {
   hidden: {},
@@ -44,21 +105,14 @@ const GATE_ITEM_REVEAL = {
   show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: EASE_SNAP } },
 };
 
-type GateState = 'idle' | 'active' | 'pass';
+function pad(value: number) {
+  return String(value).padStart(2, '0');
+}
 
-function StageLabel({
-  index,
-  label,
-  meta,
-}: {
-  index: string;
-  label: string;
-  meta?: string;
-}) {
+function FieldLabel({ label, meta }: { label: string; meta?: string }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="flex items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-        <span className="text-accent">{index}</span>
+      <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
         {label}
       </span>
       {meta ? (
@@ -79,7 +133,7 @@ function GateRow({
 }: {
   icon: LucideIcon;
   label: string;
-  detail: string;
+  detail: Record<GateState, string>;
   state: GateState;
   animated: boolean;
 }) {
@@ -121,7 +175,15 @@ function GateRow({
           state === 'pass' ? 'text-ink-soft' : 'text-muted/60',
         )}
       >
-        {detail}
+        <motion.span
+          key={state}
+          initial={animated ? { opacity: 0 } : false}
+          animate={{ opacity: 1 }}
+          transition={{ duration: animated ? 0.2 : 0 }}
+          className="inline-block"
+        >
+          {detail[state]}
+        </motion.span>
       </span>
       <span
         className={cx(
@@ -246,7 +308,9 @@ export function VerificationConsole() {
 
   const passCount = GATES.filter((_, index) => gateState(index) === 'pass').length;
   const running = step >= 1 && step < 5;
+  const reading = step === 4 && !reduced;
   const verified = step >= 5;
+  const status = STATUS[step];
   const barWidth = verified ? 100 : Math.round(score * 100);
 
   return (
@@ -270,8 +334,14 @@ export function VerificationConsole() {
           />
           Verification console
         </span>
-        <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
-          Sample run
+        <span className="flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+          <span>Sample run</span>
+          <span aria-hidden className="text-muted/50">
+            ·
+          </span>
+          <span aria-hidden className="tabular-nums">
+            {pad(cycle + 1)}
+          </span>
         </span>
       </div>
 
@@ -282,7 +352,9 @@ export function VerificationConsole() {
           verified.
         </p>
 
-        <StageLabel index="01" label="Source" meta="public repo" />
+        <div>
+          <FieldLabel label="Repository" meta="public repo" />
+        </div>
 
         <div className="mt-2 flex items-center gap-2 border border-ink bg-sheet px-2.5 py-2">
           <GithubMark size={13} className="shrink-0 text-ink" />
@@ -307,22 +379,8 @@ export function VerificationConsole() {
           </span>
         </div>
 
-        <div aria-hidden className="mt-3 flex gap-1">
-          {[1, 2, 3, 4, 5].map((threshold) => (
-            <span
-              key={threshold}
-              className={cx(
-                'h-1 flex-1 border transition-colors duration-500',
-                step >= threshold
-                  ? 'border-accent bg-accent'
-                  : 'border-line bg-transparent',
-              )}
-            />
-          ))}
-        </div>
-
         <div className="mt-4">
-          <StageLabel index="02" label="Gates" meta={`${passCount} / 3 passed`} />
+          <FieldLabel label="Checks" meta={`${passCount} / 3 passed`} />
         </div>
 
         <motion.ul
@@ -352,7 +410,6 @@ export function VerificationConsole() {
         >
           <div className="flex items-center justify-between gap-3">
             <span className="flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em]">
-              <span className="text-accent">03</span>
               <Sparkles
                 aria-hidden
                 size={11}
@@ -362,7 +419,7 @@ export function VerificationConsole() {
                   step >= 4 ? 'text-accent' : 'text-muted',
                 )}
               />
-              Relevance
+              AI relevance
             </span>
             <span
               className={cx(
@@ -373,33 +430,78 @@ export function VerificationConsole() {
               {step < 4
                 ? 'queued'
                 : step === 4
-                  ? `${score.toFixed(2)}. Reading…`
-                  : `${VERIFIED_SCORE.toFixed(2)} match`}
+                  ? `${score.toFixed(2)} · reading…`
+                  : `${VERIFIED_SCORE.toFixed(2)} · match`}
             </span>
           </div>
 
-          <div aria-hidden className="relative mt-2.5 space-y-1.5">
-            {README_LINES.map((width) => (
-              <span
-                key={width}
-                className={cx(
-                  'block h-1.5 transition-colors duration-700',
-                  verified ? 'bg-ink/25' : 'bg-tint',
-                  width,
-                )}
-              />
-            ))}
-            {step === 4 && !reduced ? (
-              <motion.span
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 h-3 bg-gradient-to-b from-transparent via-accent/20 to-transparent"
-                initial={{ top: '-10%' }}
-                animate={{ top: ['-10%', '100%'] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-              >
-                <span className="absolute inset-x-0 top-1/2 h-px bg-accent" />
-              </motion.span>
-            ) : null}
+          <div className="mt-3 border-t border-line/80 pt-2.5">
+            <div className="flex items-baseline gap-2">
+              <span className="w-10 shrink-0 font-mono text-[8px] font-bold uppercase tracking-[0.12em] text-muted">
+                Brief
+              </span>
+              <span className="min-w-0 truncate font-mono text-[9px] leading-snug text-ink-soft">
+                {SAMPLE_BRIEF}
+              </span>
+            </div>
+
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="w-10 shrink-0 font-mono text-[8px] font-bold uppercase tracking-[0.12em] text-muted">
+                Readme
+              </span>
+              <div className="min-w-0 flex-1 space-y-0.5">
+                {README_EXCERPT.map((line, lineIndex) => (
+                  <p
+                    key={lineIndex}
+                    className={cx(
+                      'font-mono text-[9px] leading-[1.55] transition-opacity duration-500',
+                      step >= 4 ? 'opacity-100' : 'opacity-50',
+                    )}
+                  >
+                    {line.map((part, partIndex) =>
+                      part.match ? (
+                        <span key={partIndex} className="relative inline-block">
+                          <motion.span
+                            aria-hidden
+                            className="absolute inset-x-0 bottom-px top-px bg-accent/25"
+                            style={{ originX: 0 }}
+                            initial={reading ? { scaleX: 0 } : false}
+                            animate={{ scaleX: step >= 4 ? 1 : 0 }}
+                            transition={{
+                              duration: reduced ? 0 : 0.34,
+                              delay: reading ? lineIndex * 0.18 + 0.12 : 0,
+                              ease: EASE_SNAP,
+                            }}
+                          />
+                          <motion.span
+                            aria-hidden
+                            className="absolute inset-x-0 bottom-0 h-px bg-accent"
+                            style={{ originX: 0 }}
+                            initial={reading ? { scaleX: 0 } : false}
+                            animate={{ scaleX: step >= 4 ? 1 : 0 }}
+                            transition={{
+                              duration: reduced ? 0 : 0.34,
+                              delay: reading ? lineIndex * 0.18 + 0.12 : 0,
+                              ease: EASE_SNAP,
+                            }}
+                          />
+                          <span
+                            className={cx(
+                              'relative transition-colors duration-300',
+                              step >= 4 ? 'text-ink' : 'text-muted',
+                            )}
+                          >
+                            {part.text}
+                          </span>
+                        </span>
+                      ) : (
+                        <span key={partIndex}>{part.text}</span>
+                      ),
+                    )}
+                  </p>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div aria-hidden className="mt-2.5 h-1 bg-line">
@@ -412,19 +514,28 @@ export function VerificationConsole() {
 
         <div
           className={cx(
-            'mt-3 flex items-center justify-between gap-3 border px-3 py-2 transition-colors duration-500',
+            'mt-3 flex items-start justify-between gap-3 border px-3 py-2.5 transition-colors duration-500',
             verified ? 'border-accent bg-accent/5' : 'border-ink',
           )}
         >
-          <span className="flex items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.14em]">
-            <span className={verified ? 'text-accent' : 'text-muted'}>04</span>
-            {STATUS[step]}
-          </span>
+          <div className="min-w-0">
+            <motion.p
+              key={step}
+              initial={reduced ? false : { opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: reduced ? 0 : 0.22 }}
+              className="font-mono text-[9px] font-bold uppercase tracking-[0.14em]"
+            >
+              {status.text}
+            </motion.p>
+            <p className="mt-1 text-[10px] leading-snug text-muted">{status.hint}</p>
+          </div>
           {verified ? (
             <motion.span
               initial={reduced ? false : { opacity: 0, scale: 0.6, rotate: -16 }}
               animate={{ opacity: 1, scale: 1, rotate: -3 }}
               transition={{ type: 'spring', stiffness: 320, damping: 18 }}
+              className="shrink-0"
             >
               <Stamp tone="new" label="verified" />
             </motion.span>
@@ -434,7 +545,7 @@ export function VerificationConsole() {
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: reduced ? 0 : 0.3 }}
-              className="flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-muted"
+              className="flex shrink-0 items-center gap-1.5 pt-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-muted"
             >
               <span aria-hidden className="block size-1.5 bg-tint" />
               Pending
