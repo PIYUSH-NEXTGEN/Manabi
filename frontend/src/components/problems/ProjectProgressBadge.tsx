@@ -9,7 +9,7 @@ export function ProjectProgressBadge({
 }) {
   if (!progress) {
     return (
-      <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-danger">
+      <span className="font-mono text-label font-bold uppercase tracking-widest text-danger">
         Progress unknown
       </span>
     );
@@ -20,7 +20,7 @@ export function ProjectProgressBadge({
   return (
     <span className="inline-flex items-center gap-1.5">
       <Stamp tone={stamp.tone} label={stamp.label} rotate={-2} />
-      <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
+      <span className="font-mono text-label font-bold uppercase tracking-widest">
         {progress.commit_count} commits
       </span>
     </span>

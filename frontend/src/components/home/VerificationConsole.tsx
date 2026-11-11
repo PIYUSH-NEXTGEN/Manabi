@@ -112,11 +112,11 @@ function pad(value: number) {
 function FieldLabel({ label, meta }: { label: string; meta?: string }) {
   return (
     <div className="flex items-center justify-between gap-3">
-      <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+      <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
         {label}
       </span>
       {meta ? (
-        <span className="font-mono text-[8px] font-bold uppercase tabular-nums tracking-[0.14em] text-muted/80">
+        <span className="font-mono text-label font-bold uppercase tabular-nums tracking-[0.14em] text-muted/80">
           {meta}
         </span>
       ) : null}
@@ -163,7 +163,7 @@ function GateRow({
       />
       <span
         className={cx(
-          'font-mono text-[10px] font-bold uppercase tracking-[0.14em] transition-colors duration-300',
+          'font-mono text-label font-bold uppercase tracking-[0.14em] transition-colors duration-300',
           state === 'idle' ? 'text-muted' : 'text-ink',
         )}
       >
@@ -171,7 +171,7 @@ function GateRow({
       </span>
       <span
         className={cx(
-          'ml-auto hidden font-mono text-[9px] uppercase tracking-[0.12em] transition-colors duration-300 sm:inline',
+          'ml-auto hidden font-mono text-label uppercase tracking-[0.12em] transition-colors duration-300 sm:inline',
           state === 'pass' ? 'text-ink-soft' : 'text-muted/60',
         )}
       >
@@ -322,7 +322,7 @@ export function VerificationConsole() {
       )}
     >
       <div className="flex items-center justify-between gap-3 border-b border-ink px-4 py-2.5">
-        <span className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em]">
+        <span className="flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.18em]">
           <motion.span
             aria-hidden
             className={cx(
@@ -334,7 +334,7 @@ export function VerificationConsole() {
           />
           Verification console
         </span>
-        <span className="flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+        <span className="flex items-center gap-1.5 font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
           <span>Sample run</span>
           <span aria-hidden className="text-muted/50">
             ·
@@ -358,7 +358,7 @@ export function VerificationConsole() {
 
         <div className="mt-2 flex items-center gap-2 border border-ink bg-sheet px-2.5 py-2">
           <GithubMark size={13} className="shrink-0 text-ink" />
-          <p className="min-w-0 truncate font-mono text-[10px] leading-none tracking-[0.02em]">
+          <p className="min-w-0 truncate font-mono text-label leading-none tracking-[0.02em]">
             {REPO_URL.slice(0, typed)}
             {step === 0 && !reduced ? (
               <span
@@ -369,7 +369,7 @@ export function VerificationConsole() {
           </p>
           <span
             className={cx(
-              'ml-auto shrink-0 border px-1.5 py-0.5 font-mono text-[8px] font-bold uppercase tracking-[0.14em] transition-colors duration-300',
+              'ml-auto shrink-0 border px-1.5 py-0.5 font-mono text-label font-bold uppercase tracking-[0.14em] transition-colors duration-300',
               step === 0
                 ? 'border-line text-muted'
                 : 'border-ink bg-ink text-paper',
@@ -409,7 +409,7 @@ export function VerificationConsole() {
           )}
         >
           <div className="flex items-center justify-between gap-3">
-            <span className="flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em]">
+            <span className="flex items-center gap-1.5 font-mono text-label font-bold uppercase tracking-[0.14em]">
               <Sparkles
                 aria-hidden
                 size={11}
@@ -423,7 +423,7 @@ export function VerificationConsole() {
             </span>
             <span
               className={cx(
-                'font-mono text-[9px] font-bold uppercase tabular-nums tracking-[0.14em] transition-colors duration-300',
+                'font-mono text-label font-bold uppercase tabular-nums tracking-[0.14em] transition-colors duration-300',
                 verified ? 'text-accent' : 'text-muted',
               )}
             >
@@ -437,16 +437,16 @@ export function VerificationConsole() {
 
           <div className="mt-3 border-t border-line/80 pt-2.5">
             <div className="flex items-baseline gap-2">
-              <span className="w-10 shrink-0 font-mono text-[8px] font-bold uppercase tracking-[0.12em] text-muted">
+              <span className="w-10 shrink-0 font-mono text-label font-bold uppercase tracking-[0.12em] text-muted">
                 Brief
               </span>
-              <span className="min-w-0 truncate font-mono text-[9px] leading-snug text-ink-soft">
+              <span className="min-w-0 truncate font-mono text-label leading-snug text-ink-soft">
                 {SAMPLE_BRIEF}
               </span>
             </div>
 
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="w-10 shrink-0 font-mono text-[8px] font-bold uppercase tracking-[0.12em] text-muted">
+              <span className="w-10 shrink-0 font-mono text-label font-bold uppercase tracking-[0.12em] text-muted">
                 Readme
               </span>
               <div className="min-w-0 flex-1 space-y-0.5">
@@ -454,7 +454,7 @@ export function VerificationConsole() {
                   <p
                     key={lineIndex}
                     className={cx(
-                      'font-mono text-[9px] leading-[1.55] transition-opacity duration-500',
+                      'font-mono text-label leading-[1.55] transition-opacity duration-500',
                       step >= 4 ? 'opacity-100' : 'opacity-50',
                     )}
                   >
@@ -524,11 +524,11 @@ export function VerificationConsole() {
               initial={reduced ? false : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: reduced ? 0 : 0.22 }}
-              className="font-mono text-[9px] font-bold uppercase tracking-[0.14em]"
+              className="font-mono text-label font-bold uppercase tracking-[0.14em]"
             >
               {status.text}
             </motion.p>
-            <p className="mt-1 text-[10px] leading-snug text-muted">{status.hint}</p>
+            <p className="mt-1 text-label leading-snug text-muted">{status.hint}</p>
           </div>
           {verified ? (
             <motion.span
@@ -545,7 +545,7 @@ export function VerificationConsole() {
               initial={{ opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: reduced ? 0 : 0.3 }}
-              className="flex shrink-0 items-center gap-1.5 pt-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-muted"
+              className="flex shrink-0 items-center gap-1.5 pt-0.5 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted"
             >
               <span aria-hidden className="block size-1.5 bg-tint" />
               Pending
@@ -554,7 +554,7 @@ export function VerificationConsole() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line px-4 py-2.5 font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
         <span>Every submission runs these checks</span>
         <span className="flex items-center gap-1.5">
           <GithubMark size={11} />

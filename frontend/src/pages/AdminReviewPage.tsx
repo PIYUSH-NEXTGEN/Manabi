@@ -12,7 +12,7 @@ import { safeExternalUrl } from '@/lib/url';
 import { cx } from '@/lib/cx';
 
 const sectionHeading =
-  'font-mono text-[11px] font-bold uppercase tracking-widest';
+  'font-mono text-label font-bold uppercase tracking-widest';
 
 const FILTERS = [
   { key: 'needs_review', label: 'Needs review' },
@@ -46,7 +46,7 @@ export function AdminReviewPage() {
   if (!me.data?.is_admin) {
     return (
       <main className="mx-auto w-[min(760px,96vw)] py-16">
-        <h1 className="font-display text-4xl uppercase">Submissions</h1>
+        <h1 className="font-display text-display uppercase">Submissions</h1>
         <p className="mt-4 border border-ink bg-sheet p-4">
           Admin access required. Add your GitHub username to
           {' '}
@@ -80,11 +80,11 @@ export function AdminReviewPage() {
 
   return (
     <main className="mx-auto w-[min(1200px,96vw)] py-12">
-      <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
+      <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
         Admin
       </p>
-      <h1 className="mt-2 font-display text-4xl uppercase">Submissions</h1>
-      <p className="mt-2 text-sm">
+      <h1 className="mt-2 font-display text-display uppercase">Submissions</h1>
+      <p className="mt-2 text-body">
         Project submissions against problems. Automatic checks first, humans
         for the edge cases.
       </p>
@@ -116,7 +116,7 @@ export function AdminReviewPage() {
           Nothing in this queue.
         </p>
       ) : (
-        <p className="mt-3 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/70">
+        <p className="mt-3 font-mono text-label font-bold uppercase tracking-widest text-ink/70">
           {submissions.data.total} total
         </p>
       )}
@@ -136,10 +136,10 @@ export function AdminReviewPage() {
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h2 className="font-display text-xl uppercase leading-tight">
+                    <h2 className="font-display text-body uppercase leading-tight">
                       {submission.problem_title}
                     </h2>
-                    <p className="mt-1 font-mono text-sm">
+                    <p className="mt-1 font-mono text-body">
                       {repoUrl ? (
                         <a
                           href={repoUrl}
@@ -153,7 +153,7 @@ export function AdminReviewPage() {
                         `${submission.repo_owner}/${submission.repo_name}`
                       )}
                     </p>
-                    <p className="mt-1 text-sm">
+                    <p className="mt-1 text-body">
                       by {submitter ?? submission.submitter}
                       {submission.demo_url ? ' · has demo link' : ''}
                       {submission.open_for_contributors ? ' · open to contributors' : ''}
@@ -173,7 +173,7 @@ export function AdminReviewPage() {
                 </div>
 
                 {submission.solution_summary ? (
-                  <p className="mt-3 border-l-2 border-line pl-3 text-sm leading-snug">
+                  <p className="mt-3 border-l-2 border-line pl-3 text-body leading-snug">
                     {submission.solution_summary}
                   </p>
                 ) : null}
@@ -203,7 +203,7 @@ export function AdminReviewPage() {
       ) : null}
 
       <p className="mt-8">
-        <Link to="/problems" className="font-mono text-xs underline">
+        <Link to="/problems" className="font-mono text-label underline">
           Back to the board
         </Link>
       </p>
@@ -212,4 +212,4 @@ export function AdminReviewPage() {
 }
 
 const buttonClass =
-  'border border-ink px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-widest hover:bg-ink/5';
+  'border border-ink px-3 py-1.5 font-mono text-label font-bold uppercase tracking-widest hover:bg-ink/5';

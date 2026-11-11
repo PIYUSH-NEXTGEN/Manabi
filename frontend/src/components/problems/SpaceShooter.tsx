@@ -401,7 +401,7 @@ export function SpaceShooter() {
             );
           })}
 
-          <g className="font-mono" fontSize={8} letterSpacing="1">
+          <g className="font-mono" fontSize={11} letterSpacing="1">
             <text x={10} y={13} fill={CREAM} opacity={0.45}>
               SCORE
             </text>
@@ -527,7 +527,7 @@ export function SpaceShooter() {
         <div aria-hidden="true" className="arcade-scanlines pointer-events-none absolute inset-0" />
         <div aria-hidden="true" className="arcade-vignette pointer-events-none absolute inset-0" />
       </div>
-      <p className="font-mono text-[9px] uppercase tracking-[0.14em] text-muted">
+      <p className="font-mono text-label uppercase tracking-[0.14em] text-muted">
         {reduced ? 'Reduced motion — mini-game paused' : 'Move to aim · click to fire'}
       </p>
     </div>

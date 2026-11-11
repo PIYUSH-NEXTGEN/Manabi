@@ -32,10 +32,10 @@ export function SubmittingCard() {
     <aside className="submit-card-enter flex flex-col gap-4 border border-ink bg-sheet p-4">
       <SpaceShooter />
       <div>
-        <h2 className="font-mono text-xs font-bold uppercase tracking-widest">
+        <h2 className="font-mono text-label font-bold uppercase tracking-widest">
           Submission in progress
         </h2>
-        <p className="mt-1 text-sm text-ink-soft" role="status" aria-live="polite">
+        <p className="mt-1 text-body text-ink-soft" role="status" aria-live="polite">
           {stage.label}
           <span className="sr-only">
             {' '}
@@ -63,7 +63,7 @@ export function SubmittingCard() {
               </span>
               <span
                 aria-hidden="true"
-                className={cx('text-xs font-mono font-bold', state === 'done' ? 'text-accent' : 'text-muted')}
+                className={cx('text-label font-mono font-bold', state === 'done' ? 'text-accent' : 'text-muted')}
               >
                 {state === 'done' ? '✓' : (
                   <span

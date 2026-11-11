@@ -41,11 +41,11 @@ function ChatPreview() {
   return (
     <div className="border border-ink bg-sheet shadow-[6px_6px_0_0_rgba(23,21,15,0.14)] sm:shadow-[10px_10px_0_0_rgba(23,21,15,0.14)]">
       <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
-        <span className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em]">
+        <span className="flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.16em]">
           <MessageSquare aria-hidden size={13} strokeWidth={2.4} />
           Catalog assistant
         </span>
-        <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+        <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
           Example exchange
         </span>
       </div>
@@ -59,14 +59,14 @@ function ChatPreview() {
       >
         <motion.p
           variants={BUBBLE_REVEAL}
-          className="ml-auto w-fit max-w-[85%] border border-ink bg-ink px-3.5 py-2.5 text-[13px] leading-snug text-paper"
+          className="ml-auto w-fit max-w-[85%] border border-ink bg-ink px-3.5 py-2.5 text-body leading-snug text-paper"
         >
           I know React and a little Python. What can I ship in a weekend?
         </motion.p>
 
         <motion.p
           variants={BUBBLE_REVEAL}
-          className="w-fit max-w-[92%] border border-line bg-paper px-3.5 py-2.5 text-[13px] leading-snug"
+          className="w-fit max-w-[92%] border border-line bg-paper px-3.5 py-2.5 text-body leading-snug"
         >
           Three briefs fit that scope, all pulled from the index:
         </motion.p>
@@ -83,9 +83,9 @@ function ChatPreview() {
             >
               <span className="flex min-w-0 items-center gap-2">
                 <FileText aria-hidden size={13} strokeWidth={2.2} className="shrink-0 text-accent" />
-                <span className="truncate text-[13px]">{item.title}</span>
+                <span className="truncate text-body">{item.title}</span>
               </span>
-              <span className="shrink-0 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-muted">
+              <span className="shrink-0 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
                 {item.scope}
               </span>
             </li>
@@ -94,13 +94,13 @@ function ChatPreview() {
 
         <motion.p
           variants={BUBBLE_REVEAL}
-          className="w-fit max-w-[92%] border border-line bg-paper px-3.5 py-2.5 text-[13px] leading-snug"
+          className="w-fit max-w-[92%] border border-line bg-paper px-3.5 py-2.5 text-body leading-snug"
         >
           Start with the queue if you want a working demo by Sunday night.
         </motion.p>
       </motion.div>
 
-      <p className="flex items-center gap-2 border-t border-line px-4 py-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+      <p className="flex items-center gap-2 border-t border-line px-4 py-2.5 font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
         <ShieldCheck aria-hidden size={12} strokeWidth={2.4} />
         Grounded in the index. It never invents a brief.
       </p>
@@ -129,19 +129,19 @@ export function AskManabi() {
             viewport={{ once: true, amount: 0.25 }}
           >
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink pb-3">
-              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-muted">
+              <p className="font-mono text-label font-bold uppercase tracking-[0.2em] text-muted">
                 <span className="text-accent">03</span> / Ask the catalog
               </p>
-              <span className="flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-muted">
+              <span className="flex items-center gap-1.5 font-mono text-label font-bold uppercase tracking-[0.2em] text-muted">
                 <MessageSquare aria-hidden size={12} strokeWidth={2.4} />
                 Chat
               </span>
             </div>
 
-            <h2 className="mt-7 font-display text-4xl uppercase leading-[0.9] tracking-tight sm:text-5xl">
+            <h2 className="mt-7 font-display text-display uppercase leading-[0.9] tracking-tight">
               Ask <span className="text-accent">MANABI</span>
             </h2>
-            <p className="mt-5 max-w-md text-sm leading-relaxed text-ink-soft">
+            <p className="mt-5 max-w-md text-body leading-relaxed text-ink-soft">
               Tell it what you know and what you want to build. It searches the
               index, matches the scope to the time you have, and points you at
               briefs that already exist.
@@ -156,7 +156,7 @@ export function AskManabi() {
                     strokeWidth={2.3}
                     className="mt-0.5 shrink-0 text-accent"
                   />
-                  <span className="text-[13px] leading-snug text-ink-soft">
+                  <span className="text-body leading-snug text-ink-soft">
                     {copy}
                   </span>
                 </li>
@@ -188,7 +188,7 @@ export function AskManabi() {
           </motion.div>
         </div>
 
-        <p className="mt-10 border-t border-line pt-4 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+        <p className="mt-10 border-t border-line pt-4 font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
           Prefer to browse?{' '}
           <Link
             to="/problems"

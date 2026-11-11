@@ -42,22 +42,22 @@ export function IndexCard({
       )}
     >
       <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
-        <span className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink">
+        <span className="flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.16em] text-ink">
           <span aria-hidden className="block size-2 bg-accent" />
           {sourceId ?? 'NO-ID'}
         </span>
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-muted">
+        <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
           {field}
         </span>
       </header>
       <div className="flex flex-1 flex-col gap-3 p-4">
-        <h3 className="font-display text-[1.15rem] uppercase leading-[1.02] tracking-tight">
+        <h3 className="font-display text-body uppercase leading-[1.02] tracking-tight">
           {title}
         </h3>
         {summary ? (
-          <p className="line-clamp-3 text-[13px] leading-snug text-ink-soft">{summary}</p>
+          <p className="line-clamp-3 text-body leading-snug text-ink-soft">{summary}</p>
         ) : null}
-        <div className="mt-auto flex items-end justify-between gap-3 border-t border-line pt-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-line pt-3 font-mono text-label font-bold uppercase tracking-[0.14em]">
           {difficulty ? (
             <span className="flex items-center gap-1.5">
               <span aria-hidden className="flex gap-0.5">

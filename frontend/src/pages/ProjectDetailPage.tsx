@@ -23,8 +23,8 @@ import {
   projectOwnerUsername,
 } from '@/api/client';
 
-const panelHeading = 'font-mono text-xs font-bold uppercase tracking-widest';
-const smallMono = 'font-mono text-[10px] font-bold uppercase tracking-widest';
+const panelHeading = 'font-mono text-label font-bold uppercase tracking-widest';
+const smallMono = 'font-mono text-label font-bold uppercase tracking-widest';
 
 function StarButton({
   projectId,
@@ -144,10 +144,10 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
         onChange={(event) => setReason(event.target.value)}
         rows={2}
         placeholder="Reports go to a maintainer, not to the repo owner."
-        className="mt-2 w-[min(420px,100%)] border border-ink bg-paper px-3 py-2 text-sm"
+        className="mt-2 w-[min(420px,100%)] border border-ink bg-paper px-3 py-2 text-body"
       />
       {error ? (
-        <p role="alert" className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
+        <p role="alert" className="mt-2 font-mono text-label font-bold uppercase tracking-widest text-danger">
           {error}
         </p>
       ) : null}
@@ -236,7 +236,7 @@ function ProjectView({ projectId }: { projectId: number }) {
     <main className="border-b border-ink">
       <div className="mx-auto w-[min(900px,96vw)] py-12">
         <p className={panelHeading}>Project · {data.repo_owner}/{data.repo_name}</p>
-        <h1 className="mt-2 font-display text-4xl uppercase leading-tight">
+        <h1 className="mt-2 font-display text-display uppercase leading-tight">
           {data.repo_name}
         </h1>
 
@@ -248,7 +248,7 @@ function ProjectView({ projectId }: { projectId: number }) {
           />
           <ProjectProgressBadge progress={progress} />
           {data.completed_at != null ? (
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
+            <span className="font-mono text-label font-bold uppercase tracking-widest text-accent">
               ✓ Completed
             </span>
           ) : null}
@@ -266,12 +266,12 @@ function ProjectView({ projectId }: { projectId: number }) {
               href={safeExternalUrl(data.repo_url) ?? undefined}
               target="_blank"
               rel="noreferrer"
-              className="font-mono text-xs font-bold underline underline-offset-4"
+              className="font-mono text-label font-bold underline underline-offset-4"
             >
               {data.repo_url} ↗
             </a>
           ) : (
-            <span className="font-mono text-xs font-bold">{data.repo_url}</span>
+            <span className="font-mono text-label font-bold">{data.repo_url}</span>
           )}
         </p>
         <p className={cx(smallMono, 'mt-1')}>
@@ -287,7 +287,7 @@ function ProjectView({ projectId }: { projectId: number }) {
         {data.solution_summary ? (
           <section aria-label="Solution summary" className="mt-6 border border-ink bg-sheet p-4">
             <h2 className={panelHeading}>How it solves this problem</h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            <p className="mt-2 text-body leading-relaxed text-ink-soft">
               {data.solution_summary}
             </p>
             {data.demo_url && safeExternalUrl(data.demo_url) ? (
@@ -295,13 +295,13 @@ function ProjectView({ projectId }: { projectId: number }) {
                 href={safeExternalUrl(data.demo_url) ?? undefined}
                 target="_blank"
                 rel="noreferrer"
-                className="font-mono text-xs font-bold underline underline-offset-4"
+                className="font-mono text-label font-bold underline underline-offset-4"
               >
                 Live demo ↗
               </a>
             ) : null}
             {data.reflection ? (
-              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+              <p className="mt-2 text-body leading-relaxed text-ink-soft">
                 “{data.reflection}”
               </p>
             ) : null}
@@ -325,13 +325,13 @@ function ProjectView({ projectId }: { projectId: number }) {
           </div>
 
           {refresh.isPending ? (
-            <p className="mt-3 text-sm leading-snug">
+            <p className="mt-3 text-body leading-snug">
               {progress
                 ? null
                 : 'Pulling the latest progress from GitHub. This can take a few seconds.'}
             </p>
           ) : progress ? null : (
-            <p className="mt-3 text-sm leading-snug">
+            <p className="mt-3 text-body leading-snug">
               Progress unknown. Hit refresh to pull the latest data from
               GitHub.
             </p>
@@ -367,10 +367,10 @@ function ProjectView({ projectId }: { projectId: number }) {
 
           <h3 className={cx(panelHeading, 'mt-6')}>Recent commits</h3>
           {commits.length > 0 ? (
-            <ul className="mt-2 ml-4 list-disc space-y-1 text-sm leading-snug">
+            <ul className="mt-2 ml-4 list-disc space-y-1 text-body leading-snug">
               {commits.map((commit) => (
                 <li key={commit.sha}>
-                  <span className="font-mono text-xs">{commit.sha.slice(0, 7)}</span>{' '}
+                  <span className="font-mono text-label">{commit.sha.slice(0, 7)}</span>{' '}
                   {commit.message}{' '}
                   <span className={cx(smallMono, 'text-ink/60')}>
                     {commit.date}
@@ -379,25 +379,25 @@ function ProjectView({ projectId }: { projectId: number }) {
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-sm">No commits recorded yet.</p>
+            <p className="mt-2 text-body">No commits recorded yet.</p>
           )}
 
           <h3 className={cx(panelHeading, 'mt-6')}>Open issues</h3>
           {issues.length > 0 ? (
             <ul className="mt-2 space-y-2">
               {issues.map((issue) => (
-                <li key={issue.number} className="text-sm">
+                <li key={issue.number} className="text-body">
                   {safeExternalUrl(issue.url) ? (
                     <a
                       href={safeExternalUrl(issue.url) ?? undefined}
                       target="_blank"
                       rel="noreferrer"
-                      className="font-mono text-xs underline underline-offset-4"
+                      className="font-mono text-label underline underline-offset-4"
                     >
                       #{issue.number} {issue.title}
                     </a>
                   ) : (
-                    <span className="font-mono text-xs">
+                    <span className="font-mono text-label">
                       #{issue.number} {issue.title}
                     </span>
                   )}
@@ -412,7 +412,7 @@ function ProjectView({ projectId }: { projectId: number }) {
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-sm">No open issues right now.</p>
+            <p className="mt-2 text-body">No open issues right now.</p>
           )}
 
           <ReportRow projectId={data.id} isOwner={owner != null && owner === (me.data?.username ?? null)} />
@@ -432,7 +432,7 @@ function Stat({
   return (
     <div>
       <dt className={smallMono}>{label}</dt>
-      <dd className="mt-1 text-sm">{children}</dd>
+      <dd className="mt-1 text-body">{children}</dd>
     </div>
   );
 }

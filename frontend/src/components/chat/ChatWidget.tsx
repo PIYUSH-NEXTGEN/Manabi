@@ -43,7 +43,7 @@ function ReplyProblems({ problems }: { problems: ChatProblemItem[] }) {
         <Link
           key={problem.id}
           to={`/problems/${problem.id}`}
-          className="border border-ink bg-paper px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest underline-offset-4 hover:underline"
+          className="border border-ink bg-paper px-3 py-2 font-mono text-label font-bold uppercase tracking-widest underline-offset-4 hover:underline"
         >
           {problem.title}
           <span className="ml-2 text-ink/60">
@@ -134,7 +134,7 @@ export function ChatWidget() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open the MANABI chat"
-        className="fixed bottom-4 right-4 z-40 border border-ink bg-accent px-4 py-3 font-mono text-xs font-bold uppercase tracking-widest text-ink shadow-lg press"
+        className="fixed bottom-4 right-4 z-40 border border-ink bg-accent px-4 py-3 font-mono text-label font-bold uppercase tracking-widest text-ink shadow-lg press"
       >
         Ask Manabi
       </button>
@@ -147,7 +147,7 @@ export function ChatWidget() {
       className="fixed bottom-4 right-4 z-40 flex h-[min(560px,80vh)] w-[min(380px,94vw)] flex-col border border-ink bg-sheet shadow-lg"
     >
       <header className="flex items-center justify-between border-b border-ink bg-ink px-3 py-2">
-        <h2 className="font-mono text-xs font-bold uppercase tracking-widest text-paper">
+        <h2 className="font-mono text-label font-bold uppercase tracking-widest text-paper">
           Ask Manabi
         </h2>
         <div className="flex items-center gap-2">
@@ -156,7 +156,7 @@ export function ChatWidget() {
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close the chat"
-            className="border-2 border-paper px-2 font-mono text-xs font-bold uppercase tracking-widest text-paper hover:bg-black/20"
+            className="border-2 border-paper px-2 font-mono text-label font-bold uppercase tracking-widest text-paper hover:bg-black/20"
           >
             ×
           </button>
@@ -165,11 +165,11 @@ export function ChatWidget() {
 
       {me.isPending ? (
         <div className="flex-1 p-3">
-          <p className="text-sm leading-snug">Checking whether you are logged in…</p>
+          <p className="text-body leading-snug">Checking whether you are logged in…</p>
         </div>
       ) : !me.data ? (
         <div className="flex flex-col gap-3 p-3">
-          <p className="text-sm leading-snug">
+          <p className="text-body leading-snug">
             The MANABI chat is for logged-in members. Log in with GitHub to
             continue.
           </p>
@@ -184,7 +184,7 @@ export function ChatWidget() {
         <>
           <div className="flex-1 overflow-y-auto p-3" role="log" aria-live="polite">
             {entries.length === 0 && !chat.isPending ? (
-            <p className="text-sm leading-snug">
+            <p className="text-body leading-snug">
               Tell it what you know and what you want to build. It finds problems
               that fit, scoped for a weekend, and it only ever points at real
               problems already in the index.
@@ -195,7 +195,7 @@ export function ChatWidget() {
                   <li
                     key={index}
                     className={cx(
-                      'max-w-[92%] border border-ink p-2 text-sm leading-snug',
+                      'max-w-[92%] border border-ink p-2 text-body leading-snug',
                       entry.message.role === 'user'
                         ? 'ml-auto bg-accent/60'
                         : 'bg-sheet',
@@ -221,7 +221,7 @@ export function ChatWidget() {
           {error ? (
             <div
               role="alert"
-              className="border-t border-ink px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
+              className="border-t border-ink px-3 py-2 font-mono text-label font-bold uppercase tracking-widest text-danger"
             >
               <p>{error}</p>
               {retryAfter != null ? (
@@ -248,7 +248,7 @@ export function ChatWidget() {
               }}
               placeholder="What do you want to build? Which side is your strongest? (Shift+Enter for a new line)"
               maxLength={MAX_MESSAGE_LENGTH}
-              className="field flex-1 text-sm"
+              className="field flex-1 text-body"
             />
             <button
               type="submit"

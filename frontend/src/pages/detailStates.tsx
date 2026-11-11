@@ -28,9 +28,9 @@ export function LoadErrorPanel({
   return (
     <main className="border-b border-ink">
       <div className="mx-auto w-[min(760px,96vw)] space-y-4 py-16">
-        <h1 className="font-display text-3xl uppercase">{title}</h1>
+        <h1 className="font-display text-display uppercase">{title}</h1>
         <p>{message}</p>
-        <Link to={backTo} className="font-mono text-xs font-bold underline">
+        <Link to={backTo} className="font-mono text-label font-bold underline">
           {backLabel}
         </Link>
       </div>

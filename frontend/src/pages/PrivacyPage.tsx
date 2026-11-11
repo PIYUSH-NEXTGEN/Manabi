@@ -69,28 +69,28 @@ export function PrivacyPage() {
       <RefSection id="collect" index="02" title="What we collect">
         <RefList>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               Account data.
             </span>{' '}
             Your GitHub numeric ID, username, display name and avatar URL, plus
             the time the account record was created.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               GitHub access token.
             </span>{' '}
             Stored server-side so MANABI can call the GitHub API on your behalf.
             It is never returned to a browser.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               Profile signals.
             </span>{' '}
             The languages and topics read from your GitHub profile to score
             recommendations.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               Submissions.
             </span>{' '}
             Repository owner, name and URL, your description and demo URL,
@@ -99,28 +99,28 @@ export function PrivacyPage() {
             setting.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               Progress data.
             </span>{' '}
             Cached commits, README state and open issues for each submitted
             repository, with the time of the last GitHub check.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               Community actions.
             </span>{' '}
             Stars, reports (the reason and the reporting account) and admin
             review notes.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               Session cookie.
             </span>{' '}
             A signed cookie that keeps you logged in. It is set Secure and
             HttpOnly on an HTTPS deployment.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               Rate-limit records.
             </span>{' '}
             Short-lived counters keyed to your account, or to an IP address for
@@ -128,7 +128,7 @@ export function PrivacyPage() {
             silently. Expired rows are removed.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               Chat.
             </span>{' '}
             Messages are used to produce a reply and are not stored in the
@@ -170,14 +170,14 @@ export function PrivacyPage() {
         </p>
         <RefList>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               Maintainers and admins.
             </span>{' '}
             Can see the submission queue and review notes needed to moderate the
             service.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               The model provider.
             </span>{' '}
             Receives the problem brief, a README excerpt, repository metadata
@@ -185,13 +185,13 @@ export function PrivacyPage() {
             message. It does not receive your access token or session.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               GitHub.
             </span>{' '}
             Handles OAuth and serves the public repository data MANABI reads.
           </RefItem>
           <RefItem>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.1em] text-ink">
               Hosting and database providers.
             </span>{' '}
             Store the application database and may keep standard operational

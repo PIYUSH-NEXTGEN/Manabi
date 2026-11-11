@@ -36,20 +36,20 @@ export function Dialog({
           )}
         >
           <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-3">
-            <DialogPrimitive.Title className="font-display text-xl uppercase leading-tight tracking-tight">
+            <DialogPrimitive.Title className="font-display text-body uppercase leading-tight tracking-tight">
               {title}
             </DialogPrimitive.Title>
             <DialogPrimitive.Close asChild>
               <button
                 type="button"
                 aria-label="Close dialog"
-                className="press border border-ink bg-sheet px-2 py-0.5 font-mono text-sm font-bold hover:bg-ink hover:text-paper"
+                className="press border border-ink bg-sheet px-2 py-0.5 font-mono text-body font-bold hover:bg-ink hover:text-paper"
               >
                 ×
               </button>
             </DialogPrimitive.Close>
           </div>
-          <div className="text-sm leading-relaxed">{children}</div>
+          <div className="text-body leading-relaxed">{children}</div>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

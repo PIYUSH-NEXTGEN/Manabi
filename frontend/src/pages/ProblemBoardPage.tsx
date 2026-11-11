@@ -19,7 +19,7 @@ import { useFacets } from '@/hooks/useFacets';
 import { fieldLabel } from '@/lib/fields';
 import { useInfiniteProblems } from '@/hooks/useInfiniteProblems';
 
-const microLabel = 'font-mono text-[9px] font-bold uppercase tracking-[0.16em]';
+const microLabel = 'font-mono text-label font-bold uppercase tracking-[0.16em]';
 
 type GoalKey = 'resume' | 'hackathon' | 'learning';
 
@@ -139,17 +139,16 @@ export function ProblemBoardPage() {
 
         <div className="mt-8 flex flex-wrap items-end justify-between gap-6 border-b border-ink pb-8">
           <div>
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-accent">
+            <p className="font-mono text-label font-bold uppercase tracking-[0.2em] text-accent">
               Collection 01
             </p>
             <h1
-              className="mt-2 font-display uppercase leading-[0.86] tracking-[-0.03em]"
-              style={{ fontSize: 'clamp(3rem, 8vw, 5.5rem)' }}
+              className="mt-2 font-display text-display uppercase leading-[0.86] tracking-[-0.03em]"
             >
               Projects
             </h1>
           </div>
-          <p className="max-w-md text-sm leading-relaxed text-ink-soft">
+          <p className="max-w-md text-body leading-relaxed text-ink-soft">
             Every brief is written and reviewed by the MANABI team. Filter it
             down, pick the one you can finish, and build the thing.
           </p>
@@ -177,7 +176,7 @@ export function ProblemBoardPage() {
                       : 'bg-sheet text-ink hover:bg-tint',
                   )}
                 >
-                  <span className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em]">
+                  <span className="flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.16em]">
                     <Icon
                       aria-hidden
                       size={14}
@@ -188,7 +187,7 @@ export function ProblemBoardPage() {
                   </span>
                   <span
                     className={cx(
-                      'text-sm leading-snug',
+                      'text-body leading-snug',
                       active ? 'text-paper/75' : 'text-ink-soft',
                     )}
                   >
@@ -291,7 +290,7 @@ export function ProblemBoardPage() {
                     type="button"
                     onClick={() => removeFilter(filter.key)}
                     aria-label={`Remove ${filter.label}: ${filter.value}`}
-                    className="group inline-flex items-center gap-1.5 border border-ink bg-sheet px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.12em] transition-colors hover:bg-ink hover:text-paper"
+                    className="group inline-flex items-center gap-1.5 border border-ink bg-sheet px-2 py-1 font-mono text-label font-bold uppercase tracking-[0.12em] transition-colors hover:bg-ink hover:text-paper"
                   >
                     <span className="text-muted group-hover:text-paper/70">
                       {filter.label}
@@ -303,7 +302,7 @@ export function ProblemBoardPage() {
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="inline-flex items-center border border-ink px-2.5 py-1.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] transition-colors hover:bg-ink hover:text-paper"
+                  className="inline-flex items-center border border-ink px-2.5 py-1.5 font-mono text-label font-bold uppercase tracking-[0.12em] transition-colors hover:bg-ink hover:text-paper"
                 >
                   Clear filters
                 </button>
@@ -318,7 +317,7 @@ export function ProblemBoardPage() {
 
             {board.isError && !board.isPlaceholderData && !board.data ? (
               <section className="mt-6 border border-ink bg-sheet p-6">
-                <p className="max-w-2xl text-sm leading-relaxed">
+                <p className="max-w-2xl text-body leading-relaxed">
                   The board could not be loaded. That is almost certainly a
                   backend or network problem and it will not fix itself by
                   refreshing faster.
@@ -338,7 +337,7 @@ export function ProblemBoardPage() {
             (!goal ? hasFilters : true) ? (
               <section className="mt-6 border border-line bg-sheet p-6">
                 {goal ? (
-                  <p className="text-sm leading-relaxed">
+                  <p className="text-body leading-relaxed">
                     No projects in this track yet. New briefs land here as
                     soon as they're tagged for the{' '}
                     {goal === 'resume'
@@ -349,7 +348,7 @@ export function ProblemBoardPage() {
                     track.
                   </p>
                 ) : (
-                  <p className="text-sm leading-relaxed">
+                  <p className="text-body leading-relaxed">
                     Nothing in the index matches those filters yet. Clear one
                     or two and look again.
                   </p>

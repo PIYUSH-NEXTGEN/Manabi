@@ -46,7 +46,7 @@ function DifficultyMeter({ level }: { level: ProblemOut['difficulty'] }) {
           />
         ))}
       </span>
-      <span className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-muted">
+      <span className="font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
         {level}
       </span>
     </span>
@@ -89,11 +89,11 @@ function BriefShowcase() {
       onMouseLeave={() => setHeld(false)}
     >
       <div className="flex items-center justify-between gap-3 border-b border-ink px-4 py-2.5">
-        <span className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em]">
+        <span className="flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.18em]">
           <span aria-hidden className="block size-1.5 bg-accent" />
           Brief index
         </span>
-        <span className="font-mono text-[9px] font-bold uppercase tabular-nums tracking-[0.16em] text-muted">
+        <span className="font-mono text-label font-bold uppercase tabular-nums tracking-[0.16em] text-muted">
           {count > 0 ? `${pad(current + 1)} / ${pad(count)}` : 'No data'}
         </span>
       </div>
@@ -126,16 +126,16 @@ function BriefShowcase() {
                 className="group/link flex h-full flex-col"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
+                  <span className="font-mono text-label font-bold uppercase tracking-[0.18em] text-accent">
                     {fieldLabel(active.field)}
                   </span>
                   <DifficultyMeter level={active.difficulty} />
                 </div>
 
-                <h2 className="mt-5 line-clamp-3 font-display text-[1.7rem] uppercase leading-[0.96] tracking-tight sm:text-[2rem]">
+                <h2 className="mt-5 line-clamp-3 font-display text-body uppercase leading-[1.02] tracking-tight">
                   {active.title}
                 </h2>
-                <p className="mt-3 line-clamp-3 text-sm leading-snug text-ink-soft">
+                <p className="mt-3 line-clamp-3 text-body leading-snug text-ink-soft">
                   {active.summary}
                 </p>
 
@@ -144,7 +144,7 @@ function BriefShowcase() {
                     {active.tech_tags.slice(0, 4).map((tag) => (
                       <li
                         key={tag}
-                        className="border border-line px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-ink-soft transition-colors group-hover/link:border-ink/40"
+                        className="border border-line px-1.5 py-0.5 font-mono text-label font-bold uppercase tracking-[0.12em] text-ink-soft transition-colors group-hover/link:border-ink/40"
                       >
                         {tag}
                       </li>
@@ -153,7 +153,7 @@ function BriefShowcase() {
                 ) : null}
 
                 <div className="mt-auto pt-6">
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-3 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-3 font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
                     <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <span className="flex items-center gap-1">
                         <Clock aria-hidden size={11} strokeWidth={2.4} />
@@ -180,19 +180,19 @@ function BriefShowcase() {
           </AnimatePresence>
         ) : (
           <div className="flex flex-1 flex-col">
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted">
+            <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
               Index
             </p>
-            <p className="mt-2 font-display text-2xl uppercase leading-tight">
+            <p className="mt-2 font-display text-display uppercase leading-tight">
               Briefs unavailable
             </p>
-            <p className="mt-3 max-w-xs text-sm leading-snug text-ink-soft">
+            <p className="mt-3 max-w-xs text-body leading-snug text-ink-soft">
               The problems API did not respond. Open the board while it comes
               back online.
             </p>
             <Link
               to="/problems"
-              className="mt-auto inline-flex w-fit items-center gap-1.5 border border-ink px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] transition-colors hover:bg-ink hover:text-paper"
+              className="mt-auto inline-flex w-fit items-center gap-1.5 border border-ink px-4 py-2 font-mono text-label font-bold uppercase tracking-[0.16em] transition-colors hover:bg-ink hover:text-paper"
             >
               Browse problems
               <ArrowUpRight aria-hidden size={12} strokeWidth={2.6} />
@@ -243,13 +243,13 @@ function BriefShowcase() {
             <button
               type="button"
               onClick={() => setManualPause((value) => !value)}
-              className="shrink-0 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted underline underline-offset-2 transition-colors hover:text-ink"
+              className="shrink-0 font-mono text-label font-bold uppercase tracking-[0.16em] text-muted underline underline-offset-2 transition-colors hover:text-ink"
             >
               {manualPause ? 'Play' : 'Pause'}
             </button>
           </>
         ) : (
-          <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+          <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
             Live index
           </span>
         )}
@@ -273,7 +273,7 @@ function HeroHeadline() {
   const reduced = usePrefersReducedMotion();
 
   return (
-    <h1 className="font-display uppercase leading-[0.92] tracking-[-0.02em] text-[2rem] sm:text-[2.75rem] md:text-[2.15rem] lg:text-[3rem] xl:text-[3.4rem]">
+    <h1 className="font-display uppercase leading-[0.92] tracking-[-0.02em] text-display    ">
       {HEADLINE_LINES.map((line, index) => (
         <motion.span
           key={line.text}
@@ -314,7 +314,7 @@ export function Hero() {
           <div>
             <HeroHeadline />
 
-            <div className="mt-7 max-w-xl space-y-4 text-base leading-[1.7] text-ink-soft sm:text-lg">
+            <div className="mt-7 max-w-xl space-y-4 text-body leading-[1.7] text-ink-soft ">
               <p>
                 Tired of Googling project ideas and still not knowing what to
                 build? MANABI gives you real problems across every domain,
@@ -355,10 +355,10 @@ export function Hero() {
                   key={stat.key}
                   className="border-r border-line py-5 pr-3 last:border-r-0 last:pr-0 [&:not(:first-child)]:pl-3"
                 >
-                  <dt className="font-mono text-[9px] font-bold uppercase leading-relaxed tracking-[0.16em] text-muted">
+                  <dt className="font-mono text-label font-bold uppercase leading-relaxed tracking-[0.16em] text-muted">
                     {stat.label}
                   </dt>
-                  <dd className="mt-1 font-display text-3xl leading-none text-accent md:text-4xl">
+                  <dd className="mt-1 font-display text-display leading-none text-accent ">
                     <StatsNumber statKey={stat.key} />
                   </dd>
                 </div>
@@ -374,7 +374,7 @@ export function Hero() {
 }
 
 const HERO_STATS = [
-  { key: 'problems', label: 'Problem briefs curated' },
+  { key: 'problems', label: 'Projects' },
   { key: 'fields', label: 'Fields' },
   { key: 'projects', label: 'Projects' },
 ] as const;

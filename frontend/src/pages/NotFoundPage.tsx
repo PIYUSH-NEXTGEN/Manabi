@@ -7,8 +7,7 @@ export function NotFoundPage() {
       <div className="mx-auto flex w-[min(760px,96vw)] flex-col gap-6 py-16">
         <h1
           aria-label="404. Page not found"
-          className="font-display uppercase leading-none text-danger"
-          style={{ fontSize: 'clamp(5rem, 18vw, 12rem)' }}
+          className="font-display text-display uppercase leading-none text-danger"
         >
           <span aria-hidden>4</span>
           <span aria-hidden className="inline-block align-top text-ink">
@@ -16,7 +15,7 @@ export function NotFoundPage() {
           </span>
           <span aria-hidden>4</span>
         </h1>
-        <p className="text-lg">
+        <p className="text-body">
           This page does not exist. The board, though, is very real.
         </p>
         <div className="flex flex-wrap gap-4">

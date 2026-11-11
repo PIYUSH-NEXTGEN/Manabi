@@ -157,11 +157,11 @@ export function FaqPage() {
                     strokeWidth={2.6}
                     className="mt-0.5 shrink-0 text-accent transition-transform duration-200 group-open:rotate-45"
                   />
-                  <span className="font-mono text-[11px] font-bold uppercase leading-snug tracking-[0.12em] text-ink">
+                  <span className="font-mono text-label font-bold uppercase leading-snug tracking-[0.12em] text-ink">
                     {entry.q}
                   </span>
                 </summary>
-                <p className="mt-2 pl-[25px] text-[13px] leading-relaxed text-ink-soft">
+                <p className="mt-2 pl-[25px] text-body leading-relaxed text-ink-soft">
                   {entry.a}
                 </p>
               </details>

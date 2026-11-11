@@ -19,6 +19,14 @@
   --font-display: var(--ff-display);
   --font-body: var(--ff-body);
   --font-mono: var(--ff-mono);
+
+  /* Exactly three sizes for the whole site (nav excluded). */
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.4;
+  --text-body: 0.9375rem;
+  --text-body--line-height: 1.55;
+  --text-display: clamp(2rem, 4vw, 2.75rem);
+  --text-display--line-height: 0.95;
 }
 
 *,
@@ -36,7 +44,7 @@ body {
 }
 
 body {
-  font-size: 15px;
+  font-size: var(--text-body);
   line-height: 1.55;
 }
 
@@ -53,7 +61,7 @@ body {
 /* Small technical labels used through the interface. */
 .label {
   font-family: var(--ff-mono);
-  font-size: 10px;
+  font-size: var(--text-label);
   font-weight: 700;
   line-height: 1.4;
   letter-spacing: 0.18em;
@@ -94,7 +102,7 @@ body {
   background: var(--sheet);
   padding: 0.55rem 0.75rem;
   font-family: var(--ff-body);
-  font-size: 0.95rem;
+  font-size: var(--text-body);
   color: var(--ink);
 }
 

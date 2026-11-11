@@ -49,7 +49,7 @@ export function Footer() {
           <div>
             <Link to="/" className="group inline-flex items-center gap-3">
               <Logo className="text-paper transition-colors group-hover:text-accent-soft" />
-              <span className="font-display text-2xl uppercase leading-none tracking-tight">
+              <span className="font-display text-body uppercase leading-none tracking-tight">
                 MANABI
               </span>
             </Link>
@@ -59,7 +59,7 @@ export function Footer() {
               target="_blank"
               rel="noreferrer"
               aria-label="Star MANABI on GitHub"
-              className="github-star group mt-6 flex w-fit items-center gap-2 bg-ink px-3 py-2 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper"
+              className="github-star group mt-6 flex w-fit items-center gap-2 bg-ink px-3 py-2 font-mono text-label font-bold uppercase tracking-[0.16em] text-paper"
             >
               <Star
                 aria-hidden
@@ -82,7 +82,7 @@ export function Footer() {
               const Icon = column.icon;
               return (
                 <div key={column.heading} className="flex flex-col">
-                  <h2 className="flex items-center gap-2 border-b border-paper/20 pb-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-paper/60">
+                  <h2 className="flex items-center gap-2 border-b border-paper/20 pb-2.5 font-mono text-label font-bold uppercase tracking-[0.2em] text-paper/60">
                     <Icon
                       aria-hidden
                       size={12}
@@ -96,7 +96,7 @@ export function Footer() {
                       <li key={`${column.heading}-${link.label}`}>
                         <Link
                           to={link.to}
-                          className="group inline-flex items-start gap-1.5 text-sm leading-snug text-paper/70 underline-offset-4 transition-colors hover:text-paper"
+                          className="group inline-flex items-start gap-1.5 text-body leading-snug text-paper/70 underline-offset-4 transition-colors hover:text-paper"
                         >
                           <ChevronRight
                             aria-hidden
@@ -116,10 +116,10 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col gap-5 border-t border-paper/20 py-4 md:flex-row md:items-center md:justify-between">
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/55">
+          <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-paper/55">
             © 2026 MANABI
           </p>
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/55">
+          <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-paper/55">
             Built for builders · Night shift edition
           </p>
         </div>
@@ -138,7 +138,7 @@ export function Footer() {
           <div className="mx-auto w-[min(1240px,96vw)] pt-7">
             <Link
               to="/problems"
-              className="group inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-paper/90 transition-colors hover:text-accent-soft"
+              className="group inline-flex items-center gap-1.5 font-mono text-label font-bold uppercase tracking-[0.16em] text-paper/90 transition-colors hover:text-accent-soft"
             >
               Start with a brief
               <ArrowUpRight

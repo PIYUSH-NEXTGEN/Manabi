@@ -23,12 +23,12 @@ import { ApiError, projectOwnerUsername } from "@/api/client";
 import type { ProblemDetail, ProblemOut } from "@/api/client";
 
 const panelHeading =
-  "font-mono text-[10px] font-bold uppercase tracking-[0.18em]";
+  "font-mono text-label font-bold uppercase tracking-[0.18em]";
 const microLabel =
-  "font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted";
+  "font-mono text-label font-bold uppercase tracking-[0.16em] text-muted";
 
 const miniStarButton =
-  "inline-flex items-center gap-1.5 border border-line bg-transparent px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-widest text-ink transition-colors hover:border-ink disabled:opacity-45";
+  "inline-flex items-center gap-1.5 border border-line bg-transparent px-2 py-1 font-mono text-label font-bold uppercase tracking-widest text-ink transition-colors hover:border-ink disabled:opacity-45";
 
 function MiniStarButton({
   project,
@@ -219,7 +219,7 @@ function Section({
       className="border-t border-ink py-8 first:border-t-0 first:pt-0"
     >
       <div className="flex items-baseline gap-3">
-        <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-accent">
+        <span className="font-mono text-label font-bold tracking-[0.16em] text-accent">
           {number}
         </span>
         <h2 className={panelHeading}>{title}</h2>
@@ -233,7 +233,7 @@ function SpecRow({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-t border-line py-2.5 first:border-t-0">
       <dt className={microLabel}>{label}</dt>
-      <dd className="text-right font-mono text-[10px] font-bold uppercase tracking-widest">
+      <dd className="text-right font-mono text-label font-bold uppercase tracking-widest">
         {children}
       </dd>
     </div>
@@ -312,19 +312,18 @@ function DetailView({ problemId }: { problemId: number }) {
           className="grid gap-8 border-b border-ink py-9 md:grid-cols-[minmax(0,1fr)_290px] md:gap-12"
         >
           <div>
-            <p className="flex flex-wrap items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-accent">
+            <p className="flex flex-wrap items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.2em] text-accent">
               <span aria-hidden className="block size-2 bg-accent" />
               Problem brief / {data.source_id ?? `NO. ${data.id}`}
             </p>
             <h1
-              className="mt-4 font-display uppercase leading-[0.9] tracking-[-0.02em]"
-              style={{ fontSize: "clamp(2.25rem, 5vw, 4rem)" }}
+              className="mt-4 font-display text-display uppercase leading-[0.9] tracking-[-0.02em]"
             >
               {data.title}
             </h1>
 
             {isHackathon ? (
-              <div className="mt-6 max-w-3xl space-y-6 border-l-2 border-accent/50 pl-5 text-base leading-relaxed text-ink-soft md:text-lg">
+              <div className="mt-6 max-w-3xl space-y-6 border-l-2 border-accent/50 pl-5 text-body leading-relaxed text-ink-soft ">
                 <div>
                   <p className={cx(microLabel, "text-accent")}>The problem</p>
                   <p className="mt-2">{data.summary}</p>
@@ -357,7 +356,7 @@ function DetailView({ problemId }: { problemId: number }) {
                 ) : null}
               </div>
             ) : (
-              <div className="mt-6 max-w-3xl space-y-4 border-l-2 border-accent/50 pl-5 text-base leading-relaxed text-ink-soft md:text-lg">
+              <div className="mt-6 max-w-3xl space-y-4 border-l-2 border-accent/50 pl-5 text-body leading-relaxed text-ink-soft ">
                 {paragraphs.map((paragraph) => (
                   <p key={paragraph}>{paragraph}</p>
                 ))}
@@ -376,7 +375,7 @@ function DetailView({ problemId }: { problemId: number }) {
           <dl className="self-start border border-ink bg-sheet px-4 py-3">
             <div className="flex items-center justify-between border-b border-line pb-2.5">
               <dt className={microLabel}>File no.</dt>
-              <dd className="font-mono text-sm font-bold tracking-[0.08em]">
+              <dd className="font-mono text-body font-bold tracking-[0.08em]">
                 M-{String(data.id).padStart(3, "0")}
               </dd>
             </div>
@@ -390,7 +389,7 @@ function DetailView({ problemId }: { problemId: number }) {
           <article>
             {isHackathon || isResume ? null : (
               <Section number={nextSectionNumber()} title="Why it matters">
-                <p className="max-w-3xl border-l-2 border-line pl-5 text-base leading-relaxed text-ink-soft">
+                <p className="max-w-3xl border-l-2 border-line pl-5 text-body leading-relaxed text-ink-soft">
                   {data.why_matters}
                 </p>
               </Section>
@@ -403,7 +402,7 @@ function DetailView({ problemId }: { problemId: number }) {
                 number={nextSectionNumber()}
                 title="What concepts you'll learn"
               >
-                <ul className="max-w-3xl space-y-2.5 text-sm leading-relaxed text-ink-soft">
+                <ul className="max-w-3xl space-y-2.5 text-body leading-relaxed text-ink-soft">
                   {learningConcepts.map((concept) => (
                     <li key={concept} className="flex gap-3">
                       <span
@@ -419,7 +418,7 @@ function DetailView({ problemId }: { problemId: number }) {
 
             {isResume ? null : (
               <Section number={nextSectionNumber()} title="Tech stack">
-                <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+                <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
                   The stack below is a starting point, not a rule. If it lists a
                   backend language you can swap it for another one - Python or
                   Go, for example - and the same goes for the database,
@@ -432,7 +431,7 @@ function DetailView({ problemId }: { problemId: number }) {
                     ))}
                   </div>
                 ) : (
-                  <p className="mt-3 text-sm">No stack listed.</p>
+                  <p className="mt-3 text-body">No stack listed.</p>
                 )}
               </Section>
             )}
@@ -440,7 +439,7 @@ function DetailView({ problemId }: { problemId: number }) {
             {resumeKit ? (
               <>
                 <Section number={nextSectionNumber()} title="MVP vs standout">
-                  <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+                  <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
                     Two bars for the same project. The first level ships with
                     honest numbers; the second one is what most people skip -
                     and what makes a recruiter stop scrolling.
@@ -454,7 +453,7 @@ function DetailView({ problemId }: { problemId: number }) {
                         <p className={cx(microLabel, "text-accent")}>
                           {scopeLevel.level}
                         </p>
-                        <p className="mt-2.5 text-sm leading-relaxed text-ink-soft">
+                        <p className="mt-2.5 text-body leading-relaxed text-ink-soft">
                           {scopeLevel.text}
                         </p>
                         {(scopeLevel.checks ?? []).length > 0 ? (
@@ -462,7 +461,7 @@ function DetailView({ problemId }: { problemId: number }) {
                             {(scopeLevel.checks ?? []).map((check) => (
                               <li
                                 key={check}
-                                className="flex gap-3 text-sm leading-relaxed text-ink-soft"
+                                className="flex gap-3 text-body leading-relaxed text-ink-soft"
                               >
                                 <span
                                   aria-hidden
@@ -485,10 +484,10 @@ function DetailView({ problemId }: { problemId: number }) {
                         key={targetRole.role}
                         className="border border-line bg-sheet p-4"
                       >
-                        <dt className="font-display text-sm uppercase tracking-tight text-ink">
+                        <dt className="font-display text-body uppercase tracking-tight text-ink">
                           {targetRole.role}
                         </dt>
-                        <dd className="mt-2 text-sm leading-relaxed text-ink-soft">
+                        <dd className="mt-2 text-body leading-relaxed text-ink-soft">
                           {targetRole.how_it_helps}
                         </dd>
                       </div>
@@ -500,7 +499,7 @@ function DetailView({ problemId }: { problemId: number }) {
                   number={nextSectionNumber()}
                   title="Resume bullet template"
                 >
-                  <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+                  <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
                     Fill the braces with your own numbers from the run - never
                     invent them. The example shows what a filled bullet looks
                     like.
@@ -511,11 +510,11 @@ function DetailView({ problemId }: { problemId: number }) {
                         key={resumeBullet.bullet}
                         className="border border-line bg-sheet p-4"
                       >
-                        <p className="font-mono text-[13px] leading-relaxed text-ink">
+                        <p className="font-mono text-body leading-relaxed text-ink">
                           {resumeBullet.bullet}
                         </p>
                         {resumeBullet.example ? (
-                          <p className="mt-2.5 text-sm leading-relaxed text-ink-soft">
+                          <p className="mt-2.5 text-body leading-relaxed text-ink-soft">
                             <span
                               className={cx(microLabel, "mr-2 text-muted")}
                             >
@@ -539,10 +538,10 @@ function DetailView({ problemId }: { problemId: number }) {
                         key={interviewPoint.question}
                         className="border-t border-line pt-4 first:border-t-0 first:pt-0"
                       >
-                        <p className="text-sm font-bold leading-snug text-ink">
+                        <p className="text-body font-bold leading-snug text-ink">
                           {interviewPoint.question}
                         </p>
-                        <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
+                        <p className="mt-1.5 text-body leading-relaxed text-ink-soft">
                           {interviewPoint.answer}
                         </p>
                       </li>
@@ -555,7 +554,7 @@ function DetailView({ problemId }: { problemId: number }) {
             {teamPlan ? (
               <Section number={nextSectionNumber()} title="Team plan">
                 {teamPlan.note ? (
-                  <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+                  <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
                     {teamPlan.note}
                   </p>
                 ) : null}
@@ -566,10 +565,10 @@ function DetailView({ problemId }: { problemId: number }) {
                         key={teamRole.role}
                         className="border border-line bg-sheet p-4"
                       >
-                        <dt className="font-display text-sm uppercase tracking-tight text-ink">
+                        <dt className="font-display text-body uppercase tracking-tight text-ink">
                           {teamRole.role}
                         </dt>
-                        <dd className="mt-2 text-sm leading-relaxed text-ink-soft">
+                        <dd className="mt-2 text-body leading-relaxed text-ink-soft">
                           {teamRole.covers}
                         </dd>
                       </div>
@@ -581,9 +580,9 @@ function DetailView({ problemId }: { problemId: number }) {
                     {(teamPlan.milestones ?? []).map((milestone, index) => (
                       <li
                         key={milestone}
-                        className="flex gap-3 text-sm leading-relaxed text-ink-soft"
+                        className="flex gap-3 text-body leading-relaxed text-ink-soft"
                       >
-                        <span className="shrink-0 font-mono text-[10px] font-bold leading-relaxed text-accent">
+                        <span className="shrink-0 font-mono text-label font-bold leading-relaxed text-accent">
                           T+{String(index + 1).padStart(1, "0")}
                         </span>
                         {milestone}
@@ -597,7 +596,7 @@ function DetailView({ problemId }: { problemId: number }) {
             {pitchGuide ? (
               <Section number={nextSectionNumber()} title="Pitch guide">
                 {pitchGuide.one_liner ? (
-                  <p className="max-w-3xl border-l-2 border-accent/60 pl-5 text-base font-bold leading-relaxed md:text-lg">
+                  <p className="max-w-3xl border-l-2 border-accent/60 pl-5 text-body font-bold leading-relaxed ">
                     {pitchGuide.one_liner}
                   </p>
                 ) : null}
@@ -609,14 +608,14 @@ function DetailView({ problemId }: { problemId: number }) {
                         className="border border-line bg-sheet p-5"
                       >
                         <p className="flex items-baseline gap-3">
-                          <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-accent">
+                          <span className="font-mono text-label font-bold tracking-[0.16em] text-accent">
                             {String(index + 1).padStart(2, "0")}
                           </span>
-                          <span className="font-display text-sm uppercase tracking-tight text-ink">
+                          <span className="font-display text-body uppercase tracking-tight text-ink">
                             {beat.heading}
                           </span>
                         </p>
-                        <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-ink-soft">
+                        <p className="mt-2.5 max-w-2xl text-body leading-relaxed text-ink-soft">
                           {beat.text}
                         </p>
                       </li>
@@ -633,10 +632,10 @@ function DetailView({ problemId }: { problemId: number }) {
                             key={judgeQuestion.question}
                             className="border-t border-line pt-4 first:border-t-0 first:pt-0"
                           >
-                            <p className="text-sm font-bold leading-snug text-ink">
+                            <p className="text-body font-bold leading-snug text-ink">
                               {judgeQuestion.question}
                             </p>
-                            <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">
+                            <p className="mt-1.5 text-body leading-relaxed text-ink-soft">
                               {judgeQuestion.answer}
                             </p>
                           </li>
@@ -649,7 +648,7 @@ function DetailView({ problemId }: { problemId: number }) {
             ) : null}
 
             <Section number={nextSectionNumber()} title="Build guide">
-              <p className="max-w-3xl text-sm leading-relaxed text-ink-soft">
+              <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
                 Work through the phases in order - each one ends with something
                 working. No phase assumes a particular language, framework, or
                 database; pick tools you already know or want to learn, and swap
@@ -663,15 +662,15 @@ function DetailView({ problemId }: { problemId: number }) {
                       className="border border-line bg-sheet p-5"
                     >
                       <p className="flex items-baseline gap-3">
-                        <span className="font-mono text-[9px] font-bold tracking-[0.16em] text-accent">
+                        <span className="font-mono text-label font-bold tracking-[0.16em] text-accent">
                           {String(index + 1).padStart(2, "0")}
                         </span>
-                        <span className="font-display text-base uppercase tracking-tight text-ink">
+                        <span className="font-display text-body uppercase tracking-tight text-ink">
                           {phase.title}
                         </span>
                       </p>
                       {phase.summary ? (
-                        <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-ink-soft">
+                        <p className="mt-2.5 max-w-2xl text-body leading-relaxed text-ink-soft">
                           {phase.summary}
                         </p>
                       ) : null}
@@ -680,9 +679,9 @@ function DetailView({ problemId }: { problemId: number }) {
                           {(phase.steps ?? []).map((step, stepIndex) => (
                             <li
                               key={step}
-                              className="flex gap-3 text-sm leading-relaxed text-ink-soft"
+                              className="flex gap-3 text-body leading-relaxed text-ink-soft"
                             >
-                              <span className="shrink-0 font-mono text-[10px] font-bold leading-relaxed text-accent">
+                              <span className="shrink-0 font-mono text-label font-bold leading-relaxed text-accent">
                                 {index + 1}.{stepIndex + 1}
                               </span>
                               {step}
@@ -694,7 +693,7 @@ function DetailView({ problemId }: { problemId: number }) {
                   ))}
                 </ol>
               ) : (
-                <p className="mt-4 max-w-3xl text-sm leading-relaxed text-ink-soft">
+                <p className="mt-4 max-w-3xl text-body leading-relaxed text-ink-soft">
                   No phased guide for this brief yet. Start with the smallest
                   version where one core flow works end to end, then keep
                   iterating on what annoys you most.
@@ -730,7 +729,7 @@ function DetailView({ problemId }: { problemId: number }) {
                             size={13}
                             className="shrink-0 text-muted"
                           />
-                          <span className="truncate font-mono text-xs font-bold">
+                          <span className="truncate font-mono text-label font-bold">
                             {project.repo_name}
                           </span>
                           {completed ? (
@@ -740,7 +739,7 @@ function DetailView({ problemId }: { problemId: number }) {
                                   ? `Demo: ${project.demo_url}`
                                   : "Marked as completed"
                               }
-                              className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent"
+                              className="font-mono text-label font-bold uppercase tracking-widest text-accent"
                             >
                               ✓ Completed
                             </span>
@@ -766,7 +765,7 @@ function DetailView({ problemId }: { problemId: number }) {
                       ) : null}
                       <Link
                         to={`/projects/${project.id}`}
-                        className="group inline-flex w-fit items-center gap-1 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
+                        className="group inline-flex w-fit items-center gap-1 font-mono text-label font-bold uppercase tracking-[0.16em] text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
                       >
                         Open project
                         <ArrowUpRight
@@ -780,7 +779,7 @@ function DetailView({ problemId }: { problemId: number }) {
                   );
                 })}
                 {data.projects.length === 0 ? (
-                  <li className="border-b border-line py-3 text-sm text-ink-soft">
+                  <li className="border-b border-line py-3 text-body text-ink-soft">
                     No projects linked yet. Be the first.
                   </li>
                 ) : null}

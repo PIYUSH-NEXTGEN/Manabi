@@ -120,9 +120,9 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
             onChange={(event) => setSummary(event.target.value)}
             rows={5}
             maxLength={SOLUTION_SUMMARY_MAX}
-            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-sm"
+            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-body"
           />
-          <span className="mt-1 block text-xs text-ink-soft">
+          <span className="mt-1 block text-label text-ink-soft">
             Editing the description re-runs the automatic relevance check at most
             once per day.
           </span>
@@ -135,10 +135,10 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
             value={demoUrl}
             onChange={(event) => setDemoUrl(event.target.value)}
             placeholder="https://…"
-            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-sm"
+            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-body"
           />
         </label>
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-body">
           <input
             type="checkbox"
             checked={openToContributors}
@@ -157,7 +157,7 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
 
 function CompleteChecklistRow({ checklist }: { checklist: CompletionChecklistItem[] }) {
   return (
-    <ul className="space-y-1 text-sm">
+    <ul className="space-y-1 text-body">
       {checklist.map((item) => (
         <li key={item.item}>
           <span className={item.ok ? 'text-accent' : 'text-danger'}>
@@ -228,7 +228,7 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
       triggerLabel="Mark complete"
     >
       <div className="flex flex-col gap-3">
-        <p className="text-sm leading-snug">
+        <p className="text-body leading-snug">
           Completing needs a verified submission, a README and at least 5
           commits. MANABI checks GitHub again the moment you press the button.
         </p>
@@ -240,7 +240,7 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
             value={demoUrl}
             onChange={(event) => setDemoUrl(event.target.value)}
             placeholder="https://…"
-            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-sm"
+            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-body"
           />
         </label>
         <label className="block" htmlFor={`complete-reflection-${project.id}`}>
@@ -251,19 +251,19 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
             onChange={(event) => setReflection(event.target.value)}
             rows={3}
             maxLength={800}
-            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-sm"
+            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-body"
           />
         </label>
         {checklist ? (
           <div className="border border-ink bg-sheet p-3">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
+            <p className="font-mono text-label font-bold uppercase tracking-widest text-danger">
               Not ready yet. Missing:
             </p>
             <CompleteChecklistRow checklist={checklist} />
           </div>
         ) : null}
         {failure ? (
-          <p role="alert" className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
+          <p role="alert" className="font-mono text-label font-bold uppercase tracking-widest text-danger">
             {failure}
           </p>
         ) : null}
@@ -294,12 +294,12 @@ function RemoveProjectDialog({ project }: { project: ProjectOut }) {
       triggerLabel="Remove"
     >
       <div className="flex flex-col gap-3">
-        <p className="text-sm leading-snug">
+        <p className="text-body leading-snug">
           This removes the submission from the board completely. Your GitHub
           repository itself is untouched.
         </p>
         {failure ? (
-          <p role="alert" className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
+          <p role="alert" className="font-mono text-label font-bold uppercase tracking-widest text-danger">
             {failure}
           </p>
         ) : null}
@@ -343,11 +343,11 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
         <div className="min-w-0">
           <Link
             to={`/projects/${project.id}`}
-            className="font-display text-base uppercase leading-tight underline-offset-4 hover:underline md:text-lg"
+            className="font-display text-body uppercase leading-tight underline-offset-4 hover:underline "
           >
             {project.repo_name}
           </Link>
-          <p className="mt-0.5 truncate font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">
+          <p className="mt-0.5 truncate font-mono text-label font-bold uppercase tracking-widest text-ink/60">
             {project.problem_title}
           </p>
         </div>
@@ -355,7 +355,7 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
           {statusTag ? (
             <span
               className={cx(
-                'font-mono text-[10px] font-bold uppercase tracking-widest',
+                'font-mono text-label font-bold uppercase tracking-widest',
                 statusTag.tone,
               )}
             >
@@ -363,12 +363,12 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
             </span>
           ) : null}
           {completed ? (
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-accent">
+            <span className="font-mono text-label font-bold uppercase tracking-widest text-accent">
               ✓ Completed
             </span>
           ) : null}
           {progress.isLoading ? (
-            <span className="font-mono text-[10px] font-bold uppercase tracking-widest text-ink/60">
+            <span className="font-mono text-label font-bold uppercase tracking-widest text-ink/60">
               Checking GitHub…
             </span>
           ) : (
@@ -396,7 +396,7 @@ function verifiedOrBetter(project: ProjectOut): boolean {
   return project.verification_status === 'verified' && project.completed_at == null;
 }
 
-const fieldLabelClasses = 'font-mono text-[11px] font-bold uppercase tracking-widest';
+const fieldLabelClasses = 'font-mono text-label font-bold uppercase tracking-widest';
 
 export function DashboardPage() {
   const me = useMe();
@@ -413,10 +413,10 @@ export function DashboardPage() {
     <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-3xl uppercase leading-none md:text-4xl">
+          <h1 className="font-display text-display uppercase leading-none">
             Dashboard
           </h1>
-          <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-ink/70">
+          <p className="mt-2 font-mono text-label font-bold uppercase tracking-widest text-ink/70">
             {displayName ? `Logged in as ${displayName}` : 'Loading…'}
           </p>
         </div>
@@ -434,18 +434,18 @@ export function DashboardPage() {
 
       <section aria-label="Your projects" className="mt-8">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-display text-xl uppercase md:text-2xl">
+          <h2 className="font-display text-body uppercase">
             Your projects
           </h2>
           {rows.length > 0 ? (
-            <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-ink/70">
+            <p className="font-mono text-label font-bold uppercase tracking-widest text-ink/70">
               {rows.length} total · {buildingCount} building · {inReview} in
               review · {completedCount} completed
             </p>
           ) : null}
         </div>
         {projects.isLoading ? (
-          <p className="mt-2 text-sm">Loading projects…</p>
+          <p className="mt-2 text-body">Loading projects…</p>
         ) : projects.data && projects.data.length > 0 ? (
           <ul className="mt-3 divide-y-[3px] divide-ink border border-ink bg-sheet">
             {projects.data.map((project) => (
@@ -453,7 +453,7 @@ export function DashboardPage() {
             ))}
           </ul>
         ) : (
-          <p className="mt-3 border border-ink bg-sheet p-4 text-sm leading-snug">
+          <p className="mt-3 border border-ink bg-sheet p-4 text-body leading-snug">
             No projects yet.{' '}
             <Link to="/problems" className="underline underline-offset-4">
               Pick a problem
@@ -462,7 +462,7 @@ export function DashboardPage() {
           </p>
         )}
         {projects.error ? (
-          <p className="mt-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
+          <p className="mt-2 font-mono text-label font-bold uppercase tracking-widest text-danger">
             {projects.error.detail}
           </p>
         ) : null}

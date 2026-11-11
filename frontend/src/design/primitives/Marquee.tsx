@@ -18,7 +18,7 @@ function MarqueeRow({ items, hidden }: { items: string[]; hidden: boolean }) {
       {items.map((item, index) => (
         <li
           key={`${item}-${index}`}
-          className="flex items-center gap-3 whitespace-nowrap font-mono text-[10px] font-bold uppercase tracking-[0.18em]"
+          className="flex items-center gap-3 whitespace-nowrap font-mono text-label font-bold uppercase tracking-[0.18em]"
         >
           <span aria-hidden className="block size-1.5 bg-accent" />
           {item}

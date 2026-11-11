@@ -5,7 +5,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'danger' | 'link';
 export type ButtonSize = 'default' | 'small';
 
 const BASE_CLASSES =
-  'inline-flex items-center justify-center gap-2 border border-ink font-mono text-[11px] font-bold uppercase tracking-[0.16em] disabled:pointer-events-none disabled:opacity-45 press';
+  'inline-flex items-center justify-center gap-2 border border-ink font-mono text-label font-bold uppercase tracking-[0.16em] disabled:pointer-events-none disabled:opacity-45 press';
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {
   default: 'px-5 py-3',

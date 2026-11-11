@@ -27,11 +27,11 @@ export function RetryCountdown({ seconds }: { seconds: number }) {
   }, []);
 
   if (left <= 0) {
-    return <p className="text-sm font-bold">You can try again now.</p>;
+    return <p className="text-body font-bold">You can try again now.</p>;
   }
 
   return (
-    <p className="text-sm leading-snug">
+    <p className="text-body leading-snug">
       Try again in{' '}
       <span className="font-bold tabular-nums">{format(left)}</span>
     </p>

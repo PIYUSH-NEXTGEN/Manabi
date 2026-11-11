@@ -32,7 +32,7 @@ export function Markdown({
 
 const linkClass = 'font-bold underline decoration-2 underline-offset-2';
 const headingClass =
-  'mt-3 mb-1 font-mono text-xs font-bold uppercase tracking-widest first:mt-0';
+  'mt-3 mb-1 font-mono text-label font-bold uppercase tracking-widest first:mt-0';
 
 function heading(Tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') {
   return ({ children }: { children?: ReactNode }) => (
@@ -42,7 +42,7 @@ function heading(Tag: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6') {
 
 const components = {
   p: ({ children }: { children?: ReactNode }) => (
-    <p className="mb-2 text-sm last:mb-0">{children}</p>
+    <p className="mb-2 text-body last:mb-0">{children}</p>
   ),
   a: ({ href, children }: { href?: string; children?: ReactNode }) => {
     if (href && href.startsWith('/')) {
@@ -89,7 +89,7 @@ const components = {
     <code className="bg-accent/40 px-1 font-mono">{children}</code>
   ),
   pre: ({ children }: { children?: ReactNode }) => (
-    <pre className="mb-2 overflow-x-auto border border-ink bg-paper p-2 font-mono text-xs last:mb-0">
+    <pre className="mb-2 overflow-x-auto border border-ink bg-paper p-2 font-mono text-label last:mb-0">
       {children}
     </pre>
   ),

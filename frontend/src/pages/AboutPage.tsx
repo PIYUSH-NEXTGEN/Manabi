@@ -119,7 +119,7 @@ export function AboutPage() {
               href={REPO_URL}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-accent transition-colors hover:text-ink"
+              className="inline-flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.14em] text-accent transition-colors hover:text-ink"
             >
               <GithubMark size={13} />
               View the repository
@@ -152,15 +152,15 @@ export function AboutPage() {
             >
               <span
                 aria-hidden
-                className="font-display text-2xl leading-none text-accent"
+                className="font-display text-display leading-none text-accent"
               >
                 {step.number}
               </span>
               <div>
-                <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink">
+                <h3 className="font-mono text-label font-bold uppercase tracking-[0.16em] text-ink">
                   {step.title}
                 </h3>
-                <p className="mt-1.5 text-[13px] leading-relaxed">
+                <p className="mt-1.5 text-body leading-relaxed">
                   {step.copy}
                 </p>
               </div>
@@ -173,10 +173,10 @@ export function AboutPage() {
         <dl className="grid gap-x-8 sm:grid-cols-2">
           {INDEX_ITEMS.map((item) => (
             <div key={item.title} className="border-t border-line py-4">
-              <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ink">
+              <dt className="font-mono text-label font-bold uppercase tracking-[0.14em] text-ink">
                 {item.title}
               </dt>
-              <dd className="mt-1.5 text-[13px] leading-relaxed">
+              <dd className="mt-1.5 text-body leading-relaxed">
                 {item.copy}
               </dd>
             </div>
@@ -193,14 +193,14 @@ export function AboutPage() {
             >
               <span
                 aria-hidden
-                className="font-mono text-[9px] font-bold tabular-nums tracking-[0.14em] text-accent"
+                className="font-mono text-label font-bold tabular-nums tracking-[0.14em] text-accent"
               >
                 {principle.number}
               </span>
-              <h3 className="mt-2 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-ink">
+              <h3 className="mt-2 font-mono text-label font-bold uppercase tracking-[0.14em] text-ink">
                 {principle.title}
               </h3>
-              <p className="mt-2 text-[13px] leading-relaxed">
+              <p className="mt-2 text-body leading-relaxed">
                 {principle.copy}
               </p>
             </li>

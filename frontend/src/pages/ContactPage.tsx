@@ -77,20 +77,20 @@ export function ContactPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <article className="flex flex-col border border-ink bg-sheet">
           <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-accent">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-accent">
               Open · public
             </span>
             <GithubMark size={14} className="text-ink" />
           </header>
           <div className="flex flex-1 flex-col p-5">
-            <h2 className="font-display text-xl uppercase leading-none tracking-tight">
+            <h2 className="font-display text-body uppercase leading-none tracking-tight">
               GitHub issues
             </h2>
-            <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">
+            <p className="mt-3 text-body leading-relaxed text-ink-soft">
               Bugs, broken briefs, copy errors, feature requests and
               verification questions that can be discussed in public.
             </p>
-            <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">
+            <p className="mt-2 text-body leading-relaxed text-ink-soft">
               Best for anything with a URL we can inspect.
             </p>
             <a
@@ -107,7 +107,7 @@ export function ContactPage() {
 
         <article className="flex flex-col border border-ink bg-sheet">
           <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
-            <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-ink-soft">
+            <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-ink-soft">
               Private
             </span>
             {CONTACT_EMAIL ? (
@@ -122,16 +122,16 @@ export function ContactPage() {
             )}
           </header>
           <div className="flex flex-1 flex-col p-5">
-            <h2 className="font-display text-xl uppercase leading-none tracking-tight">
+            <h2 className="font-display text-body uppercase leading-none tracking-tight">
               {CONTACT_EMAIL ? 'Email' : 'Private follow-up'}
             </h2>
             {CONTACT_EMAIL ? (
               <>
-                <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">
+                <p className="mt-3 text-body leading-relaxed text-ink-soft">
                   Account data, security reports, or anything you would rather
                   not post publicly.
                 </p>
-                <p className="mt-2 break-all font-mono text-[11px] tracking-[0.02em] text-ink">
+                <p className="mt-2 break-all font-mono text-label tracking-[0.02em] text-ink">
                   {CONTACT_EMAIL}
                 </p>
                 <a
@@ -147,7 +147,7 @@ export function ContactPage() {
               </>
             ) : (
               <>
-                <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">
+                <p className="mt-3 text-body leading-relaxed text-ink-soft">
                   This deployment has no private address configured. Open a
                   minimal issue and ask for a private channel. Do not put
                   sensitive details in the issue itself.

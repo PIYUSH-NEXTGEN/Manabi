@@ -55,7 +55,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             key={toast.id}
             role="status"
             className={cx(
-              'border-t border-ink px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em]',
+              'border-t border-ink px-4 py-3 font-mono text-label font-bold uppercase tracking-[0.16em]',
               toast.tone === 'error' ? 'bg-danger text-paper' : 'bg-accent text-paper',
             )}
           >

@@ -34,7 +34,7 @@ function Section({
 }) {
   return (
     <section className="flex flex-col gap-3">
-      <h2 className="border-b border-ink pb-1 font-mono text-sm font-bold uppercase tracking-widest">
+      <h2 className="border-b border-ink pb-1 font-mono text-body font-bold uppercase tracking-widest">
         {title}
       </h2>
       {children}
@@ -49,10 +49,10 @@ export function KitPage() {
   return (
     <main className="mx-auto flex w-[min(960px,92vw)] flex-col gap-10 py-10">
       <header className="flex flex-col gap-2">
-        <p className="font-mono text-xs font-bold uppercase tracking-widest">
+        <p className="font-mono text-label font-bold uppercase tracking-widest">
           Design system / neo-brutalism
         </p>
-        <h1 className="font-display text-5xl uppercase leading-none">MANABI /_kit</h1>
+        <h1 className="font-display text-display uppercase leading-none">MANABI /_kit</h1>
       </header>
 
       <Section title="Button">
@@ -118,7 +118,7 @@ export function KitPage() {
       </Section>
 
       <Section title="Difficulty squares">
-        <div className="flex flex-wrap items-center gap-4 font-mono text-sm font-bold uppercase tracking-widest">
+        <div className="flex flex-wrap items-center gap-4 font-mono text-body font-bold uppercase tracking-widest">
           <span>
             <span aria-hidden>■□□</span> beginner
           </span>

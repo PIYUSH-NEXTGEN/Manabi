@@ -36,7 +36,7 @@ export function Stamp({ tone, label, rotate = 0, className }: StampProps) {
     <span
       style={style}
       className={cx(
-        'inline-block border px-2 py-1 font-mono text-[10px] font-bold uppercase leading-none tracking-[0.14em]',
+        'inline-block border px-2 py-1 font-mono text-label font-bold uppercase leading-none tracking-[0.14em]',
         TONE_CLASSES[tone],
         className,
       )}

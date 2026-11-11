@@ -7,14 +7,14 @@ export function ContributePage() {
     <StaticShell kicker="Contribute" title="Build on someone else's repo" wide>
       <div className="flex items-center gap-4">
         <Stamp tone="open" />
-        <p className="font-mono text-[11px] font-bold uppercase tracking-widest">
+        <p className="font-mono text-label font-bold uppercase tracking-widest">
           Projects marked open are looking for contributors
         </p>
       </div>
 
       <ol className="flex flex-col gap-4">
         <li className="border-t border-ink pt-3">
-          <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
+          <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
             01. Find a live project
           </p>
           <p className="mt-1">
@@ -23,7 +23,7 @@ export function ContributePage() {
           </p>
         </li>
         <li className="border-t border-ink pt-3">
-          <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
+          <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
             02. Take a good-first-issue
           </p>
           <p className="mt-1">
@@ -32,7 +32,7 @@ export function ContributePage() {
           </p>
         </li>
         <li className="border-t border-ink pt-3">
-          <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
+          <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
             03. Open a PR like everywhere else
           </p>
           <p className="mt-1">

@@ -14,9 +14,9 @@ interface TabsProps {
 }
 
 const TRIGGER_CLASSES =
-  '-ml-px first:ml-0 border border-ink bg-sheet px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-ink data-[state=active]:bg-ink data-[state=active]:text-paper';
+  '-ml-px first:ml-0 border border-ink bg-sheet px-4 py-2 font-mono text-label font-bold uppercase tracking-[0.16em] text-ink data-[state=active]:bg-ink data-[state=active]:text-paper';
 
-const CONTENT_CLASSES = 'border border-t-0 border-ink bg-sheet p-5 text-sm';
+const CONTENT_CLASSES = 'border border-t-0 border-ink bg-sheet p-5 text-body';
 
 export function Tabs({ tabs, defaultValue, className }: TabsProps) {
   const initial = defaultValue ?? tabs[0]?.value;

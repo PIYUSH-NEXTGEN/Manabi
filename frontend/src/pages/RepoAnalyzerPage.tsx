@@ -20,7 +20,7 @@ export function RepoAnalyzerPage() {
 
   return (
     <StaticShell kicker="Coming soon" title="Repo Analyzer">
-      <p className="text-sm leading-relaxed">
+      <p className="text-body leading-relaxed">
         Paste a public GitHub repository link and MANABI will scan it for open
         pull requests, API endpoints, dependencies, and project structure so you
         can see at a glance what is inside before you start building.
@@ -42,7 +42,7 @@ export function RepoAnalyzerPage() {
         {error ? (
           <p
             role="alert"
-            className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
+            className="font-mono text-label font-bold uppercase tracking-widest text-danger"
           >
             {error}
           </p>
@@ -56,7 +56,7 @@ export function RepoAnalyzerPage() {
         </button>
       </form>
 
-      <p className="mt-8 text-sm leading-relaxed text-ink/60">
+      <p className="mt-8 text-body leading-relaxed text-ink/60">
         This tool is being built. In the meantime, browse{' '}
         <Link to="/problems" className="text-accent underline underline-offset-4">
           project ideas

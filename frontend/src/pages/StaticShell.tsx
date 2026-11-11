@@ -26,7 +26,7 @@ export function StaticShell({
   return (
     <main className="border-b border-ink bg-paper">
       <div className={cx('mx-auto py-10 md:py-14', width)}>
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5 font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
           <span className="flex items-center gap-2 text-accent">
             <span aria-hidden className="block size-2 bg-accent" />
             {kicker}
@@ -45,14 +45,11 @@ export function StaticShell({
           )}
         >
           <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-            <h1
-              className="font-display uppercase leading-[0.88] tracking-[-0.03em]"
-              style={{ fontSize: 'clamp(2.6rem, 6vw, 4.25rem)' }}
-            >
+            <h1 className="font-display text-display uppercase leading-[0.88] tracking-[-0.03em]">
               {title}
             </h1>
             {intro ? (
-              <div className="mt-5 max-w-2xl text-[15px] leading-relaxed text-ink-soft">
+              <div className="mt-5 max-w-2xl text-body leading-relaxed text-ink-soft">
                 {intro}
               </div>
             ) : null}
@@ -64,7 +61,7 @@ export function StaticShell({
             </aside>
           ) : null}
 
-          <div className="flex min-w-0 flex-col gap-8 text-sm leading-relaxed text-ink-soft lg:col-start-1 lg:row-start-2">
+          <div className="flex min-w-0 flex-col gap-8 text-body leading-relaxed text-ink-soft lg:col-start-1 lg:row-start-2">
             {children}
           </div>
         </div>

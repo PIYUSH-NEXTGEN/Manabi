@@ -35,7 +35,7 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
         className="pointer-events-none absolute inset-0 -translate-x-[120%] skew-x-[-18deg] bg-[linear-gradient(100deg,transparent_40%,rgba(255,255,255,0.35)_50%,transparent_60%)] [transition:transform_900ms_cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[120%]"
       />
       <header className="relative flex items-center border-b border-line px-4 py-2.5">
-        <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-accent">
+        <span className="font-mono text-label font-bold uppercase tracking-[0.18em] text-accent">
           {problem.difficulty}
         </span>
         <span
@@ -45,17 +45,17 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
       </header>
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-muted">
+        <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
           {field}
         </p>
-        <h3 className="mt-2 font-display text-[1.25rem] uppercase leading-[1.02] tracking-tight">
+        <h3 className="mt-2 font-display text-body uppercase leading-[1.02] tracking-tight">
           {problem.title}
         </h3>
-        <p className="mt-3 line-clamp-3 text-[13px] leading-relaxed text-ink-soft">
+        <p className="mt-3 line-clamp-3 text-body leading-relaxed text-ink-soft">
           {problem.summary}
         </p>
 
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-[9px] font-bold uppercase tracking-[0.14em]">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-label font-bold uppercase tracking-[0.14em]">
           <span className="flex items-center gap-2.5">
             <span className="flex items-center gap-1 text-muted">
               <GitBranch aria-hidden size={11} strokeWidth={2.4} />

@@ -16,7 +16,7 @@ import { SubmittingCard } from './SubmittingCard';
 import { RetryCountdown } from '@/components/common/RetryCountdown';
 
 const panelHeading =
-  'font-mono text-xs font-bold uppercase tracking-widest';
+  'font-mono text-label font-bold uppercase tracking-widest';
 const invalidReason =
   'Use a GitHub repo URL like https://github.com/owner/name';
 
@@ -122,7 +122,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
     return (
       <aside className="flex flex-col gap-3">
         <h2 className={panelHeading}>Submit a project</h2>
-        <p className="text-sm leading-snug">
+        <p className="text-body leading-snug">
           Log in with GitHub to claim this problem and submit your repository.
         </p>
         <a
@@ -199,8 +199,8 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
     return (
       <aside ref={panelRef} className="flex flex-col gap-3 border border-ink bg-sheet p-4">
         <h2 className={panelHeading}>Submitted</h2>
-        <p className="text-sm leading-snug">{statusLabel(submitted.verification_status)}</p>
-        <p className="text-sm leading-snug">
+        <p className="text-body leading-snug">{statusLabel(submitted.verification_status)}</p>
+        <p className="text-body leading-snug">
           Your repository has been added to the problem board with a progress badge.
         </p>
         <Link
@@ -254,7 +254,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           onChange={handleSummaryChange}
           rows={5}
           maxLength={SOLUTION_SUMMARY_MAX}
-          className="border border-ink bg-paper px-3 py-2 text-sm"
+          className="border border-ink bg-paper px-3 py-2 text-body"
         />
         <Input
           label="Deployed link (optional)"
@@ -263,7 +263,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           value={demoUrl}
           onChange={handleDemoUrlChange}
         />
-        <label className="flex items-center gap-2 text-sm">
+        <label className="flex items-center gap-2 text-body">
           <input
             type="checkbox"
             checked={openForContributors}
@@ -275,7 +275,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
         {validationError ? (
           <p
             role="alert"
-            className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
+            className="font-mono text-label font-bold uppercase tracking-widest text-danger"
           >
             {validationError}
           </p>
@@ -285,19 +285,19 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
             role="alert"
             className="flex flex-col gap-2 border border-danger bg-danger-soft p-3"
           >
-            <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
+            <p className="font-mono text-label font-bold uppercase tracking-widest text-danger">
               {submitReasons.length > 0 ? 'Your project was rejected' : 'Submission failed'}
             </p>
-            <p className="text-sm leading-snug">{submitError}</p>
+            <p className="text-body leading-snug">{submitError}</p>
             {submitRetryAfter != null ? (
               <RetryCountdown seconds={submitRetryAfter} />
             ) : null}
             {submitReasons.length > 0 ? (
               <div className="flex flex-col gap-1.5">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-ink-soft">
+                <p className="font-mono text-label uppercase tracking-widest text-ink-soft">
                   Why this can happen
                 </p>
-                <ul className="flex list-disc flex-col gap-1.5 pl-5 text-sm leading-snug">
+                <ul className="flex list-disc flex-col gap-1.5 pl-5 text-body leading-snug">
                   {submitReasons.map((reason) => (
                     <li key={reason}>{reason}</li>
                   ))}

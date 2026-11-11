@@ -71,10 +71,10 @@ export function BuildInPublic() {
           viewport={{ once: true, amount: 0.4 }}
           className="flex flex-wrap items-center justify-between gap-3 border-b border-paper/25 pb-3 dark:border-ink/25"
         >
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-paper/60 dark:text-ink/60">
+          <p className="font-mono text-label font-bold uppercase tracking-[0.2em] text-paper/60 dark:text-ink/60">
             <span className="text-accent-soft dark:text-ink">02</span> / Submission
           </p>
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-paper/45 dark:text-ink/45">
+          <p className="font-mono text-label font-bold uppercase tracking-[0.2em] text-paper/45 dark:text-ink/45">
             Checked, not claimed
           </p>
         </motion.div>
@@ -88,7 +88,7 @@ export function BuildInPublic() {
           >
             <motion.h2
               variants={ITEM_REVEAL}
-              className="font-display text-4xl uppercase leading-[0.9] tracking-tight sm:text-5xl xl:text-[3.65rem]"
+              className="font-display text-display uppercase leading-[0.9] tracking-tight"
             >
               Submit a repo.
               <br />
@@ -99,7 +99,7 @@ export function BuildInPublic() {
 
             <motion.p
               variants={ITEM_REVEAL}
-              className="mt-5 max-w-lg text-sm leading-relaxed text-paper/75 sm:text-base dark:text-ink/75"
+              className="mt-5 max-w-lg text-body leading-relaxed text-paper/75  dark:text-ink/75"
             >
               Every project is checked before it goes public: your own repo, a
               README, real commits, then an AI relevance check. Only what passes
@@ -108,7 +108,7 @@ export function BuildInPublic() {
 
             <motion.p
               variants={ITEM_REVEAL}
-              className="mt-6 border-l-2 border-accent-soft/60 pl-4 text-[12px] leading-relaxed text-paper/60 dark:border-ink/40 dark:text-ink/60 sm:text-[13px]"
+              className="mt-6 border-l-2 border-accent-soft/60 pl-4 text-label leading-relaxed text-paper/60 dark:border-ink/40 dark:text-ink/60 "
             >
               If the AI can’t judge, a keyword check takes over. It can send work
               to human review, but never mark it verified.
@@ -117,7 +117,7 @@ export function BuildInPublic() {
             <motion.div variants={ITEM_REVEAL} className="mt-9">
               <Link
                 to="/problems"
-                className="group inline-flex items-center gap-2 border border-paper bg-paper px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-ink transition-colors hover:border-accent hover:bg-accent hover:text-paper dark:border-ink dark:bg-transparent dark:text-ink dark:hover:border-accent dark:hover:bg-accent dark:hover:text-[#f4f0e7]"
+                className="group inline-flex items-center gap-2 border border-paper bg-paper px-5 py-3 font-mono text-label font-bold uppercase tracking-[0.16em] text-ink transition-colors hover:border-accent hover:bg-accent hover:text-paper dark:border-ink dark:bg-transparent dark:text-ink dark:hover:border-accent dark:hover:bg-accent dark:hover:text-[#f4f0e7]"
               >
                 Claim a problem
                 <ArrowUpRight
@@ -144,7 +144,7 @@ export function BuildInPublic() {
                 variants={ITEM_REVEAL}
                 className="flex items-start gap-4 border-b border-paper/20 py-4 dark:border-ink/20"
               >
-                <span className="mt-1 w-5 shrink-0 font-mono text-[9px] font-bold tracking-[0.16em] text-paper/35 dark:text-ink/35">
+                <span className="mt-1 w-5 shrink-0 font-mono text-label font-bold tracking-[0.16em] text-paper/35 dark:text-ink/35">
                   {step}
                 </span>
                 <Icon
@@ -154,10 +154,10 @@ export function BuildInPublic() {
                   className="mt-1 shrink-0 text-accent-soft dark:text-ink"
                 />
                 <div className="min-w-0">
-                  <h3 className="font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
+                  <h3 className="font-mono text-label font-bold uppercase tracking-[0.14em]">
                     {title}
                   </h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-paper/65 dark:text-ink/65">
+                  <p className="mt-1.5 text-body leading-relaxed text-paper/65 dark:text-ink/65">
                     {copy}
                   </p>
                 </div>
