@@ -547,7 +547,7 @@ export const handlers = [
 
     return HttpResponse.json({
       reply:
-        'Based on what you told me, the closest problems from the catalog are linked under this reply. Nothing here was invented — both are already in the index.',
+        'Based on what you told me, the closest problems from the catalog are linked under this reply. Nothing here was invented. Both are already in the index.',
       problems: [
         ...problemMatches,
         problems.find((p) => p.id === 5),

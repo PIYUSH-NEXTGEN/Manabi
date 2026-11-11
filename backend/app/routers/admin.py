@@ -1,6 +1,6 @@
 """Admin submissions queue (§8): list needs_review/rejected/verified rows with
 their evidence, approve or reject them. Problem-review endpoints were removed
-deliberately — this queue is for project submissions only."""
+deliberately. This queue is for project submissions only."""
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import func, select
@@ -36,7 +36,7 @@ def set_problem_goal(problem_id: int, body: schemas.AdminGoalSetIn, user: AdminU
 def _submission_reports(db, project_ids: list[int]) -> dict[int, tuple[int, str | None]]:
     """Bulk (report_count, latest_note) for the page's projects.
 
-    Earlier revisions ran two scalar queries per row here (classic N+1 — 102
+    Earlier revisions ran two scalar queries per row here (classic N+1. 102
     queries for a 50-row page). Two grouped statements replace them; the
     latest-note tie-break (id desc) is deterministic, which the per-row
     `created_at desc, limit 1` version was not on ties.

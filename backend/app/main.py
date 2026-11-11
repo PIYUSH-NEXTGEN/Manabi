@@ -25,7 +25,7 @@ def guard_deploy_secrets(settings) -> None:
     is_local = "localhost" in settings.BASE_URL or settings.BASE_URL.startswith("http://127.0.0.1")
     if not is_local and settings.SESSION_SECRET == DEFAULT_SESSION_SECRET:
         raise RuntimeError(
-            "SESSION_SECRET is still the placeholder value — generate a long random string "
+            "SESSION_SECRET is still the placeholder value. Generate a long random string "
             "(python -c \"import secrets; print(secrets.token_urlsafe(32))\") before deploying."
         )
 

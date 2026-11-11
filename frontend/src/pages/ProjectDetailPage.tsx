@@ -109,7 +109,7 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
     setError(null);
     report.mutate(reason.trim(), {
       onSuccess: () => {
-        toast('Report sent — thanks. A maintainer will take a look.');
+        toast('Report sent. Thanks. A maintainer will take a look.');
         setReason('');
       },
       onError: (err) => {
@@ -119,7 +119,7 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
           } else if (err.status === 422) {
             setError('You cannot report your own submission.');
           } else if (err.status === 429) {
-            setError('Too many reports this hour — try again later.');
+            setError('Too many reports this hour. Try again later.');
           } else {
             setError(err.detail);
           }
@@ -317,7 +317,7 @@ function ProjectView({ projectId }: { projectId: number }) {
 
           {progress ? null : (
             <p className="mt-3 text-sm leading-snug">
-              Progress unknown — hit refresh to pull the latest data from
+              Progress unknown. Hit refresh to pull the latest data from
               GitHub.
             </p>
           )}
@@ -342,7 +342,7 @@ function ProjectView({ projectId }: { projectId: number }) {
               <Stat label="Last commit">
                 {progress.last_commit_at
                   ? progress.last_commit_at.slice(0, 10)
-                  : '—'}
+                  : '-'}
               </Stat>
               <Stat label="README">
                 {progress.has_readme ? 'Yes' : 'No'}

@@ -85,7 +85,7 @@ export function AdminReviewPage() {
       </p>
       <h1 className="mt-2 font-display text-4xl uppercase">Submissions</h1>
       <p className="mt-2 text-sm">
-        Project submissions against problems — automatic checks first, humans
+        Project submissions against problems. Automatic checks first, humans
         for the edge cases.
       </p>
 
@@ -107,7 +107,7 @@ export function AdminReviewPage() {
 
       {submissions.isError ? (
         <p role="alert" className="mt-6 border border-ink bg-sheet p-4">
-          Could not load the queue — {submissions.error.detail}
+          Could not load the queue. {submissions.error.detail}
         </p>
       ) : submissions.isPending ? (
         <Skeleton className="mt-6 h-48" />

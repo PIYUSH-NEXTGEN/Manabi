@@ -280,7 +280,7 @@ describe('DashboardPage', () => {
     await user.click(await screen.findByRole('button', { name: 'Mark complete' }));
     await user.click(screen.getByRole('button', { name: 'Mark completed' }));
 
-    expect(await screen.findByText('Not ready yet — missing:')).toBeInTheDocument();
+    expect(await screen.findByText('Not ready yet. Missing:')).toBeInTheDocument();
     expect(screen.getByText('Verified submission')).toBeInTheDocument();
     expect(screen.getByText('At least 5 commits')).toBeInTheDocument();
     // the dialog stays open so the user can read the checklist

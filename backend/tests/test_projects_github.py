@@ -179,7 +179,7 @@ def test_parse_repo_url_rejects_garbage():
 def test_parse_repo_url_rejects_encoded_separators():
     """Percent-encodings that change when decoded must not smuggle path
     separators: e.g. /repos/a%2Fb/c on api.github.com actually resolves to
-    /repos/a/b/c — a different repository than the URL the visitor saw."""
+    /repos/a/b/c. A different repository than the URL the visitor saw."""
     assert parse_repo_url("https://github.com/a%2Fb/c") is None
     assert parse_repo_url("https://github.com/octocat/triage%2Fx") is None
     assert parse_repo_url("https://github.com/octocat/tra%252Fiage") is None  # double encoding

@@ -1,6 +1,6 @@
 /**
  * MANABI mark: a solid geometric M cut from the same grid as the interface.
- * The accent square on the baseline is the record tab — the same orange
+ * The accent square on the baseline is the record tab. The same orange
  * marker used across the UI to tag a record.
  */
 export function Logo({ className }: { className?: string }) {

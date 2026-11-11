@@ -19,7 +19,7 @@ describe('SubmittingCard', () => {
     renderCard();
     const status = screen.getByRole('status');
     expect(status.textContent).toContain('Reading the repository from GitHub');
-    expect(status.textContent).toContain('step 1 of 4');
+    expect(status.textContent).toContain('Step 1 of 4');
   });
 
   it('renders the full check ledger', () => {

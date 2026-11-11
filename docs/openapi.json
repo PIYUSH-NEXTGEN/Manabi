@@ -1336,7 +1336,7 @@
           "profiles"
         ],
         "summary": "Github Heatmap",
-        "description": "Daily public push activity for the logged-in user (last 13 weeks).\n\nDegrades to `{days: [], total: 0, window_days: N}` when GitHub is\nunreachable \u2014 the UI shows an honest empty grid, never fake data.",
+        "description": "Daily public push activity for the logged-in user (last 13 weeks).\n\nDegrades to `{days: [], total: 0, window_days: N}` when GitHub is\nunreachable. The UI shows an honest empty grid, never fake data.",
         "operationId": "github_heatmap_api_me_github_heatmap_get",
         "responses": {
           "200": {

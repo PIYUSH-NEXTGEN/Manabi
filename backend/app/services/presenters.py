@@ -22,7 +22,7 @@ def _validated(model, raw):
 
 def _build_guide(problem: Problem) -> list[schemas.BuildGuidePhase] | None:
     """Curated guide phases, or None when absent/invalid. Never 500 on a
-    hand-edited JSON blob — it degrades to the approaches-derived roadmap."""
+    hand-edited JSON blob. It degrades to the approaches-derived roadmap."""
     if not problem.build_guide:
         return None
     phases = []
@@ -96,7 +96,7 @@ def project_to_out(
 
     include_private adds the owner/admin-only fields (relevance reason,
     ownership basis, review note). relevance_score is never part of this
-    schema — it is not exposed publicly beyond the admin queue. viewer
+    schema. It is not exposed publicly beyond the admin queue. viewer
     sets starred_by_me for the logged-in viewer (False when anonymous).
     """
     stars = project.stars

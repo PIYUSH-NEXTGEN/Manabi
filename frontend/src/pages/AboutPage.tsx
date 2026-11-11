@@ -23,7 +23,7 @@ const PRINCIPLES = [
 const IN_THE_INDEX = [
   {
     title: 'Problem index',
-    copy: 'Briefs across the seven fields: Web Dev, App Dev, AIML, Data Science, Cyber Security, DevOps Cloud, and Blockchain — filterable by field, difficulty, and tech stack.',
+    copy: 'Briefs across the seven fields: Web Dev, App Dev, AIML, Data Science, Cyber Security, DevOps Cloud, and Blockchain. Filterable by field, difficulty, and tech stack.',
   },
   {
     title: 'Your dashboard',
@@ -39,8 +39,8 @@ export function AboutPage() {
   return (
     <StaticShell kicker="About" title="About MANABI">
       <p>
-        MANABI is a catalog of real-world problems — from governments,
-        companies, hackathons, and public programs — with a suggested stack
+        MANABI is a catalog of real-world problems. From governments,
+        companies, hackathons, and public programs. With a suggested stack
         attached. Pick a brief, build it your way, link your GitHub repository,
         and let the commits prove the work.
       </p>

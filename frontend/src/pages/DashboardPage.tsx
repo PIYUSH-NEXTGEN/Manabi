@@ -210,7 +210,7 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
             setFailure(
               error instanceof ApiError
                 ? error.status >= 500
-                  ? 'GitHub is not reachable right now — try again shortly.'
+                  ? 'GitHub is not reachable right now. Try again shortly.'
                   : error.detail
                 : 'Could not mark as completed. Try again.',
             );
@@ -257,7 +257,7 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
         {checklist ? (
           <div className="border border-ink bg-sheet p-3">
             <p className="font-mono text-[11px] font-bold uppercase tracking-widest text-danger">
-              Not ready yet — missing:
+              Not ready yet. Missing:
             </p>
             <CompleteChecklistRow checklist={checklist} />
           </div>

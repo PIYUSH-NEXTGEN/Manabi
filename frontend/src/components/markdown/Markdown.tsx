@@ -4,7 +4,7 @@ import ReactMarkdown from 'react-markdown';
 
 /**
  * Renders a Markdown string (LLM reply or seeded scenario) in the brutalist
- * design language. Raw HTML stays inert — react-markdown ignores it by default,
+ * design language. Raw HTML stays inert. React-markdown ignores it by default,
  * per agent.md ("react-markdown, no raw HTML").
  *
  * With `problemsAsLinks`, catalog tokens like [P17] become links to the problem

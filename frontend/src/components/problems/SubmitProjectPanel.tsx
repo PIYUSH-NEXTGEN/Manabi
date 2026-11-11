@@ -24,23 +24,23 @@ const ERROR_MESSAGES: Record<string, string> = {
   invalid_summary: 'Keep the description to at most 400 characters.',
   invalid_demo_url: 'The deployed link must be a plain http(s) URL, at most 500 characters.',
   repo_not_found: 'Repository not found on GitHub or not public.',
-  fork_not_allowed: 'This is a fork — submit the original repo you built the solution in.',
+  fork_not_allowed: 'This is a fork. Submit the original repo you built the solution in.',
   repo_not_available: 'This repository is archived or disabled and cannot accept submissions.',
   not_repo_owner: 'You can only submit repositories you own',
-  github_rate_limited: 'GitHub rate limit reached — try again in a few minutes.',
-  github_unavailable: 'GitHub is not reachable right now — try again shortly.',
+  github_rate_limited: 'GitHub rate limit reached. Try again in a few minutes.',
+  github_unavailable: 'GitHub is not reachable right now. Try again shortly.',
   not_relevant: 'Your project was rejected by the automatic relevance check. The reasons below explain everything that can cause a rejection.',
   readme_required: 'Your project was rejected: the repository has no README. Add one that explains the project, then submit again.',
   too_few_commits: 'Your project was rejected: the repository does not have enough commit history yet.',
   already_submitted: 'You already linked this repository to this problem.',
   repo_already_used: 'This repository is already linked to another problem.',
   repo_already_used_other_problem: 'This repository is already linked to another problem.',
-  rate_limited: 'Too many submissions this hour — try again later.',
+  rate_limited: 'Too many submissions this hour. Try again later.',
 };
 
 function errorMessageFor(error: unknown): string {
   if (error instanceof ApiError) {
-    if (error.status === 429) return 'Too many attempts — wait a bit before trying again.';
+    if (error.status === 429) return 'Too many attempts. Wait a bit before trying again.';
     if (error.code && ERROR_MESSAGES[error.code]) return ERROR_MESSAGES[error.code];
     return error.detail;
   }

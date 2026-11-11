@@ -127,7 +127,7 @@ describe('Route table (no dead links)', () => {
     render(<App />);
 
     expect(
-      await screen.findByRole('heading', { name: '404 — page not found', level: 1 }),
+      await screen.findByRole('heading', { name: '404. Page not found', level: 1 }),
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Browse problems' })).toBeInTheDocument();
   });

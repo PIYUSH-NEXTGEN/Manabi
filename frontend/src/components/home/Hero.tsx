@@ -294,7 +294,7 @@ function StatsNumber({
 }) {
   const stats = useStats();
   if (!stats.data) {
-    return <span aria-hidden>—</span>;
+    return <span aria-hidden>-</span>;
   }
   return <CountUp value={stats.data[statKey]} />;
 }

@@ -271,7 +271,7 @@ export function BuildInPublic() {
                 <ProgressPanel project={query.project} />
               ) : query.isError ? (
                 <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/45">
-                  Live example unavailable — the projects API is down.
+                  Live example unavailable. The projects API is down.
                 </p>
               ) : null}
             </div>

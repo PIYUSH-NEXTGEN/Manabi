@@ -56,7 +56,7 @@ class SubmissionError(Exception):
 
 
 # A submission claims real work, and five or more commits is the smallest
-# footprint a real project leaves on GitHub. Nothing here measures quality —
+# footprint a real project leaves on GitHub. Nothing here measures quality -
 # this only prevents a repo that was opened five minutes ago from riding along.
 MIN_COMMIT_COUNT = 5
 
@@ -189,10 +189,10 @@ async def _repo_facts(owner: str, name: str, token: str | None) -> RepoFacts:
             )
         if exc.status == 403:
             raise SubmissionError(
-                503, "github_rate_limited", "GitHub rate limit reached — try again shortly."
+                503, "github_rate_limited", "GitHub rate limit reached. Try again shortly."
             )
         raise SubmissionError(
-            503, "github_unavailable", "GitHub is not reachable right now — try again shortly."
+            503, "github_unavailable", "GitHub is not reachable right now. Try again shortly."
         )
     facts = RepoFacts.from_repo(repo)
     settings = get_settings()
@@ -247,7 +247,7 @@ async def _ownership_via_contributors(facts: RepoFacts, user: User, token: str |
     except GitHubError as exc:
         if exc.status == 403:
             raise SubmissionError(
-                503, "github_rate_limited", "GitHub rate limit reached — try again shortly."
+                503, "github_rate_limited", "GitHub rate limit reached. Try again shortly."
             )
         return None  # transient GitHub trouble -> not proven, fail safe
     for contributor in contributors:
@@ -294,7 +294,7 @@ def assert_limits(db, user: User) -> None:
         raise SubmissionError(
             429,
             "too_many_submissions",
-            f"You can submit at most {settings.MAX_SUBMISSIONS_PER_DAY} projects per day — try again tomorrow.",
+            f"You can submit at most {settings.MAX_SUBMISSIONS_PER_DAY} projects per day. Try again tomorrow.",
         )
     active = db.scalar(
         select(func.count(Project.id)).where(
@@ -305,7 +305,7 @@ def assert_limits(db, user: User) -> None:
         raise SubmissionError(
             429,
             "too_many_active_projects",
-            f"You already have {settings.MAX_ACTIVE_PROJECTS_PER_USER} projects — remove one before adding another.",
+            f"You already have {settings.MAX_ACTIVE_PROJECTS_PER_USER} projects. Remove one before adding another.",
         )
 
 
@@ -498,7 +498,7 @@ def evaluate_relevance(
 
     if not llm_ok:
         # Deterministic fallback: keyword overlap only chooses between
-        # needs_review and a hard 422 — it can never auto-verify.
+        # needs_review and a hard 422. It can never auto-verify.
         ratio, overlap = _fallback_overlap(problem, summary, facts, readme)
         if not overlap:
             return RelevanceEvaluation(
@@ -508,7 +508,7 @@ def evaluate_relevance(
         reason = (
             pre_existing_note
             if pre_existing
-            else "Linked to the problem by keywords — automatic check could not fully confirm."
+            else "Linked to the problem by keywords. Automatic check could not fully confirm."
         )
         return RelevanceEvaluation(VERIFICATION_NEEDS_REVIEW, None, reason)
 
@@ -574,7 +574,7 @@ async def create_submission(
             reasons=[
                 "Fewer than "
                 f"{MIN_COMMIT_COUNT} commits usually means the project was just created and is not a working solution yet.",
-                "Push your real work to GitHub — every meaningful change should land as its own commit.",
+                "Push your real work to GitHub. Every meaningful change should land as its own commit.",
                 "The commit count only needs real history; commits made just to reach the number can be rejected after review.",
             ],
         )
@@ -654,7 +654,7 @@ async def refresh_project_state(db, project: Project, user: User | None) -> None
 
     Detects: repo gone/private, renamed/transferred (by immutable id),
     ownership lost (needs_review + reason). Never raises for verification
-    matters — progress fetching must keep working.
+    matters. Progress fetching must keep working.
 
     `user` is the logged-in viewer who triggered the refresh. Ownership is
     always judged against the project's submitter, never the viewer.
@@ -680,7 +680,7 @@ async def refresh_project_state(db, project: Project, user: User | None) -> None
         project.repo_url = facts.url
         project.repo_github_id = facts.github_id or project.repo_github_id
         project.verification_status = VERIFICATION_NEEDS_REVIEW
-        project.relevance_reason = "Repository was renamed or transferred — review required"
+        project.relevance_reason = "Repository was renamed or transferred. Review required"
 
     if submitter is not None:
         basis = await check_ownership(facts, submitter, token)
@@ -724,7 +724,7 @@ async def auto_reverify(db, project: Project, problem: Problem, user: User) -> b
     if evaluation.status == VERIFICATION_REJECTED:
         # The auto path stays conservative: park rejected candidates for an
         # admin instead of silently unpublishing a submitted project.
-        project.relevance_reason = "Re-check found the repository unrelated — admin review required"
+        project.relevance_reason = "Re-check found the repository unrelated. Admin review required"
         project.relevance_score = evaluation.score
         project.relevance_checked_at = utcnow()
         db.commit()
@@ -745,7 +745,7 @@ async def reverify_after_summary_edit(db, project: Project, problem: Problem, us
         raise SubmissionError(
             429,
             "verification_rate_limited",
-            "Verification was updated recently — try again in a few hours.",
+            "Verification was updated recently. Try again in a few hours.",
         )
     token = user.github_token if user else None
     try:
@@ -756,7 +756,7 @@ async def reverify_after_summary_edit(db, project: Project, problem: Problem, us
             project.verification_status = VERIFICATION_NEEDS_REVIEW
             db.commit()
             return
-        raise SubmissionError(503, "github_unavailable", "GitHub is not reachable right now — try again shortly.")
+        raise SubmissionError(503, "github_unavailable", "GitHub is not reachable right now. Try again shortly.")
     facts = RepoFacts.from_repo(repo)
     readme = await github.fetch_readme_text(facts.owner_login, facts.name, token)
     commit_count = await _commit_count(facts, token)
@@ -765,7 +765,7 @@ async def reverify_after_summary_edit(db, project: Project, problem: Problem, us
     )
     if evaluation.status == VERIFICATION_REJECTED:
         project.relevance_score = evaluation.score
-        project.relevance_reason = "Re-check found the repository unrelated — admin review required"
+        project.relevance_reason = "Re-check found the repository unrelated. Admin review required"
         project.relevance_checked_at = utcnow()
         project.verification_status = VERIFICATION_NEEDS_REVIEW
         db.commit()

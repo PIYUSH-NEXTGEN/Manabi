@@ -17,7 +17,7 @@ _SessionLocal = None
 
 
 def normalized_database_url(raw: str) -> str:
-    """Accept libpq-style 'postgres://' URLs (Neon/Supabase/shears copy-paste) — SQLAlchemy 2 rejects that scheme."""
+    """Accept libpq-style 'postgres://' URLs (Neon/Supabase/shears copy-paste). SQLAlchemy 2 rejects that scheme."""
     url = make_url(raw)
     if url.drivername == "postgres":
         return raw.replace("postgres://", "postgresql://", 1)

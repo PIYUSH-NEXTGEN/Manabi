@@ -13,7 +13,7 @@ const FAQS = [
   },
   {
     q: 'What do beginner, intermediate, and advanced mean?',
-    a: 'Scope, not a skill gate. Beginner is one flow in one stack, intermediate adds persistence, auth, or an API, and advanced is systems work — event delivery, consistency, offline sync. Pick where you want to stretch.',
+    a: 'Scope, not a skill gate. Beginner is one flow in one stack, intermediate adds persistence, auth, or an API, and advanced is systems work. Event delivery, consistency, offline sync. Pick where you want to stretch.',
   },
   {
     q: 'Do I need an account?',

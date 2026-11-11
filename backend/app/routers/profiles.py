@@ -22,7 +22,7 @@ def public_profile(username: str, db: DB):
         .where(Project.user_id == user.id, Problem.status == STATUS_PUBLISHED)
         .order_by(Project.id.desc())
     ).all()
-    # Public profile: verified rows only — for everyone (the owner has their
+    # Public profile: verified rows only. For everyone (the owner has their
     # own dashboard for non-verified states).
     projects = filter_visible(rows, None)
     return {
@@ -36,7 +36,7 @@ async def github_heatmap(user: CurrentUser):
     """Daily public push activity for the logged-in user (last 13 weeks).
 
     Degrades to `{days: [], total: 0, window_days: N}` when GitHub is
-    unreachable — the UI shows an honest empty grid, never fake data.
+    unreachable. The UI shows an honest empty grid, never fake data.
     """
     days = await github.fetch_contribution_histogram(user.username, user.github_token)
     if days is None:

@@ -1,5 +1,5 @@
 """Endpoint visibility (§7.4): problems list/detail counts, /api/stats,
-public profile — alongside is_admin behaviour."""
+public profile. Alongside is_admin behaviour."""
 
 from datetime import datetime, timezone
 

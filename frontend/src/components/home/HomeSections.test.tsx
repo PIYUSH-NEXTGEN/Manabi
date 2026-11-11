@@ -46,7 +46,7 @@ describe('BuildInPublic', () => {
     expect(await screen.findByText('Verification console')).toBeInTheDocument();
     expect(
       await screen.findByText(
-        'Live example unavailable — the projects API is down.',
+        'Live example unavailable. The projects API is down.',
       ),
     ).toBeInTheDocument();
   });

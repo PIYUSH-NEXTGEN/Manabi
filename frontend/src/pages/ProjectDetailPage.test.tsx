@@ -92,7 +92,7 @@ describe('ProjectDetailPage', () => {
     renderProject('/projects/2');
 
     expect(
-      await screen.findByText(/Progress unknown — hit refresh/i),
+      await screen.findByText(/Progress unknown. Hit refresh/i),
     ).toBeInTheDocument();
   });
 
@@ -213,7 +213,7 @@ describe('ProjectDetailPage', () => {
 
     expect(
       await screen.findByRole('status'),
-    ).toHaveTextContent('Report sent — thanks. A maintainer will take a look.');
+    ).toHaveTextContent('Report sent. Thanks. A maintainer will take a look.');
     expect(bodies).toEqual([
       { reason: 'The demo link goes to a parking page.' },
     ]);
@@ -262,7 +262,7 @@ describe('ProjectDetailPage', () => {
     await user.click(screen.getByRole('button', { name: 'Report submission' }));
 
     expect(
-      await screen.findByText('Too many reports this hour — try again later.'),
+      await screen.findByText('Too many reports this hour. Try again later.'),
     ).toBeInTheDocument();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });

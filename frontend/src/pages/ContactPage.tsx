@@ -7,7 +7,7 @@ export function ContactPage() {
   return (
     <StaticShell kicker="Contact" title="Talk to us">
       <p>
-        Bugs, breaks, and bad copy: open a GitHub issue — issues are the
+        Bugs, breaks, and bad copy: open a GitHub issue. Issues are the
         changelog. Anything else that needs a reply: email.
       </p>
 
@@ -47,7 +47,7 @@ export function ContactPage() {
           role="status"
           className="border border-ink bg-sheet p-4 font-mono text-[11px] font-bold uppercase tracking-widest"
         >
-          Contact details are not configured yet — no fake form here.
+          Contact details are not configured yet. No fake form here.
         </p>
       )}
 

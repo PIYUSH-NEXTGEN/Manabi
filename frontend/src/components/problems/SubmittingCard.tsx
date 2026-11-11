@@ -82,7 +82,7 @@ export function SubmittingCard() {
           {stage.label}
           <span className="sr-only">
             {' '}
-            — step {stageIndex + 1} of {STAGES.length}
+            Step {stageIndex + 1} of {STAGES.length}
           </span>
         </p>
       </div>

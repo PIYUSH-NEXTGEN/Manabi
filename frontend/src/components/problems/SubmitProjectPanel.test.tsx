@@ -141,7 +141,7 @@ describe('SubmitProjectPanel', () => {
     await user.click(screen.getByRole('button', { name: 'Submit project' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Too many attempts — wait a bit before trying again.',
+      'Too many attempts. Wait a bit before trying again.',
     );
   });
 

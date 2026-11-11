@@ -452,7 +452,7 @@ export interface paths {
          * @description Daily public push activity for the logged-in user (last 13 weeks).
          *
          *     Degrades to `{days: [], total: 0, window_days: N}` when GitHub is
-         *     unreachable — the UI shows an honest empty grid, never fake data.
+         *     unreachable. The UI shows an honest empty grid, never fake data.
          */
         get: operations["github_heatmap_api_me_github_heatmap_get"];
         put?: never;

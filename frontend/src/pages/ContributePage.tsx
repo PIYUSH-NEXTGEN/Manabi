@@ -15,7 +15,7 @@ export function ContributePage() {
       <ol className="flex flex-col gap-4">
         <li className="border-t border-ink pt-3">
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
-            01 — Find a live project
+            01. Find a live project
           </p>
           <p className="mt-1">
             Open a problem, scroll to its submitted projects, and look for the
@@ -24,7 +24,7 @@ export function ContributePage() {
         </li>
         <li className="border-t border-ink pt-3">
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
-            02 — Take a good-first-issue
+            02. Take a good-first-issue
           </p>
           <p className="mt-1">
             Each project page lists contributor issues straight from GitHub,
@@ -33,7 +33,7 @@ export function ContributePage() {
         </li>
         <li className="border-t border-ink pt-3">
           <p className="font-mono text-xs font-bold uppercase tracking-widest text-accent">
-            03 — Open a PR like everywhere else
+            03. Open a PR like everywhere else
           </p>
           <p className="mt-1">
             MANABI does not fork your workflow. Commits show up on the project
@@ -43,7 +43,7 @@ export function ContributePage() {
       </ol>
 
       <p>
-        No project yet for a problem you like? Claim it and be the first —
+        No project yet for a problem you like? Claim it and be the first,
         then tick 'open for contributors' when you submit.
       </p>
 

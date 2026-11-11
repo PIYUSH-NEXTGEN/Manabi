@@ -312,7 +312,7 @@ export function VerificationConsole() {
               {step < 4
                 ? 'queued'
                 : step === 4
-                  ? `${score.toFixed(2)} — reading…`
+                  ? `${score.toFixed(2)}. Reading…`
                   : `${VERIFIED_SCORE.toFixed(2)} match`}
             </span>
           </div>
