@@ -130,7 +130,7 @@ def test_report_duplicate_returns_409(client, seeded, reporter):
     assert res.json()["detail"]["code"] == "already_reported"
 
 
-def test_report_rate_limited_after_quota(client, seeded, reporter):
+def test_report_rate_limited_after_quota(client, seeded, reporter, db_session):
     from app.routers.projects import REPORT_LIMITER
 
     # The limiter (per-user) is checked before the duplicate-report guard, so a
@@ -138,7 +138,7 @@ def test_report_rate_limited_after_quota(client, seeded, reporter):
     monkeypatch = pytest.MonkeyPatch()
     monkeypatch.setenv("REPORT_RATE_LIMIT_PER_HOUR", "1")
     config.get_settings.cache_clear()
-    REPORT_LIMITER._hits.clear()
+    REPORT_LIMITER.reset(db_session)
     try:
         first = client.post(f"/api/projects/{seeded['project'].id}/report", json={"reason": "one"})
         assert first.status_code == 201, first.json()
@@ -148,7 +148,35 @@ def test_report_rate_limited_after_quota(client, seeded, reporter):
     finally:
         monkeypatch.undo()
         config.get_settings.cache_clear()
-        REPORT_LIMITER._hits.clear()
+        REPORT_LIMITER.reset(db_session)
+
+
+def test_report_rate_limit_returns_retry_after(client, seeded, reporter, db_session):
+    """A blocked request carries Retry-After: seconds until the next slot."""
+    from app.models import RateLimitHit
+    from app.routers.projects import REPORT_LIMITER
+
+    monkeypatch = pytest.MonkeyPatch()
+    monkeypatch.setenv("REPORT_RATE_LIMIT_PER_HOUR", "1")
+    config.get_settings.cache_clear()
+    REPORT_LIMITER.reset(db_session)
+    try:
+        assert client.post(
+            f"/api/projects/{seeded['project'].id}/report", json={"reason": "one"}
+        ).status_code == 201
+        # The hit store is the DB: exactly one row for this user.
+        assert (
+            db_session.query(RateLimitHit).filter(RateLimitHit.key == f"report:{reporter.id}").count()
+            == 1
+        )
+        second = client.post(f"/api/projects/{seeded['project'].id}/report", json={"reason": "two"})
+        assert second.status_code == 429
+        retry_after = int(second.headers["Retry-After"])
+        assert 0 < retry_after <= 3600
+    finally:
+        monkeypatch.undo()
+        config.get_settings.cache_clear()
+        REPORT_LIMITER.reset(db_session)
 
 
 def test_report_threshold_flips_problem_to_needs_review(client, seeded, db_session):

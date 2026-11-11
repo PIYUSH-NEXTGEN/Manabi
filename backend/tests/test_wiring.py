@@ -213,7 +213,7 @@ def test_problem_create_rate_limited_for_regular_users(client, db_session, user,
 
     monkeypatch.setenv("PROBLEM_CREATE_PER_HOUR", "2")
     config.get_settings.cache_clear()
-    PROBLEM_CREATE_LIMITER._hits.clear()
+    PROBLEM_CREATE_LIMITER.reset(db_session)
     try:
         assert client.post("/api/problems", json=draft_card_factory()).status_code == 201
         assert client.post("/api/problems", json=draft_card_factory()).status_code == 201
@@ -222,16 +222,16 @@ def test_problem_create_rate_limited_for_regular_users(client, db_session, user,
         assert res.json()["detail"]["code"] == "rate_limited"
     finally:
         config.get_settings.cache_clear()
-        PROBLEM_CREATE_LIMITER._hits.clear()
+        PROBLEM_CREATE_LIMITER.reset(db_session)
 
 
 def test_problem_create_admins_are_exempt(client, db_session, user, monkeypatch):
-    from app.routers.problems import PROBLEM_CREATE_LIMITER
+    from app.routers.problems import ADMIN_LIMITER
 
     monkeypatch.setenv("PROBLEM_CREATE_PER_HOUR", "1")
     monkeypatch.setenv("ADMIN_GITHUB_USERNAMES", "fixer")
     config.get_settings.cache_clear()
-    PROBLEM_CREATE_LIMITER._hits.clear()
+    ADMIN_LIMITER.reset(db_session)
     try:
         for index in range(3):
             res = client.post(
@@ -241,7 +241,29 @@ def test_problem_create_admins_are_exempt(client, db_session, user, monkeypatch)
             assert res.status_code == 201, res.json()
     finally:
         config.get_settings.cache_clear()
-        PROBLEM_CREATE_LIMITER._hits.clear()
+        ADMIN_LIMITER.reset(db_session)
+
+
+def test_problem_create_admins_still_have_sanity_cap(client, db_session, user, monkeypatch):
+    """Admins bypass the user quota but not the shared 100/h sanity cap."""
+    from app.routers.problems import ADMIN_LIMITER
+
+    monkeypatch.setenv("ADMIN_GITHUB_USERNAMES", "fixer")
+    monkeypatch.setenv("ADMIN_RATE_LIMIT_PER_HOUR", "2")
+    config.get_settings.cache_clear()
+    ADMIN_LIMITER.reset(db_session)
+    try:
+        for index in range(2):
+            assert client.post(
+                "/api/problems", json=draft_card_factory(source_id=f"ADMCAP{index}")
+            ).status_code == 201
+        res = client.post("/api/problems", json=draft_card_factory(source_id="ADMCAP-X"))
+        assert res.status_code == 429
+        assert res.json()["detail"]["code"] == "rate_limited"
+        assert int(res.headers["Retry-After"]) > 0
+    finally:
+        config.get_settings.cache_clear()
+        ADMIN_LIMITER.reset(db_session)
 
 @pytest.fixture
 def _escape_probe_dist(tmp_path, monkeypatch):

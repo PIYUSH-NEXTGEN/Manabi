@@ -21,7 +21,7 @@ from app.models import (
 )
 from app.services import github, verification, visibility
 from app.services.presenters import project_out_safely
-from app.services.ratelimit import RateLimiter
+from app.services.ratelimit import ADMIN_LIMITER, RateLimiter
 from app.services.verification import SubmissionError
 
 router = APIRouter(tags=["projects"])
@@ -102,20 +102,26 @@ async def get_project_progress(
 ):
     project = _project_or_404(db, project_id)
     # refresh=true forces a GitHub API call and can write back to the DB, so
-    # it is quota-sensitive. Owners and admins refresh freely; everyone else
-    # (including anonymous visitors) gets a modest hourly cap.
-    is_owner = user is not None and (
-        user.id == project.user_id or visibility.is_admin(user)
-    )
+    # it is quota-sensitive. Owners refresh freely; everyone else (including
+    # anonymous visitors) gets a modest hourly cap, and admins a higher
+    # sanity cap so a runaway admin session cannot drain the shared quota.
+    is_owner = user is not None and user.id == project.user_id
     if refresh and not is_owner:
-        viewer_key = user.id if user else f"ip:{request.client.host if request.client else 'unknown'}"
-        if not REFRESH_LIMITER.allowed(f"refresh:{viewer_key}"):
+        is_admin = user is not None and visibility.is_admin(user)
+        limiter = ADMIN_LIMITER if is_admin else REFRESH_LIMITER
+        prefix = "admin" if is_admin else "refresh"
+        viewer_key = (
+            user.id if user else f"ip:{request.client.host if request.client else 'unknown'}"
+        )
+        retry = limiter.check(db, f"{prefix}:{viewer_key}")
+        if retry is not None:
             raise HTTPException(
                 status_code=429,
                 detail={
                     "code": "rate_limited",
-                    "message": "Too many progress refreshes this hour — open the repo on GitHub for the latest state.",
+                    "message": "Too many progress refreshes this hour. Open the repo on GitHub for the latest state.",
                 },
+                headers={"Retry-After": str(retry)},
             )
     now = datetime.now(timezone.utc)
     cached = project.progress_json
@@ -206,7 +212,7 @@ async def edit_project(project_id: int, body: schemas.ProjectPatch, user: Curren
         if new_summary is not None:
             # summary edits re-run the relevance check (rate limited by the
             # auto-reverify interval); all SubmissionErrors map to clean
-            # {"code", "message"} responses — the PATCH itself still succeeded.
+            # {"code", "message"} responses. The PATCH itself still succeeded.
             await verification.reverify_after_summary_edit(db, project, project.problem, user, new_summary)
     except SubmissionError as err:
         db.rollback()
@@ -254,7 +260,7 @@ async def complete_project(project_id: int, body: schemas.CompleteIn, user: Curr
     if progress is None:
         raise HTTPException(
             status_code=503,
-            detail={"code": "github_unavailable", "message": "GitHub is not reachable right now — try again shortly."},
+            detail={"code": "github_unavailable", "message": "GitHub is not reachable right now. Try again shortly."},
         )
     if not all(item.ok for item in checklist):
         raise HTTPException(
@@ -287,7 +293,7 @@ def reopen_project(project_id: int, user: CurrentUser, db: DB):
 
 
 # ---------------------------------------------------------------------------
-# Reports (§8) — logged-in users, once per project, not the owner
+# Reports (§8). Logged-in users, once per project, not the owner
 # ---------------------------------------------------------------------------
 
 
@@ -301,9 +307,12 @@ def report_project(project_id: int, body: schemas.ReportIn, user: CurrentUser, d
             status_code=422,
             detail={"code": "cannot_report_own_project", "message": "You cannot report your own submission."},
         )
-    if not REPORT_LIMITER.allowed(f"report:{user.id}"):
+    retry = REPORT_LIMITER.check(db, f"report:{user.id}")
+    if retry is not None:
         raise HTTPException(
-            status_code=429, detail={"code": "rate_limited", "message": "Too many reports this hour — try again later."}
+            status_code=429,
+            detail={"code": "rate_limited", "message": "Too many reports this hour. Try again later."},
+            headers={"Retry-After": str(retry)},
         )
     reason = verification.clean_text(body.reason)[:300]
     existing = db.scalar(
@@ -326,7 +335,7 @@ def report_project(project_id: int, body: schemas.ReportIn, user: CurrentUser, d
 
 
 # ---------------------------------------------------------------------------
-# Stars (§8b) — logged-in users, one per user per project, visible to everyone
+# Stars (§8b). Logged-in users, one per user per project, visible to everyone
 # ---------------------------------------------------------------------------
 
 
@@ -341,10 +350,11 @@ def star_project(project_id: int, user: CurrentUser, db: DB):
     project = _project_or_404(db, project_id)
     if not visibility.can_view_project(project, user):
         raise HTTPException(status_code=404, detail="Project not found")
-    if not STAR_LIMITER.allowed(f"star:{user.id}"):
+    if (retry := STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
         raise HTTPException(
             status_code=429,
-            detail={"code": "rate_limited", "message": "Too many star actions this hour — try again later."},
+            detail={"code": "rate_limited", "message": "Too many star actions this hour. Try again later."},
+            headers={"Retry-After": str(retry)},
         )
     existing = db.scalar(
         select(ProjectStar).where(
@@ -365,10 +375,11 @@ def unstar_project(project_id: int, user: CurrentUser, db: DB):
     project = _project_or_404(db, project_id)
     if not visibility.can_view_project(project, user):
         raise HTTPException(status_code=404, detail="Project not found")
-    if not STAR_LIMITER.allowed(f"star:{user.id}"):
+    if (retry := STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
         raise HTTPException(
             status_code=429,
-            detail={"code": "rate_limited", "message": "Too many star actions this hour — try again later."},
+            detail={"code": "rate_limited", "message": "Too many star actions this hour. Try again later."},
+            headers={"Retry-After": str(retry)},
         )
     star = db.scalar(
         select(ProjectStar).where(

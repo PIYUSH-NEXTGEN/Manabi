@@ -24,8 +24,9 @@ def _client_ip(request: Request) -> str:
     return request.client.host if request.client else "unknown"
 
 
-def _login_allowed(request: Request) -> bool:
-    return LOGIN_LIMITER.allowed(f"login-ip:{_client_ip(request)}")
+def _login_block(db, request: Request) -> int | None:
+    """Seconds until retry, or None when this attempt may proceed."""
+    return LOGIN_LIMITER.check(db, f"login-ip:{_client_ip(request)}")
 
 oauth = OAuth()
 
@@ -60,11 +61,12 @@ def get_github_client():
 
 
 @router.get("/github/login")
-async def github_login(request: Request):
-    if not _login_allowed(request):
+async def github_login(request: Request, db: DB):
+    if (retry := _login_block(db, request)) is not None:
         raise HTTPException(
             status_code=429,
-            detail={"code": "rate_limited", "message": "Too many login attempts — try again later."},
+            detail={"code": "rate_limited", "message": "Too many login attempts. Try again later."},
+            headers={"Retry-After": str(retry)},
         )
     client = get_github_client()
     if client is None:
@@ -75,10 +77,11 @@ async def github_login(request: Request):
 
 @router.get("/github/callback")
 async def github_callback(request: Request, db: DB):
-    if not _login_allowed(request):
+    if (retry := _login_block(db, request)) is not None:
         raise HTTPException(
             status_code=429,
-            detail={"code": "rate_limited", "message": "Too many login attempts — try again later."},
+            detail={"code": "rate_limited", "message": "Too many login attempts. Try again later."},
+            headers={"Retry-After": str(retry)},
         )
     client = get_github_client()
     if client is None:
