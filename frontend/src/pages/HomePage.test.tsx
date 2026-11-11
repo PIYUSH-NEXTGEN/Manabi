@@ -48,13 +48,11 @@ describe('HomePage', () => {
     10000,
   );
 
-  it('shows the sample project progress panel with an ACTIVE stamp', async () => {
+  it('shows the submission console as the only sample panel', async () => {
     renderWithProviders(<HomePage />, { route: '/' });
 
-    expect(
-      await screen.findByText('demo-farmer / crop-triage'),
-    ).toBeInTheDocument();
-    expect(screen.getAllByText('ACTIVE').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByLabelText('14 commits').length).toBeGreaterThanOrEqual(1);
+    expect(await screen.findByText('Verification console')).toBeInTheDocument();
+    expect(screen.getByText('Sample run')).toBeInTheDocument();
+    expect(screen.queryByText('Project record')).not.toBeInTheDocument();
   });
 });
