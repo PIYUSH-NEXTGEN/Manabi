@@ -143,8 +143,44 @@ body {
   }
 }
 
+/*
+ * The footer is a light-on-dark band by design. Night mode swaps --ink and
+ * --paper globally, which would flip it to dark-on-light; rebind the derived
+ * theme colours here so it keeps its intended night treatment.
+ */
+.dark .inverted-surface {
+  --color-ink: #17150f;
+  --color-ink-soft: #2d2a22;
+  --color-paper: #f4f0e7;
+  --color-sheet: #eae5db;
+  --color-tint: #d9d3c4;
+  --color-olive: #4e4d3c;
+  --color-accent: #c2451c;
+  --color-accent-soft: #e4d5c6;
+  --color-danger: #9f2c14;
+  --color-danger-soft: #efdcd2;
+  --color-muted: #6f695b;
+  --color-line: rgba(23, 21, 15, 0.22);
+}
+
 /* Submission-progress card: a small arcade screen. The game itself is drawn in
-   SVG; these layers only add the CRT scanlines and corner falloff on top. */
+   SVG; these layers only add the CRT scanlines and corner falloff on top.
+   Night mode dims the sprites and frame so they do not glare inside the dark
+   card. */
+.arcade-screen {
+  --arcade-ink: #efe7d5;
+  --arcade-accent: #ec6a34;
+  --arcade-frame: #17150f;
+  border: 1px solid var(--arcade-frame);
+  background: #0a0806;
+}
+
+.dark .arcade-screen {
+  --arcade-ink: #c8c0ae;
+  --arcade-accent: #b85a30;
+  --arcade-frame: rgba(200, 192, 174, 0.32);
+}
+
 .arcade-scanlines {
   background-image: repeating-linear-gradient(
     to bottom,

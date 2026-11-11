@@ -175,7 +175,7 @@ export function BuildInPublic() {
   const query = useShowcaseProject();
 
   return (
-    <section className="relative overflow-hidden border-b border-ink bg-olive text-paper">
+    <section className="relative overflow-hidden border-b border-ink bg-olive text-paper dark:bg-[#2f3025] dark:text-ink">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
@@ -193,11 +193,11 @@ export function BuildInPublic() {
             whileInView="show"
             viewport={{ once: true, amount: 0.25 }}
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-paper/25 pb-3">
-              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-paper/60">
-                <span className="text-accent-soft">02</span> / Submission
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-paper/25 pb-3 dark:border-ink/25">
+              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-paper/60 dark:text-ink/60">
+                <span className="text-accent-soft dark:text-ink">02</span> / Submission
               </p>
-              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-paper/45">
+              <p className="font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-paper/45 dark:text-ink/45">
                 Checked, not claimed
               </p>
             </div>
@@ -205,46 +205,46 @@ export function BuildInPublic() {
             <h2 className="mt-7 font-display text-4xl uppercase leading-[0.9] tracking-tight sm:text-5xl">
               Submit a repo.
               <br />
-              <span className="text-accent-soft">We check the work.</span>
+              <span className="text-accent-soft dark:text-ink">We check the work.</span>
             </h2>
-            <p className="mt-5 max-w-md text-sm leading-relaxed text-paper/75">
+            <p className="mt-5 max-w-md text-sm leading-relaxed text-paper/75 dark:text-ink/75">
               Every project is checked before it goes public: your own repo, a
               README, real commits, then an AI relevance check. Only what passes
               gets tracked.
             </p>
 
-            <ul className="mt-8 grid gap-px border border-paper/25 bg-paper/25 sm:grid-cols-2">
+            <ul className="mt-8 grid gap-px border border-paper/25 bg-paper/25 sm:grid-cols-2 dark:border-ink/25 dark:bg-ink/25">
               {STEPS.map(({ step, icon: Icon, title, copy }) => (
-                <li key={step} className="bg-olive p-4">
+                <li key={step} className="bg-olive p-4 dark:bg-[#2f3025]">
                   <div className="flex items-center justify-between gap-2">
                     <Icon
                       aria-hidden
                       size={18}
                       strokeWidth={2.2}
-                      className="text-accent-soft"
+                      className="text-accent-soft dark:text-ink"
                     />
-                    <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/35">
+                    <span className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/35 dark:text-ink/35">
                       {step}
                     </span>
                   </div>
                   <h3 className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.14em]">
                     {title}
                   </h3>
-                  <p className="mt-1.5 text-[13px] leading-snug text-paper/65">
+                  <p className="mt-1.5 text-[13px] leading-snug text-paper/65 dark:text-ink/65">
                     {copy}
                   </p>
                 </li>
               ))}
             </ul>
 
-            <p className="mt-4 border-l-2 border-accent-soft/60 pl-3 text-[12px] leading-relaxed text-paper/60">
+            <p className="mt-4 border-l-2 border-accent-soft/60 pl-3 text-[12px] leading-relaxed text-paper/60 dark:border-ink/40 dark:text-ink/60">
               If the AI can’t judge, a keyword check takes over. It can send work
               to human review, but never mark it verified.
             </p>
 
             <Link
               to="/problems"
-              className="group mt-8 inline-flex items-center gap-2 border border-paper bg-paper px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-ink transition-colors hover:border-accent hover:bg-accent hover:text-paper"
+              className="group mt-8 inline-flex items-center gap-2 border border-paper bg-paper px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-ink transition-colors hover:border-accent hover:bg-accent hover:text-paper dark:border-ink dark:bg-transparent dark:text-ink dark:hover:border-accent dark:hover:bg-accent dark:hover:text-[#f4f0e7]"
             >
               Claim a problem
               <ArrowUpRight
@@ -266,11 +266,11 @@ export function BuildInPublic() {
             <div className="flex flex-col gap-5">
               <VerificationConsole />
               {query.isLoading ? (
-                <div className="skeleton h-52 border border-paper/40" aria-hidden />
+                <div className="skeleton h-52 border border-paper/40 dark:border-ink/30" aria-hidden />
               ) : query.project ? (
                 <ProgressPanel project={query.project} />
               ) : query.isError ? (
-                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/45">
+                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-paper/45 dark:text-ink/45">
                   Live example unavailable. The projects API is down.
                 </p>
               ) : null}

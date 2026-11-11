@@ -29,8 +29,8 @@ const SHIP_Y = 152;
 const BULLET_SPEED = 260;
 const MAX_SWAY = 22;
 
-const CREAM = '#efe7d5';
-const ACCENT = '#ec6a34';
+const CREAM = 'var(--arcade-ink)';
+const ACCENT = 'var(--arcade-accent)';
 
 const ENEMY_A = [
   '..X.....X..',
@@ -361,7 +361,7 @@ export function SpaceShooter() {
 
   return (
     <div className="flex flex-col gap-1.5">
-      <div className="relative overflow-hidden border border-ink bg-[#0a0806]">
+      <div className="arcade-screen relative overflow-hidden">
         <svg
           ref={svgRef}
           viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}

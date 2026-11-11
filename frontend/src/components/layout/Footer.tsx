@@ -42,7 +42,7 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-ink bg-ink text-paper">
+    <footer className="inverted-surface relative overflow-hidden border-t border-ink bg-ink text-paper">
       <div className="mx-auto w-[min(1240px,96vw)]">
         <div className="grid gap-12 py-14 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
           <div>
