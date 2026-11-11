@@ -56,8 +56,15 @@ against Postgres it runs `alembic upgrade head` itself, so prod never silently d
 | `LLM_PROVIDER` | `gemini` | `anthropic` | `mock` |
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | Gemini (default model in code: `gemini-3.8-flash`) |
 | `ANTHROPIC_API_KEY`, `LLM_MODEL_FAST` | Optional Anthropic provider |
-| `CHAT_RATE_LIMIT_PER_DAY` | Chat limit per account per day (login-only; anonymous users are rejected) |
+| `CHAT_RATE_LIMIT_PER_DAY` | Chat messages per account per rolling 24 h (login-only; anonymous users are rejected) |
 | `ADMIN_GITHUB_USERNAMES` | Comma separated GitHub logins allowed into the `/admin/review` page |
+
+The remaining rate limits (submit attempts 10/h, stars 60/h, login 20/h per IP,
+progress refresh 10/h, problem create 5/h, reports 5/h, admin sanity cap
+100/h) default in `app/config.py` and are documented with comments in
+`.env.example`. Every 429 carries a `Retry-After` header, and its message
+names the wait ("Try again in about 37 minutes"). Limits live in the
+`rate_limit_hits` DB table, so they survive restarts and multi-worker deploys.
 
 Without an LLM key the AI endpoints return `503 {"detail": "AI is not configured yet"}`.
 
@@ -81,5 +88,6 @@ Full machine-readable contract: `docs/openapi.json` (regenerate with
   -related is ever returned by an API.
 - The DB is open to pattern-injection style data — such text is wrapped as data in
   LLM prompts with explicit instructions to ignore embedded instructions.
-- Known post-hackathon hardening TODOs: DNS-TOCTOU (resolve-time pinning), durable
-  (Redis/DB) rate limiting instead of in-memory counters.
+- Known post-hackathon hardening TODOs: DNS-TOCTOU (resolve-time pinning).
+  Rate limiting is already DB-backed (`rate_limit_hits`), durable across
+  restarts and workers.

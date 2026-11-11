@@ -13,6 +13,7 @@ import { useSubmitProject } from '@/hooks/useSubmitProject';
 import { GITHUB_REPO_URL_PATTERN, stripGitSuffix } from '@/lib/repoUrl';
 import { SOLUTION_SUMMARY_MAX } from '@/lib/limits';
 import { SubmittingCard } from './SubmittingCard';
+import { RetryCountdown } from '@/components/common/RetryCountdown';
 
 const panelHeading =
   'font-mono text-xs font-bold uppercase tracking-widest';
@@ -86,6 +87,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
   const [openForContributors, setOpenForContributors] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitRetryAfter, setSubmitRetryAfter] = useState<number | null>(null);
   const [submitReasons, setSubmitReasons] = useState<string[]>([]);
   const [submitted, setSubmitted] = useState<ProjectOut | null>(null);
 
@@ -165,6 +167,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
 
     setValidationError(null);
     setSubmitError(null);
+    setSubmitRetryAfter(null);
     submit.mutate(
       {
         repo_url: normalized,
@@ -184,6 +187,9 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
         onError: (error) => {
           setSubmitError(errorMessageFor(error));
           setSubmitReasons(rejectReasons(error));
+          setSubmitRetryAfter(
+            error instanceof ApiError ? error.retryAfterSeconds : null,
+          );
         },
       },
     );
@@ -283,6 +289,9 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
               {submitReasons.length > 0 ? 'Your project was rejected' : 'Submission failed'}
             </p>
             <p className="text-sm leading-snug">{submitError}</p>
+            {submitRetryAfter != null ? (
+              <RetryCountdown seconds={submitRetryAfter} />
+            ) : null}
             {submitReasons.length > 0 ? (
               <div className="flex flex-col gap-1.5">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-ink-soft">

@@ -9,7 +9,7 @@ from app.models import STATUS_PUBLISHED, Problem
 from app.services.catalog_search import search_catalog
 from app.services.llm import LLMConfigError, LLMResponseError
 from app.services.llm import chat as llm_chat
-from app.services.ratelimit import CHAT_DAILY_LIMITER
+from app.services.ratelimit import CHAT_DAILY_LIMITER, human_wait
 
 router = APIRouter(tags=["chat"])
 logger = logging.getLogger(__name__)
@@ -124,7 +124,7 @@ def chat(body: schemas.ChatIn, db: DB, user: CurrentUser):
     if (retry := CHAT_DAILY_LIMITER.check(db, f"user:{user.id}")) is not None:
         raise HTTPException(
             status_code=429,
-            detail=f"You have used your {CHAT_DAILY_LIMITER._limit()} messages for today. Come back tomorrow.",
+            detail=f"You have used your {CHAT_DAILY_LIMITER._limit()} messages for today. Try again in {human_wait(retry)}.",
             headers={"Retry-After": str(retry)},
         )
     try:

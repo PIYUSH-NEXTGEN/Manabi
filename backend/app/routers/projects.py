@@ -21,7 +21,7 @@ from app.models import (
 )
 from app.services import github, verification, visibility
 from app.services.presenters import project_out_safely
-from app.services.ratelimit import ADMIN_LIMITER, RateLimiter
+from app.services.ratelimit import ADMIN_LIMITER, RateLimiter, human_wait
 from app.services.verification import SubmissionError
 
 router = APIRouter(tags=["projects"])
@@ -72,7 +72,7 @@ async def submit_project(problem_id: int, body: schemas.ProjectCreate, user: Cur
             status_code=429,
             detail={
                 "code": "rate_limited",
-                "message": f"You have made {SUBMIT_LIMITER._limit()} submit attempts this hour. Fix the reported issues, then come back in about {max(1, round(retry / 60))} minutes.",
+                "message": f"You have made {SUBMIT_LIMITER._limit()} submit attempts this hour. Fix the reported issues, then try again in {human_wait(retry)}.",
             },
             headers={"Retry-After": str(retry)},
         )
@@ -134,7 +134,7 @@ async def get_project_progress(
                 status_code=429,
                 detail={
                     "code": "rate_limited",
-                    "message": "Too many progress refreshes this hour. Open the repo on GitHub for the latest state.",
+                    "message": f"Too many progress refreshes this hour. Try again in {human_wait(retry)} or open the repo on GitHub for the latest state.",
                 },
                 headers={"Retry-After": str(retry)},
             )
@@ -326,7 +326,7 @@ def report_project(project_id: int, body: schemas.ReportIn, user: CurrentUser, d
     if retry is not None:
         raise HTTPException(
             status_code=429,
-            detail={"code": "rate_limited", "message": "Too many reports this hour. Try again later."},
+            detail={"code": "rate_limited", "message": f"Too many reports this hour. Try again in {human_wait(retry)}."},
             headers={"Retry-After": str(retry)},
         )
     reason = verification.clean_text(body.reason)[:300]
@@ -368,7 +368,7 @@ def star_project(project_id: int, user: CurrentUser, db: DB):
     if (retry := STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
         raise HTTPException(
             status_code=429,
-            detail={"code": "rate_limited", "message": "Too many star actions this hour. Try again later."},
+            detail={"code": "rate_limited", "message": f"Too many star actions this hour. Try again in {human_wait(retry)}."},
             headers={"Retry-After": str(retry)},
         )
     existing = db.scalar(
@@ -393,7 +393,7 @@ def unstar_project(project_id: int, user: CurrentUser, db: DB):
     if (retry := STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
         raise HTTPException(
             status_code=429,
-            detail={"code": "rate_limited", "message": "Too many star actions this hour. Try again later."},
+            detail={"code": "rate_limited", "message": f"Too many star actions this hour. Try again in {human_wait(retry)}."},
             headers={"Retry-After": str(retry)},
         )
     star = db.scalar(

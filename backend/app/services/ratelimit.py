@@ -76,6 +76,19 @@ class RateLimiter:
 
 CHAT_DAILY_LIMITER = RateLimiter("CHAT_RATE_LIMIT_PER_DAY", window_seconds=86400)
 
+
+def human_wait(seconds: int) -> str:
+    """A readable wait time for 429 messages: 'about 37 minutes', 'about 6 hours'."""
+    minutes = max(1, round(seconds / 60))
+    if minutes < 60:
+        return f"about {minutes} minute{'s' if minutes != 1 else ''}"
+    hours = round(minutes / 60)
+    if hours < 24:
+        return f"about {hours} hour{'s' if hours != 1 else ''}"
+    days = round(hours / 24)
+    return f"about {days} day{'s' if days != 1 else ''}"
+
+
 # Sanity cap for admins, who are exempt from the per-user limits elsewhere.
 # High enough that real admin work never feels it; low enough that a
 # runaway or hijacked admin session stops before it drains the shared

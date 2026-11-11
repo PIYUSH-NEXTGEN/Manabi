@@ -156,14 +156,20 @@ describe('SubmitProjectPanel', () => {
     );
   });
 
-  it('shows the catch-all wording for 429 bursts', async () => {
+  it('shows the backend 429 message plus a live retry countdown', async () => {
     const user = userEvent.setup();
     server.use(
       http.get('*/api/auth/me', () => HttpResponse.json(LOGGED_IN)),
       http.post('*/api/problems/1/projects', () =>
         HttpResponse.json(
-          { detail: { code: 'rate_limited', message: 'Too many submissions this hour - try again later.' } },
-          { status: 429 },
+          {
+            detail: {
+              code: 'rate_limited',
+              message:
+                'You have made 10 submit attempts this hour. Fix the reported issues, then try again in about 37 minutes.',
+            },
+          },
+          { status: 429, headers: { 'Retry-After': '2220' } },
         ),
       ),
     );
@@ -174,7 +180,10 @@ describe('SubmitProjectPanel', () => {
     await user.click(screen.getByRole('button', { name: 'Submit project' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      'Too many attempts. Wait a bit before trying again.',
+      'try again in about 37 minutes',
+    );
+    expect(await screen.findByText(/Try again in/)).toHaveTextContent(
+      'Try again in 37:00',
     );
   });
 

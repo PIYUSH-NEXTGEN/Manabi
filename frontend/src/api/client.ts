@@ -14,16 +14,25 @@ export class ApiError extends Error {
   readonly detail: string;
   /** Machine-readable error code from {"detail": {"code", "message"}} bodies. */
   readonly code: string | null;
+  /** Seconds until the rate limit frees up, from the Retry-After header. */
+  readonly retryAfterSeconds: number | null;
   /** The raw parsed response body, for error payloads with extra fields
    * (e.g. the completion checklist). */
   readonly payload?: unknown;
 
-  constructor(status: number, detail: string, code: string | null = null, payload?: unknown) {
+  constructor(
+    status: number,
+    detail: string,
+    code: string | null = null,
+    payload?: unknown,
+    retryAfterSeconds: number | null = null,
+  ) {
     super(detail);
     this.name = 'ApiError';
     this.status = status;
     this.detail = detail;
     this.code = code;
+    this.retryAfterSeconds = retryAfterSeconds;
     this.payload = payload;
   }
 }
@@ -79,7 +88,12 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
     } catch {
       detail = `Request failed with status ${response.status}`;
     }
-    throw new ApiError(response.status, detail, code, payload);
+    const retryHeader = response.headers.get('Retry-After');
+    const retryAfterSeconds =
+      retryHeader !== null && /^\d+$/.test(retryHeader)
+        ? Number(retryHeader)
+        : null;
+    throw new ApiError(response.status, detail, code, payload, retryAfterSeconds);
   }
 
   if (response.status === 204) {

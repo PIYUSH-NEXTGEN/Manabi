@@ -13,6 +13,7 @@ import {
   type ChatProblemItem,
 } from '@/api/client';
 import { Markdown } from '@/components/markdown/Markdown';
+import { RetryCountdown } from '@/components/common/RetryCountdown';
 
 const OPEN_CHAT_EVENT = 'manabi:open-chat';
 const MAX_HISTORY = 6;
@@ -58,6 +59,7 @@ export function ChatWidget() {
   const [entries, setEntries] = useState<ChatEntry[]>([]);
   const [draft, setDraft] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [retryAfter, setRetryAfter] = useState<number | null>(null);
   const me = useMe();
   const location = useLocation();
 
@@ -84,6 +86,7 @@ export function ChatWidget() {
         },
       ]);
       setError(null);
+      setRetryAfter(null);
     },
     onError: (mutationError) => {
       setError(
@@ -91,11 +94,17 @@ export function ChatWidget() {
           ? mutationError.detail
           : 'The chatbot is unreachable right now. Try again later.',
       );
+      setRetryAfter(
+        mutationError instanceof ApiError
+          ? mutationError.retryAfterSeconds
+          : null,
+      );
     },
   });
 
   function send() {
     setError(null);
+    setRetryAfter(null);
 
     const content = draft.trim();
     if (content.length === 0) return;
@@ -208,12 +217,15 @@ export function ChatWidget() {
           </div>
 
           {error ? (
-            <p
+            <div
               role="alert"
               className="border-t border-ink px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
             >
-              {error}
-            </p>
+              <p>{error}</p>
+              {retryAfter != null ? (
+                <RetryCountdown seconds={retryAfter} />
+              ) : null}
+            </div>
           ) : null}
 
           <form

@@ -119,7 +119,7 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
           } else if (err.status === 422) {
             setError('You cannot report your own submission.');
           } else if (err.status === 429) {
-            setError('Too many reports this hour. Try again later.');
+            setError(err.detail || 'Too many reports this hour. Try again later.');
           } else {
             setError(err.detail);
           }

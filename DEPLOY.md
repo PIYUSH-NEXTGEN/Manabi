@@ -129,10 +129,17 @@ On Render/Railway a `Procfile` is included (`web: uvicorn app.main:app --host 0.
 
 ## Rate limits (env-tunable)
 
-`CHAT_RATE_LIMIT_ANON_PER_HOUR=10`, `CHAT_RATE_LIMIT_USER_PER_HOUR=30`,
-`PROBLEM_CREATE_PER_HOUR=5` (problem creation per user per hour; admins are
-exempt) and `REPORT_RATE_LIMIT_PER_HOUR=30`. The UI shows the backend's raw
-limit messages honestly when they trip.
+Chat: `CHAT_RATE_LIMIT_PER_DAY=20` messages per account per rolling 24 h
+(login-only, anonymous visitors are rejected). Submits:
+`SUBMIT_RATE_LIMIT_PER_HOUR=10` attempts per account per hour. Stars:
+`STAR_RATE_LIMIT_PER_HOUR=60`. Login: `AUTH_LOGIN_RATE_LIMIT_PER_HOUR=20` per
+IP per hour. Progress refresh: `PROGRESS_REFRESH_RATE_LIMIT_PER_HOUR=10`
+(owners exempt). Problem create: `PROBLEM_CREATE_PER_HOUR=5`. Reports:
+`REPORT_RATE_LIMIT_PER_HOUR=5`. Admins additionally share a sanity cap,
+`ADMIN_RATE_LIMIT_PER_HOUR=100`. Limits are stored in the database
+(`rate_limit_hits`), so they survive restarts and hold with multiple workers.
+Every 429 carries a `Retry-After` header plus a message that names the wait;
+the frontend renders it as a live countdown.
 
 ## 6. The submission-verification system (0005) — production checklist
 

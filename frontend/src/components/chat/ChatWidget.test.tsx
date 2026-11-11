@@ -209,7 +209,7 @@ describe('ChatWidget', () => {
       http.post('*/api/chat', () =>
         HttpResponse.json(
           { detail: 'Chat hourly quota exhausted. Try again later.' },
-          { status: 429 },
+          { status: 429, headers: { 'Retry-After': '300' } },
         ),
       ),
     );
@@ -226,6 +226,9 @@ describe('ChatWidget', () => {
     expect(
       await screen.findByRole('alert'),
     ).toHaveTextContent('Chat hourly quota exhausted. Try again later.');
+    expect(await screen.findByText(/Try again in/)).toHaveTextContent(
+      'Try again in 5:00',
+    );
     expect(screen.queryByText(/linked under this/i)).not.toBeInTheDocument();
   });
 

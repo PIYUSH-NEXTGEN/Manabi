@@ -278,8 +278,13 @@ describe('ProjectDetailPage', () => {
           );
         }
         return HttpResponse.json(
-          { detail: { code: 'rate_limited', message: 'Too many reports this hour - try again later.' } },
-          { status: 429 },
+          {
+            detail: {
+              code: 'rate_limited',
+              message: 'Too many reports this hour. Try again in about 37 minutes.',
+            },
+          },
+          { status: 429, headers: { 'Retry-After': '2220' } },
         );
       }),
     );
@@ -304,7 +309,9 @@ describe('ProjectDetailPage', () => {
     await user.click(screen.getByRole('button', { name: 'Report submission' }));
 
     expect(
-      await screen.findByText('Too many reports this hour. Try again later.'),
+      await screen.findByText(
+        'Too many reports this hour. Try again in about 37 minutes.',
+      ),
     ).toBeInTheDocument();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });

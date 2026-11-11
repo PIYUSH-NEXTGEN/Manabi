@@ -15,7 +15,6 @@ briefs.
 
 - Problem board with search plus field, difficulty, and domain filters
 - Problem detail pages with tech stack, build guide, and future ideas
-- Problem briefs downloadable as XLSX (`GET /api/problems/{id}/export.xlsx`)
 - Submit a project by repo URL (owner/push-access/contributor gates plus an
   LLM relevance check)
 - Progress tracking from the GitHub API: commits, README state, open issues,
@@ -27,8 +26,8 @@ briefs.
   curated counts until an admin or the verification system clears it
 - Viewer reports on published projects; 3 reports flip a project back to
   human review
-- Catalog chat with per-user and anonymous rate limits, plus an honest mock
-  provider so the app runs fully offline
+- Catalog chat (login-only, 20 messages per account per rolling 24 h) with an
+  honest mock provider so the app runs fully offline
 - `GET /api/recommendations` scores briefs against your GitHub profile signals
   (topics and languages)
 - Admin submissions queue at `/admin/review` (approve/reject), gated by
@@ -51,8 +50,8 @@ with `npm run gen:api` in `frontend/`).
 ## Project submission and verification
 
 Submitting a repo is gated hard. Anti-abuse limits (5 submissions per rolling
-24 h, 10 active projects, one repo per problem, forks and archived repos off)
-apply before GitHub is even contacted. Then the ownership gate accepts exactly
+24 h, 10 active projects, 10 submit-button attempts per hour, one repo per
+problem, forks and archived repos off) apply before GitHub is even contacted. Then the ownership gate accepts exactly
 one verifiable basis: the repo owner by GitHub numeric id, push or admin
 access for org repos, or 3 or more commits under your own account. An LLM then
 judges your README plus summary against the problem brief.
@@ -177,10 +176,20 @@ people touch:
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | empty | GitHub OAuth app for login |
 | `LLM_PROVIDER` | `mock` | `gemini`, `anthropic`, or `mock` |
 | `GEMINI_API_KEY` / `GEMINI_MODEL` / `ANTHROPIC_API_KEY` / `LLM_MODEL_FAST` | empty | Provider keys and optional model overrides |
-| `CHAT_RATE_LIMIT_ANON_PER_HOUR` / `CHAT_RATE_LIMIT_USER_PER_HOUR` | 10 / 30 | Chat rate limits, per user or IP per hour |
-| `PROBLEM_CREATE_PER_HOUR` | 5 | Problem publishing per user per hour (admins exempt) |
-| `REPORT_RATE_LIMIT_PER_HOUR` | 30 | Project reports per user per hour |
+| `CHAT_RATE_LIMIT_PER_DAY` | 20 | Chat messages per account per rolling 24 h (login-only) |
+| `SUBMIT_RATE_LIMIT_PER_HOUR` | 10 | Submit-button attempts per account per hour (failures count) |
+| `PROBLEM_CREATE_PER_HOUR` | 5 | Problem publishing per user per hour (admins get the sanity cap below) |
+| `REPORT_RATE_LIMIT_PER_HOUR` | 5 | Project reports per user per hour |
+| `STAR_RATE_LIMIT_PER_HOUR` | 60 | Star/unstar toggles per user per hour |
+| `AUTH_LOGIN_RATE_LIMIT_PER_HOUR` | 20 | Login redirect + OAuth callback per IP per hour |
+| `PROGRESS_REFRESH_RATE_LIMIT_PER_HOUR` | 10 | Forced progress refreshes per user per hour (owners exempt) |
+| `ADMIN_RATE_LIMIT_PER_HOUR` | 100 | Shared hourly sanity cap for admin actions |
 | `ADMIN_GITHUB_USERNAMES` | empty | Comma-separated GitHub logins allowed into `/admin/review` |
+
+Rate limits are stored in the database (`rate_limit_hits` table), so they
+survive restarts and hold under multiple workers. Every 429 response carries a
+`Retry-After` header and a message that names the wait ("Try again in about
+37 minutes"); the UI shows a live countdown from that header.
 
 Without LLM keys, AI endpoints return `503 {"detail": "AI is not configured
 yet"}`. Everything else works fine without them. The submission-verification

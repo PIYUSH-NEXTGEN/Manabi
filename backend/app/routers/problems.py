@@ -15,7 +15,7 @@ from app.models import (
     VERIFICATION_VERIFIED,
 )
 from app.services.presenters import problem_to_out, project_to_out
-from app.services.ratelimit import ADMIN_LIMITER, RateLimiter
+from app.services.ratelimit import ADMIN_LIMITER, RateLimiter, human_wait
 from app.services.visibility import can_view_project, is_admin
 
 router = APIRouter(prefix="/api/problems", tags=["problems"])
@@ -273,7 +273,7 @@ def create_problem(body: schemas.ProblemIn, user: CurrentUser, db: DB):
     if retry is not None:
         raise HTTPException(
             status_code=429,
-            detail={"code": "rate_limited", "message": "Too many problems created this hour. Try again later."},
+            detail={"code": "rate_limited", "message": f"Too many problems created this hour. Try again in {human_wait(retry)}."},
             headers={"Retry-After": str(retry)},
         )
     if body.source_id:
@@ -338,7 +338,7 @@ def star_problem(problem_id: int, user: CurrentUser, db: DB):
     if (retry := PROBLEM_STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
         raise HTTPException(
             status_code=429,
-            detail={"code": "rate_limited", "message": "Too many star actions this hour. Try again later."},
+            detail={"code": "rate_limited", "message": f"Too many star actions this hour. Try again in {human_wait(retry)}."},
             headers={"Retry-After": str(retry)},
         )
     existing = db.scalar(
@@ -361,7 +361,7 @@ def unstar_problem(problem_id: int, user: CurrentUser, db: DB):
     if (retry := PROBLEM_STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
         raise HTTPException(
             status_code=429,
-            detail={"code": "rate_limited", "message": "Too many star actions this hour. Try again later."},
+            detail={"code": "rate_limited", "message": f"Too many star actions this hour. Try again in {human_wait(retry)}."},
             headers={"Retry-After": str(retry)},
         )
     star = db.scalar(
