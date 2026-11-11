@@ -1,21 +1,21 @@
 import logging
 import re
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 
 from app import schemas
-from app.deps import DB, OptionalUser
+from app.deps import CurrentUser, DB
 from app.models import STATUS_PUBLISHED, Problem
 from app.services.catalog_search import search_catalog
 from app.services.llm import LLMConfigError, LLMResponseError
 from app.services.llm import chat as llm_chat
-from app.services.ratelimit import CHAT_ANON_LIMITER, CHAT_USER_LIMITER
+from app.services.ratelimit import CHAT_DAILY_LIMITER
 
 router = APIRouter(tags=["chat"])
 logger = logging.getLogger(__name__)
 
 EMPTY_REPLY_FALLBACK = (
-    "I could not compose a reply to that — try rephrasing, or ask me to suggest a problem to build."
+    "I could not compose a reply to that. Try rephrasing, or ask me to suggest a problem to build."
 )
 
 CHAT_SYSTEM = """\
@@ -117,13 +117,16 @@ def postprocess_reply(db: DB, reply: str) -> tuple[str, list[schemas.ChatProblem
 
 
 @router.post("/api/chat", response_model=schemas.ChatOut)
-def chat(body: schemas.ChatIn, request: Request, db: DB, user: OptionalUser):
-    if user is not None:
-        limiter, key = CHAT_USER_LIMITER, f"user:{user.id}"
-    else:
-        limiter, key = CHAT_ANON_LIMITER, f"ip:{request.client.host if request.client else 'unknown'}"
-    if not limiter.allowed(key):
-        raise HTTPException(status_code=429, detail="Too many chat messages this hour — try again later")
+def chat(body: schemas.ChatIn, db: DB, user: CurrentUser):
+    # Chat is for logged-in users only. The LLM call costs real quota, and
+    # keying the limit on the session user (not the raw IP) is fair to people
+    # who share one campus/office address. Each account gets its own bucket.
+    if (retry := CHAT_DAILY_LIMITER.check(db, f"user:{user.id}")) is not None:
+        raise HTTPException(
+            status_code=429,
+            detail=f"You have used your {CHAT_DAILY_LIMITER._limit()} messages for today. Come back tomorrow.",
+            headers={"Retry-After": str(retry)},
+        )
     try:
         problem_id = body.page_context.problem_id if body.page_context else None
         system = build_system(db, body.messages, problem_id)

@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { cx } from '@/lib/cx';
 import { fieldLabel } from '@/lib/fields';
 import { buttonClasses, Stamp } from '@/design/primitives';
+import { useMe } from '@/hooks/useMe';
 import {
   ApiError,
   postChat,
@@ -57,6 +58,7 @@ export function ChatWidget() {
   const [entries, setEntries] = useState<ChatEntry[]>([]);
   const [draft, setDraft] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const me = useMe();
   const location = useLocation();
 
   useEffect(() => {
@@ -151,71 +153,92 @@ export function ChatWidget() {
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-3" role="log" aria-live="polite">
-        {entries.length === 0 ? (
+      {me.isPending ? (
+        <div className="flex-1 p-3">
+          <p className="text-sm leading-snug">Checking whether you are logged in…</p>
+        </div>
+      ) : !me.data ? (
+        <div className="flex flex-col gap-3 p-3">
           <p className="text-sm leading-snug">
-            Tell it what you know and what you want to build. It finds problems
-            that fit, scoped for a weekend — and it only ever points at real
-            problems already in the index.
+            The MANABI chat is for logged-in members. Log in with GitHub to
+            continue.
           </p>
-        ) : (
-          <ul className="space-y-3">
-            {entries.map((entry, index) => (
-              <li
-                key={index}
-                className={cx(
-                  'max-w-[92%] border border-ink p-2 text-sm leading-snug',
-                  entry.message.role === 'user'
-                    ? 'ml-auto bg-accent/60'
-                    : 'bg-sheet',
-                )}
-              >
-                {entry.message.role === 'assistant' ? (
-                  <Markdown problemsAsLinks>
-                    {entry.message.content}
-                  </Markdown>
-                ) : (
-                  <p>{entry.message.content}</p>
-                )}
-                {entry.problems && entry.problems.length > 0 ? (
-                  <ReplyProblems problems={entry.problems} />
-                ) : null}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+          <a
+            href="/api/auth/github/login"
+            className={cx(buttonClasses('primary'), 'self-start')}
+          >
+            Log in with GitHub
+          </a>
+        </div>
+      ) : (
+        <>
+          <div className="flex-1 overflow-y-auto p-3" role="log" aria-live="polite">
+            {entries.length === 0 ? (
+            <p className="text-sm leading-snug">
+              Tell it what you know and what you want to build. It finds problems
+              that fit, scoped for a weekend, and it only ever points at real
+              problems already in the index.
+            </p>
+            ) : (
+              <ul className="space-y-3">
+                {entries.map((entry, index) => (
+                  <li
+                    key={index}
+                    className={cx(
+                      'max-w-[92%] border border-ink p-2 text-sm leading-snug',
+                      entry.message.role === 'user'
+                        ? 'ml-auto bg-accent/60'
+                        : 'bg-sheet',
+                    )}
+                  >
+                    {entry.message.role === 'assistant' ? (
+                      <Markdown problemsAsLinks>
+                        {entry.message.content}
+                      </Markdown>
+                    ) : (
+                      <p>{entry.message.content}</p>
+                    )}
+                    {entry.problems && entry.problems.length > 0 ? (
+                      <ReplyProblems problems={entry.problems} />
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-      {error ? (
-        <p
-          role="alert"
-          className="border-t border-ink px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
-        >
-          {error}
-        </p>
-      ) : null}
+          {error ? (
+            <p
+              role="alert"
+              className="border-t border-ink px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-danger"
+            >
+              {error}
+            </p>
+          ) : null}
 
-      <form
-        noValidate
-        onSubmit={handleSubmit}
-        className="flex gap-2 border-t border-ink p-3"
-      >
-        <textarea
-          rows={2}
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="What do you want to build? Which side is your strongest?"
-          maxLength={MAX_MESSAGE_LENGTH}
-          className="field flex-1 text-sm"
-        />
-        <button
-          type="submit"
-          disabled={chat.isPending}
-          className={cx(buttonClasses('primary'), 'self-stretch')}
-        >
-          {chat.isPending ? 'Thinking…' : 'Send'}
-        </button>
-      </form>
+          <form
+            noValidate
+            onSubmit={handleSubmit}
+            className="flex gap-2 border-t border-ink p-3"
+          >
+            <textarea
+              rows={2}
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder="What do you want to build? Which side is your strongest?"
+              maxLength={MAX_MESSAGE_LENGTH}
+              className="field flex-1 text-sm"
+            />
+            <button
+              type="submit"
+              disabled={chat.isPending}
+              className={cx(buttonClasses('primary'), 'self-stretch')}
+            >
+              {chat.isPending ? 'Thinking…' : 'Send'}
+            </button>
+          </form>
+        </>
+      )}
     </section>
   );
 }

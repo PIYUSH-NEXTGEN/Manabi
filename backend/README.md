@@ -56,7 +56,7 @@ against Postgres it runs `alembic upgrade head` itself, so prod never silently d
 | `LLM_PROVIDER` | `gemini` | `anthropic` | `mock` |
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | Gemini (default model in code: `gemini-3.8-flash`) |
 | `ANTHROPIC_API_KEY`, `LLM_MODEL_FAST` | Optional Anthropic provider |
-| `CHAT_RATE_LIMIT_ANON_PER_HOUR` / `CHAT_RATE_LIMIT_USER_PER_HOUR` | Chat limits |
+| `CHAT_RATE_LIMIT_PER_DAY` | Chat limit per account per day (login-only; anonymous users are rejected) |
 | `ADMIN_GITHUB_USERNAMES` | Comma separated GitHub logins allowed into the `/admin/review` page |
 
 Without an LLM key the AI endpoints return `503 {"detail": "AI is not configured yet"}`.
@@ -67,7 +67,7 @@ Without an LLM key the AI endpoints return `503 {"detail": "AI is not configured
 - **Problems:** `GET /api/problems` (filters `q/field/domain/difficulty/tech/source/sort/limit/offset`), `GET /api/problems/facets`, `GET /api/problems/{id}`, `POST /api/problems` (auth)
 - **GitHub OAuth:** `GET /api/auth/github/login`, `GET /api/auth/github/callback`, `GET /api/me`, `POST /api/auth/logout` (logout is POST)
 - **Projects:** `POST /api/problems/{id}/projects` (auth), `GET /api/projects/{id}`, `GET /api/projects/{id}/progress?refresh=`, `GET /api/me/projects` (auth)
-- **Chat:** `POST /api/chat` (public; [P<id>] references resolved against the DB, fake ids stripped)
+- **Chat:** `POST /api/chat` (login-only; [P<id>] references resolved against the DB, fake ids stripped)
 - **Recommendations:** `GET /api/recommendations` (auth; GitHub signals cached 10 min)
 - **Stats:** `GET /api/stats`
 - **Stretch:** `GET /api/u/{username}` — public profile

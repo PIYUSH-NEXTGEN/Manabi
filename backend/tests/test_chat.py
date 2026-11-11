@@ -9,7 +9,7 @@ from app.db import Base, get_db
 from app.deps import get_current_user, get_optional_user
 from app.main import app
 from app.models import Problem, User
-from app.services.ratelimit import CHAT_ANON_LIMITER, CHAT_USER_LIMITER
+from app.services.ratelimit import CHAT_DAILY_LIMITER
 
 
 @pytest.fixture(autouse=True)
@@ -77,8 +77,7 @@ def user(db_session):
     db_session.commit()
     app.dependency_overrides[get_current_user] = lambda: u
     app.dependency_overrides[get_optional_user] = lambda: u
-    CHAT_USER_LIMITER._hits.clear()
-    CHAT_ANON_LIMITER._hits.clear()
+    CHAT_DAILY_LIMITER.reset(db_session)
     return u
 
 
@@ -86,8 +85,7 @@ def user(db_session):
 def anon(db_session):
     app.dependency_overrides.pop(get_current_user, None)
     app.dependency_overrides.pop(get_optional_user, None)
-    CHAT_USER_LIMITER._hits.clear()
-    CHAT_ANON_LIMITER._hits.clear()
+    CHAT_DAILY_LIMITER.reset(db_session)
 
 
 @pytest.fixture
@@ -129,7 +127,7 @@ def test_catalog_search_no_match_empty(db_session):
 
 # ---------------- endpoint ----------------
 
-def test_chat_public_and_shape(client, db_session, anon, monkeypatch):
+def test_chat_public_and_shape(client, db_session, user, monkeypatch):
     patch_reply(monkeypatch, "MOCK-CHAT-REPLY: saw: hello")
     res = client.post("/api/chat", json={"messages": [msg(content="hello")], "page_context": None})
     assert res.status_code == 200
@@ -138,7 +136,7 @@ def test_chat_public_and_shape(client, db_session, anon, monkeypatch):
     assert isinstance(data["problems"], list)
 
 
-def test_chat_reference_kept_when_real(client, db_session, anon, monkeypatch):
+def test_chat_reference_kept_when_real(client, db_session, user, monkeypatch):
     patch_reply(monkeypatch, "Start with [P1] this weekend.")
     data = client.post("/api/chat", json={"messages": [msg()]}).json()
     assert data["problems"] == [
@@ -147,14 +145,14 @@ def test_chat_reference_kept_when_real(client, db_session, anon, monkeypatch):
     assert data["reply"].count("[P1]") == 1
 
 
-def test_chat_invalid_reference_stripped(client, db_session, anon, monkeypatch):
+def test_chat_invalid_reference_stripped(client, db_session, user, monkeypatch):
     patch_reply(monkeypatch, "Try [P1] and [P4242].")
     data = client.post("/api/chat", json={"messages": [msg()]}).json()
     assert [p["id"] for p in data["problems"]] == [1]
     assert "[P4242]" not in data["reply"] and "[P1]" in data["reply"]
 
 
-def test_chat_strips_inline_latex_but_keeps_money(client, db_session, anon, monkeypatch):
+def test_chat_strips_inline_latex_but_keeps_money(client, db_session, user, monkeypatch):
     patch_reply(monkeypatch, "Score with $F_2$ or $F_\\beta$; budget stays $5 and $10.")
     data = client.post("/api/chat", json={"messages": [msg()]}).json()
     reply = data["reply"]
@@ -163,7 +161,7 @@ def test_chat_strips_inline_latex_but_keeps_money(client, db_session, anon, monk
     assert "$5 and $10" in reply
 
 
-def test_chat_catalog_in_system_prompt(client, db_session, anon, monkeypatch):
+def test_chat_catalog_in_system_prompt(client, db_session, user, monkeypatch):
     captured = {}
 
     def fake(system, messages):
@@ -176,7 +174,7 @@ def test_chat_catalog_in_system_prompt(client, db_session, anon, monkeypatch):
     assert "CATALOG" in captured["system"]
 
 
-def test_chat_system_prompt_requests_readable_markdown(client, db_session, anon, monkeypatch):
+def test_chat_system_prompt_requests_readable_markdown(client, db_session, user, monkeypatch):
     captured = {}
 
     def fake(system, messages):
@@ -189,7 +187,7 @@ def test_chat_system_prompt_requests_readable_markdown(client, db_session, anon,
     assert "No LaTeX" in captured["system"]
 
 
-def test_chat_page_context_included(client, db_session, anon, monkeypatch):
+def test_chat_page_context_included(client, db_session, user, monkeypatch):
     captured = {}
 
     def fake(system, messages):
@@ -203,28 +201,28 @@ def test_chat_page_context_included(client, db_session, anon, monkeypatch):
     assert "CURRENT PAGE CONTEXT" in captured["system"] and "[P2]" in captured["system"]
 
 
-def test_chat_page_context_unknown_problem_ignored(client, db_session, anon, monkeypatch):
+def test_chat_page_context_unknown_problem_ignored(client, db_session, user, monkeypatch):
     patch_reply(monkeypatch, "re")
     res = client.post("/api/chat", json={"messages": [msg()], "page_context": {"problem_id": 9999}})
     assert res.status_code == 200
 
 
-def test_chat_rate_limited_anon(client, db_session, anon, monkeypatch):
+def test_chat_requires_login(client, db_session, anon):
+    """Chat is login-only: anonymous callers get 401, never an LLM call."""
+    res = client.post("/api/chat", json={"messages": [msg()]})
+    assert res.status_code == 401
+
+
+def test_chat_daily_limit_20(client, db_session, user, monkeypatch):
     patch_reply(monkeypatch, "re")
     codes = []
-    for _ in range(int(config.get_settings().CHAT_RATE_LIMIT_ANON_PER_HOUR) + 1):
+    for _ in range(int(config.get_settings().CHAT_RATE_LIMIT_PER_DAY) + 1):
         res = client.post("/api/chat", json={"messages": [msg()]})
         codes.append(res.status_code)
     assert codes[-1] == 429 and 200 in codes
-
-
-def test_chat_rate_limited_user(client, db_session, user, monkeypatch):
-    patch_reply(monkeypatch, "re")
-    codes = []
-    for _ in range(int(config.get_settings().CHAT_RATE_LIMIT_USER_PER_HOUR) + 1):
-        res = client.post("/api/chat", json={"messages": [msg()]})
-        codes.append(res.status_code)
-    assert codes[-1] == 429 and 200 in codes
+    assert "today" in client.post(
+        "/api/chat", json={"messages": [msg()]}
+    ).json()["detail"]
 
 
 def test_chat_too_many_messages_422(client, db_session, user):
@@ -247,7 +245,7 @@ def test_chat_empty_messages_422(client, db_session, user):
     assert res.status_code == 422
 
 
-def test_chat_not_configured_503(client, db_session, anon, monkeypatch):
+def test_chat_not_configured_503(client, db_session, user, monkeypatch):
     from app.services.llm import LLMConfigError as _LCE
 
     def boom(system, messages):
@@ -259,7 +257,7 @@ def test_chat_not_configured_503(client, db_session, anon, monkeypatch):
     assert res.json()["detail"] == "AI is not configured yet"
 
 
-def test_chat_provider_error_502(client, db_session, anon, monkeypatch):
+def test_chat_provider_error_502(client, db_session, user, monkeypatch):
     from app.services.llm import LLMResponseError as _LRE
 
     def boom(system, messages):
@@ -270,8 +268,8 @@ def test_chat_provider_error_502(client, db_session, anon, monkeypatch):
     assert res.status_code == 502
 
 
-def test_chat_unexpected_exception_maps_to_502(client, db_session, anon, monkeypatch):
-    """Any non-LLM crash must still answer JSON with 502 — never a bare 500."""
+def test_chat_unexpected_exception_maps_to_502(client, db_session, user, monkeypatch):
+    """Any non-LLM crash must still answer JSON with 502. Never a bare 500."""
     def boom(system, messages):
         raise RuntimeError("unexpected provider crash")
 
@@ -281,7 +279,7 @@ def test_chat_unexpected_exception_maps_to_502(client, db_session, anon, monkeyp
     assert res.json()["detail"]
 
 
-def test_chat_empty_reply_gets_fallback_message(client, db_session, anon, monkeypatch):
+def test_chat_empty_reply_gets_fallback_message(client, db_session, user, monkeypatch):
     patch_reply(monkeypatch, "")
     res = client.post("/api/chat", json={"messages": [msg()]})
     assert res.status_code == 200

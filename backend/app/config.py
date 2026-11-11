@@ -16,8 +16,10 @@ class Settings(BaseSettings):
     GEMINI_MODEL: str = ""
     ANTHROPIC_API_KEY: str = ""
     LLM_MODEL_FAST: str = ""
-    CHAT_RATE_LIMIT_ANON_PER_HOUR: int = 10
-    CHAT_RATE_LIMIT_USER_PER_HOUR: int = 30
+    # Chat is login-only. The daily cap is the budget guard (each message is
+    # a paid LLM call), keyed per account. No hourly burst cap by choice:
+    # a heavy user may spend the whole allowance in one session.
+    CHAT_RATE_LIMIT_PER_DAY: int = 20
 
     # Login (both the redirect and the OAuth callback) hits GitHub's OAuth
     # infrastructure and creates session traffic; real users log in a few
@@ -27,6 +29,12 @@ class Settings(BaseSettings):
     # Star/unstar toggles on projects and problems; each click is a DB write.
     # Manual users never approach this; it stops accidental loops and scripts.
     STAR_RATE_LIMIT_PER_HOUR: int = 60
+
+    # Sanity cap for admins, who bypass the per-user limits on problem
+    # creation and progress refresh. Real admin work stays far below it;
+    # a runaway or hijacked admin session gets stopped at 100/h instead of
+    # silently draining the shared GitHub API quota.
+    ADMIN_RATE_LIMIT_PER_HOUR: int = 100
 
     # Forcing a progress refresh (refresh=true) makes the server call GitHub's
     # API and can write back to the DB. Project owners are exempt; everyone
@@ -41,7 +49,11 @@ class Settings(BaseSettings):
     PROBLEM_CREATE_PER_HOUR: int = 5
     # Reports against published projects, per user per hour. Independent of the
     # chat limit so tuning one cannot silently retune the other.
-    REPORT_RATE_LIMIT_PER_HOUR: int = 30
+    # Project reports (flags for admins to review). The duplicate guard
+    # already blocks repeat reports on the same project by the same user, so
+    # this caps spray across many projects: a genuine reporter stays far
+    # under it, a spammer gets little throughput.
+    REPORT_RATE_LIMIT_PER_HOUR: int = 5
 
     # --- Admin ---
     ADMIN_GITHUB_USERNAMES: str = ""

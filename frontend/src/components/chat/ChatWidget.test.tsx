@@ -1,11 +1,18 @@
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { server } from '@/api/mocks/server';
 import { ChatWidget } from '@/components/chat/ChatWidget';
 import { AskManabi } from '@/components/home/AskManabi';
 import { renderWithProviders } from '@/test/renderWithProviders';
+
+const LOGGED_IN = {
+  id: 1,
+  username: 'octocat',
+  name: 'Octo Cat',
+  avatar_url: null,
+};
 
 const CHAT_200 = {
   reply:
@@ -21,6 +28,31 @@ const CHAT_200 = {
 };
 
 describe('ChatWidget', () => {
+  beforeEach(() => {
+    // Chat is login-only: most tests talk to the chatbot as a member.
+    server.use(http.get('*/api/auth/me', () => HttpResponse.json(LOGGED_IN)));
+  });
+
+  it('asks logged-out visitors to log in before they can chat', async () => {
+    server.use(
+      http.get('*/api/auth/me', () =>
+        HttpResponse.json({ detail: 'Not authenticated' }, { status: 401 }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<ChatWidget />);
+
+    await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
+    expect(screen.getByLabelText('MANABI chat')).toBeInTheDocument();
+    expect(
+      await screen.findByRole('link', { name: 'Log in with GitHub' }),
+    ).toHaveAttribute('href', '/api/auth/github/login');
+    expect(
+      screen.queryByPlaceholderText(/What do you want to build/i),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Send' })).not.toBeInTheDocument();
+  });
+
   it('opens from the floating dock and closes back to it', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ChatWidget />);
@@ -176,7 +208,7 @@ describe('ChatWidget', () => {
     server.use(
       http.post('*/api/chat', () =>
         HttpResponse.json(
-          { detail: 'Chat hourly quota exhausted — try again later.' },
+          { detail: 'Chat hourly quota exhausted. Try again later.' },
           { status: 429 },
         ),
       ),
@@ -193,7 +225,7 @@ describe('ChatWidget', () => {
 
     expect(
       await screen.findByRole('alert'),
-    ).toHaveTextContent('Chat hourly quota exhausted — try again later.');
+    ).toHaveTextContent('Chat hourly quota exhausted. Try again later.');
     expect(screen.queryByText(/linked under this/i)).not.toBeInTheDocument();
   });
 
@@ -211,7 +243,7 @@ describe('ChatWidget', () => {
     await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
     await user.type(
       screen.getByPlaceholderText(/What do you want to build/i),
-      'this one — can I do it in a weekend?',
+      'this one. Can I do it in a weekend?',
     );
     await user.click(screen.getByRole('button', { name: 'Send' }));
 

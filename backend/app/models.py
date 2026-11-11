@@ -216,3 +216,19 @@ class ProblemStar(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
 
     problem: Mapped[Problem] = relationship(back_populates="stars")
+
+
+class RateLimitHit(Base):
+    """One recorded rate-limit hit. Sliding-window limiters count these rows,
+    so the counters live in the DB and survive restarts and multi-worker
+    deploys (every worker counts the same table)."""
+
+    __tablename__ = "rate_limit_hits"
+    __table_args__ = (
+        Index("ix_rate_limit_hits_bucket_key_created", "bucket", "key", "created_at"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    bucket: Mapped[str] = mapped_column(String(64), nullable=False)
+    key: Mapped[str] = mapped_column(String(191), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
