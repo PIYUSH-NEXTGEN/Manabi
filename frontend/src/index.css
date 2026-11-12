@@ -28,6 +28,7 @@
   --font-brand: var(--ff-brand);
   --font-body: var(--ff-body);
   --font-mono: var(--ff-mono);
+  --font-serif: "Instrument Serif", Georgia, serif;
 
   /* Literals, not var() self-references: @theme emits these into :root. */
   --radius-xs: 8px;
@@ -373,17 +374,41 @@ body {
 }
 
 .balloon-drift {
-  animation: balloon-drift 32s ease-in-out infinite;
+  animation: balloon-drift 26s ease-in-out infinite;
 }
 
 @keyframes balloon-drift {
   0%,
   100% {
-    transform: translate3d(0, 0, 0) rotate(-1.5deg);
+    transform: translate3d(0, 0, 0) rotate(-2deg);
+  }
+
+  25% {
+    transform: translate3d(10px, -8px, 0) rotate(-0.5deg);
   }
 
   50% {
-    transform: translate3d(18px, -12px, 0) rotate(1.5deg);
+    transform: translate3d(26px, -18px, 0) rotate(2deg);
+  }
+
+  75% {
+    transform: translate3d(12px, -9px, 0) rotate(0.5deg);
+  }
+}
+
+.balloon-bob {
+  animation: balloon-bob 8s ease-in-out infinite;
+  transform-origin: 50% 70%;
+}
+
+@keyframes balloon-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-0.6deg);
+  }
+
+  50% {
+    transform: translateY(-6px) rotate(0.6deg);
   }
 }
 
@@ -1019,6 +1044,7 @@ body {
   .bird-fly,
   .bird-drift,
   .balloon-drift,
+  .balloon-bob,
   .smoke-rise,
   .tree-sway,
   .grass-sway,

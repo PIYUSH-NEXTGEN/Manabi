@@ -17,7 +17,11 @@ function HeroHeadline() {
       {HEADLINE_LINES.map((line, index) => (
         <motion.span
           key={line}
-          className="block"
+          className={
+            index === 1
+              ? 'block font-serif font-normal italic tracking-[-0.02em]'
+              : 'block'
+          }
           initial={reduced ? false : { opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={
@@ -71,7 +75,7 @@ export function Hero() {
                 ? { duration: 0 }
                 : { duration: 0.6, delay: 0.6, ease: EASE_SNAP }
             }
-            className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
+            className="mt-9 flex justify-center"
           >
             <Link
               to="/problems"
@@ -84,12 +88,6 @@ export function Hero() {
                 strokeWidth={2.4}
                 className="transition-transform duration-200 group-hover:translate-x-0.5"
               />
-            </Link>
-            <Link
-              to="/about"
-              className="press inline-flex items-center justify-center rounded-full bg-sky px-7 py-4 text-[0.9375rem] font-semibold text-[#0a0b0d] transition-colors hover:bg-sky-strong"
-            >
-              Learn More
             </Link>
           </motion.div>
         </div>

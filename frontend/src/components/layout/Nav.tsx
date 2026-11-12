@@ -3,7 +3,6 @@ import { AnimatePresence, motion } from 'motion/react';
 import { Moon, Sun } from 'lucide-react';
 import { GithubMark } from '@/components/icons/GithubMark';
 import { EASE_SNAP } from '@/design/motion';
-import { Logo } from './Logo';
 import { useMe } from '@/hooks/useMe';
 import { useTheme } from '@/lib/useTheme';
 import { cx } from '@/lib/cx';
@@ -51,9 +50,8 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
         <div className="flex items-center gap-2 md:gap-4">
           <Link
             to="/"
-            className="press flex w-fit items-center gap-2.5 rounded-full py-1 pl-1 pr-2 transition-opacity hover:opacity-80"
+            className="press flex w-fit items-center rounded-full py-1 pl-1 pr-2 transition-opacity hover:opacity-80"
           >
-            <Logo className="text-ink" />
             <span className="font-brand text-[0.9375rem] uppercase leading-none tracking-[-0.01em] text-ink">
               MANABI
             </span>

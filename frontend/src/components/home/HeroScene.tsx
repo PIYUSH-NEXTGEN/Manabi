@@ -264,9 +264,8 @@ export function HeroScene() {
 
       <div
         className="hero-balloon balloon-drift absolute right-[17%] top-[27%] hidden w-20 opacity-80 dark:opacity-65 sm:block"
-        style={{ animationDuration: '32s' }}
       >
-        <svg viewBox="0 0 72 96" fill="none" aria-hidden>
+        <svg className="balloon-bob" viewBox="0 0 72 96" fill="none" aria-hidden>
           <defs>
             <linearGradient
               id="hero-balloon-body"
@@ -748,7 +747,7 @@ export function HeroScene() {
 
         <g className="hero-parallax hero-parallax--near">
           <path
-            d="M824 410C902 470 716 522 820 582C930 648 704 680 788 742L1018 742C926 680 1084 642 982 582C878 522 1012 472 920 410Z"
+            d="M880 426C884 464 790 512 820 582C930 648 704 680 788 742L1018 742C926 680 1084 642 982 582C878 522 950 468 880 426Z"
             stroke="var(--scene-grass-shadow)"
             strokeWidth="22"
             strokeOpacity="0.22"
@@ -756,7 +755,7 @@ export function HeroScene() {
             filter="url(#hero-soft)"
           />
           <path
-            d="M824 410C902 470 716 522 820 582C930 648 704 680 788 742L1018 742C926 680 1084 642 982 582C878 522 1012 472 920 410Z"
+            d="M880 426C884 464 790 512 820 582C930 648 704 680 788 742L1018 742C926 680 1084 642 982 582C878 522 950 468 880 426Z"
             fill="url(#river)"
             stroke="var(--sketch-ink-soft)"
             strokeWidth="1.5"
@@ -769,10 +768,10 @@ export function HeroScene() {
             strokeLinecap="round"
             fill="none"
           >
-            <path d="M832 424C844 470 730 516 818 574C846 592 850 610 840 628" />
-            <path d="M946 430C938 474 1024 520 944 568C916 588 912 608 924 626" />
-            <path d="M830 470C842 500 790 520 822 548C854 576 854 600 844 620" />
-            <path d="M946 504C936 532 978 552 950 580C922 608 926 630 938 650" />
+            <path d="M874 452C844 470 730 516 818 574C846 592 850 610 840 628" />
+            <path d="M905 452C938 474 1024 520 944 568C916 588 912 608 924 626" />
+            <path d="M856 478C842 500 790 520 822 548C854 576 854 600 844 620" />
+            <path d="M918 508C936 532 978 552 950 580C922 608 926 630 938 650" />
             <path d="M806 650C830 672 798 696 812 720" />
           </g>
           <g stroke="var(--scene-foam)" strokeLinecap="round">
