@@ -46,27 +46,29 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
     >
       <nav
         aria-label="Main"
-        className="relative mx-auto flex w-full max-w-[780px] items-center justify-between gap-3 rounded-full border border-ink/15 bg-paper/85 px-3 py-2 shadow-[0_18px_50px_-28px_rgba(10,11,13,0.35)] backdrop-blur-xl md:grid md:grid-cols-[1fr_auto_1fr] md:px-4"
+        className="relative mx-auto flex w-full max-w-[680px] items-center justify-between gap-3 rounded-full border border-ink/15 bg-paper/85 px-3 py-2 shadow-[0_18px_50px_-28px_rgba(10,11,13,0.35)] backdrop-blur-xl md:px-4"
       >
-        <Link
-          to="/"
-          className="press flex w-fit items-center gap-2.5 rounded-full py-1 pl-1 pr-2 transition-opacity hover:opacity-80"
-        >
-          <Logo className="text-ink" />
-          <span className="font-brand text-[0.9375rem] uppercase leading-none tracking-[-0.01em] text-ink">
-            MANABI
-          </span>
-        </Link>
+        <div className="flex items-center gap-2 md:gap-4">
+          <Link
+            to="/"
+            className="press flex w-fit items-center gap-2.5 rounded-full py-1 pl-1 pr-2 transition-opacity hover:opacity-80"
+          >
+            <Logo className="text-ink" />
+            <span className="font-brand text-[0.9375rem] uppercase leading-none tracking-[-0.01em] text-ink">
+              MANABI
+            </span>
+          </Link>
 
-        <ul className="hidden items-center gap-1 md:flex">
-          {NAV_LINKS.map((link) => (
-            <li key={link.to}>
-              <NavLink to={link.to} className={navLinkClasses}>
-                {link.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+          <ul className="hidden items-center gap-1 md:flex">
+            {NAV_LINKS.map((link) => (
+              <li key={link.to}>
+                <NavLink to={link.to} className={navLinkClasses}>
+                  {link.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <div className="flex items-center justify-end gap-2">
           {me.data ? (
