@@ -207,9 +207,9 @@ export function HeroScene() {
     >
       <div className="hero-sky absolute inset-0" />
 
-      <div className="absolute left-[13%] top-[6%] size-52 rounded-full bg-[#ffe9b7]/55 blur-3xl dark:bg-[#a9c4ff]/10" />
-      <div className="absolute left-[15%] top-[8%] size-16 rounded-full bg-[#fff4cf]/80 blur-xl dark:bg-[#eef4ff] dark:blur-none dark:shadow-[0_0_50px_16px_rgba(180,205,255,0.24)]" />
-      <div className="absolute right-[7%] top-[24%] size-64 rounded-full bg-[#e8cfd2]/30 blur-3xl dark:bg-[#3f4f76]/12" />
+      <div className="absolute left-[13%] top-[6%] size-52 rounded-full bg-[#fffdf8]/80 blur-3xl dark:bg-[#a9c4ff]/10" />
+      <div className="absolute left-[15%] top-[8%] hidden size-16 rounded-full dark:block dark:bg-[#eef4ff] dark:shadow-[0_0_50px_16px_rgba(180,205,255,0.24)]" />
+      <div className="absolute right-[7%] top-[24%] size-64 rounded-full bg-[#e9e5dc]/35 blur-3xl dark:bg-[#3f4f76]/12" />
 
       <div className="absolute inset-0 hidden dark:block">
         {STARS.map((star, index) => (
@@ -263,7 +263,7 @@ export function HeroScene() {
       </svg>
 
       <div
-        className="balloon-drift absolute right-[17%] top-[27%] hidden w-20 dark:opacity-40 sm:block"
+        className="hero-balloon balloon-drift absolute right-[17%] top-[27%] hidden w-20 opacity-80 dark:opacity-65 sm:block"
         style={{ animationDuration: '32s' }}
       >
         <svg viewBox="0 0 72 96" fill="none" aria-hidden>
@@ -364,7 +364,7 @@ export function HeroScene() {
       <Pollen />
 
       <svg
-        className="absolute inset-x-0 bottom-0 h-[78%] w-full"
+        className="hero-sketch absolute inset-x-0 bottom-0 h-[78%] w-full"
         viewBox="0 0 1680 720"
         preserveAspectRatio="none"
         fill="none"
@@ -372,31 +372,31 @@ export function HeroScene() {
       >
         <defs>
           <linearGradient id="mountain-far" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="var(--scene-mountain-far-light)" />
-            <stop offset="0.55" stopColor="var(--scene-mountain-far)" />
-            <stop offset="1" stopColor="var(--scene-mountain-far-shadow)" />
+            <stop offset="0" stopColor="var(--sketch-highlight)" />
+            <stop offset="0.55" stopColor="var(--sketch-wash)" />
+            <stop offset="1" stopColor="var(--sketch-shade)" />
           </linearGradient>
           <linearGradient id="mountain-mid" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="var(--scene-mountain-mid-light)" />
-            <stop offset="0.52" stopColor="var(--scene-mountain-mid)" />
-            <stop offset="1" stopColor="var(--scene-mountain-mid-shadow)" />
+            <stop offset="0" stopColor="var(--sketch-wash)" />
+            <stop offset="0.52" stopColor="var(--sketch-shade)" />
+            <stop offset="1" stopColor="var(--sketch-deep)" />
           </linearGradient>
           <linearGradient id="meadow-far" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--scene-far)" />
-            <stop offset="1" stopColor="var(--scene-mid)" />
+            <stop offset="0" stopColor="var(--sketch-wash)" />
+            <stop offset="1" stopColor="var(--sketch-shade)" />
           </linearGradient>
           <linearGradient id="meadow-mid" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--scene-mid)" />
-            <stop offset="1" stopColor="var(--scene-near)" />
+            <stop offset="0" stopColor="var(--sketch-shade)" />
+            <stop offset="1" stopColor="var(--sketch-deep)" />
           </linearGradient>
           <linearGradient id="meadow-near" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--scene-near)" />
+            <stop offset="0" stopColor="var(--sketch-deep)" />
             <stop offset="1" stopColor="var(--scene-front)" />
           </linearGradient>
           <linearGradient id="river" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--scene-water)" />
-            <stop offset="0.42" stopColor="var(--scene-water-mid)" />
-            <stop offset="1" stopColor="var(--scene-water-deep)" />
+            <stop offset="0" stopColor="var(--sketch-highlight)" />
+            <stop offset="0.42" stopColor="var(--sketch-wash)" />
+            <stop offset="1" stopColor="var(--sketch-shade)" />
           </linearGradient>
           <filter id="hero-blur" x="-20%" y="-60%" width="140%" height="220%">
             <feGaussianBlur stdDeviation="18" />
@@ -408,12 +408,80 @@ export function HeroScene() {
             <feGaussianBlur stdDeviation="8" />
           </filter>
 
+          <pattern
+            id="sketch-hatch-soft"
+            width="9"
+            height="9"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(-16)"
+          >
+            <path
+              d="M-2 9L9-2M5 11L11 5"
+              stroke="var(--sketch-ink-soft)"
+              strokeWidth="0.7"
+              strokeOpacity="0.42"
+              strokeLinecap="round"
+            />
+          </pattern>
+          <pattern
+            id="sketch-hatch"
+            width="5.5"
+            height="5.5"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(-14)"
+          >
+            <path
+              d="M-1 5.5L5.5-1M4 7L7 4"
+              stroke="var(--sketch-ink-soft)"
+              strokeWidth="0.62"
+              strokeOpacity="0.6"
+              strokeLinecap="round"
+            />
+          </pattern>
+          <pattern
+            id="sketch-hatch-dense"
+            width="3.4"
+            height="3.4"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(-12)"
+          >
+            <path
+              d="M-1 3.4L3.4-1M2.6 4.2L4.2 2.6"
+              stroke="var(--sketch-ink)"
+              strokeWidth="0.52"
+              strokeOpacity="0.5"
+              strokeLinecap="round"
+            />
+          </pattern>
+          <pattern
+            id="sketch-cross"
+            width="7"
+            height="7"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(-8)"
+          >
+            <path
+              d="M-1 7L7-1M-1 0L7 8"
+              stroke="var(--sketch-ink-soft)"
+              strokeWidth="0.55"
+              strokeOpacity="0.45"
+              strokeLinecap="round"
+            />
+          </pattern>
+
           <g id="tree-round">
             <rect x="-3.2" y="-50" width="6.4" height="50" rx="3.2" fill="var(--scene-trunk)" />
             <path
               d="M-1-50l-8-14M1-50l8-14"
               stroke="var(--scene-trunk)"
               strokeWidth="1.8"
+              strokeLinecap="round"
+            />
+            <path
+              d="M-1.4-44v7M1.4-34v6M0-25v5"
+              stroke="var(--sketch-ink-soft)"
+              strokeWidth="0.9"
+              strokeOpacity="0.5"
               strokeLinecap="round"
             />
             <circle cx="-18" cy="-56" r="20" fill="var(--scene-tree-deep)" />
@@ -424,7 +492,17 @@ export function HeroScene() {
             <circle cx="-8" cy="-78" r="16" fill="var(--scene-tree-alt)" opacity="0.85" />
             <circle cx="12" cy="-72" r="12" fill="var(--scene-tree-alt)" opacity="0.7" />
             <circle cx="-24" cy="-60" r="8" fill="var(--scene-tree-alt)" opacity="0.35" />
-            <circle cx="-4" cy="-81" r="5" fill="var(--scene-grass-light)" opacity="0.4" />
+            <circle cx="14" cy="-62" r="15" fill="url(#sketch-hatch)" opacity="0.5" stroke="none" />
+            <circle cx="-18" cy="-58" r="12" fill="url(#sketch-hatch-soft)" opacity="0.4" stroke="none" />
+            <path
+              d="M-26-50C-18-42-10-39-2-41M2-58C10-50 17-46 22-38M-14-72c5-4 11-4 16 0"
+              stroke="var(--sketch-ink-soft)"
+              strokeWidth="0.9"
+              strokeOpacity="0.45"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <circle cx="-4" cy="-81" r="5" fill="var(--scene-grass-light)" opacity="0.55" />
           </g>
 
           <g id="tree-birch">
@@ -446,6 +524,15 @@ export function HeroScene() {
             <circle cx="0" cy="-84" r="20" fill="var(--scene-tree)" />
             <circle cx="-4" cy="-92" r="13" fill="var(--scene-tree-alt)" opacity="0.85" />
             <circle cx="10" cy="-82" r="10" fill="var(--scene-tree-alt)" opacity="0.55" />
+            <circle cx="12" cy="-74" r="13" fill="url(#sketch-hatch)" opacity="0.45" stroke="none" />
+            <path
+              d="M-18-78c6-4 13-4 19 1M-10-64c7-3 14-2 19 2"
+              stroke="var(--sketch-ink-soft)"
+              strokeWidth="0.9"
+              strokeOpacity="0.4"
+              strokeLinecap="round"
+              fill="none"
+            />
           </g>
 
           <g id="tree-pine">
@@ -456,6 +543,9 @@ export function HeroScene() {
             <path d="M0-92L12-72H-12Z" fill="var(--scene-tree-alt)" opacity="0.55" />
             <path d="M0-78L16-58H-16Z" fill="var(--scene-tree-alt)" opacity="0.45" />
             <path d="M0-64L18-44H-18Z" fill="var(--scene-tree-alt)" opacity="0.3" />
+            <path d="M0-100L22-62H0Z" fill="url(#sketch-hatch)" opacity="0.5" stroke="none" />
+            <path d="M0-86L26-48H0Z" fill="url(#sketch-hatch)" opacity="0.45" stroke="none" />
+            <path d="M0-72L30-34H0Z" fill="url(#sketch-hatch-soft)" opacity="0.5" stroke="none" />
           </g>
 
           <g id="tree-cypress">
@@ -469,6 +559,7 @@ export function HeroScene() {
               strokeLinecap="round"
               opacity="0.5"
             />
+            <path d="M0-88C7-70 9-50 5-30H0Z" fill="url(#sketch-hatch)" opacity="0.5" stroke="none" />
           </g>
 
           <g id="bush">
@@ -477,6 +568,7 @@ export function HeroScene() {
             <circle cx="20" cy="-9" r="15" fill="var(--scene-tree-deep)" />
             <circle cx="-6" cy="-26" r="12" fill="var(--scene-tree-alt)" opacity="0.7" />
             <circle cx="12" cy="-18" r="9" fill="var(--scene-tree-alt)" opacity="0.45" />
+            <circle cx="10" cy="-16" r="13" fill="url(#sketch-hatch)" opacity="0.45" stroke="none" />
           </g>
 
           <g id="grass-tuft">
@@ -502,36 +594,40 @@ export function HeroScene() {
           <path
             d="M0 432C52 418 92 390 128 380C158 342 190 326 222 354C250 378 274 402 306 410C344 420 378 410 412 398C454 384 488 366 528 376C568 386 604 410 650 418C700 426 740 416 780 400C820 384 858 382 898 396C940 410 978 424 1022 418C1064 412 1098 396 1136 396C1176 396 1210 412 1246 424C1284 436 1324 430 1362 410C1400 390 1436 380 1474 392C1516 406 1550 422 1590 422C1628 422 1656 414 1680 404V720H0V432Z"
             fill="url(#mountain-far)"
+            stroke="var(--sketch-ink-soft)"
+            strokeWidth="1.6"
+            strokeOpacity="0.55"
           />
-          <g fill="var(--scene-mountain-far-light)" opacity="0.42">
+          <g fill="var(--sketch-highlight)" opacity="0.42">
             <path d="M222 354C198 368 176 390 150 400C184 410 214 408 246 398C236 382 228 368 222 354Z" />
             <path d="M1136 396C1110 402 1086 408 1064 412C1088 418 1112 416 1140 410C1138 404 1136 400 1136 396Z" />
             <path d="M1474 392C1450 400 1428 404 1408 406C1430 414 1454 416 1482 410C1478 404 1476 398 1474 392Z" />
           </g>
-          <g fill="var(--scene-mountain-far-shadow)" opacity="0.3">
+          <g fill="url(#sketch-hatch-soft)" opacity="0.9">
             <path d="M222 354C234 372 246 390 262 404C238 412 218 408 200 400C210 386 218 370 222 354Z" />
             <path d="M1246 424C1260 430 1274 430 1288 426C1276 420 1264 414 1254 408Z" />
             <path d="M1362 410C1376 416 1390 416 1404 410C1394 404 1384 398 1376 392Z" />
           </g>
-          <g fill="var(--scene-snow)" opacity="0.3">
+          <g fill="var(--sketch-highlight)" opacity="0.55">
             <path d="M216 350C222 356 228 362 232 370C224 368 218 360 212 354Z" />
             <path d="M1468 388C1474 394 1480 400 1484 408C1476 406 1470 398 1464 392Z" />
           </g>
           <g
-            stroke="var(--scene-mountain-rim)"
-            strokeOpacity="0.42"
-            strokeWidth="2"
+            stroke="var(--sketch-ink-faint)"
+            strokeOpacity="0.55"
+            strokeWidth="1.6"
             strokeLinecap="round"
           >
             <path d="M222 354C198 368 176 390 150 400M1362 410C1378 400 1394 390 1410 386" />
           </g>
           <g
-            stroke="var(--scene-mountain-far-shadow)"
-            strokeOpacity="0.22"
-            strokeWidth="1.3"
+            stroke="var(--sketch-ink-soft)"
+            strokeOpacity="0.35"
+            strokeWidth="1.2"
             strokeLinecap="round"
           >
             <path d="M232 368C240 384 248 396 260 406M304 410C322 416 340 420 360 418M1026 418C1040 420 1054 420 1068 416M1136 396C1148 404 1162 410 1178 414" />
+            <path d="M56 414C104 394 152 366 196 360M430 402C474 384 508 376 552 382M704 420C748 408 786 398 826 404M934 414C972 406 1008 400 1044 404M1210 424C1248 420 1286 416 1320 420M1518 412C1554 414 1590 414 1622 408" />
           </g>
           <ellipse
             cx="826"
@@ -548,67 +644,73 @@ export function HeroScene() {
           <path
             d="M0 482C52 474 92 458 136 440C186 420 242 402 300 400C358 398 408 418 462 432C526 448 588 448 650 440C712 432 764 420 826 422C888 424 944 438 1004 442C1064 446 1122 440 1174 430C1226 420 1272 404 1324 400C1376 396 1428 414 1482 430C1534 446 1592 450 1680 440V720H0V482Z"
             fill="url(#mountain-mid)"
+            stroke="var(--sketch-ink)"
+            strokeWidth="1.5"
+            strokeOpacity="0.6"
           />
-          <g fill="var(--scene-mountain-mid-light)" opacity="0.22">
+          <g fill="var(--sketch-highlight)" opacity="0.3">
             <path d="M136 440C186 420 242 402 300 400C250 412 204 426 164 442C154 446 144 446 136 440Z" />
             <path d="M1174 430C1226 420 1272 404 1324 400C1280 410 1240 422 1204 434C1192 438 1182 438 1174 430Z" />
           </g>
-          <g fill="var(--scene-mountain-mid-shadow)" opacity="0.18">
+          <g fill="url(#sketch-hatch)" opacity="0.9">
             <path d="M300 400C358 398 408 418 462 432C406 434 354 424 314 412C306 408 302 404 300 400Z" />
             <path d="M1324 400C1376 396 1428 414 1482 430C1430 432 1382 424 1342 412C1334 408 1328 404 1324 400Z" />
           </g>
           <g
-            stroke="var(--scene-mountain-rim)"
-            strokeOpacity="0.26"
-            strokeWidth="2"
+            stroke="var(--sketch-ink-faint)"
+            strokeOpacity="0.55"
+            strokeWidth="1.5"
             strokeLinecap="round"
           >
             <path d="M136 440C186 420 242 402 300 400M1174 430C1226 420 1272 404 1324 400" />
           </g>
           <g
-            stroke="var(--scene-mountain-mid-shadow)"
-            strokeOpacity="0.16"
-            strokeWidth="1.4"
+            stroke="var(--sketch-ink-soft)"
+            strokeOpacity="0.38"
+            strokeWidth="1.2"
             strokeLinecap="round"
           >
             <path d="M182 424C236 412 286 412 328 422M1204 426C1258 416 1306 414 1352 420" />
+            <path d="M360 408C410 408 452 418 492 430M616 442C656 436 696 426 732 420M862 426C906 430 948 438 988 440M1100 438C1140 436 1180 430 1216 424M1390 406C1436 416 1480 428 1524 434" />
           </g>
         </g>
 
-        <g className="hero-parallax hero-parallax--mid" filter="url(#hero-blur)" opacity="0.7">
-          <ellipse cx="430" cy="446" rx="300" ry="30" fill="var(--scene-mist)" />
-          <ellipse cx="1260" cy="470" rx="330" ry="34" fill="var(--scene-mist)" />
-          <ellipse cx="850" cy="430" rx="360" ry="24" fill="var(--scene-mist)" opacity="0.7" />
+        <g
+          className="hero-parallax hero-parallax--mid"
+          stroke="var(--sketch-ink-faint)"
+          strokeOpacity="0.28"
+          strokeWidth="1.1"
+          strokeLinecap="round"
+          opacity="0.8"
+        >
+          <path d="M140 446C220 438 302 442 384 448M462 452C536 446 612 448 688 454M760 444C836 438 912 440 988 446M1060 458C1138 450 1218 452 1298 458M1370 446C1444 440 1520 442 1596 448" />
+          <path d="M250 462C322 456 396 458 470 462M700 466C772 460 846 462 918 466M1150 468C1222 462 1296 464 1368 468" />
         </g>
 
         <g className="hero-parallax hero-parallax--mid">
           <path
             d="M0 506C220 456 380 522 580 494C780 466 932 526 1120 490C1320 452 1500 506 1680 472V720H0V506Z"
             fill="url(#meadow-far)"
+            stroke="none"
           />
           <path
             d="M0 566C200 508 420 572 620 542C820 512 1000 582 1200 546C1400 512 1540 560 1680 536V720H0V566Z"
             fill="url(#meadow-mid)"
+            stroke="none"
           />
-          <g stroke="var(--scene-grass-light)" strokeOpacity="0.22" strokeWidth="10" fill="none">
-            <path d="M0 542C240 502 380 554 590 528C800 502 950 564 1170 528C1350 498 1520 542 1680 514" />
-            <path d="M0 596C230 548 420 610 640 576C860 542 1040 612 1260 576C1430 548 1580 590 1680 566" />
-          </g>
         </g>
 
         <g className="hero-parallax hero-parallax--near">
           <path
             d="M0 620C220 574 400 638 620 606C840 574 1040 650 1260 612C1440 582 1580 630 1680 602V720H0V620Z"
             fill="url(#meadow-near)"
+            stroke="none"
           />
           <path
             d="M0 672C220 640 420 690 640 666C860 642 1060 700 1280 672C1460 650 1600 690 1680 668V720H0V672Z"
             fill="var(--scene-front)"
+            stroke="none"
           />
-          <g stroke="var(--scene-grass-light)" strokeOpacity="0.16" strokeWidth="12" fill="none">
-            <path d="M0 650C220 610 420 662 640 636C860 610 1060 668 1280 640C1460 618 1600 658 1680 636" />
-          </g>
-
           <path
             d="M312 626C406 654 486 682 560 720"
             stroke="var(--scene-path)"
@@ -656,7 +758,23 @@ export function HeroScene() {
           <path
             d="M824 410C902 470 716 522 820 582C930 648 704 680 788 742L1018 742C926 680 1084 642 982 582C878 522 1012 472 920 410Z"
             fill="url(#river)"
+            stroke="var(--sketch-ink-soft)"
+            strokeWidth="1.5"
+            strokeOpacity="0.65"
           />
+          <g
+            stroke="var(--sketch-ink-faint)"
+            strokeOpacity="0.38"
+            strokeWidth="1.1"
+            strokeLinecap="round"
+            fill="none"
+          >
+            <path d="M832 424C844 470 730 516 818 574C846 592 850 610 840 628" />
+            <path d="M946 430C938 474 1024 520 944 568C916 588 912 608 924 626" />
+            <path d="M830 470C842 500 790 520 822 548C854 576 854 600 844 620" />
+            <path d="M946 504C936 532 978 552 950 580C922 608 926 630 938 650" />
+            <path d="M806 650C830 672 798 696 812 720" />
+          </g>
           <g stroke="var(--scene-foam)" strokeLinecap="round">
             <path
               d="M850 462C878 496 806 522 850 556"
@@ -890,12 +1008,40 @@ export function HeroScene() {
         <use href="#flower" transform="translate(342 718) scale(1.1)" />
         <use href="#flower" transform="translate(1452 708) scale(1)" />
 
+        <g style={{ color: 'var(--sketch-ink-soft)' }} opacity="0.42">
+          <use href="#grass-tuft" transform="translate(168 664) scale(0.42)" />
+          <use href="#grass-tuft" transform="translate(248 682) scale(0.34)" />
+          <use href="#grass-tuft" transform="translate(386 676) scale(0.4)" />
+          <use href="#grass-tuft" transform="translate(566 696) scale(0.38)" />
+          <use href="#grass-tuft" transform="translate(676 684) scale(0.32)" />
+          <use href="#grass-tuft" transform="translate(1044 672) scale(0.42)" />
+          <use href="#grass-tuft" transform="translate(1148 690) scale(0.34)" />
+          <use href="#grass-tuft" transform="translate(1244 660) scale(0.4)" />
+          <use href="#grass-tuft" transform="translate(1330 684) scale(0.3)" />
+          <use href="#grass-tuft" transform="translate(1484 684) scale(0.4)" />
+          <use href="#grass-tuft" transform="translate(1572 668) scale(0.34)" />
+          <use href="#grass-tuft" transform="translate(744 706) scale(0.3)" />
+          <use href="#grass-tuft" transform="translate(966 704) scale(0.32)" />
+        </g>
+
+        <g fill="var(--sketch-ink-faint)" opacity="0.5">
+          <circle cx="298" cy="674" r="1.5" />
+          <circle cx="520" cy="690" r="1.3" />
+          <circle cx="636" cy="674" r="1.4" />
+          <circle cx="1114" cy="678" r="1.5" />
+          <circle cx="1310" cy="672" r="1.3" />
+          <circle cx="1540" cy="700" r="1.4" />
+        </g>
+
         <g className="hero-parallax hero-parallax--front">
           <Tuft x={16} y={720} scale={2.1} opacity={0.85} duration={6} delay={-2} />
           <Tuft x={204} y={720} scale={1.5} opacity={0.7} duration={8} delay={-1} />
           <Tuft x={486} y={720} scale={1.3} opacity={0.65} duration={7.5} delay={-3} />
+          <Tuft x={606} y={720} scale={1.2} opacity={0.6} duration={7} delay={-2.4} />
+          <Tuft x={940} y={720} scale={1.15} opacity={0.55} duration={8.2} delay={-4.2} />
           <Tuft x={1138} y={720} scale={1.35} opacity={0.65} duration={8.5} delay={-5} color="var(--scene-grass-light)" />
           <Tuft x={1420} y={720} scale={1.5} opacity={0.72} duration={6} delay={-4} color="var(--scene-grass-light)" />
+          <Tuft x={1556} y={720} scale={1.25} opacity={0.6} duration={7.6} delay={-1.6} />
           <Tuft x={1664} y={720} scale={2} opacity={0.85} duration={6.5} delay={-5} />
         </g>
       </svg>

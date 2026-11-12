@@ -189,20 +189,15 @@ body {
   background:
     radial-gradient(
       52% 46% at 14% 2%,
-      color-mix(in srgb, var(--scene-sun) 30%, transparent) 0%,
+      rgba(255, 255, 255, 0.85) 0%,
       transparent 68%
     ),
     radial-gradient(
       46% 40% at 82% 24%,
-      color-mix(in srgb, var(--scene-blossom) 12%, transparent) 0%,
+      rgba(23, 21, 18, 0.045) 0%,
       transparent 74%
     ),
-    linear-gradient(
-      to bottom,
-      var(--paper) 0%,
-      var(--dawn-peach) 58%,
-      var(--dawn-sky) 100%
-    );
+    linear-gradient(to bottom, #fcfaf5 0%, #f6f1e8 58%, #ebe5d9 100%);
 }
 
 .dark .hero-sky {
@@ -226,6 +221,10 @@ body {
 
 .dark .hero-parallax {
   filter: saturate(0.6) brightness(0.75) contrast(1.05);
+}
+
+.dark .hero-sketch .hero-parallax {
+  filter: none;
 }
 
 .hero-parallax--far {
@@ -275,7 +274,7 @@ body {
 .hero-light-shimmer {
   background: radial-gradient(
     38% 34% at 18% 8%,
-    color-mix(in srgb, var(--scene-sun) 22%, transparent) 0%,
+    rgba(255, 255, 255, 0.45) 0%,
     transparent 72%
   );
   mix-blend-mode: soft-light;
@@ -444,11 +443,137 @@ body {
 }
 
 .hero-cloud {
-  filter: drop-shadow(0 8px 12px rgba(90, 74, 64, 0.18));
+  filter: none;
 }
 
-.dark .hero-cloud {
-  filter: none;
+.hero-cloud path:first-child {
+  fill: #fbf8f1;
+  stroke: #3e3a33;
+  stroke-width: 1.2;
+  stroke-opacity: 0.45;
+}
+
+.hero-cloud path:last-child {
+  stroke: #7c766b;
+  opacity: 0.45;
+}
+
+.dark .hero-cloud path:first-child {
+  fill: #0f161d;
+  stroke: #c9c3b7;
+  stroke-opacity: 0.55;
+}
+
+.dark .hero-cloud path:last-child {
+  stroke: #c9c3b7;
+}
+
+.hero-balloon {
+  --sky: #f7f3ea;
+  --sky-strong: #3e3a33;
+}
+
+.dark .hero-balloon {
+  --sky: #101821;
+  --sky-strong: #d7d1c4;
+}
+
+.hero-balloon [fill]:not([fill="none"]):not([stroke]) {
+  stroke: #3e3a33;
+  stroke-width: 0.8;
+  stroke-opacity: 0.55;
+  stroke-linejoin: round;
+}
+
+.dark .hero-balloon [fill]:not([fill="none"]):not([stroke]) {
+  stroke: #d7d1c4;
+  stroke-opacity: 0.6;
+}
+
+/* Ink-and-paper landscape: graphite washes, hatched shadows, drawn edges. */
+.hero-sketch {
+  --sketch-ink: #171512;
+  --sketch-ink-soft: #3e3a33;
+  --sketch-ink-faint: #7c766b;
+  --sketch-paper: #f7f3ea;
+  --sketch-wash: #e6e0d4;
+  --sketch-shade: #c9c1b2;
+  --sketch-deep: #a79e8f;
+  --sketch-highlight: #fdfbf6;
+
+  --scene-mountain-far: var(--sketch-wash);
+  --scene-mountain-far-light: var(--sketch-highlight);
+  --scene-mountain-far-shadow: var(--sketch-shade);
+  --scene-mountain-mid: var(--sketch-shade);
+  --scene-mountain-mid-light: var(--sketch-wash);
+  --scene-mountain-mid-shadow: var(--sketch-deep);
+  --scene-mountain-rim: var(--sketch-ink-faint);
+  --scene-snow: var(--sketch-highlight);
+  --scene-mist: var(--sketch-paper);
+  --scene-haze: var(--sketch-paper);
+  --scene-cloud: var(--sketch-highlight);
+  --scene-cloud-light: var(--sketch-highlight);
+  --scene-far: var(--sketch-wash);
+  --scene-mid: var(--sketch-shade);
+  --scene-near: var(--sketch-deep);
+  --scene-front: #c3bbae;
+  --scene-grass-light: var(--sketch-highlight);
+  --scene-grass-shadow: var(--sketch-ink-soft);
+  --scene-tree: var(--sketch-shade);
+  --scene-tree-alt: var(--sketch-wash);
+  --scene-tree-deep: var(--sketch-deep);
+  --scene-trunk: var(--sketch-ink-soft);
+  --scene-trunk-light: var(--sketch-ink-faint);
+  --scene-birch: var(--sketch-highlight);
+  --scene-birch-mark: var(--sketch-ink);
+  --scene-path: var(--sketch-shade);
+  --scene-water: var(--sketch-paper);
+  --scene-water-mid: var(--sketch-wash);
+  --scene-water-deep: var(--sketch-shade);
+  --scene-foam: var(--sketch-ink-faint);
+  --scene-sky-tint: var(--sketch-highlight);
+  --scene-bloom: var(--sketch-ink-faint);
+  --scene-blossom: var(--sketch-ink-faint);
+  --scene-lavender: var(--sketch-ink-faint);
+  --scene-wood: var(--sketch-shade);
+  --scene-wood-light: var(--sketch-wash);
+  --scene-wood-dark: var(--sketch-ink);
+  --scene-stone: var(--sketch-shade);
+  --scene-stone-light: var(--sketch-wash);
+  --scene-roof: var(--sketch-deep);
+  --scene-roof-light: var(--sketch-shade);
+  --scene-window: var(--sketch-highlight);
+  --scene-window-glow: transparent;
+  --scene-lantern: var(--sketch-highlight);
+}
+
+.dark .hero-sketch {
+  --sketch-ink: #f7f3e9;
+  --sketch-ink-soft: #c9c3b7;
+  --sketch-ink-faint: #8a847a;
+  --sketch-paper: #0a0f15;
+  --sketch-wash: #111921;
+  --sketch-shade: #1a232d;
+  --sketch-deep: #242f3a;
+  --sketch-highlight: #151e27;
+
+  --scene-front: #2b3742;
+}
+
+.hero-sketch [fill]:not([fill="none"]):not([stroke]) {
+  stroke: var(--sketch-ink-soft);
+  stroke-width: 1.05;
+  stroke-opacity: 0.6;
+  stroke-linejoin: round;
+}
+
+.hero-scene .pollen {
+  background: #8a8479;
+  box-shadow: none;
+}
+
+.dark .hero-scene .pollen {
+  background: #a9a397;
 }
 
 @keyframes twinkle {
