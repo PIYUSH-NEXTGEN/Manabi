@@ -1,7 +1,7 @@
-import { AskManabi } from '@/components/home/AskManabi';
 import { BuildInPublic } from '@/components/home/BuildInPublic';
 import { Hero } from '@/components/home/Hero';
 import { ProjectsSection } from '@/components/home/ProjectsSection';
+import { Sponsors } from '@/components/home/Sponsors';
 
 export function HomePage() {
   return (
@@ -9,7 +9,7 @@ export function HomePage() {
       <Hero />
       <ProjectsSection />
       <BuildInPublic />
-      <AskManabi />
+      <Sponsors />
     </main>
   );
 }

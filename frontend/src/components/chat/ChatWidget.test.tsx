@@ -4,7 +4,7 @@ import { http, HttpResponse } from 'msw';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { server } from '@/api/mocks/server';
 import { ChatWidget } from '@/components/chat/ChatWidget';
-import { AskManabi } from '@/components/home/AskManabi';
+import { ProjectsSection } from '@/components/home/ProjectsSection';
 import { renderWithProviders } from '@/test/renderWithProviders';
 
 const LOGGED_IN = {
@@ -69,16 +69,16 @@ describe('ChatWidget', () => {
     expect(screen.queryByLabelText('MANABI chat')).not.toBeInTheDocument();
   });
 
-  it('opens from the home Ask MANABI section button', async () => {
+  it('opens from the project board AI guide button', async () => {
     const user = userEvent.setup();
     renderWithProviders(
       <>
-        <AskManabi />
+        <ProjectsSection />
         <ChatWidget />
       </>,
     );
 
-    await user.click(screen.getByRole('button', { name: 'Open the chat' }));
+    await user.click(screen.getByRole('button', { name: 'Chat with the AI guide' }));
     expect(screen.getByLabelText('MANABI chat')).toBeInTheDocument();
   });
 
