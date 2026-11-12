@@ -102,7 +102,7 @@ PROJECTS = [
             "## Proposed solution\n"
             "A beginner-friendly, single-page web app that lets a user register "
             "documents, assign each one a category and expiry date, and see at a "
-            "glance which documents are upcoming, expired, or valid — with the "
+            "glance which documents are upcoming, expired, or valid, with the "
             "number of days remaining shown for every item.\n\n"
             "## Target audience\n"
             "Students, renters, vehicle owners, and anyone who keeps track of "
@@ -159,7 +159,7 @@ PROJECTS = [
             "## Possible future improvements\n"
             "Email reminders, document tags, dark mode, search by document name\n\n"
             "## Limitations\n"
-            "Runs in one browser only — data is not synced across devices. "
+            "Runs in one browser only. Data is not synced across devices. "
             "Notifications depend on browser permission and the tab being open. "
             "This is a personal tracking tool, not a legal reminder service."
         ),
@@ -169,8 +169,8 @@ PROJECTS = [
         title="Accessibility-Friendly Website Checker",
         summary=(
             "A client-side tool that checks a sample web page for common "
-            "accessibility issues — colour contrast, missing image alt text, "
-            "and heading order — and produces a plain-language report."
+            "accessibility issues (colour contrast, missing image alt text, "
+            "and heading order) and produces a plain-language report."
         ),
         who_affected=(
             "Web developers, students, and site owners who want to make pages "
@@ -236,7 +236,7 @@ PROJECTS = [
             "accessibility fundamentals (WCAG)\n\n"
             "## Expected deliverables\n"
             "A working checker that accepts HTML, runs the three core checks, "
-            "and displays a clear report — with a built-in sample page so it is "
+            "and displays a clear report, with a built-in sample page so it is "
             "usable without pasting anything.\n\n"
             "## Estimated development duration\n"
             "30–35 hours (solo)\n\n"
@@ -262,7 +262,7 @@ PROJECTS = [
             "markup or a built-in sample page); treat live URL scanning as an "
             "extension that would need a backend proxy.\n\n"
             "## Limitations\n"
-            "Rule-based and educational only — not a substitute for a manual "
+            "Rule-based and educational only, not a substitute for a manual "
             "accessibility audit or a guarantee of legal compliance. Cannot scan "
             "external URLs directly due to CORS."
         ),
@@ -371,8 +371,8 @@ PROJECTS = [
         source_id="manabi-web-beginner-004",
         title="Student Resource Exchange",
         summary=(
-            "A place for students to upload and share study resources — notes, "
-            "lab manuals, reference books — organised by subject and semester, "
+            "A place for students to upload and share study resources (notes, "
+            "lab manuals, reference books), organised by subject and semester, "
             "with search, ratings, and a way to report broken resources."
         ),
         who_affected=(
@@ -440,7 +440,7 @@ PROJECTS = [
             "moderation\n\n"
             "## Expected deliverables\n"
             "A working exchange where students can post resources, browse by "
-            "subject/semester, search, rate, and report — preloaded with sample "
+            "subject/semester, search, rate, and report, preloaded with sample "
             "resources.\n\n"
             "## Estimated development duration\n"
             "35–40 hours (solo)\n\n"
@@ -499,7 +499,7 @@ PROJECTS = [
             "# Household Waste Sorting Guide\n\n"
             "## Problem statement\n"
             "People frequently do not know how to dispose of different types of "
-            "waste correctly — for example, whether batteries, plastic bottles, "
+            "waste correctly. For example, whether batteries, plastic bottles, "
             "or cardboard go in the recycling bin, the general waste bin, or a "
             "special drop-off point.\n\n"
             "## Proposed solution\n"
@@ -511,7 +511,7 @@ PROJECTS = [
             "conscious residents.\n\n"
             "## Real-world use case\n"
             "A user searches for \"battery\" and learns it is hazardous waste "
-            "that belongs at a drop-off point — not in the regular bin.\n\n"
+            "that belongs at a drop-off point, not in the regular bin.\n\n"
             "## Core features (MVP)\n"
             "- Search for an item such as batteries, plastic bottles, or "
             "cardboard\n"
@@ -751,7 +751,7 @@ PROJECTS = [
             "## Limitations and assumptions\n"
             "Scheme details change over time, so the source and last-updated "
             "date must be displayed and the data periodically reviewed. This is "
-            "not legal advice — users should always verify on the official "
+            "not legal advice. Users should always verify on the official "
             "website. The MVP uses a manually curated dataset for one region, "
             "not live government data."
         ),
@@ -762,7 +762,7 @@ PROJECTS = [
         summary=(
             "A simple product catalogue for small local businesses to showcase "
             "items with images, descriptions, prices, and a WhatsApp enquiry "
-            "link — without a full e-commerce store."
+            "link, without a full e-commerce store."
         ),
         who_affected=(
             "Small local shop owners, artisans, and home-based businesses "
@@ -846,7 +846,7 @@ PROJECTS = [
             "## Possible future improvements\n"
             "Product details page, stock status, image upload\n\n"
             "## Limitations\n"
-            "Enquiry-only in the MVP — no payment or checkout. Images are stored "
+            "Enquiry-only in the MVP. No payment or checkout. Images are stored "
             "as URLs. Data lives in one browser. The WhatsApp link depends on "
             "the customer having WhatsApp installed."
         ),
@@ -962,7 +962,7 @@ PROJECTS = [
         why_matters=(
             "Privacy policies are long and written in legal language. "
             "Highlighting the key clauses helps people understand what is "
-            "collected and shared — without needing a law degree."
+            "collected and shared, without needing a law degree."
         ),
         domain="cybersecurity",
         est_hours=24,
@@ -1061,7 +1061,7 @@ def main() -> int:
             db.add(Problem(**data))
             inserted += 1
     print(
-        f"Beginner web projects — inserted: {inserted}, skipped: {skipped}, "
+        f"Beginner web projects - inserted: {inserted}, skipped: {skipped}, "
         f"total: {len(PROJECTS)}"
     )
     return 0

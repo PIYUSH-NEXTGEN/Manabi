@@ -123,7 +123,7 @@ PROJECTS = [
             "A web platform where every user lists skills they can teach and "
             "skills they want to learn. A matching engine pairs complementary "
             "users, who then send exchange requests, schedule sessions, and "
-            "rate each other afterward — all without money changing hands.\n\n"
+            "rate each other afterward, all without money changing hands.\n\n"
             "## Target audience\n"
             "Students, freelancers, hobbyists, and professionals looking to "
             "learn or teach practical skills affordably.\n\n"
@@ -1319,7 +1319,7 @@ def main() -> int:
             db.add(Problem(**data))
             inserted += 1
     print(
-        f"Intermediate web projects — inserted: {inserted}, skipped: {skipped}, "
+        f"Intermediate web projects - inserted: {inserted}, skipped: {skipped}, "
         f"total: {len(PROJECTS)}"
     )
     return 0

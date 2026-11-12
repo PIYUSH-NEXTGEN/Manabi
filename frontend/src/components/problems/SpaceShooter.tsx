@@ -528,7 +528,7 @@ export function SpaceShooter() {
         <div aria-hidden="true" className="arcade-vignette pointer-events-none absolute inset-0" />
       </div>
       <p className="font-mono text-label uppercase tracking-[0.14em] text-muted">
-        {reduced ? 'Reduced motion — mini-game paused' : 'Move to aim · click to fire'}
+        {reduced ? 'Reduced motion · mini-game paused' : 'Move to aim · click to fire'}
       </p>
     </div>
   );

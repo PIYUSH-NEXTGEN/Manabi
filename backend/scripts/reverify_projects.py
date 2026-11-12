@@ -116,9 +116,9 @@ async def main(apply: bool, limit: int | None) -> None:
         writer.writerows(results)
 
     mode = "APPLIED" if apply else "DRY RUN"
-    print(f"{mode} — {len(results)} projects, report: {REPORT_PATH}")
+    print(f"{mode}: {len(results)} projects, report: {REPORT_PATH}")
     for pid, uid, token_display, old, new, reason, action in results:
-        print(f"  project {pid} (user {uid}, token: {token_display}): {old} -> {new} — {reason[:120]} [{action}]")
+        print(f"  project {pid} (user {uid}, token: {token_display}): {old} -> {new} - {reason[:120]} [{action}]")
 
 
 if __name__ == "__main__":
