@@ -120,7 +120,7 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
             onChange={(event) => setSummary(event.target.value)}
             rows={5}
             maxLength={SOLUTION_SUMMARY_MAX}
-            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-body"
+            className="field mt-1 w-full"
           />
           <span className="mt-1 block text-label text-ink-soft">
             Editing the description re-runs the automatic relevance check at most
@@ -135,7 +135,7 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
             value={demoUrl}
             onChange={(event) => setDemoUrl(event.target.value)}
             placeholder="https://…"
-            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-body"
+            className="field mt-1 w-full"
           />
         </label>
         <label className="flex items-center gap-2 text-body">
@@ -240,7 +240,7 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
             value={demoUrl}
             onChange={(event) => setDemoUrl(event.target.value)}
             placeholder="https://…"
-            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-body"
+            className="field mt-1 w-full"
           />
         </label>
         <label className="block" htmlFor={`complete-reflection-${project.id}`}>
@@ -251,11 +251,11 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
             onChange={(event) => setReflection(event.target.value)}
             rows={3}
             maxLength={800}
-            className="mt-1 w-full border border-ink bg-paper px-3 py-2 text-body"
+            className="field mt-1 w-full"
           />
         </label>
         {checklist ? (
-          <div className="border border-ink bg-sheet p-3">
+          <div className="rounded-panel border border-danger/30 bg-danger-soft/60 p-3.5">
             <p className="font-mono text-label font-bold uppercase tracking-widest text-danger">
               Not ready yet. Missing:
             </p>
@@ -338,16 +338,16 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
   }
 
   return (
-    <li className="flex flex-col gap-2 px-4 py-3">
+    <li className="flex flex-col gap-3 px-5 py-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <Link
             to={`/projects/${project.id}`}
-            className="font-display text-body uppercase leading-tight underline-offset-4 hover:underline "
+            className="font-display text-[1.0625rem] leading-snug text-ink underline-offset-4 hover:underline"
           >
             {project.repo_name}
           </Link>
-          <p className="mt-0.5 truncate font-mono text-label font-bold uppercase tracking-widest text-ink/60">
+          <p className="mt-1 truncate font-mono text-label font-bold uppercase tracking-[0.12em] text-muted">
             {project.problem_title}
           </p>
         </div>
@@ -410,19 +410,19 @@ export function DashboardPage() {
   const buildingCount = rows.length - completedCount;
 
   return (
-    <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-10">
+    <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-12">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="font-display text-display uppercase leading-none">
+          <h1 className="font-display text-display leading-[1.02] tracking-[-0.03em]">
             Dashboard
           </h1>
-          <p className="mt-2 font-mono text-label font-bold uppercase tracking-widest text-ink/70">
+          <p className="mt-2 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
             {displayName ? `Logged in as ${displayName}` : 'Loading…'}
           </p>
         </div>
         {me.data ? (
           <Button
-            variant="danger"
+            variant="secondary"
             size="small"
             onClick={() => logout.mutate()}
             disabled={logout.isPending}
@@ -434,11 +434,11 @@ export function DashboardPage() {
 
       <section aria-label="Your projects" className="mt-8">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h2 className="font-display text-body uppercase">
+          <h2 className="font-display text-[1.25rem] tracking-[-0.015em] text-ink">
             Your projects
           </h2>
           {rows.length > 0 ? (
-            <p className="font-mono text-label font-bold uppercase tracking-widest text-ink/70">
+            <p className="font-mono text-label font-bold uppercase tracking-[0.08em] text-muted">
               {rows.length} total · {buildingCount} building · {inReview} in
               review · {completedCount} completed
             </p>
@@ -447,13 +447,13 @@ export function DashboardPage() {
         {projects.isLoading ? (
           <p className="mt-2 text-body">Loading projects…</p>
         ) : projects.data && projects.data.length > 0 ? (
-          <ul className="mt-3 divide-y-[3px] divide-ink border border-ink bg-sheet">
+          <ul className="mt-4 divide-y divide-line overflow-hidden rounded-card border border-line bg-sheet shadow-soft">
             {projects.data.map((project) => (
               <MyProjectRow key={project.id} project={project} />
             ))}
           </ul>
         ) : (
-          <p className="mt-3 border border-ink bg-sheet p-4 text-body leading-snug">
+          <p className="mt-4 rounded-card border border-line bg-sheet p-5 text-body leading-relaxed shadow-soft">
             No projects yet.{' '}
             <Link to="/problems" className="underline underline-offset-4">
               Pick a problem

@@ -10,18 +10,18 @@ describe('Stamp', () => {
 
   it('uses danger for closed and olive for AI-suggested', () => {
     const { rerender } = render(<Stamp tone="closed" />);
-    expect(screen.getByText('CLOSED')).toHaveClass('bg-danger', 'text-paper');
+    expect(screen.getByText('CLOSED')).toHaveClass('bg-danger', 'text-white');
 
     rerender(<Stamp tone="ai-suggested" />);
     expect(screen.getByText('AI-SUGGESTED')).toHaveClass('bg-olive', 'text-paper');
   });
 
-  it('uses olive for active and accent for stale progress states', () => {
+  it('uses a quiet olive for active and a soft accent for stale states', () => {
     const { rerender } = render(<Stamp tone="active" />);
-    expect(screen.getByText('ACTIVE')).toHaveClass('bg-olive');
+    expect(screen.getByText('ACTIVE')).toHaveClass('bg-olive/10', 'text-olive');
 
     rerender(<Stamp tone="stale" />);
-    expect(screen.getByText('STALE')).toHaveClass('bg-accent');
+    expect(screen.getByText('STALE')).toHaveClass('bg-accent-soft', 'text-accent');
   });
 
   it('accepts a custom label and rotation', () => {

@@ -84,12 +84,12 @@ const components = {
       {children}
     </blockquote>
   ),
-  hr: () => <hr className="my-3 border-t border-ink" />,
+  hr: () => <hr className="my-3 border-t border-line" />,
   code: ({ children }: { children?: ReactNode }) => (
     <code className="bg-accent/40 px-1 font-mono">{children}</code>
   ),
   pre: ({ children }: { children?: ReactNode }) => (
-    <pre className="mb-2 overflow-x-auto border border-ink bg-paper p-2 font-mono text-label last:mb-0">
+    <pre className="mb-2 overflow-x-auto rounded-panel border border-line bg-paper p-3 font-mono text-label last:mb-0">
       {children}
     </pre>
   ),
@@ -99,11 +99,11 @@ const components = {
     </table>
   ),
   th: ({ children }: { children?: ReactNode }) => (
-    <th className="border-[2px] border-ink bg-paper px-2 py-1 font-bold">
+    <th className="border border-line bg-paper px-2 py-1 font-bold">
       {children}
     </th>
   ),
   td: ({ children }: { children?: ReactNode }) => (
-    <td className="border-[2px] border-ink px-2 py-1">{children}</td>
+    <td className="border border-line px-2 py-1">{children}</td>
   ),
 };

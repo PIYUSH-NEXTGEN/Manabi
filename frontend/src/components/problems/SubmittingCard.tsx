@@ -29,7 +29,7 @@ export function SubmittingCard() {
   const stage = STAGES[stageIndex]!;
 
   return (
-    <aside className="submit-card-enter flex flex-col gap-4 border border-ink bg-sheet p-4">
+    <aside className="submit-card-enter flex flex-col gap-4 rounded-panel border border-line bg-sheet p-4">
       <SpaceShooter />
       <div>
         <h2 className="font-mono text-label font-bold uppercase tracking-widest">

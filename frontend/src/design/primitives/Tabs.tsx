@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
+import { cx } from '@/lib/cx';
 
 export interface TabItem {
   value: string;
@@ -14,9 +15,10 @@ interface TabsProps {
 }
 
 const TRIGGER_CLASSES =
-  '-ml-px first:ml-0 border border-ink bg-sheet px-4 py-2 font-mono text-label font-bold uppercase tracking-[0.16em] text-ink data-[state=active]:bg-ink data-[state=active]:text-paper';
+  'rounded-full px-4 py-2 text-[0.875rem] font-semibold text-ink-soft transition-colors hover:text-ink data-[state=active]:bg-sheet data-[state=active]:text-ink data-[state=active]:shadow-soft';
 
-const CONTENT_CLASSES = 'border border-t-0 border-ink bg-sheet p-5 text-body';
+const CONTENT_CLASSES =
+  'mt-4 rounded-panel border border-line bg-sheet p-5 text-body leading-relaxed text-ink-soft';
 
 export function Tabs({ tabs, defaultValue, className }: TabsProps) {
   const initial = defaultValue ?? tabs[0]?.value;
@@ -26,9 +28,9 @@ export function Tabs({ tabs, defaultValue, className }: TabsProps) {
 
   return (
     <TabsPrimitive.Root defaultValue={initial} className={className}>
-      <TabsPrimitive.List className="flex flex-wrap">
+      <TabsPrimitive.List className="inline-flex flex-wrap gap-1 rounded-pill border border-line bg-tint/60 p-1">
         {tabs.map((tab) => (
-          <TabsPrimitive.Trigger key={tab.value} value={tab.value} className={TRIGGER_CLASSES}>
+          <TabsPrimitive.Trigger key={tab.value} value={tab.value} className={cx(TRIGGER_CLASSES)}>
             {tab.label}
           </TabsPrimitive.Trigger>
         ))}

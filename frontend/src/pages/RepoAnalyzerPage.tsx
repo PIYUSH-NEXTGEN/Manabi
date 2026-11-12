@@ -20,6 +20,12 @@ export function RepoAnalyzerPage() {
 
   return (
     <StaticShell kicker="Coming soon" title="Repo Analyzer">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full bg-accent-soft px-2.5 py-1 font-mono text-label font-bold uppercase tracking-[0.1em] text-accent">
+          Preview · not active yet
+        </span>
+      </div>
+
       <p className="text-body leading-relaxed">
         Paste a public GitHub repository link and MANABI will scan it for open
         pull requests, API endpoints, dependencies, and project structure so you
@@ -39,14 +45,6 @@ export function RepoAnalyzerPage() {
           onChange={(event) => setRepoUrl(event.target.value)}
           error={error}
         />
-        {error ? (
-          <p
-            role="alert"
-            className="font-mono text-label font-bold uppercase tracking-widest text-danger"
-          >
-            {error}
-          </p>
-        ) : null}
         <button
           type="submit"
           disabled
@@ -56,7 +54,7 @@ export function RepoAnalyzerPage() {
         </button>
       </form>
 
-      <p className="mt-8 text-body leading-relaxed text-ink/60">
+      <p className="mt-8 border-t border-line pt-5 text-body leading-relaxed text-ink-soft">
         This tool is being built. In the meantime, browse{' '}
         <Link to="/problems" className="text-accent underline underline-offset-4">
           project ideas

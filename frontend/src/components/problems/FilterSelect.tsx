@@ -31,7 +31,7 @@ export function FilterSelect({
     <div className="flex flex-col gap-1.5">
       <label
         htmlFor={id}
-        className="font-mono text-label font-bold uppercase tracking-widest"
+        className="font-mono text-label font-bold uppercase tracking-[0.14em] text-ink-soft"
       >
         {label}
       </label>
@@ -39,7 +39,7 @@ export function FilterSelect({
         id={id}
         value={value}
         onChange={handleChange}
-        className="field w-full appearance-none font-mono text-label font-bold uppercase tracking-widest"
+        className="field w-full appearance-none text-[0.875rem] font-semibold"
       >
         <option value="">All</option>
         {options.map((option) => (

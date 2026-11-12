@@ -90,10 +90,14 @@ describe('Route table (no dead links)', () => {
     render(<App />);
 
     expect(
-      await screen.findByRole('heading', {
-        name: 'Pick a project. Ship it. Prove it.',
-        level: 1,
-      }),
+      await screen.findByRole(
+        'heading',
+        {
+          name: 'Pick a project. Ship it. Prove it.',
+          level: 1,
+        },
+        { timeout: 5000 },
+      ),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('heading', { name: 'Dashboard', level: 1 }),

@@ -189,7 +189,7 @@ export function AboutPage() {
           {PRINCIPLES.map((principle) => (
             <li
               key={principle.number}
-              className="flex flex-col border border-ink bg-sheet p-4"
+              className="flex flex-col rounded-card border border-line bg-sheet p-5 shadow-soft"
             >
               <span
                 aria-hidden
@@ -229,7 +229,7 @@ export function AboutPage() {
         </RefList>
       </RefSection>
 
-      <div className="flex flex-wrap gap-3 border-t border-ink pt-6">
+      <div className="flex flex-wrap gap-3 border-t border-line pt-6">
         <Link to="/problems" className={buttonClasses('primary')}>
           Browse problems
         </Link>

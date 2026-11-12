@@ -20,17 +20,17 @@ describe('IndexCard', () => {
     ).toBeInTheDocument();
   });
 
-  it('shows difficulty as filled squares with a screen-reader label', () => {
+  it('shows difficulty as filled bars with a screen-reader label', () => {
     render(
       <IndexCard field="data-science" title="Drift detector" difficulty="intermediate" />,
     );
 
     const label = screen.getByText('intermediate');
-    const squares = label.previousElementSibling?.children;
-    expect(squares).toHaveLength(3);
-    expect(squares?.[0]).toHaveClass('bg-ink');
-    expect(squares?.[1]).toHaveClass('bg-ink');
-    expect(squares?.[2]).toHaveClass('bg-transparent');
+    const bars = label.previousElementSibling?.children;
+    expect(bars).toHaveLength(3);
+    expect(bars?.[0]).toHaveClass('bg-accent');
+    expect(bars?.[1]).toHaveClass('bg-accent');
+    expect(bars?.[2]).toHaveClass('bg-tint');
   });
 
   it('falls back to NO-ID when the source has no ID', () => {

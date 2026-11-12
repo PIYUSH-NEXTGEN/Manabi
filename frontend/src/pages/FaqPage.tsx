@@ -170,7 +170,7 @@ export function FaqPage() {
         </RefSection>
       ))}
 
-      <div className="flex flex-wrap gap-3 border-t border-ink pt-6">
+      <div className="flex flex-wrap gap-3 border-t border-line pt-6">
         <Link to="/problems" className={buttonClasses('primary')}>
           Browse problems
         </Link>

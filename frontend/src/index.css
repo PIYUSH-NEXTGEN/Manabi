@@ -16,23 +16,45 @@
   --color-danger-soft: var(--danger-soft);
   --color-muted: var(--muted);
   --color-line: var(--line);
+  --color-dawn-sky: var(--dawn-sky);
+  --color-dawn-peach: var(--dawn-peach);
+  --color-dawn-sage: var(--dawn-sage);
+  --color-dawn-lavender: var(--dawn-lavender);
   --font-display: var(--ff-display);
+  --font-brand: var(--ff-brand);
   --font-body: var(--ff-body);
   --font-mono: var(--ff-mono);
 
-  /* Exactly three sizes for the whole site (nav excluded). */
+  /* Literals, not var() self-references: @theme emits these into :root. */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-xl: 36px;
+  --radius-card: 26px;
+  --radius-panel: 18px;
+  --radius-pill: 999px;
+
+  --shadow-soft:
+    0 1px 2px rgba(48, 39, 27, 0.04), 0 10px 30px -18px rgba(48, 39, 27, 0.18);
+  --shadow-lift:
+    0 2px 4px rgba(48, 39, 27, 0.04), 0 28px 60px -30px rgba(48, 39, 27, 0.32);
+
+  /* A calm editorial scale: hero, display, lead, body, mono label. */
   --text-label: 0.6875rem;
-  --text-label--line-height: 1.4;
-  --text-body: 0.9375rem;
-  --text-body--line-height: 1.55;
-  --text-display: clamp(2rem, 4vw, 2.75rem);
-  --text-display--line-height: 0.95;
+  --text-label--line-height: 1.5;
+  --text-body: 0.9688rem;
+  --text-body--line-height: 1.65;
+  --text-lead: clamp(1.0625rem, 1.5vw, 1.1875rem);
+  --text-lead--line-height: 1.6;
+  --text-display: clamp(2rem, 4.2vw, 3.15rem);
+  --text-display--line-height: 1.02;
+  --text-hero: clamp(2.6rem, 6.4vw, 4.6rem);
+  --text-hero--line-height: 1.0;
 }
 
-*,
-*::before,
-*::after {
-  border-radius: 0;
+html {
+  scroll-behavior: smooth;
 }
 
 html,
@@ -45,17 +67,51 @@ body {
 
 body {
   font-size: var(--text-body);
-  line-height: 1.55;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Display type is a medium-weight sans, not a black slab: calm, tight, and
+   set in sentence case by the components that use it. */
+.font-display {
+  font-weight: 600;
+  letter-spacing: -0.025em;
 }
 
 ::selection {
   background: var(--accent);
-  color: var(--paper);
+  color: var(--sheet);
 }
 
 :focus-visible {
   outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: var(--radius-xs);
+}
+
+/* Large, quiet dawn wash used behind the hero and the closing surfaces. */
+.dawn-field {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(90% 70% at 50% -18%, var(--dawn-sky) 0%, transparent 70%),
+    radial-gradient(55% 60% at 4% 0%, var(--dawn-lavender) 0%, transparent 68%),
+    radial-gradient(62% 65% at 96% 2%, var(--dawn-peach) 0%, transparent 72%),
+    radial-gradient(130% 65% at 50% 108%, var(--dawn-sage) 0%, transparent 72%);
+}
+
+/* Soft floating panel: the reference's default container. */
+.panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--sheet);
+  box-shadow: var(--shadow-soft);
+}
+
+.panel-quiet {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--sheet) 72%, transparent);
 }
 
 /* Small technical labels used through the interface. */
@@ -75,7 +131,7 @@ body {
   justify-content: space-between;
   gap: 1rem;
   border-top: 1px solid var(--line);
-  padding: 0.45rem 0;
+  padding: 0.5rem 0;
 }
 
 .barcode {
@@ -98,42 +154,65 @@ body {
 }
 
 .field {
-  border: 1px solid var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
   background: var(--sheet);
-  padding: 0.55rem 0.75rem;
+  padding: 0.7rem 0.9rem;
   font-family: var(--ff-body);
   font-size: var(--text-body);
   color: var(--ink);
+  transition:
+    border-color var(--dur-press) var(--ease-snap),
+    box-shadow var(--dur-press) var(--ease-snap);
 }
 
 .field::placeholder {
-  opacity: 0.45;
+  color: var(--muted);
+  opacity: 0.75;
 }
 
 .field:hover {
-  border-color: var(--ink-soft);
+  border-color: color-mix(in srgb, var(--ink) 24%, transparent);
 }
 
 .field:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: -1px;
+  outline: none;
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 .field[aria-invalid="true"] {
   border-color: var(--danger);
-  outline-color: var(--danger);
+}
+
+.field[aria-invalid="true"]:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 22%, transparent);
 }
 
 .skeleton {
-  background-image: repeating-linear-gradient(
-    -45deg,
-    var(--tint) 0 8px,
-    var(--sheet) 8px 16px
+  border-radius: var(--radius-sm);
+  background-image: linear-gradient(
+    100deg,
+    var(--tint) 20%,
+    color-mix(in srgb, var(--tint) 45%, var(--sheet)) 40%,
+    var(--tint) 60%
   );
+  background-size: 220% 100%;
+  animation: skeleton-sweep 1.6s var(--ease-snap) infinite;
+}
+
+@keyframes skeleton-sweep {
+  from {
+    background-position: 120% 0;
+  }
+
+  to {
+    background-position: -120% 0;
+  }
 }
 
 .bg-stripes {
+  border-radius: var(--radius-pill);
   background-image: repeating-linear-gradient(
     -45deg,
     var(--ink) 0 10px,
@@ -327,8 +406,17 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .press {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .press,
+  .field {
     transition: none;
+  }
+
+  .skeleton {
+    animation: none;
   }
 
   .marquee-track {

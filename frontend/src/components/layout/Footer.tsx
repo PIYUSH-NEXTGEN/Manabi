@@ -43,23 +43,28 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
 
 export function Footer() {
   return (
-    <footer className="inverted-surface relative overflow-hidden border-t border-ink bg-ink text-paper">
+    <footer className="dawn-field relative overflow-hidden border-t border-line">
       <div className="mx-auto w-[min(1240px,96vw)]">
-        <div className="grid gap-10 py-11 lg:grid-cols-[1.5fr_1fr] lg:gap-16">
+        <div className="grid gap-10 py-14 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
           <div>
             <Link to="/" className="group inline-flex items-center gap-3">
-              <Logo className="text-paper transition-colors group-hover:text-accent-soft" />
-              <span className="font-display text-body uppercase leading-none tracking-tight">
+              <Logo className="text-ink transition-colors group-hover:text-accent" />
+              <span className="font-brand text-[0.9375rem] uppercase leading-none tracking-[-0.01em]">
                 MANABI
               </span>
             </Link>
+
+            <p className="mt-4 max-w-sm text-body leading-relaxed text-ink-soft">
+              Real problems, picked from the index and proven by a public
+              repository.
+            </p>
 
             <a
               href="https://github.com/PIYUSH-NEXTGEN/Manabi"
               target="_blank"
               rel="noreferrer"
               aria-label="Star MANABI on GitHub"
-              className="github-star group mt-6 flex w-fit items-center gap-2 bg-ink px-3 py-2 font-mono text-label font-bold uppercase tracking-[0.16em] text-paper"
+              className="github-star group mt-6 flex w-fit items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[0.8125rem] font-semibold text-paper"
             >
               <Star
                 aria-hidden
@@ -71,38 +76,29 @@ export function Footer() {
               <GithubMark size={14} className="text-paper/80 transition-colors group-hover:text-paper" />
               Star on GitHub
             </a>
-
           </div>
 
-          <nav
-            aria-label="Footer"
-            className="grid gap-x-8 gap-y-10 sm:grid-cols-2"
-          >
+          <nav aria-label="Footer" className="grid gap-x-8 gap-y-10 sm:grid-cols-2">
             {FOOTER_COLUMNS.map((column) => {
               const Icon = column.icon;
               return (
                 <div key={column.heading} className="flex flex-col">
-                  <h2 className="flex items-center gap-2 border-b border-paper/20 pb-2.5 font-mono text-label font-bold uppercase tracking-[0.2em] text-paper/60">
-                    <Icon
-                      aria-hidden
-                      size={12}
-                      strokeWidth={2.4}
-                      className="text-accent-soft"
-                    />
+                  <h2 className="flex items-center gap-2 border-b border-line pb-2.5 font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
+                    <Icon aria-hidden size={12} strokeWidth={2.4} className="text-accent" />
                     {column.heading}
                   </h2>
-                  <ul className="mt-3.5 flex flex-col gap-2.5">
+                  <ul className="mt-3.5 flex flex-col gap-2">
                     {column.links.map((link) => (
                       <li key={`${column.heading}-${link.label}`}>
                         <Link
                           to={link.to}
-                          className="group inline-flex items-start gap-1.5 text-body leading-snug text-paper/70 underline-offset-4 transition-colors hover:text-paper"
+                          className="group inline-flex items-start gap-1.5 text-body leading-snug text-ink-soft underline-offset-4 transition-colors hover:text-accent hover:underline"
                         >
                           <ChevronRight
                             aria-hidden
                             size={13}
                             strokeWidth={2.6}
-                            className="mt-0.5 shrink-0 text-paper/30 transition-colors group-hover:text-accent-soft"
+                            className="mt-1 shrink-0 text-ink/25 transition-colors group-hover:text-accent"
                           />
                           {link.label}
                         </Link>
@@ -115,39 +111,43 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="flex flex-col gap-5 border-t border-paper/20 py-4 md:flex-row md:items-center md:justify-between">
-          <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-paper/55">
+        <div className="flex flex-col gap-3 border-t border-line py-5 md:flex-row md:items-center md:justify-between">
+          <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
             © 2026 MANABI
           </p>
-          <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-paper/55">
+          <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
             Built for builders · Night shift edition
           </p>
         </div>
       </div>
 
-      <div className="relative aspect-[16/6.2] overflow-hidden bg-ink">
-        <img
-          src="/footer-scene.png"
-          alt=""
-          draggable={false}
-          className="absolute inset-0 size-full object-cover object-top [image-rendering:pixelated]"
-        />
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink via-ink/70 to-transparent pointer-events-none" />
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-6 bg-gradient-to-t from-ink/40 to-transparent" />
-        <div className="absolute inset-x-0 top-0">
-          <div className="mx-auto w-[min(1240px,96vw)] pt-7">
-            <Link
-              to="/problems"
-              className="group inline-flex items-center gap-1.5 font-mono text-label font-bold uppercase tracking-[0.16em] text-paper/90 transition-colors hover:text-accent-soft"
-            >
-              Start with a brief
-              <ArrowUpRight
-                aria-hidden
-                size={13}
-                strokeWidth={2.6}
-                className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-              />
-            </Link>
+      <div className="mx-auto w-[min(1240px,96vw)] pb-6">
+        <div className="relative aspect-[16/7] overflow-hidden rounded-xl border border-line bg-ink shadow-soft">
+          <img
+            src="/footer-scene.png"
+            alt=""
+            draggable={false}
+            className="absolute inset-0 size-full object-cover object-top [image-rendering:pixelated]"
+          />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink/80 via-ink/30 to-transparent" />
+          <div className="absolute inset-x-0 top-0">
+            <div className="mx-auto flex w-full flex-wrap items-center justify-between gap-3 px-5 pt-5">
+              <Link
+                to="/problems"
+                className="group inline-flex items-center gap-1.5 rounded-full bg-paper/95 px-4 py-2 text-[0.8125rem] font-semibold text-ink shadow-soft transition-colors hover:bg-paper hover:text-accent"
+              >
+                Start with a brief
+                <ArrowUpRight
+                  aria-hidden
+                  size={13}
+                  strokeWidth={2.6}
+                  className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                />
+              </Link>
+              <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-paper/70">
+                The long way home
+              </span>
+            </div>
           </div>
         </div>
       </div>

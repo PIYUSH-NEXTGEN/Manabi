@@ -1,52 +1,87 @@
 :root {
   color-scheme: light;
 
-  /* Surfaces */
-  --ink: #17150f;
-  --ink-soft: #2d2a22;
-  --paper: #eae5db;
-  --sheet: #f4f0e7;
-  --tint: #d9d3c4;
-  --olive: #4e4d3c;
+  /* Warm ivory ground, like paper lit at dawn. */
+  --ink: #211d18;
+  --ink-soft: #4a433a;
+  --paper: #f7f4ed;
+  --sheet: #fffdf8;
+  --tint: #efe9de;
+  --olive: #3d4737;
 
-  /* Accent and semantic colour */
-  --accent: #c2451c;
-  --accent-soft: #e4d5c6;
-  --danger: #9f2c14;
-  --danger-soft: #efdcd2;
-  --muted: #6f695b;
-  --line: rgba(23, 21, 15, 0.22);
+  /* Accent and semantic colour. Terracotta keeps MANABI's identity but warms
+     it to sit inside the dawn palette instead of punching out of it. */
+  --accent: #b64f22;
+  --accent-soft: #f3e0d2;
+  --danger: #a03a23;
+  --danger-soft: #f7e3dc;
+  --muted: #746c60;
+  --line: rgba(33, 29, 24, 0.11);
   --line-strong: var(--ink);
 
-  /* Type */
-  --ff-display: "Archivo Black", "Arial Black", sans-serif;
+  /* Atmospheric tints sampled from the reference's dawn landscape. Used only
+     for large, quiet background washes and a few soft surfaces. */
+  --dawn-sky: #d9e4ec;
+  --dawn-peach: #f6e2d3;
+  --dawn-sage: #dfe5d6;
+  --dawn-lavender: #e6e2ee;
+
+  /* Type: a single calm sans for display and body, mono kept as the technical
+     voice of the catalog. */
+  --ff-display: "Archivo", Arial, sans-serif;
+  --ff-brand: "Archivo Black", "Arial Black", sans-serif;
   --ff-body: "Archivo", Arial, sans-serif;
   --ff-mono: "JetBrains Mono", "Courier New", monospace;
 
+  /* Geometry */
+  --radius-xs: 8px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-xl: 36px;
+  --radius-pill: 999px;
+
+  /* Depth: diffuse light, never a hard offset slab. */
+  --shadow-soft:
+    0 1px 2px rgba(48, 39, 27, 0.04), 0 10px 30px -18px rgba(48, 39, 27, 0.18);
+  --shadow-lift:
+    0 2px 4px rgba(48, 39, 27, 0.04), 0 28px 60px -30px rgba(48, 39, 27, 0.32);
+
   /* Motion */
-  --dur-press: 120ms;
+  --dur-press: 160ms;
   --ease-snap: cubic-bezier(0.2, 0.9, 0.2, 1);
 }
 
 /*
- * Night mode: the same warm print palette with paper and ink swapped, so every
- * component that pairs bg-ink/text-paper or bg-olive/text-paper inverts cleanly.
+ * Night mode: the same warm palette with paper and ink swapped, so every
+ * component that pairs bg-ink/text-paper inverts cleanly. The dawn tints are
+ * muted to deep dusk hues so background washes stay quiet.
  */
 .dark {
   color-scheme: dark;
 
-  --ink: #efe9dd;
-  --ink-soft: #cbc3b3;
-  --paper: #12100c;
-  --sheet: #1a1713;
-  --tint: #2a251e;
-  --olive: #b9b49b;
+  --ink: #f2ece1;
+  --ink-soft: #cdc4b5;
+  --paper: #16130f;
+  --sheet: #1e1a15;
+  --tint: #2b251d;
+  --olive: #2c3327;
 
-  --accent: #ec6a34;
-  --accent-soft: #33241a;
-  --danger: #ff8a68;
-  --danger-soft: #3a2018;
-  --muted: #a39c8d;
-  --line: rgba(239, 233, 221, 0.22);
+  --accent: #e8834f;
+  --accent-soft: #3a271c;
+  --danger: #ff9a7d;
+  --danger-soft: #3a211a;
+  --muted: #a89f90;
+  --line: rgba(242, 236, 225, 0.14);
   --line-strong: var(--ink);
+
+  --dawn-sky: #1b222a;
+  --dawn-peach: #2b201a;
+  --dawn-sage: #1f251c;
+  --dawn-lavender: #241f2b;
+
+  --shadow-soft:
+    0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -18px rgba(0, 0, 0, 0.6);
+  --shadow-lift:
+    0 2px 4px rgba(0, 0, 0, 0.3), 0 28px 60px -30px rgba(0, 0, 0, 0.75);
 }

@@ -39,13 +39,13 @@ const BUBBLE_REVEAL = {
 
 function ChatPreview() {
   return (
-    <div className="border border-ink bg-sheet shadow-[6px_6px_0_0_rgba(23,21,15,0.14)] sm:shadow-[10px_10px_0_0_rgba(23,21,15,0.14)]">
-      <div className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
-        <span className="flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.16em]">
-          <MessageSquare aria-hidden size={13} strokeWidth={2.4} />
+    <div className="overflow-hidden rounded-card border border-line bg-sheet shadow-lift">
+      <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
+        <span className="flex items-center gap-2 text-[0.875rem] font-semibold text-ink">
+          <MessageSquare aria-hidden size={14} strokeWidth={2.2} className="text-accent" />
           Catalog assistant
         </span>
-        <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
+        <span className="font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
           Example exchange
         </span>
       </div>
@@ -59,14 +59,14 @@ function ChatPreview() {
       >
         <motion.p
           variants={BUBBLE_REVEAL}
-          className="ml-auto w-fit max-w-[85%] border border-ink bg-ink px-3.5 py-2.5 text-body leading-snug text-paper"
+          className="ml-auto w-fit max-w-[85%] rounded-[18px] rounded-br-sm bg-ink px-4 py-2.5 text-body leading-snug text-paper"
         >
           I know React and a little Python. What can I ship in a weekend?
         </motion.p>
 
         <motion.p
           variants={BUBBLE_REVEAL}
-          className="w-fit max-w-[92%] border border-line bg-paper px-3.5 py-2.5 text-body leading-snug"
+          className="w-fit max-w-[92%] rounded-[18px] rounded-bl-sm bg-tint/70 px-4 py-2.5 text-body leading-snug text-ink"
         >
           Three briefs fit that scope, all pulled from the index:
         </motion.p>
@@ -79,13 +79,13 @@ function ChatPreview() {
           ].map((item) => (
             <li
               key={item.id}
-              className="flex items-center justify-between gap-3 border border-line bg-paper px-3 py-2"
+              className="flex items-center justify-between gap-3 rounded-panel border border-line bg-paper px-3 py-2"
             >
               <span className="flex min-w-0 items-center gap-2">
                 <FileText aria-hidden size={13} strokeWidth={2.2} className="shrink-0 text-accent" />
                 <span className="truncate text-body">{item.title}</span>
               </span>
-              <span className="shrink-0 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
+              <span className="shrink-0 font-mono text-label font-bold uppercase tracking-[0.12em] text-muted">
                 {item.scope}
               </span>
             </li>
@@ -94,14 +94,14 @@ function ChatPreview() {
 
         <motion.p
           variants={BUBBLE_REVEAL}
-          className="w-fit max-w-[92%] border border-line bg-paper px-3.5 py-2.5 text-body leading-snug"
+          className="w-fit max-w-[92%] rounded-[18px] rounded-bl-sm bg-tint/70 px-4 py-2.5 text-body leading-snug text-ink"
         >
           Start with the queue if you want a working demo by Sunday night.
         </motion.p>
       </motion.div>
 
-      <p className="flex items-center gap-2 border-t border-line px-4 py-2.5 font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
-        <ShieldCheck aria-hidden size={12} strokeWidth={2.4} />
+      <p className="flex items-center gap-2 border-t border-line px-5 py-3 font-mono text-label font-bold uppercase tracking-[0.13em] text-muted">
+        <ShieldCheck aria-hidden size={12} strokeWidth={2.4} className="text-accent" />
         Grounded in the index. It never invents a brief.
       </p>
     </div>
@@ -110,17 +110,8 @@ function ChatPreview() {
 
 export function AskManabi() {
   return (
-    <section className="relative overflow-hidden border-b border-ink bg-paper">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(-45deg, rgba(23,21,15,0.035) 0 1px, transparent 1px 12px)',
-        }}
-      />
-
-      <div className="relative mx-auto w-[min(1240px,96vw)] py-16 md:py-20">
+    <section className="border-b border-line bg-paper">
+      <div className="mx-auto w-[min(1240px,96vw)] py-16 md:py-24">
         <div className="grid items-center gap-12 lg:grid-cols-[0.95fr_1.05fr] lg:gap-16">
           <motion.div
             variants={slideUpReveal}
@@ -128,17 +119,17 @@ export function AskManabi() {
             whileInView="show"
             viewport={{ once: true, amount: 0.25 }}
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink pb-3">
-              <p className="font-mono text-label font-bold uppercase tracking-[0.2em] text-muted">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
+              <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
                 <span className="text-accent">03</span> / Ask the catalog
               </p>
-              <span className="flex items-center gap-1.5 font-mono text-label font-bold uppercase tracking-[0.2em] text-muted">
+              <span className="flex items-center gap-1.5 font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
                 <MessageSquare aria-hidden size={12} strokeWidth={2.4} />
                 Chat
               </span>
             </div>
 
-            <h2 className="mt-7 font-display text-display uppercase leading-[0.9] tracking-tight">
+            <h2 className="mt-7 font-display text-display leading-[1.03] tracking-[-0.03em]">
               Ask <span className="text-accent">MANABI</span>
             </h2>
             <p className="mt-5 max-w-md text-body leading-relaxed text-ink-soft">
@@ -150,12 +141,9 @@ export function AskManabi() {
             <ul className="mt-7 space-y-3">
               {POINTS.map(({ icon: Icon, copy }) => (
                 <li key={copy} className="flex items-start gap-3">
-                  <Icon
-                    aria-hidden
-                    size={15}
-                    strokeWidth={2.3}
-                    className="mt-0.5 shrink-0 text-accent"
-                  />
+                  <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent">
+                    <Icon aria-hidden size={13} strokeWidth={2.4} />
+                  </span>
                   <span className="text-body leading-snug text-ink-soft">
                     {copy}
                   </span>
@@ -188,11 +176,11 @@ export function AskManabi() {
           </motion.div>
         </div>
 
-        <p className="mt-10 border-t border-line pt-4 font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
-          Prefer to browse?{' '}
+        <p className="mt-12 flex flex-wrap items-center gap-2 border-t border-line pt-4 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
+          Prefer to browse?
           <Link
             to="/problems"
-            className="text-accent underline underline-offset-4 hover:text-ink"
+            className="text-accent underline decoration-accent/40 underline-offset-4 hover:text-ink"
           >
             Skip the chat and open the index
           </Link>

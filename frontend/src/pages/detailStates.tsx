@@ -26,11 +26,14 @@ export function LoadErrorPanel({
   backLabel: string;
 }) {
   return (
-    <main className="border-b border-ink">
+    <main className="border-b border-line">
       <div className="mx-auto w-[min(760px,96vw)] space-y-4 py-16">
-        <h1 className="font-display text-display uppercase">{title}</h1>
-        <p>{message}</p>
-        <Link to={backTo} className="font-mono text-label font-bold underline">
+        <h1 className="font-display text-display leading-tight text-ink">{title}</h1>
+        <p className="text-body leading-relaxed text-ink-soft">{message}</p>
+        <Link
+          to={backTo}
+          className="inline-flex rounded-full border border-line bg-sheet px-4 py-2.5 text-[0.875rem] font-semibold text-ink hover:border-ink/25"
+        >
           {backLabel}
         </Link>
       </div>

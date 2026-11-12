@@ -46,8 +46,8 @@ export function AdminReviewPage() {
   if (!me.data?.is_admin) {
     return (
       <main className="mx-auto w-[min(760px,96vw)] py-16">
-        <h1 className="font-display text-display uppercase">Submissions</h1>
-        <p className="mt-4 border border-ink bg-sheet p-4">
+        <h1 className="font-display text-display leading-[1.02] tracking-[-0.03em]">Submissions</h1>
+        <p className="mt-4 rounded-panel border border-line bg-sheet p-4">
           Admin access required. Add your GitHub username to
           {' '}
           <code>ADMIN_GITHUB_USERNAMES</code> to use this page.
@@ -83,8 +83,8 @@ export function AdminReviewPage() {
       <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
         Admin
       </p>
-      <h1 className="mt-2 font-display text-display uppercase">Submissions</h1>
-      <p className="mt-2 text-body">
+      <h1 className="mt-2 font-display text-display leading-[1.02] tracking-[-0.03em]">Submissions</h1>
+      <p className="mt-3 max-w-2xl text-body leading-relaxed text-ink-soft">
         Project submissions against problems. Automatic checks first, humans
         for the edge cases.
       </p>
@@ -106,13 +106,13 @@ export function AdminReviewPage() {
       </div>
 
       {submissions.isError ? (
-        <p role="alert" className="mt-6 border border-ink bg-sheet p-4">
+        <p role="alert" className="mt-6 rounded-panel border border-line bg-sheet p-4">
           Could not load the queue. {submissions.error.detail}
         </p>
       ) : submissions.isPending ? (
         <Skeleton className="mt-6 h-48" />
       ) : submissions.data.items.length === 0 ? (
-        <p className="mt-6 border border-ink bg-sheet p-4">
+        <p className="mt-6 rounded-panel border border-line bg-sheet p-4">
           Nothing in this queue.
         </p>
       ) : (
@@ -132,11 +132,11 @@ export function AdminReviewPage() {
             return (
               <li
                 key={submission.id}
-                className="border border-ink bg-sheet p-4"
+                className="rounded-card border border-line bg-sheet p-5 shadow-soft"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h2 className="font-display text-body uppercase leading-tight">
+                    <h2 className="font-display text-[1.0625rem] leading-snug text-ink">
                       {submission.problem_title}
                     </h2>
                     <p className="mt-1 font-mono text-body">
@@ -189,7 +189,8 @@ export function AdminReviewPage() {
                       Approve
                     </Button>
                     <Button
-                      variant="danger"
+                      variant="secondary"
+                      className="text-danger hover:border-danger/40 hover:text-danger"
                       onClick={() => runReject(submission.id)}
                     >
                       Reject
@@ -203,7 +204,10 @@ export function AdminReviewPage() {
       ) : null}
 
       <p className="mt-8">
-        <Link to="/problems" className="font-mono text-label underline">
+        <Link
+          to="/problems"
+          className="inline-flex rounded-full border border-line bg-sheet px-4 py-2.5 text-[0.8125rem] font-semibold text-ink hover:border-ink/25"
+        >
           Back to the board
         </Link>
       </p>
@@ -212,4 +216,4 @@ export function AdminReviewPage() {
 }
 
 const buttonClass =
-  'border border-ink px-3 py-1.5 font-mono text-label font-bold uppercase tracking-widest hover:bg-ink/5';
+  'rounded-full border border-line px-3.5 py-1.5 text-[0.8125rem] font-semibold text-ink hover:border-ink/25 hover:bg-tint/60';

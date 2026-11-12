@@ -13,7 +13,7 @@ export function ContributePage() {
       </div>
 
       <ol className="flex flex-col gap-4">
-        <li className="border-t border-ink pt-3">
+        <li className="rounded-panel border border-line bg-sheet p-4 shadow-soft">
           <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
             01. Find a live project
           </p>
@@ -22,7 +22,7 @@ export function ContributePage() {
             'Open for contributors' stamp.
           </p>
         </li>
-        <li className="border-t border-ink pt-3">
+        <li className="rounded-panel border border-line bg-sheet p-4 shadow-soft">
           <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
             02. Take a good-first-issue
           </p>
@@ -31,7 +31,7 @@ export function ContributePage() {
             good-first-issue first.
           </p>
         </li>
-        <li className="border-t border-ink pt-3">
+        <li className="rounded-panel border border-line bg-sheet p-4 shadow-soft">
           <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
             03. Open a PR like everywhere else
           </p>

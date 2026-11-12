@@ -50,8 +50,8 @@ interface RefAsideProps {
 
 export function RefAside({ title, children, className }: RefAsideProps) {
   return (
-    <section className={cx('border border-ink bg-sheet', className)}>
-      <h2 className="border-b border-line px-4 py-2.5 font-mono text-label font-bold uppercase tracking-[0.16em] text-ink">
+    <section className={cx('overflow-hidden rounded-card border border-line bg-sheet shadow-soft', className)}>
+      <h2 className="border-b border-line px-4 py-3 font-mono text-label font-bold uppercase tracking-[0.14em] text-ink-soft">
         {title}
       </h2>
       <div className="flex flex-col gap-3 p-4 text-body leading-relaxed text-ink-soft">
@@ -97,7 +97,7 @@ export function RefIndex({ items }: RefIndexProps) {
           <li key={item.href} className="border-t border-line first:border-t-0">
             <a
               href={item.href}
-              className="group flex items-baseline gap-3 py-2 font-mono text-label font-bold uppercase tracking-[0.12em] text-ink-soft transition-colors hover:text-accent"
+              className="group flex items-baseline gap-3 rounded-full py-2 font-mono text-label font-bold uppercase tracking-[0.1em] text-ink-soft transition-colors hover:text-accent"
             >
               <span aria-hidden className="tabular-nums text-label text-muted">
                 {String(position + 1).padStart(2, '0')}
@@ -120,10 +120,10 @@ export function RefNote({ children, tone = 'ink' }: RefNoteProps) {
   return (
     <p
       className={cx(
-        'border-l-[3px] py-1 pl-3.5 text-body leading-relaxed',
+        'rounded-r-panel border-l-2 py-2.5 pl-4 text-body leading-relaxed',
         tone === 'accent'
-          ? 'border-accent text-ink'
-          : 'border-ink text-ink-soft',
+          ? 'border-accent bg-accent-soft/40 text-ink'
+          : 'border-ink/30 bg-tint/40 text-ink-soft',
       )}
     >
       {children}
@@ -137,7 +137,7 @@ export function RefList({ children }: { children: ReactNode }) {
 
 export function RefItem({ children }: { children: ReactNode }) {
   return (
-    <li className="relative pl-4 text-body leading-relaxed before:absolute before:left-0 before:top-[0.55em] before:block before:size-1.5 before:bg-accent">
+    <li className="relative pl-4 text-body leading-relaxed before:absolute before:left-0 before:top-[0.6em] before:block before:size-1.5 before:rounded-full before:bg-accent">
       {children}
     </li>
   );

@@ -3,7 +3,7 @@ export function ThinkingIndicator() {
   return (
     <li
       role="status"
-      className="max-w-[92%] border border-ink bg-sheet p-2"
+      className="max-w-[92%] rounded-panel rounded-bl-sm border border-line bg-paper p-3"
     >
       <p className="sr-only">Manabi is typing a reply</p>
       <div aria-hidden="true" className="flex items-center gap-1.5 px-1 py-0.5">

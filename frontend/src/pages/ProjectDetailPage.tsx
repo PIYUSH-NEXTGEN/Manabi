@@ -144,7 +144,7 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
         onChange={(event) => setReason(event.target.value)}
         rows={2}
         placeholder="Reports go to a maintainer, not to the repo owner."
-        className="mt-2 w-[min(420px,100%)] border border-ink bg-paper px-3 py-2 text-body"
+        className="field mt-2 w-[min(420px,100%)]"
       />
       {error ? (
         <p role="alert" className="mt-2 font-mono text-label font-bold uppercase tracking-widest text-danger">
@@ -191,7 +191,7 @@ function ProjectView({ projectId }: { projectId: number }) {
 
   if (project.isPending) {
     return (
-      <main className="border-b border-ink bg-paper">
+      <main className="border-b border-line bg-paper">
         <PageSkeleton width="w-[min(900px,96vw)]" />
       </main>
     );
@@ -233,10 +233,10 @@ function ProjectView({ projectId }: { projectId: number }) {
   }
 
   return (
-    <main className="border-b border-ink">
-      <div className="mx-auto w-[min(900px,96vw)] py-12">
+    <main className="border-b border-line">
+      <div className="mx-auto w-[min(900px,96vw)] py-14">
         <p className={panelHeading}>Project · {data.repo_owner}/{data.repo_name}</p>
-        <h1 className="mt-2 font-display text-display uppercase leading-tight">
+        <h1 className="mt-2 font-display text-display leading-[1.05] tracking-[-0.03em]">
           {data.repo_name}
         </h1>
 
@@ -266,7 +266,7 @@ function ProjectView({ projectId }: { projectId: number }) {
               href={safeExternalUrl(data.repo_url) ?? undefined}
               target="_blank"
               rel="noreferrer"
-              className="font-mono text-label font-bold underline underline-offset-4"
+              className="break-all font-mono text-label font-bold underline underline-offset-4"
             >
               {data.repo_url} ↗
             </a>
@@ -285,7 +285,7 @@ function ProjectView({ projectId }: { projectId: number }) {
         </p>
 
         {data.solution_summary ? (
-          <section aria-label="Solution summary" className="mt-6 border border-ink bg-sheet p-4">
+          <section aria-label="Solution summary" className="mt-6 rounded-card border border-line bg-sheet p-5 shadow-soft">
             <h2 className={panelHeading}>How it solves this problem</h2>
             <p className="mt-2 text-body leading-relaxed text-ink-soft">
               {data.solution_summary}
@@ -310,7 +310,7 @@ function ProjectView({ projectId }: { projectId: number }) {
 
         <section
           aria-label="GitHub progress"
-          className="mt-8 border border-ink bg-sheet p-4"
+          className="mt-8 rounded-card border border-line bg-sheet p-5 shadow-soft"
         >
           <div className="flex items-center justify-between gap-3">
             <h2 className={panelHeading}>Progress</h2>

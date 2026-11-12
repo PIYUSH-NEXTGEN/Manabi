@@ -18,7 +18,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     <div className="flex flex-col gap-1.5">
       <label
         htmlFor={inputId}
-        className="font-mono text-label font-bold uppercase tracking-widest"
+        className="font-mono text-label font-bold uppercase tracking-[0.14em] text-ink-soft"
       >
         {label}
       </label>
@@ -34,7 +34,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         <p
           id={errorId}
           role="alert"
-          className="font-mono text-label font-bold uppercase tracking-widest text-danger"
+          className="text-label font-semibold leading-snug text-danger"
         >
           {error}
         </p>

@@ -18,9 +18,9 @@ function MarqueeRow({ items, hidden }: { items: string[]; hidden: boolean }) {
       {items.map((item, index) => (
         <li
           key={`${item}-${index}`}
-          className="flex items-center gap-3 whitespace-nowrap font-mono text-label font-bold uppercase tracking-[0.18em]"
+          className="flex items-center gap-3 whitespace-nowrap font-mono text-label font-bold uppercase tracking-[0.18em] text-ink-soft"
         >
-          <span aria-hidden className="block size-1.5 bg-accent" />
+          <span aria-hidden className="block size-1.5 rounded-full bg-accent" />
           {item}
         </li>
       ))}
@@ -49,7 +49,7 @@ export function Marquee({
     <div
       aria-label={label}
       className={cx(
-        'marquee overflow-hidden border-y border-ink bg-sheet py-2.5',
+        'marquee overflow-hidden border-y border-line bg-sheet/60 py-3',
         className,
       )}
     >

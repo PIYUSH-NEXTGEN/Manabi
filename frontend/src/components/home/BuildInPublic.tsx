@@ -53,117 +53,119 @@ const ITEM_REVEAL = {
 
 export function BuildInPublic() {
   return (
-    <section className="relative overflow-hidden border-b border-ink bg-olive text-paper dark:bg-[#2f3025] dark:text-ink">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(90deg, rgba(234,229,219,0.07) 0 1px, transparent 1px 96px)',
-        }}
-      />
+    <section className="border-b border-line bg-paper">
+      <div className="mx-auto w-[min(1240px,96vw)] py-14 md:py-20">
+        <div className="relative overflow-hidden rounded-xl bg-[#333d2e] px-6 py-10 text-[#f7f4ee] shadow-lift sm:px-10 md:py-14">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage:
+                'radial-gradient(70% 90% at 92% -10%, rgba(246,226,211,0.20) 0%, transparent 60%), radial-gradient(60% 80% at 0% 110%, rgba(217,228,236,0.12) 0%, transparent 65%)',
+            }}
+          />
 
-      <div className="relative mx-auto w-[min(1240px,96vw)] py-14 md:py-20">
-        <motion.div
-          variants={slideUpReveal}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, amount: 0.4 }}
-          className="flex flex-wrap items-center justify-between gap-3 border-b border-paper/25 pb-3 dark:border-ink/25"
-        >
-          <p className="font-mono text-label font-bold uppercase tracking-[0.2em] text-paper/60 dark:text-ink/60">
-            <span className="text-accent-soft dark:text-ink">02</span> / Submission
-          </p>
-          <p className="font-mono text-label font-bold uppercase tracking-[0.2em] text-paper/45 dark:text-ink/45">
-            Checked, not claimed
-          </p>
-        </motion.div>
-
-        <div className="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16 xl:gap-20">
-          <motion.div
-            variants={LEFT_REVEAL}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.25 }}
-          >
-            <motion.h2
-              variants={ITEM_REVEAL}
-              className="font-display text-display uppercase leading-[0.9] tracking-tight"
+          <div className="relative">
+            <motion.div
+              variants={slideUpReveal}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, amount: 0.4 }}
+              className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f7f4ee]/20 pb-3"
             >
-              Submit a repo.
-              <br />
-              <span className="text-accent-soft dark:text-ink">
-                We check the work.
-              </span>
-            </motion.h2>
-
-            <motion.p
-              variants={ITEM_REVEAL}
-              className="mt-5 max-w-lg text-body leading-relaxed text-paper/75  dark:text-ink/75"
-            >
-              Every project is checked before it goes public: your own repo, a
-              README, real commits, then an AI relevance check. Only what passes
-              gets tracked.
-            </motion.p>
-
-            <motion.p
-              variants={ITEM_REVEAL}
-              className="mt-6 border-l-2 border-accent-soft/60 pl-4 text-label leading-relaxed text-paper/60 dark:border-ink/40 dark:text-ink/60 "
-            >
-              If the AI can’t judge, a keyword check takes over. It can send work
-              to human review, but never mark it verified.
-            </motion.p>
-
-            <motion.div variants={ITEM_REVEAL} className="mt-9">
-              <Link
-                to="/problems"
-                className="group inline-flex items-center gap-2 border border-paper bg-paper px-5 py-3 font-mono text-label font-bold uppercase tracking-[0.16em] text-ink transition-colors hover:border-accent hover:bg-accent hover:text-paper dark:border-ink dark:bg-transparent dark:text-ink dark:hover:border-accent dark:hover:bg-accent dark:hover:text-[#f4f0e7]"
-              >
-                Claim a problem
-                <ArrowUpRight
-                  aria-hidden
-                  size={14}
-                  strokeWidth={2.6}
-                  className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                />
-              </Link>
+              <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-[#f7f4ee]/70">
+                <span className="text-[#f0c9b4]">02</span> / Submission
+              </p>
+              <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-[#f7f4ee]/55">
+                Checked, not claimed
+              </p>
             </motion.div>
-          </motion.div>
 
-          <motion.ul
-            variants={LIST_REVEAL}
-            initial="hidden"
-            whileInView="show"
-            viewport={{ once: true, amount: 0.25 }}
-            transition={{ delay: 0.1 }}
-            className="border-t border-paper/20 lg:mt-1 dark:border-ink/20"
-          >
-            {STEPS.map(({ step, icon: Icon, title, copy }) => (
-              <motion.li
-                key={step}
-                variants={ITEM_REVEAL}
-                className="flex items-start gap-4 border-b border-paper/20 py-4 dark:border-ink/20"
+            <div className="mt-10 grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:gap-16 xl:gap-20">
+              <motion.div
+                variants={LEFT_REVEAL}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.25 }}
               >
-                <span className="mt-1 w-5 shrink-0 font-mono text-label font-bold tracking-[0.16em] text-paper/35 dark:text-ink/35">
-                  {step}
-                </span>
-                <Icon
-                  aria-hidden
-                  size={17}
-                  strokeWidth={2.1}
-                  className="mt-1 shrink-0 text-accent-soft dark:text-ink"
-                />
-                <div className="min-w-0">
-                  <h3 className="font-mono text-label font-bold uppercase tracking-[0.14em]">
-                    {title}
-                  </h3>
-                  <p className="mt-1.5 text-body leading-relaxed text-paper/65 dark:text-ink/65">
-                    {copy}
-                  </p>
-                </div>
-              </motion.li>
-            ))}
-          </motion.ul>
+                <motion.h2
+                  variants={ITEM_REVEAL}
+                  className="text-balance font-display text-display leading-[1.05] tracking-[-0.03em]"
+                >
+                  Submit a repo.
+                  <br />
+                  <span className="text-[#f0c9b4]">We check the work.</span>
+                </motion.h2>
+
+                <motion.p
+                  variants={ITEM_REVEAL}
+                  className="mt-5 max-w-lg text-body leading-relaxed text-[#f7f4ee]/75"
+                >
+                  Every project is checked before it goes public: your own repo, a
+                  README, real commits, then an AI relevance check. Only what passes
+                  gets tracked.
+                </motion.p>
+
+                <motion.p
+                  variants={ITEM_REVEAL}
+                  className="mt-6 rounded-panel border border-[#f7f4ee]/15 bg-[#f7f4ee]/5 px-4 py-3 text-label leading-relaxed text-[#f7f4ee]/65"
+                >
+                  If the AI can’t judge, a keyword check takes over. It can send work
+                  to human review, but never mark it verified.
+                </motion.p>
+
+                <motion.div variants={ITEM_REVEAL} className="mt-9">
+                  <Link
+                    to="/problems"
+                    className="group inline-flex items-center gap-2 rounded-full bg-[#f7f4ee] px-5 py-3.5 text-[0.875rem] font-semibold text-[#211d18] transition-colors hover:bg-[#f0c9b4]"
+                  >
+                    Claim a problem
+                    <ArrowUpRight
+                      aria-hidden
+                      size={14}
+                      strokeWidth={2.6}
+                      className="transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                    />
+                  </Link>
+                </motion.div>
+              </motion.div>
+
+              <motion.ul
+                variants={LIST_REVEAL}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ delay: 0.1 }}
+                className="flex flex-col gap-2"
+              >
+                {STEPS.map(({ step, icon: Icon, title, copy }) => (
+                  <motion.li
+                    key={step}
+                    variants={ITEM_REVEAL}
+                    className="flex items-start gap-4 rounded-panel border border-[#f7f4ee]/15 bg-[#f7f4ee]/5 px-4 py-3.5"
+                  >
+                    <span className="mt-1.5 w-5 shrink-0 font-mono text-label font-bold tracking-[0.14em] text-[#f7f4ee]/35">
+                      {step}
+                    </span>
+                    <Icon
+                      aria-hidden
+                      size={17}
+                      strokeWidth={2.1}
+                      className="mt-1 shrink-0 text-[#f0c9b4]"
+                    />
+                    <div className="min-w-0">
+                      <h3 className="text-[0.9375rem] font-semibold leading-snug">
+                        {title}
+                      </h3>
+                      <p className="mt-1 text-body leading-relaxed text-[#f7f4ee]/65">
+                        {copy}
+                      </p>
+                    </div>
+                  </motion.li>
+                ))}
+              </motion.ul>
+            </div>
+          </div>
         </div>
       </div>
     </section>

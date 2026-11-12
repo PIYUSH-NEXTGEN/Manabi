@@ -75,7 +75,7 @@ export function ContactPage() {
       }
     >
       <div className="grid gap-4 md:grid-cols-2">
-        <article className="flex flex-col border border-ink bg-sheet">
+        <article className="flex flex-col overflow-hidden rounded-card border border-line bg-sheet shadow-soft">
           <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
             <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-accent">
               Open · public
@@ -83,7 +83,7 @@ export function ContactPage() {
             <GithubMark size={14} className="text-ink" />
           </header>
           <div className="flex flex-1 flex-col p-5">
-            <h2 className="font-display text-body uppercase leading-none tracking-tight">
+            <h2 className="font-display text-[1.125rem] leading-snug">
               GitHub issues
             </h2>
             <p className="mt-3 text-body leading-relaxed text-ink-soft">
@@ -105,7 +105,7 @@ export function ContactPage() {
           </div>
         </article>
 
-        <article className="flex flex-col border border-ink bg-sheet">
+        <article className="flex flex-col overflow-hidden rounded-card border border-line bg-sheet shadow-soft">
           <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
             <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-ink-soft">
               Private
@@ -122,7 +122,7 @@ export function ContactPage() {
             )}
           </header>
           <div className="flex flex-1 flex-col p-5">
-            <h2 className="font-display text-body uppercase leading-none tracking-tight">
+            <h2 className="font-display text-[1.125rem] leading-snug">
               {CONTACT_EMAIL ? 'Email' : 'Private follow-up'}
             </h2>
             {CONTACT_EMAIL ? (

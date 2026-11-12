@@ -5,10 +5,5 @@ interface SkeletonProps {
 }
 
 export function Skeleton({ className }: SkeletonProps) {
-  return (
-    <div
-      aria-hidden
-      className={cx('skeleton h-24 w-full border border-line', className)}
-    />
-  );
+  return <div aria-hidden className={cx('skeleton h-24 w-full', className)} />;
 }

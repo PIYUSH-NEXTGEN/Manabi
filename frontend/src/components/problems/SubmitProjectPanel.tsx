@@ -197,7 +197,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
 
   if (submitted) {
     return (
-      <aside ref={panelRef} className="flex flex-col gap-3 border border-ink bg-sheet p-4">
+      <aside ref={panelRef} className="flex flex-col gap-3 rounded-card border border-line bg-sheet p-5 shadow-soft">
         <h2 className={panelHeading}>Submitted</h2>
         <p className="text-body leading-snug">{statusLabel(submitted.verification_status)}</p>
         <p className="text-body leading-snug">
@@ -216,7 +216,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
   return (
     <aside
       ref={panelRef}
-      className="flex flex-col gap-3 border border-ink bg-sheet p-4"
+      className="flex flex-col gap-3 rounded-card border border-line bg-sheet p-5 shadow-soft"
     >
       <h2 className={panelHeading}>Submit a project</h2>
       {submit.isPending ? (
@@ -254,7 +254,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           onChange={handleSummaryChange}
           rows={5}
           maxLength={SOLUTION_SUMMARY_MAX}
-          className="border border-ink bg-paper px-3 py-2 text-body"
+          className="field w-full"
         />
         <Input
           label="Deployed link (optional)"
@@ -283,7 +283,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
         {submitError ? (
           <div
             role="alert"
-            className="flex flex-col gap-2 border border-danger bg-danger-soft p-3"
+            className="flex flex-col gap-2 rounded-panel border border-danger/40 bg-danger-soft p-3.5"
           >
             <p className="font-mono text-label font-bold uppercase tracking-widest text-danger">
               {submitReasons.length > 0 ? 'Your project was rejected' : 'Submission failed'}

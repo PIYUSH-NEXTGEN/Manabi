@@ -1,6 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState, type FormEvent } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { MessageSquare } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import { fieldLabel } from '@/lib/fields';
 import { buttonClasses, Stamp } from '@/design/primitives';
@@ -43,7 +44,7 @@ function ReplyProblems({ problems }: { problems: ChatProblemItem[] }) {
         <Link
           key={problem.id}
           to={`/problems/${problem.id}`}
-          className="border border-ink bg-paper px-3 py-2 font-mono text-label font-bold uppercase tracking-widest underline-offset-4 hover:underline"
+          className="rounded-panel border border-line bg-paper px-3 py-2 text-[0.875rem] font-semibold text-ink underline-offset-4 hover:underline"
         >
           {problem.title}
           <span className="ml-2 text-ink/60">
@@ -134,9 +135,10 @@ export function ChatWidget() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open the MANABI chat"
-        className="fixed bottom-4 right-4 z-40 border border-ink bg-accent px-4 py-3 font-mono text-label font-bold uppercase tracking-widest text-ink shadow-lg press"
+        className="press fixed bottom-4 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-accent p-3.5 text-[0.875rem] font-semibold text-paper shadow-lift lg:bottom-5 lg:right-5 lg:px-5"
       >
-        Ask Manabi
+        <MessageSquare aria-hidden size={16} strokeWidth={2.2} />
+        <span className="hidden lg:inline">Ask Manabi</span>
       </button>
     );
   }
@@ -144,10 +146,9 @@ export function ChatWidget() {
   return (
     <section
       aria-label="MANABI chat"
-      className="fixed bottom-4 right-4 z-40 flex h-[min(560px,80vh)] w-[min(380px,94vw)] flex-col border border-ink bg-sheet shadow-lg"
+      className="fixed bottom-5 right-5 z-40 flex h-[min(560px,80vh)] w-[min(380px,94vw)] flex-col overflow-hidden rounded-card border border-line bg-sheet shadow-lift"
     >
-      <header className="flex items-center justify-between border-b border-ink bg-ink px-3 py-2">
-        <h2 className="font-mono text-label font-bold uppercase tracking-widest text-paper">
+      <header className="flex items-center justify-between bg-ink px-4 py-3">          <h2 className="text-[0.9375rem] font-semibold text-paper">
           Ask Manabi
         </h2>
         <div className="flex items-center gap-2">
@@ -156,7 +157,7 @@ export function ChatWidget() {
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close the chat"
-            className="border-2 border-paper px-2 font-mono text-label font-bold uppercase tracking-widest text-paper hover:bg-black/20"
+            className="flex size-8 items-center justify-center rounded-full text-paper/80 hover:bg-white/10 hover:text-paper"
           >
             ×
           </button>
@@ -195,10 +196,10 @@ export function ChatWidget() {
                   <li
                     key={index}
                     className={cx(
-                      'max-w-[92%] border border-ink p-2 text-body leading-snug',
+                      'max-w-[92%] rounded-panel p-3 text-body leading-relaxed',
                       entry.message.role === 'user'
-                        ? 'ml-auto bg-accent/60'
-                        : 'bg-sheet',
+                        ? 'ml-auto rounded-br-sm bg-accent-soft text-ink'
+                        : 'rounded-bl-sm border border-line bg-paper text-ink',
                     )}
                   >
                     {entry.message.role === 'assistant' ? (
@@ -221,7 +222,7 @@ export function ChatWidget() {
           {error ? (
             <div
               role="alert"
-              className="border-t border-ink px-3 py-2 font-mono text-label font-bold uppercase tracking-widest text-danger"
+              className="border-t border-line bg-danger-soft/50 px-4 py-2.5 text-label font-semibold text-danger"
             >
               <p>{error}</p>
               {retryAfter != null ? (
@@ -233,7 +234,7 @@ export function ChatWidget() {
           <form
             noValidate
             onSubmit={handleSubmit}
-            className="flex gap-2 border-t border-ink p-3"
+            className="flex gap-2 border-t border-line p-3"
           >
             <textarea
               rows={2}

@@ -57,8 +57,8 @@ function BoardSkeletons() {
   return (
     <div className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
       {Array.from({ length: 6 }, (_, index) => (
-        <div key={index} className="border border-line bg-sheet">
-          <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
+        <div key={index} className="overflow-hidden rounded-card border border-line bg-sheet shadow-soft">
+          <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <Skeleton className="h-2.5 w-16" />
             <Skeleton className="h-2.5 w-8" />
           </div>
@@ -133,18 +133,16 @@ export function ProblemBoardPage() {
   }
 
   return (
-    <main className="border-b border-ink bg-paper">
+    <main className="border-b border-line bg-paper">
       <div className="mx-auto w-[min(1240px,96vw)] py-10 md:py-12">
 
 
-        <div className="mt-8 flex flex-wrap items-end justify-between gap-6 border-b border-ink pb-8">
+        <div className="mt-8 flex flex-wrap items-end justify-between gap-6 border-b border-line pb-8">
           <div>
             <p className="font-mono text-label font-bold uppercase tracking-[0.2em] text-accent">
               Collection 01
             </p>
-            <h1
-              className="mt-2 font-display text-display uppercase leading-[0.86] tracking-[-0.03em]"
-            >
+            <h1 className="mt-3 font-display text-display leading-[1.02] tracking-[-0.03em] text-ink">
               Projects
             </h1>
           </div>
@@ -170,13 +168,13 @@ export function ProblemBoardPage() {
                   aria-pressed={active}
                   onClick={() => setParam('goal', active ? '' : option.value)}
                   className={cx(
-                    'flex flex-col gap-2 border border-ink px-5 py-5 text-left transition-colors',
+                    'flex flex-col gap-2 rounded-card border px-5 py-5 text-left transition-[transform,box-shadow,background-color] duration-300',
                     active
-                      ? 'bg-ink text-paper'
-                      : 'bg-sheet text-ink hover:bg-tint',
+                      ? 'border-transparent bg-ink text-paper shadow-soft'
+                      : 'border-line bg-sheet text-ink shadow-soft hover:-translate-y-0.5 hover:border-ink/20',
                   )}
                 >
-                  <span className="flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.16em]">
+                  <span className="flex items-center gap-2 text-[0.875rem] font-semibold">
                     <Icon
                       aria-hidden
                       size={14}
@@ -187,7 +185,7 @@ export function ProblemBoardPage() {
                   </span>
                   <span
                     className={cx(
-                      'text-body leading-snug',
+                      'text-body leading-relaxed',
                       active ? 'text-paper/75' : 'text-ink-soft',
                     )}
                   >
@@ -196,7 +194,9 @@ export function ProblemBoardPage() {
                   <span
                     className={cx(microLabel, active ? 'text-paper/55' : 'text-muted')}
                   >
-                    {board.data ? `${count} projects` : 'Counting…'}
+                    {board.data
+                      ? `${count} ${count === 1 ? 'project' : 'projects'}`
+                      : 'Counting…'}
                   </span>
                 </button>
               );
@@ -208,9 +208,9 @@ export function ProblemBoardPage() {
           <aside className="lg:sticky lg:top-24 lg:self-start">
             <section
               aria-label="Search and filters"
-              className="border border-ink bg-sheet"
+              className="overflow-hidden rounded-card border border-line bg-sheet shadow-soft"
             >
-              <div className="flex items-center justify-between border-b border-line px-4 py-2.5">
+              <div className="flex items-center justify-between border-b border-line px-4 py-3">
                 <h2 className={cx(microLabel, 'flex items-center gap-2')}>
                   <SlidersHorizontal
                     aria-hidden
@@ -245,7 +245,7 @@ export function ProblemBoardPage() {
                   </div>
                 </form>
 
-                <div className="mt-4 flex flex-col gap-4">
+                <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
                   <FilterSelect
                     label="Field"
                     value={field}
@@ -290,7 +290,7 @@ export function ProblemBoardPage() {
                     type="button"
                     onClick={() => removeFilter(filter.key)}
                     aria-label={`Remove ${filter.label}: ${filter.value}`}
-                    className="group inline-flex items-center gap-1.5 border border-ink bg-sheet px-2 py-1 font-mono text-label font-bold uppercase tracking-[0.12em] transition-colors hover:bg-ink hover:text-paper"
+                    className="group inline-flex items-center gap-1.5 rounded-full border border-line bg-sheet px-2.5 py-1 font-mono text-label font-bold uppercase tracking-[0.1em] transition-colors hover:border-ink/25 hover:text-accent"
                   >
                     <span className="text-muted group-hover:text-paper/70">
                       {filter.label}
@@ -302,7 +302,7 @@ export function ProblemBoardPage() {
                 <button
                   type="button"
                   onClick={clearFilters}
-                  className="inline-flex items-center border border-ink px-2.5 py-1.5 font-mono text-label font-bold uppercase tracking-[0.12em] transition-colors hover:bg-ink hover:text-paper"
+                  className="inline-flex items-center rounded-full border border-line px-3 py-1.5 font-mono text-label font-bold uppercase tracking-[0.1em] transition-colors hover:border-ink/25 hover:text-accent"
                 >
                   Clear filters
                 </button>
@@ -316,7 +316,7 @@ export function ProblemBoardPage() {
             ) : null}
 
             {board.isError && !board.isPlaceholderData && !board.data ? (
-              <section className="mt-6 border border-ink bg-sheet p-6">
+              <section className="mt-6 rounded-card border border-line bg-sheet p-6 shadow-soft">
                 <p className="max-w-2xl text-body leading-relaxed">
                   The board could not be loaded. That is almost certainly a
                   backend or network problem and it will not fix itself by
@@ -335,7 +335,7 @@ export function ProblemBoardPage() {
             {board.data &&
             visibleProblems.length === 0 &&
             (!goal ? hasFilters : true) ? (
-              <section className="mt-6 border border-line bg-sheet p-6">
+              <section className="mt-6 rounded-card border border-line bg-sheet p-6 shadow-soft">
                 {goal ? (
                   <p className="text-body leading-relaxed">
                     No projects in this track yet. New briefs land here as

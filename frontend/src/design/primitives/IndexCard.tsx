@@ -37,36 +37,36 @@ export function IndexCard({
   return (
     <article
       className={cx(
-        'flex h-full flex-col border border-ink bg-sheet transition-colors duration-150 hover:border-accent',
+        'flex h-full flex-col overflow-hidden rounded-card border border-line bg-sheet shadow-soft transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-ink/20 hover:shadow-lift',
         className,
       )}
     >
-      <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-2.5">
-        <span className="flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.16em] text-ink">
-          <span aria-hidden className="block size-2 bg-accent" />
+      <header className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
+        <span className="flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.16em] text-ink-soft">
+          <span aria-hidden className="block size-1.5 rounded-full bg-accent" />
           {sourceId ?? 'NO-ID'}
         </span>
-        <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
-          {field}
-        </span>
+        <span className="text-label font-semibold text-muted">{field}</span>
       </header>
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <h3 className="font-display text-body uppercase leading-[1.02] tracking-tight">
+      <div className="flex flex-1 flex-col gap-3 p-5">
+        <h3 className="font-display text-[1.0625rem] leading-snug text-ink">
           {title}
         </h3>
         {summary ? (
-          <p className="line-clamp-3 text-body leading-snug text-ink-soft">{summary}</p>
+          <p className="line-clamp-3 text-body leading-relaxed text-ink-soft">
+            {summary}
+          </p>
         ) : null}
-        <div className="mt-auto flex items-end justify-between gap-3 border-t border-line pt-3 font-mono text-label font-bold uppercase tracking-[0.14em]">
+        <div className="mt-auto flex items-end justify-between gap-3 border-t border-line pt-3.5 font-mono text-label font-bold uppercase tracking-[0.12em]">
           {difficulty ? (
             <span className="flex items-center gap-1.5">
-              <span aria-hidden className="flex gap-0.5">
+              <span aria-hidden className="flex gap-1">
                 {Array.from({ length: 3 }, (_, index) => (
                   <span
                     key={index}
                     className={cx(
-                      'block size-2 border border-ink',
-                      index < filled ? 'bg-ink' : 'bg-transparent',
+                      'block h-1.5 w-4 rounded-full',
+                      index < filled ? 'bg-accent' : 'bg-tint',
                     )}
                   />
                 ))}

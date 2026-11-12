@@ -26,36 +26,26 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
     <Link
       to={`/problems/${problem.id}`}
       className={cx(
-        'group relative flex h-full flex-col overflow-hidden border border-ink bg-sheet [transition:transform_400ms_cubic-bezier(0.22,1,0.36,1),box-shadow_400ms_cubic-bezier(0.22,1,0.36,1),border-color_400ms_cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-[6px] hover:border-accent hover:shadow-[0_26px_48px_-24px_rgba(10,10,25,0.5)] focus-visible:-translate-y-[6px] focus-visible:border-accent focus-visible:shadow-[0_26px_48px_-24px_rgba(10,10,25,0.5)]',
+        'group relative flex h-full flex-col overflow-hidden rounded-card border border-line bg-sheet shadow-soft transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-ink/20 hover:shadow-lift focus-visible:-translate-y-1 focus-visible:border-accent/50 focus-visible:shadow-lift',
         className,
       )}
     >
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -translate-x-[120%] skew-x-[-18deg] bg-[linear-gradient(100deg,transparent_40%,rgba(255,255,255,0.35)_50%,transparent_60%)] [transition:transform_900ms_cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-[120%]"
-      />
-      <header className="relative flex items-center border-b border-line px-4 py-2.5">
-        <span className="font-mono text-label font-bold uppercase tracking-[0.18em] text-accent">
+      <header className="flex items-center justify-between gap-3 px-5 pt-5">
+        <span className="rounded-full bg-accent-soft px-2.5 py-1 font-mono text-label font-bold uppercase tracking-[0.12em] text-accent">
           {problem.difficulty}
         </span>
-        <span
-          aria-hidden
-          className="absolute inset-x-0 bottom-[-1px] h-[2px] origin-left scale-x-0 bg-accent [transition:transform_300ms_cubic-bezier(0.22,1,0.36,1)] group-hover:scale-x-100"
-        />
+        <span className="text-label font-semibold text-muted">{field}</span>
       </header>
 
-      <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
-          {field}
-        </p>
-        <h3 className="mt-2 font-display text-body uppercase leading-[1.02] tracking-tight">
+      <div className="flex flex-1 flex-col p-5">
+        <h3 className="font-display text-[1.125rem] leading-snug tracking-[-0.015em] text-ink">
           {problem.title}
         </h3>
         <p className="mt-3 line-clamp-3 text-body leading-relaxed text-ink-soft">
           {problem.summary}
         </p>
 
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-3 font-mono text-label font-bold uppercase tracking-[0.14em]">
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-3.5 font-mono text-label font-bold uppercase tracking-[0.12em]">
           <span className="flex items-center gap-2.5">
             <span className="flex items-center gap-1 text-muted">
               <GitBranch aria-hidden size={11} strokeWidth={2.4} />
@@ -76,13 +66,13 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
               </span>
             ) : null}
           </span>
-          <span className="flex items-center gap-1 text-accent transition-colors group-hover:text-ink">
+          <span className="flex items-center gap-1 text-ink transition-colors group-hover:text-accent">
             Open brief
             <ArrowUpRight
               aria-hidden
               size={12}
               strokeWidth={2.6}
-              className="[transition:transform_300ms_cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-1 group-hover:translate-x-1"
+              className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
             />
           </span>
         </div>

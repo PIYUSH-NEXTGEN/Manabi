@@ -14,12 +14,12 @@ describe('Button', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('applies archival surface classes per variant', () => {
+  it('applies the pill surface classes per variant', () => {
     const { rerender } = render(<Button variant="primary">Go</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-accent', 'text-paper');
+    expect(screen.getByRole('button')).toHaveClass('rounded-full', 'bg-accent', 'text-paper');
 
     rerender(<Button variant="secondary">Go</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-transparent', 'text-ink');
+    expect(screen.getByRole('button')).toHaveClass('border-line', 'text-ink');
 
     rerender(<Button variant="danger">Go</Button>);
     expect(screen.getByRole('button')).toHaveClass('bg-danger', 'text-paper');

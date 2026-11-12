@@ -128,13 +128,13 @@ describe('ProblemBoardPage', () => {
 
     expect(
       screen.getByRole('button', { name: /Resume/i }),
-    ).toHaveTextContent('1 projects');
+    ).toHaveTextContent('1 project');
     expect(
       screen.getByRole('button', { name: /Hackathon/i }),
-    ).toHaveTextContent('1 projects');
+    ).toHaveTextContent('1 project');
     expect(
       screen.getByRole('button', { name: /Learning/i }),
-    ).toHaveTextContent('1 projects');
+    ).toHaveTextContent('1 project');
   });
 
   it('clicking a track chip filters the board to that goal', async () => {

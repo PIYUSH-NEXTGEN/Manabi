@@ -49,14 +49,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div aria-live="polite" className="fixed inset-x-0 bottom-0 z-50 flex flex-col">
+      <div
+        aria-live="polite"
+        className="pointer-events-none fixed inset-x-0 bottom-5 z-50 flex flex-col items-center gap-2 px-4"
+      >
         {toasts.map((toast) => (
           <div
             key={toast.id}
             role="status"
             className={cx(
-              'border-t border-ink px-4 py-3 font-mono text-label font-bold uppercase tracking-[0.16em]',
-              toast.tone === 'error' ? 'bg-danger text-paper' : 'bg-accent text-paper',
+              'pointer-events-auto max-w-[min(520px,92vw)] rounded-full px-5 py-3 text-left text-[0.875rem] font-semibold leading-snug text-paper shadow-lift',
+              toast.tone === 'error' ? 'bg-danger' : 'bg-ink',
             )}
           >
             {toast.message}

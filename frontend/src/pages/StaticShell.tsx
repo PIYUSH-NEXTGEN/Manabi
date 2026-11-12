@@ -24,11 +24,11 @@ export function StaticShell({
     aside || wide ? 'w-[min(1120px,96vw)]' : 'w-[min(820px,96vw)]';
 
   return (
-    <main className="border-b border-ink bg-paper">
-      <div className={cx('mx-auto py-10 md:py-14', width)}>
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-2.5 font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
+    <main className="border-b border-line bg-paper">
+      <div className={cx('mx-auto py-12 md:py-16', width)}>
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line pb-3 font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
           <span className="flex items-center gap-2 text-accent">
-            <span aria-hidden className="block size-2 bg-accent" />
+            <span aria-hidden className="block size-1.5 rounded-full bg-accent" />
             {kicker}
           </span>
           <span className="flex items-center gap-2.5">
@@ -45,11 +45,11 @@ export function StaticShell({
           )}
         >
           <div className="min-w-0 lg:col-start-1 lg:row-start-1">
-            <h1 className="font-display text-display uppercase leading-[0.88] tracking-[-0.03em]">
+            <h1 className="text-balance font-display text-display leading-[1.03] tracking-[-0.03em] text-ink">
               {title}
             </h1>
             {intro ? (
-              <div className="mt-5 max-w-2xl text-body leading-relaxed text-ink-soft">
+              <div className="mt-5 max-w-2xl text-lead leading-relaxed text-muted">
                 {intro}
               </div>
             ) : null}

@@ -11,13 +11,13 @@ export type StampTone =
   | 'not-started';
 
 const TONE_CLASSES: Record<StampTone, string> = {
-  open: 'border-ink bg-sheet text-ink',
-  closed: 'border-danger bg-danger text-paper',
-  'ai-suggested': 'border-olive bg-olive text-paper',
-  new: 'border-accent bg-accent text-paper',
-  active: 'border-olive bg-olive text-paper',
-  stale: 'border-accent bg-accent text-paper',
-  'not-started': 'border-line bg-sheet text-ink-soft',
+  open: 'bg-tint text-ink-soft',
+  closed: 'bg-danger text-white',
+  'ai-suggested': 'bg-olive text-paper',
+  new: 'bg-accent text-white',
+  active: 'bg-olive/10 text-olive ring-1 ring-olive/25 dark:bg-dawn-sage dark:text-ink',
+  stale: 'bg-accent-soft text-accent',
+  'not-started': 'bg-tint/60 text-muted',
 };
 
 interface StampProps {
@@ -36,7 +36,7 @@ export function Stamp({ tone, label, rotate = 0, className }: StampProps) {
     <span
       style={style}
       className={cx(
-        'inline-block border px-2 py-1 font-mono text-label font-bold uppercase leading-none tracking-[0.14em]',
+        'inline-block rounded-full px-2.5 py-1 font-mono text-label font-bold uppercase leading-none tracking-[0.1em]',
         TONE_CLASSES[tone],
         className,
       )}

@@ -27,23 +27,23 @@ export function Dialog({
         <Button variant="secondary">{triggerLabel}</Button>
       </DialogPrimitive.Trigger>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-ink/70" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-ink/35" />
         <DialogPrimitive.Content
           aria-describedby={undefined}
           className={cx(
-            'fixed left-1/2 top-1/2 z-50 w-[min(560px,92vw)] -translate-x-1/2 -translate-y-1/2 border border-ink bg-paper p-6',
+            'fixed left-1/2 top-1/2 z-50 w-[min(560px,92vw)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-line bg-sheet p-6 shadow-lift',
             className,
           )}
         >
-          <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-3">
-            <DialogPrimitive.Title className="font-display text-body uppercase leading-tight tracking-tight">
+          <div className="mb-4 flex items-start justify-between gap-4 border-b border-line pb-3.5">
+            <DialogPrimitive.Title className="font-display text-[1.0625rem] leading-snug text-ink">
               {title}
             </DialogPrimitive.Title>
             <DialogPrimitive.Close asChild>
               <button
                 type="button"
                 aria-label="Close dialog"
-                className="press border border-ink bg-sheet px-2 py-0.5 font-mono text-body font-bold hover:bg-ink hover:text-paper"
+                className="press -mr-1 -mt-1 flex size-8 shrink-0 items-center justify-center rounded-full text-body text-muted hover:bg-tint hover:text-ink"
               >
                 ×
               </button>

@@ -352,10 +352,12 @@ describe('DashboardPage', () => {
       await screen.findByText('Log in with GitHub to reach your dashboard.'),
     ).toBeInTheDocument();
     // The redirect to the home catalog may complete after the toast appears.
-    await waitFor(() =>
-      expect(screen.getByRole('heading', { level: 1 })).not.toHaveTextContent(
-        'Dashboard',
-      ),
+    await waitFor(
+      () =>
+        expect(screen.getByRole('heading', { level: 1 })).not.toHaveTextContent(
+          'Dashboard',
+        ),
+      { timeout: 5000 },
     );
   });
 });

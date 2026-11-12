@@ -28,7 +28,7 @@ const microLabel =
   "font-mono text-label font-bold uppercase tracking-[0.16em] text-muted";
 
 const miniStarButton =
-  "inline-flex items-center gap-1.5 border border-line bg-transparent px-2 py-1 font-mono text-label font-bold uppercase tracking-widest text-ink transition-colors hover:border-ink disabled:opacity-45";
+  "inline-flex items-center gap-1.5 rounded-full border border-line bg-transparent px-2.5 py-1 font-mono text-label font-bold uppercase tracking-[0.1em] text-ink transition-colors hover:border-ink/25 hover:text-accent disabled:opacity-45";
 
 function MiniStarButton({
   project,
@@ -216,7 +216,7 @@ function Section({
       initial="hidden"
       whileInView="show"
       viewport={{ once: true, amount: 0.2 }}
-      className="border-t border-ink py-8 first:border-t-0 first:pt-0"
+      className="border-t border-line py-9 first:border-t-0 first:pt-0"
     >
       <div className="flex items-baseline gap-3">
         <span className="font-mono text-label font-bold tracking-[0.16em] text-accent">
@@ -256,7 +256,7 @@ function DetailView({ problemId }: { problemId: number }) {
 
   if (problem.isPending) {
     return (
-      <main className="border-b border-ink bg-paper">
+      <main className="border-b border-line bg-paper">
         <PageSkeleton width="w-[min(1240px,96vw)]" />
       </main>
     );
@@ -302,23 +302,21 @@ function DetailView({ problemId }: { problemId: number }) {
     String((sectionCounter += 1)).padStart(2, "0");
 
   return (
-    <main className="border-b border-ink bg-paper">
-      <div className="mx-auto w-[min(1240px,96vw)] py-8 md:py-10">
+    <main className="border-b border-line bg-paper">
+      <div className="mx-auto w-[min(1240px,96vw)] py-10 md:py-14">
         <motion.header
           variants={slideUpReveal}
           initial="hidden"
           animate="show"
           transition={{ duration: 0.35, ease: EASE_SNAP }}
-          className="grid gap-8 border-b border-ink py-9 md:grid-cols-[minmax(0,1fr)_290px] md:gap-12"
+          className="grid gap-8 border-b border-line py-9 md:grid-cols-[minmax(0,1fr)_290px] md:gap-12"
         >
           <div>
             <p className="flex flex-wrap items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.2em] text-accent">
-              <span aria-hidden className="block size-2 bg-accent" />
+              <span aria-hidden className="block size-1.5 rounded-full bg-accent" />
               Problem brief / {data.source_id ?? `NO. ${data.id}`}
             </p>
-            <h1
-              className="mt-4 font-display text-display uppercase leading-[0.9] tracking-[-0.02em]"
-            >
+            <h1 className="mt-4 text-balance font-display text-display leading-[1.05] tracking-[-0.03em]">
               {data.title}
             </h1>
 
@@ -372,7 +370,7 @@ function DetailView({ problemId }: { problemId: number }) {
             </div>
           </div>
 
-          <dl className="self-start border border-ink bg-sheet px-4 py-3">
+          <dl className="self-start rounded-card border border-line bg-sheet px-5 py-4 shadow-soft">
             <div className="flex items-center justify-between border-b border-line pb-2.5">
               <dt className={microLabel}>File no.</dt>
               <dd className="font-mono text-body font-bold tracking-[0.08em]">
@@ -448,7 +446,7 @@ function DetailView({ problemId }: { problemId: number }) {
                     {(resumeKit.scope_levels ?? []).map((scopeLevel) => (
                       <div
                         key={scopeLevel.level}
-                        className="border border-ink bg-sheet p-5"
+                        className="rounded-card border border-line bg-sheet p-5 shadow-soft"
                       >
                         <p className={cx(microLabel, "text-accent")}>
                           {scopeLevel.level}
@@ -482,9 +480,9 @@ function DetailView({ problemId }: { problemId: number }) {
                     {(resumeKit.target_roles ?? []).map((targetRole) => (
                       <div
                         key={targetRole.role}
-                        className="border border-line bg-sheet p-4"
+                        className="rounded-panel border border-line bg-sheet p-4"
                       >
-                        <dt className="font-display text-body uppercase tracking-tight text-ink">
+                        <dt className="font-display text-[1.0625rem] leading-snug text-ink">
                           {targetRole.role}
                         </dt>
                         <dd className="mt-2 text-body leading-relaxed text-ink-soft">
@@ -508,7 +506,7 @@ function DetailView({ problemId }: { problemId: number }) {
                     {(resumeKit.resume_bullets ?? []).map((resumeBullet) => (
                       <li
                         key={resumeBullet.bullet}
-                        className="border border-line bg-sheet p-4"
+                        className="rounded-panel border border-line bg-sheet p-4"
                       >
                         <p className="font-mono text-body leading-relaxed text-ink">
                           {resumeBullet.bullet}
@@ -563,9 +561,9 @@ function DetailView({ problemId }: { problemId: number }) {
                     {(teamPlan.roles ?? []).map((teamRole) => (
                       <div
                         key={teamRole.role}
-                        className="border border-line bg-sheet p-4"
+                        className="rounded-panel border border-line bg-sheet p-4"
                       >
-                        <dt className="font-display text-body uppercase tracking-tight text-ink">
+                        <dt className="font-display text-[1.0625rem] leading-snug text-ink">
                           {teamRole.role}
                         </dt>
                         <dd className="mt-2 text-body leading-relaxed text-ink-soft">
@@ -605,13 +603,13 @@ function DetailView({ problemId }: { problemId: number }) {
                     {(pitchGuide.beats ?? []).map((beat, index) => (
                       <li
                         key={`${beat.heading}-${index}`}
-                        className="border border-line bg-sheet p-5"
+                        className="rounded-panel border border-line bg-sheet p-5"
                       >
                         <p className="flex items-baseline gap-3">
                           <span className="font-mono text-label font-bold tracking-[0.16em] text-accent">
                             {String(index + 1).padStart(2, "0")}
                           </span>
-                          <span className="font-display text-body uppercase tracking-tight text-ink">
+                          <span className="font-display text-[1.0625rem] tracking-[-0.01em] text-ink">
                             {beat.heading}
                           </span>
                         </p>
@@ -658,14 +656,13 @@ function DetailView({ problemId }: { problemId: number }) {
                 <ol className="mt-5 flex list-none flex-col gap-6">
                   {guide.map((phase, index) => (
                     <li
-                      key={`${phase.title}-${index}`}
-                      className="border border-line bg-sheet p-5"
+                      key={`${phase.title}-${index}`}                              className="rounded-panel border border-line bg-sheet p-5"
                     >
                       <p className="flex items-baseline gap-3">
                         <span className="font-mono text-label font-bold tracking-[0.16em] text-accent">
                           {String(index + 1).padStart(2, "0")}
                         </span>
-                        <span className="font-display text-body uppercase tracking-tight text-ink">
+                        <span className="font-display text-[1.0625rem] tracking-[-0.01em] text-ink">
                           {phase.title}
                         </span>
                       </p>
@@ -706,7 +703,7 @@ function DetailView({ problemId }: { problemId: number }) {
             <SubmitProjectPanel problemId={data.id} />
 
             <section>
-              <h2 className={cx(panelHeading, "border-b border-ink pb-2")}>
+              <h2 className={cx(panelHeading, "border-b border-line pb-2.5 text-ink-soft")}>
                 Projects in the wild
                 {buildingCount === 1 && completedCount === 0
                   ? " (1)"
@@ -723,8 +720,8 @@ function DetailView({ problemId }: { problemId: number }) {
                       key={project.id}
                       className="flex flex-col gap-2 border-b border-line py-3.5"
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="flex min-w-0 items-center gap-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="flex min-w-0 flex-wrap items-center gap-2">
                           <GithubMark
                             size={13}
                             className="shrink-0 text-muted"
@@ -745,7 +742,7 @@ function DetailView({ problemId }: { problemId: number }) {
                             </span>
                           ) : null}
                         </span>
-                        <span className="flex items-center gap-2">
+                        <span className="flex flex-wrap items-center gap-2">
                           <MiniStarButton project={project} />
                           <ProjectProgressBadge progress={project.progress} />
                         </span>

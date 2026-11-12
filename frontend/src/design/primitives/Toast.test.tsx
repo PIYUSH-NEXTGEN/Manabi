@@ -19,7 +19,7 @@ function ToastTrigger() {
 }
 
 describe('Toast', () => {
-  it('renders an info toast in the bottom slab', async () => {
+  it('renders an info toast as a floating pill', async () => {
     const user = userEvent.setup();
     render(
       <ToastProvider>
@@ -31,10 +31,10 @@ describe('Toast', () => {
 
     const status = screen.getByRole('status');
     expect(status).toHaveTextContent('Saved to the board');
-    expect(status).toHaveClass('bg-accent', 'text-paper');
+    expect(status).toHaveClass('rounded-full', 'bg-ink', 'text-paper');
   });
 
-  it('renders error toasts on a red slab', async () => {
+  it('renders error toasts on a red pill', async () => {
     const user = userEvent.setup();
     render(
       <ToastProvider>
