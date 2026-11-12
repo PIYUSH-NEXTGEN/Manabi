@@ -1,24 +1,19 @@
+import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import type { LucideIcon } from 'lucide-react';
-import { ChevronRight, Info, Scale, Star } from 'lucide-react';
+import { motion } from 'motion/react';
+import { ArrowUpRight, Mail, Star } from 'lucide-react';
 import { Logo } from './Logo';
 import { GithubMark } from '@/components/icons/GithubMark';
+import { XMark } from '@/components/icons/XMark';
+import { EASE_SNAP } from '@/design/motion';
 
-export interface FooterLink {
-  label: string;
-  to: string;
-}
+const REPO_URL = 'https://github.com/PIYUSH-NEXTGEN/Manabi';
+const X_URL = 'https://x.com/Piyush_NextGen';
+const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL;
 
-export interface FooterColumn {
-  heading: string;
-  icon: LucideIcon;
-  links: FooterLink[];
-}
-
-export const FOOTER_COLUMNS: FooterColumn[] = [
+const FOOTER_COLUMNS = [
   {
     heading: 'MANABI',
-    icon: Info,
     links: [
       { label: 'About', to: '/about' },
       { label: 'FAQ', to: '/faq' },
@@ -26,8 +21,15 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
     ],
   },
   {
+    heading: 'Platform',
+    links: [
+      { label: 'Projects', to: '/problems' },
+      { label: 'Dashboard', to: '/me' },
+      { label: 'Contribute', to: '/contribute' },
+    ],
+  },
+  {
     heading: 'Legal',
-    icon: Scale,
     links: [
       { label: 'Privacy', to: '/privacy' },
       { label: 'Terms', to: '/terms' },
@@ -35,84 +37,214 @@ export const FOOTER_COLUMNS: FooterColumn[] = [
   },
 ];
 
+const SOCIALS = [
+  {
+    label: 'GitHub',
+    href: REPO_URL,
+    icon: GithubMark,
+  },
+];
+
+const reveal = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06, delayChildren: 0.05 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE_SNAP } },
+};
+
+function handleSubscribe(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  const email = String(new FormData(event.currentTarget).get('email') ?? '').trim();
+  if (!CONTACT_EMAIL || email.length === 0) return;
+  const subject = encodeURIComponent('MANABI updates');
+  const body = encodeURIComponent(`Please add ${email} to MANABI updates.`);
+  window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+}
+
 export function Footer() {
   return (
-    <footer className="dawn-field relative overflow-hidden border-t border-line">
-      <div className="mx-auto w-[min(1240px,96vw)]">
-        <div className="grid gap-10 py-14 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
-          <div>
-            <Link to="/" className="group inline-flex items-center gap-3">
-              <Logo className="text-ink transition-colors group-hover:text-accent" />
-              <span className="font-brand text-[0.9375rem] uppercase leading-none tracking-[-0.01em]">
-                MANABI
-              </span>
-            </Link>
+    <footer className="relative overflow-hidden border-t border-line bg-tint/40">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-32 top-0 size-[26rem] rounded-full bg-sky/25 blur-3xl dark:bg-sky/10"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-24 bottom-0 size-[22rem] rounded-full bg-lime/20 blur-3xl dark:bg-lime/5"
+      />
 
-            <p className="mt-4 max-w-sm text-body leading-relaxed text-ink-soft">
-              Real problems, picked from the index and proven by a public
-              repository.
-            </p>
+      <div className="relative mx-auto w-[min(1240px,96vw)] px-2 pb-6 pt-10 sm:px-4 sm:pt-14">
+        <motion.div
+          variants={reveal}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, amount: 0.15 }}
+          className="overflow-hidden rounded-[2rem] border border-line bg-paper shadow-lift"
+        >
+          <div className="grid gap-10 p-6 sm:p-10 lg:grid-cols-[1.5fr_2fr] lg:gap-14 lg:p-12">
+            <motion.div variants={item}>
+              <Link to="/" className="group inline-flex items-center gap-3">
+                <Logo className="text-ink transition-colors group-hover:text-accent" />
+                <span className="font-brand text-[0.9375rem] uppercase leading-none tracking-[-0.01em]">
+                  MANABI
+                </span>
+              </Link>
 
-            <a
-              href="https://github.com/PIYUSH-NEXTGEN/Manabi"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Star MANABI on GitHub"
-              className="github-star group mt-6 flex w-fit items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[0.8125rem] font-semibold text-paper"
-            >
-              <Star
-                aria-hidden
-                size={12}
-                strokeWidth={2.4}
-                fill="currentColor"
-                className="text-paper"
-              />
-              <GithubMark size={14} className="text-paper/80 transition-colors group-hover:text-paper" />
-              Star on GitHub
-            </a>
-          </div>
+              <p className="mt-5 max-w-xs text-body leading-relaxed text-ink-soft">
+                Pick a real problem, build it in public, and show the work in a
+                public repo. Made for devs who ship.
+              </p>
 
-          <nav aria-label="Footer" className="grid gap-x-8 gap-y-10 sm:grid-cols-2">
-            {FOOTER_COLUMNS.map((column) => {
-              const Icon = column.icon;
-              return (
-                <div key={column.heading} className="flex flex-col">
-                  <h2 className="flex items-center gap-2 border-b border-line pb-2.5 font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
-                    <Icon aria-hidden size={12} strokeWidth={2.4} className="text-accent" />
+              <div className="mt-6 flex flex-col gap-2.5 text-body text-ink-soft">
+                <a
+                  href={X_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group inline-flex w-fit items-center gap-2.5 transition-colors hover:text-ink"
+                >
+                  <span className="flex size-7 items-center justify-center rounded-full border border-line bg-tint text-ink">
+                    <XMark size={13} />
+                  </span>
+                  @Piyush_NextGen
+                </a>
+              </div>
+            </motion.div>
+
+            <div className="grid gap-8 sm:grid-cols-3">
+              {FOOTER_COLUMNS.map((column) => (
+                <motion.div key={column.heading} variants={item}>
+                  <h2 className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
                     {column.heading}
                   </h2>
-                  <ul className="mt-3.5 flex flex-col gap-2">
+                  <ul className="mt-4 flex flex-col gap-2.5">
                     {column.links.map((link) => (
                       <li key={`${column.heading}-${link.label}`}>
                         <Link
                           to={link.to}
-                          className="group inline-flex items-start gap-1.5 text-body leading-snug text-ink-soft underline-offset-4 transition-colors hover:text-accent hover:underline"
+                          className="group inline-flex items-center gap-1 text-body leading-snug text-ink-soft transition-colors hover:text-ink"
                         >
-                          <ChevronRight
-                            aria-hidden
-                            size={13}
-                            strokeWidth={2.6}
-                            className="mt-1 shrink-0 text-ink/25 transition-colors group-hover:text-accent"
-                          />
-                          {link.label}
+                          <span className="relative">
+                            {link.label}
+                            <span className="absolute inset-x-0 -bottom-0.5 h-px origin-left scale-x-0 bg-ink transition-transform duration-300 group-hover:scale-x-100" />
+                          </span>
                         </Link>
                       </li>
                     ))}
                   </ul>
-                </div>
-              );
-            })}
-          </nav>
-        </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
 
-        <div className="flex flex-col gap-3 border-t border-line py-5 md:flex-row md:items-center md:justify-between">
-          <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
-            © 2026 MANABI
-          </p>
-          <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
-            Built for builders · Night shift edition
-          </p>
-        </div>
+          <motion.div
+            variants={item}
+            className="grid gap-6 border-t border-line px-6 py-6 sm:px-10 lg:grid-cols-[1fr_auto] lg:items-center lg:px-12"
+          >
+            <div>
+              <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-ink">
+                Get new briefs first
+              </p>
+              <p className="mt-1.5 max-w-md text-body leading-relaxed text-ink-soft">
+                New briefs, fixes and features land on GitHub first. Follow the
+                build and watch it ship.
+              </p>
+            </div>
+
+            {CONTACT_EMAIL ? (
+              <form
+                className="flex w-full max-w-md gap-2"
+                onSubmit={handleSubscribe}
+              >
+                <label htmlFor="footer-email" className="sr-only">
+                  Email address
+                </label>
+                <input
+                  id="footer-email"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="Enter your email"
+                  className="field min-w-0 flex-1 rounded-full text-body"
+                />
+                <button
+                  type="submit"
+                  className="press inline-flex shrink-0 items-center gap-1.5 rounded-full bg-ink px-4 py-2.5 text-[0.8125rem] font-semibold text-paper transition-colors hover:bg-ink/90"
+                >
+                  Subscribe
+                  <ArrowUpRight aria-hidden size={13} strokeWidth={2.6} />
+                </button>
+              </form>
+            ) : (
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Star MANABI on GitHub"
+                className="press group inline-flex w-fit items-center gap-2 rounded-full bg-ink px-5 py-3 text-[0.875rem] font-semibold text-paper transition-colors hover:bg-ink/90"
+              >
+                <Star
+                  aria-hidden
+                  size={12}
+                  strokeWidth={2.4}
+                  fill="currentColor"
+                  className="text-paper"
+                />
+                <GithubMark
+                  size={14}
+                  className="text-paper/80 transition-colors group-hover:text-paper"
+                />
+                Star on GitHub
+              </a>
+            )}
+          </motion.div>
+
+          <div className="relative border-t border-line px-6 py-6 sm:px-10 lg:px-12">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-sky/20 to-transparent dark:from-sky/5"
+            />
+
+            <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2">
+                {SOCIALS.map(({ label, href, icon: Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={`MANABI on ${label}`}
+                    className="press flex size-9 items-center justify-center rounded-full border border-line bg-paper text-ink-soft transition-colors hover:border-ink/25 hover:bg-tint hover:text-ink"
+                  >
+                    <Icon aria-hidden size={15} />
+                  </a>
+                ))}
+                <Link
+                  to="/contact"
+                  aria-label="Contact MANABI"
+                  className="press flex size-9 items-center justify-center rounded-full border border-line bg-paper text-ink-soft transition-colors hover:border-ink/25 hover:bg-tint hover:text-ink"
+                >
+                  <Mail aria-hidden size={15} strokeWidth={2.2} />
+                </Link>
+                <span className="ml-1 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
+                  Open source · built in public
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
+                <Link to="/privacy" className="transition-colors hover:text-ink">
+                  Privacy
+                </Link>
+                <Link to="/terms" className="transition-colors hover:text-ink">
+                  Terms
+                </Link>
+                <span>© 2026 MANABI</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </footer>
   );
