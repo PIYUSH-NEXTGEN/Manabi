@@ -19,7 +19,7 @@ describe('Button', () => {
     expect(screen.getByRole('button')).toHaveClass('rounded-full', 'bg-accent', 'text-paper');
 
     rerender(<Button variant="secondary">Go</Button>);
-    expect(screen.getByRole('button')).toHaveClass('border-line', 'text-ink');
+    expect(screen.getByRole('button')).toHaveClass('bg-sky', 'text-[#0a0b0d]');
 
     rerender(<Button variant="danger">Go</Button>);
     expect(screen.getByRole('button')).toHaveClass('bg-danger', 'text-paper');

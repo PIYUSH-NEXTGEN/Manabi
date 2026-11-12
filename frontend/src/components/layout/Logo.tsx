@@ -18,7 +18,7 @@ export function Logo({ className }: { className?: string }) {
         fill="currentColor"
         d="M3 26V6h4.4l8.6 8.4L24.6 6H29v20h-4.4V12l-8.6 8.8L7.4 12v14H3Z"
       />
-      <rect x="14.4" y="22.4" width="3.2" height="3.6" fill="var(--accent)" />
+      <rect x="14.4" y="22.4" width="3.2" height="3.6" fill="var(--sky)" />
     </svg>
   );
 }

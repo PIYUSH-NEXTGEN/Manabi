@@ -8,7 +8,6 @@ const STATIC_ROUTE_TARGETS: Array<[string, string]> = [
   ['/', 'Pick a project. Ship it. Prove it.'],
   ['/_kit', 'MANABI /_kit'],
   ['/about', 'About MANABI'],
-  ['/repo-analyzer', 'Repo Analyzer'],
   ['/faq', 'Straight answers'],
   ['/contribute', "Build on someone else's repo"],
   ['/contact', 'Talk to us'],

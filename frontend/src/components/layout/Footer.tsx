@@ -1,12 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
-import {
-  ArrowUpRight,
-  ChevronRight,
-  Info,
-  Scale,
-  Star,
-} from 'lucide-react';
+import { ChevronRight, Info, Scale, Star } from 'lucide-react';
 import { Logo } from './Logo';
 import { GithubMark } from '@/components/icons/GithubMark';
 
@@ -118,37 +112,6 @@ export function Footer() {
           <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
             Built for builders · Night shift edition
           </p>
-        </div>
-      </div>
-
-      <div className="mx-auto w-[min(1240px,96vw)] pb-6">
-        <div className="relative aspect-[16/7] overflow-hidden rounded-xl border border-line bg-ink shadow-soft">
-          <img
-            src="/footer-scene.png"
-            alt=""
-            draggable={false}
-            className="absolute inset-0 size-full object-cover object-top [image-rendering:pixelated]"
-          />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-ink/80 via-ink/30 to-transparent" />
-          <div className="absolute inset-x-0 top-0">
-            <div className="mx-auto flex w-full flex-wrap items-center justify-between gap-3 px-5 pt-5">
-              <Link
-                to="/problems"
-                className="group inline-flex items-center gap-1.5 rounded-full bg-paper/95 px-4 py-2 text-[0.8125rem] font-semibold text-ink shadow-soft transition-colors hover:bg-paper hover:text-accent"
-              >
-                Start with a brief
-                <ArrowUpRight
-                  aria-hidden
-                  size={13}
-                  strokeWidth={2.6}
-                  className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                />
-              </Link>
-              <span className="font-mono text-label font-bold uppercase tracking-[0.16em] text-paper/70">
-                The long way home
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     </footer>

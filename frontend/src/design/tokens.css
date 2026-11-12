@@ -1,34 +1,47 @@
 :root {
   color-scheme: light;
 
-  /* Warm ivory ground, like paper lit at dawn. */
-  --ink: #211d18;
-  --ink-soft: #4a433a;
-  --paper: #f7f4ed;
-  --sheet: #fffdf8;
-  --tint: #efe9de;
-  --olive: #3d4737;
+  /* White ground, black ink, light blue as the only accent. */
+  --ink: #0a0b0d;
+  --ink-soft: #4a5563;
+  --paper: #ffffff;
+  --sheet: #ffffff;
+  --tint: #f1f7fd;
+  --olive: #dfeaf5;
 
-  /* Accent and semantic colour. Terracotta keeps MANABI's identity but warms
-     it to sit inside the dawn palette instead of punching out of it. */
-  --accent: #b64f22;
-  --accent-soft: #f3e0d2;
-  --danger: #a03a23;
-  --danger-soft: #f7e3dc;
-  --muted: #746c60;
-  --line: rgba(33, 29, 24, 0.11);
+  /* Black carries primary actions and emphasis. Light blue is a surface
+     colour only, so it always sits behind black text. */
+  --accent: #0a0b0d;
+  --accent-soft: #dff0ff;
+  --sky: #bfe3ff;
+  --sky-strong: #a3d4fb;
+  --lime: #c9f26d;
+  --lime-soft: #eefbcf;
+  --danger: #b42318;
+  --danger-soft: #fee4e2;
+  --muted: #6b7480;
+  --line: rgba(10, 11, 13, 0.09);
   --line-strong: var(--ink);
 
-  /* Atmospheric tints sampled from the reference's dawn landscape. Used only
-     for large, quiet background washes and a few soft surfaces. */
-  --dawn-sky: #d9e4ec;
-  --dawn-peach: #f6e2d3;
-  --dawn-sage: #dfe5d6;
-  --dawn-lavender: #e6e2ee;
+  /* Atmospheric tints for wide washes and the hero landscape. */
+  --dawn-sky: #eaf6ff;
+  --dawn-peach: #f7fbff;
+  --dawn-sage: #dff0ff;
+  --dawn-lavender: #eef7ff;
+
+  /* Hero landscape layers, all in the same light-blue family. */
+  --scene-far: #eaf6ff;
+  --scene-mid: #d6edff;
+  --scene-near: #bfe3ff;
+  --scene-front: #a8d5f7;
+  --scene-tree: #7bbdf0;
+  --scene-snow: #ffffff;
+  --scene-water: #ffffff;
 
   /* Type: a single calm sans for display and body, mono kept as the technical
      voice of the catalog. */
   --ff-display: "Archivo", Arial, sans-serif;
+  --ff-hero: "Inter", Arial, sans-serif;
   --ff-brand: "Archivo Black", "Arial Black", sans-serif;
   --ff-body: "Archivo", Arial, sans-serif;
   --ff-mono: "JetBrains Mono", "Courier New", monospace;
@@ -43,9 +56,11 @@
 
   /* Depth: diffuse light, never a hard offset slab. */
   --shadow-soft:
-    0 1px 2px rgba(48, 39, 27, 0.04), 0 10px 30px -18px rgba(48, 39, 27, 0.18);
+    0 1px 2px rgba(10, 11, 13, 0.04),
+    0 10px 30px -18px rgba(10, 11, 13, 0.16);
   --shadow-lift:
-    0 2px 4px rgba(48, 39, 27, 0.04), 0 28px 60px -30px rgba(48, 39, 27, 0.32);
+    0 2px 4px rgba(10, 11, 13, 0.04),
+    0 28px 60px -30px rgba(10, 11, 13, 0.3);
 
   /* Motion */
   --dur-press: 160ms;
@@ -53,32 +68,43 @@
 }
 
 /*
- * Night mode: the same warm palette with paper and ink swapped, so every
- * component that pairs bg-ink/text-paper inverts cleanly. The dawn tints are
- * muted to deep dusk hues so background washes stay quiet.
+ * Night mode: paper and ink swap, light blue stays the accent, primary actions
+ * invert to white so they keep the same contrast as the black buttons.
  */
 .dark {
   color-scheme: dark;
 
-  --ink: #f2ece1;
-  --ink-soft: #cdc4b5;
-  --paper: #16130f;
-  --sheet: #1e1a15;
-  --tint: #2b251d;
-  --olive: #2c3327;
+  --ink: #f4f8fc;
+  --ink-soft: #b9c4d0;
+  --paper: #070a0e;
+  --sheet: #0c1117;
+  --tint: #131c26;
+  --olive: #1a2633;
 
-  --accent: #e8834f;
-  --accent-soft: #3a271c;
-  --danger: #ff9a7d;
-  --danger-soft: #3a211a;
-  --muted: #a89f90;
-  --line: rgba(242, 236, 225, 0.14);
+  --accent: #f4f8fc;
+  --accent-soft: #123049;
+  --sky: #7cc4ff;
+  --sky-strong: #4aa8ee;
+  --lime: #c9f26d;
+  --lime-soft: #233416;
+  --danger: #ff8a7a;
+  --danger-soft: #3a1b18;
+  --muted: #8b98a7;
+  --line: rgba(244, 248, 252, 0.12);
   --line-strong: var(--ink);
 
-  --dawn-sky: #1b222a;
-  --dawn-peach: #2b201a;
-  --dawn-sage: #1f251c;
-  --dawn-lavender: #241f2b;
+  --dawn-sky: #0f1c28;
+  --dawn-peach: #0d141c;
+  --dawn-sage: #123049;
+  --dawn-lavender: #101a24;
+
+  --scene-far: #0b1622;
+  --scene-mid: #0d1c2b;
+  --scene-near: #102539;
+  --scene-front: #143049;
+  --scene-tree: #1e4e74;
+  --scene-snow: #d6ecff;
+  --scene-water: #1f4d70;
 
   --shadow-soft:
     0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -18px rgba(0, 0, 0, 0.6);

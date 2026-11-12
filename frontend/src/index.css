@@ -12,6 +12,10 @@
   --color-olive: var(--olive);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
+  --color-sky: var(--sky);
+  --color-sky-strong: var(--sky-strong);
+  --color-lime: var(--lime);
+  --color-lime-soft: var(--lime-soft);
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-muted: var(--muted);
@@ -49,7 +53,7 @@
   --text-lead--line-height: 1.6;
   --text-display: clamp(2rem, 4.2vw, 3.15rem);
   --text-display--line-height: 1.02;
-  --text-hero: clamp(2.6rem, 6.4vw, 4.6rem);
+  --text-hero: clamp(2.75rem, 7.2vw, 5.4rem);
   --text-hero--line-height: 1.0;
 }
 
@@ -66,6 +70,12 @@ body {
 }
 
 body {
+  transition:
+    background-color 320ms var(--ease-snap),
+    color 320ms var(--ease-snap);
+}
+
+body {
   font-size: var(--text-body);
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
@@ -77,6 +87,11 @@ body {
 .font-display {
   font-weight: 600;
   letter-spacing: -0.025em;
+}
+
+.font-hero {
+  font-family: var(--ff-hero);
+  font-weight: 500;
 }
 
 ::selection {
@@ -150,7 +165,118 @@ body {
   transition:
     background-color var(--dur-press) var(--ease-snap),
     color var(--dur-press) var(--ease-snap),
-    border-color var(--dur-press) var(--ease-snap);
+    border-color var(--dur-press) var(--ease-snap),
+    transform var(--dur-press) var(--ease-snap);
+}
+
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Daylight landscape behind the landing hero. Sky above, three soft ridges
+   below, all in the same light-blue family so the black copy stays legible. */
+.hero-sky {
+  background:
+    radial-gradient(
+      52% 44% at 82% 6%,
+      color-mix(in srgb, var(--sky) 38%, transparent) 0%,
+      transparent 70%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--paper) 0%,
+      var(--dawn-peach) 46%,
+      var(--dawn-sky) 100%
+    );
+}
+
+@keyframes cloud-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(34px, -6px, 0);
+  }
+}
+
+.cloud-drift {
+  animation: cloud-drift 26s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.8) rotate(0deg);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1) rotate(12deg);
+  }
+}
+
+.twinkle {
+  animation: twinkle 6s ease-in-out infinite;
+}
+
+@keyframes windmill-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.windmill-blades {
+  animation: windmill-spin 22s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes bird-fly {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  25% {
+    transform: translate3d(16px, -7px, 0);
+  }
+
+  50% {
+    transform: translate3d(32px, 0, 0);
+  }
+
+  75% {
+    transform: translate3d(16px, 7px, 0);
+  }
+}
+
+.bird-fly {
+  animation: bird-fly 20s ease-in-out infinite;
+}
+
+@keyframes smoke-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(3px) scale(0.8);
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-18px) scale(1.25);
+  }
+}
+
+.smoke-rise {
+  animation: smoke-rise 4.5s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center bottom;
 }
 
 .field {
@@ -413,6 +539,18 @@ body {
   .press,
   .field {
     transition: none;
+  }
+
+  .press:active {
+    transform: none;
+  }
+
+  .cloud-drift,
+  .twinkle,
+  .windmill-blades,
+  .bird-fly,
+  .smoke-rise {
+    animation: none;
   }
 
   .skeleton {

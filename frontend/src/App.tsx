@@ -44,7 +44,6 @@ const PAGE_PRELOADS = [
   () => import('@/pages/ProjectDetailPage'),
   () => import('@/pages/DashboardPage'),
   () => import('@/pages/AdminReviewPage'),
-  () => import('@/pages/RepoAnalyzerPage'),
   () => import('@/pages/AboutPage'),
   () => import('@/pages/FaqPage'),
   () => import('@/pages/ContributePage'),
@@ -77,11 +76,6 @@ export function schedulePrefetch(): void {
   setTimeout(prefetchPages, 350);
 }
 
-const RepoAnalyzerPage = lazy(() =>
-  import('@/pages/RepoAnalyzerPage').then((m) => ({
-    default: m.RepoAnalyzerPage,
-  })),
-);
 const ProblemDetailPage = lazy(() =>
   import('@/pages/ProblemDetailPage').then((m) => ({
     default: m.ProblemDetailPage,
@@ -141,7 +135,6 @@ export function App() {
 
                   <Route path="/problems" element={<ProblemBoardPage />} />
                   <Route path="/problems/:id" element={<ProblemDetailPage />} />
-                  <Route path="/repo-analyzer" element={<RepoAnalyzerPage />} />
                   <Route
                     path="/projects/:id"
                     element={<ProjectDetailPage />}

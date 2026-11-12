@@ -18,7 +18,16 @@ describe('HomePage', () => {
     ).toBeInTheDocument();
 
     expect(
-      screen.getByRole('button', { name: 'Browse projects' }),
+      screen.getByRole('link', { name: 'Browse all projects' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('link', { name: 'How the platform works' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', {
+        name: 'Find a project worth proving.',
+        level: 2,
+      }),
     ).toBeInTheDocument();
   });
 

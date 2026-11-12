@@ -14,9 +14,9 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    'border-transparent bg-accent text-paper shadow-soft hover:-translate-y-px hover:bg-ink',
+    'border-transparent bg-accent text-paper shadow-soft hover:-translate-y-px hover:bg-ink active:translate-y-0 active:scale-[0.98]',
   secondary:
-    'border-line bg-sheet/80 text-ink hover:-translate-y-px hover:border-ink/25 hover:bg-sheet',
+    'border-transparent bg-sky text-[#0a0b0d] hover:-translate-y-px hover:bg-sky-strong active:translate-y-0 active:scale-[0.98]',
   danger:
     'border-transparent bg-danger text-paper shadow-soft hover:-translate-y-px hover:bg-ink',
   link: 'border-transparent bg-transparent px-0 py-0 text-accent underline underline-offset-4 hover:text-ink',

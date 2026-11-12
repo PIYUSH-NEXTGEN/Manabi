@@ -55,13 +55,13 @@ export function BuildInPublic() {
   return (
     <section className="border-b border-line bg-paper">
       <div className="mx-auto w-[min(1240px,96vw)] py-14 md:py-20">
-        <div className="relative overflow-hidden rounded-xl bg-[#333d2e] px-6 py-10 text-[#f7f4ee] shadow-lift sm:px-10 md:py-14">
+        <div className="relative overflow-hidden rounded-xl bg-accent-soft px-6 py-10 text-ink shadow-lift sm:px-10 md:py-14">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
             style={{
               backgroundImage:
-                'radial-gradient(70% 90% at 92% -10%, rgba(246,226,211,0.20) 0%, transparent 60%), radial-gradient(60% 80% at 0% 110%, rgba(217,228,236,0.12) 0%, transparent 65%)',
+                'radial-gradient(60% 80% at 92% -10%, rgba(255,255,255,0.75) 0%, transparent 60%), radial-gradient(55% 70% at 0% 110%, rgba(191,227,255,0.55) 0%, transparent 65%)',
             }}
           />
 
@@ -71,12 +71,12 @@ export function BuildInPublic() {
               initial="hidden"
               whileInView="show"
               viewport={{ once: true, amount: 0.4 }}
-              className="flex flex-wrap items-center justify-between gap-3 border-b border-[#f7f4ee]/20 pb-3"
+              className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/10 pb-3"
             >
-              <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-[#f7f4ee]/70">
-                <span className="text-[#f0c9b4]">02</span> / Submission
+              <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-ink/65">
+                <span className="text-ink">02</span> / Submission
               </p>
-              <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-[#f7f4ee]/55">
+              <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-ink/45">
                 Checked, not claimed
               </p>
             </motion.div>
@@ -94,12 +94,12 @@ export function BuildInPublic() {
                 >
                   Submit a repo.
                   <br />
-                  <span className="text-[#f0c9b4]">We check the work.</span>
+                  <span className="text-ink/55">We check the work.</span>
                 </motion.h2>
 
                 <motion.p
                   variants={ITEM_REVEAL}
-                  className="mt-5 max-w-lg text-body leading-relaxed text-[#f7f4ee]/75"
+                  className="mt-5 max-w-lg text-body leading-relaxed text-ink/70"
                 >
                   Every project is checked before it goes public: your own repo, a
                   README, real commits, then an AI relevance check. Only what passes
@@ -108,7 +108,7 @@ export function BuildInPublic() {
 
                 <motion.p
                   variants={ITEM_REVEAL}
-                  className="mt-6 rounded-panel border border-[#f7f4ee]/15 bg-[#f7f4ee]/5 px-4 py-3 text-label leading-relaxed text-[#f7f4ee]/65"
+                  className="mt-6 rounded-panel border border-ink/10 bg-paper/55 px-4 py-3 text-label leading-relaxed text-ink/65"
                 >
                   If the AI can’t judge, a keyword check takes over. It can send work
                   to human review, but never mark it verified.
@@ -117,7 +117,7 @@ export function BuildInPublic() {
                 <motion.div variants={ITEM_REVEAL} className="mt-9">
                   <Link
                     to="/problems"
-                    className="group inline-flex items-center gap-2 rounded-full bg-[#f7f4ee] px-5 py-3.5 text-[0.875rem] font-semibold text-[#211d18] transition-colors hover:bg-[#f0c9b4]"
+                    className="press group inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3.5 text-[0.875rem] font-semibold text-paper transition-colors hover:bg-ink/90"
                   >
                     Claim a problem
                     <ArrowUpRight
@@ -142,22 +142,22 @@ export function BuildInPublic() {
                   <motion.li
                     key={step}
                     variants={ITEM_REVEAL}
-                    className="flex items-start gap-4 rounded-panel border border-[#f7f4ee]/15 bg-[#f7f4ee]/5 px-4 py-3.5"
+                    className="flex items-start gap-4 rounded-panel border border-ink/10 bg-paper/55 px-4 py-3.5"
                   >
-                    <span className="mt-1.5 w-5 shrink-0 font-mono text-label font-bold tracking-[0.14em] text-[#f7f4ee]/35">
+                    <span className="mt-1.5 w-5 shrink-0 font-mono text-label font-bold tracking-[0.14em] text-ink/35">
                       {step}
                     </span>
                     <Icon
                       aria-hidden
                       size={17}
                       strokeWidth={2.1}
-                      className="mt-1 shrink-0 text-[#f0c9b4]"
+                      className="mt-1 shrink-0 text-ink"
                     />
                     <div className="min-w-0">
                       <h3 className="text-[0.9375rem] font-semibold leading-snug">
                         {title}
                       </h3>
-                      <p className="mt-1 text-body leading-relaxed text-[#f7f4ee]/65">
+                      <p className="mt-1 text-body leading-relaxed text-ink/65">
                         {copy}
                       </p>
                     </div>

@@ -33,9 +33,6 @@ describe('Nav', () => {
       '/problems',
     );
     expect(
-      screen.getAllByRole('link', { name: 'Repo Analyzer' })[0],
-    ).toHaveAttribute('href', '/repo-analyzer');
-    expect(
       screen.getAllByRole('link', { name: 'Dashboard' })[0],
     ).toHaveAttribute('href', '/me');
   });

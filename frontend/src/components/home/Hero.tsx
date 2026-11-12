@@ -1,265 +1,10 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AnimatePresence, motion } from 'motion/react';
-import { ArrowRight, ArrowUpRight, Clock } from 'lucide-react';
-import type { ProblemOut } from '@/api/client';
-import { buttonClasses } from '@/design';
+import { Link } from 'react-router-dom';
+import { motion } from 'motion/react';
+import { ArrowRight } from 'lucide-react';
 import { EASE_SNAP } from '@/design/motion';
-import { cx } from '@/lib/cx';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
-import { useProblems } from '@/hooks/useProblems';
-import { useStats } from '@/hooks/useStats';
-import { fieldLabel } from '@/lib/fields';
-import { CountUp } from './CountUp';
-
-const SHOWCASE_LIMIT = 6;
-const CYCLE_MS = 3000;
-
-const DIFFICULTY_FILL: Record<ProblemOut['difficulty'], number> = {
-  beginner: 1,
-  intermediate: 2,
-  advanced: 3,
-};
-
-function pad(value: number) {
-  return String(value).padStart(2, '0');
-}
-
-function domainLabel(value: string) {
-  return value
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
-function DifficultyMeter({ level }: { level: ProblemOut['difficulty'] }) {
-  return (
-    <span className="flex shrink-0 items-center gap-2">
-      <span aria-hidden className="flex gap-1">
-        {Array.from({ length: 3 }, (_, index) => (
-          <span
-            key={index}
-            className={cx(
-              'block h-1.5 w-5 rounded-full',
-              index < DIFFICULTY_FILL[level] ? 'bg-accent' : 'bg-tint',
-            )}
-          />
-        ))}
-      </span>
-      <span className="font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
-        {level}
-      </span>
-    </span>
-  );
-}
-
-function BriefShowcase() {
-  const query = useProblems({
-    sort: 'popular',
-    distinct: 'field',
-    limit: SHOWCASE_LIMIT,
-  });
-  const reduced = usePrefersReducedMotion();
-  const [index, setIndex] = useState(0);
-  const [held, setHeld] = useState(false);
-  const [manualPause, setManualPause] = useState(false);
-
-  const items = query.data?.items.slice(0, SHOWCASE_LIMIT) ?? [];
-  const count = items.length;
-  const paused = held || manualPause;
-
-  useEffect(() => {
-    if (paused || reduced || count < 2) return;
-    const timer = window.setTimeout(() => {
-      setIndex((value) => (value + 1) % count);
-    }, CYCLE_MS);
-    return () => window.clearTimeout(timer);
-  }, [paused, reduced, count, index]);
-
-  const current = count > 0 ? index % count : 0;
-  const active = count > 0 ? items[current] : null;
-  const showDomain =
-    active != null &&
-    active.domain.replace(/-/g, '') !== active.field.replace(/-/g, '');
-
-  return (
-    <figure
-      className="relative overflow-hidden rounded-card border border-line bg-sheet shadow-lift transition-shadow duration-300 hover:shadow-[0_36px_80px_-38px_rgba(48,39,27,0.42)] motion-reduce:transition-none"
-      onMouseEnter={() => setHeld(true)}
-      onMouseLeave={() => setHeld(false)}
-    >
-      <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3">
-        <span className="flex items-center gap-2 font-mono text-label font-bold uppercase tracking-[0.16em] text-ink-soft">
-          <span aria-hidden className="block size-1.5 rounded-full bg-accent" />
-          Brief index
-        </span>
-        <span className="font-mono text-label font-bold uppercase tabular-nums tracking-[0.14em] text-muted">
-          {count > 0 ? `${pad(current + 1)} / ${pad(count)}` : 'No data'}
-        </span>
-      </div>
-
-      <div className="flex min-h-[300px] flex-col p-6 sm:p-8" aria-busy={query.isLoading}>
-        {query.isLoading ? (
-          <div className="space-y-3" aria-hidden>
-            <div className="flex items-center justify-between">
-              <div className="skeleton h-2.5 w-20" />
-              <div className="skeleton h-2.5 w-24" />
-            </div>
-            <div className="skeleton mt-3 h-7 w-3/4" />
-            <div className="skeleton h-7 w-1/2" />
-            <div className="skeleton mt-3 h-3 w-full" />
-            <div className="skeleton h-3 w-2/3" />
-            <div className="skeleton mt-auto h-9 w-full" />
-          </div>
-        ) : active ? (
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={active.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: reduced ? 0 : 0.38, ease: EASE_SNAP }}
-              className="flex flex-1 flex-col"
-            >
-              <Link
-                to={`/problems/${active.id}`}
-                className="group/link flex h-full flex-col"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <span className="rounded-full bg-accent-soft px-2.5 py-1 font-mono text-label font-bold uppercase tracking-[0.12em] text-accent">
-                    {fieldLabel(active.field)}
-                  </span>
-                  <DifficultyMeter level={active.difficulty} />
-                </div>
-
-                <h3 className="mt-5 line-clamp-3 font-display text-[1.5rem] leading-[1.15] tracking-[-0.02em] text-ink">
-                  {active.title}
-                </h3>
-                <p className="mt-3 line-clamp-3 text-body leading-relaxed text-ink-soft">
-                  {active.summary}
-                </p>
-
-                {active.tech_tags.length > 0 ? (
-                  <ul className="mt-4 flex flex-wrap gap-1.5">
-                    {active.tech_tags.slice(0, 4).map((tag) => (
-                      <li
-                        key={tag}
-                        className="rounded-full border border-line px-2 py-0.5 font-mono text-label font-bold uppercase tracking-[0.1em] text-ink-soft"
-                      >
-                        {tag}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-
-                <div className="mt-auto pt-6">
-                  <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-3.5 font-mono text-label font-bold uppercase tracking-[0.13em] text-muted">
-                    <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <span className="flex items-center gap-1">
-                        <Clock aria-hidden size={11} strokeWidth={2.4} />
-                        {`~${active.est_hours}h`}
-                      </span>
-                      {showDomain ? <span>{domainLabel(active.domain)}</span> : null}
-                      {active.project_count > 0 ? (
-                        <span>{active.project_count} built</span>
-                      ) : null}
-                    </span>
-                    <span className="flex items-center gap-1 text-ink transition-colors group-hover/link:text-accent">
-                      Open brief
-                      <ArrowUpRight
-                        aria-hidden
-                        size={12}
-                        strokeWidth={2.6}
-                        className="transition-transform duration-200 group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5"
-                      />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          </AnimatePresence>
-        ) : (
-          <div className="flex flex-1 flex-col">
-            <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
-              Index
-            </p>
-            <p className="mt-2 font-display text-[1.5rem] leading-snug text-ink">
-              Briefs unavailable
-            </p>
-            <p className="mt-3 max-w-xs text-body leading-relaxed text-ink-soft">
-              The problems API did not respond. Open the board while it comes
-              back online.
-            </p>
-            <Link
-              to="/problems"
-              className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-full border border-line bg-sheet px-4 py-2.5 text-[0.8125rem] font-semibold text-ink transition-colors hover:border-ink/25"
-            >
-              Browse problems
-              <ArrowUpRight aria-hidden size={12} strokeWidth={2.6} />
-            </Link>
-          </div>
-        )}
-      </div>
-
-      <figcaption className="flex items-center gap-3 border-t border-line px-5 py-3">
-        {count > 1 ? (
-          <>
-            <span className="flex flex-1 items-center gap-1.5" role="group" aria-label="Choose a brief">
-              {items.map((item, itemIndex) => {
-                const isActive = itemIndex === current;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setIndex(itemIndex)}
-                    aria-label={`Show brief ${pad(itemIndex + 1)}: ${item.title}`}
-                    aria-pressed={isActive}
-                    className="group/tick relative flex-1 pt-1.5"
-                  >
-                    <span
-                      className={cx(
-                        'block h-1 rounded-full transition-colors duration-150',
-                        isActive ? 'bg-accent/25' : 'bg-tint group-hover/tick:bg-ink/25',
-                      )}
-                    />
-                    {isActive ? (
-                      paused || reduced ? (
-                        <span className="absolute inset-x-0 top-1.5 h-1 rounded-full bg-accent" />
-                      ) : (
-                        <motion.span
-                          key={item.id}
-                          aria-hidden
-                          className="absolute left-0 top-1.5 h-1 rounded-full bg-accent"
-                          initial={{ width: '0%' }}
-                          animate={{ width: '100%' }}
-                          transition={{ duration: CYCLE_MS / 1000, ease: 'linear' }}
-                        />
-                      )
-                    ) : null}
-                  </button>
-                );
-              })}
-            </span>
-            <button
-              type="button"
-              onClick={() => setManualPause((value) => !value)}
-              className="shrink-0 rounded-full px-2 py-1 text-[0.75rem] font-semibold text-muted underline underline-offset-4 transition-colors hover:text-ink"
-            >
-              {manualPause ? 'Play' : 'Pause'}
-            </button>
-          </>
-        ) : (
-          <span className="font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
-            Live index
-          </span>
-        )}
-      </figcaption>
-    </figure>
-  );
-}
 
 const HEADLINE_LINES = ['Pick a project.', 'Ship it. Prove it.'];
-const HEADLINE_MARK = '#';
 const HEADLINE_STEP_MS = 700;
 
 /** Two-line centered headline, revealed without layout shift. */
@@ -267,12 +12,12 @@ function HeroHeadline() {
   const reduced = usePrefersReducedMotion();
 
   return (
-    <h1 className="text-balance font-display text-hero leading-[1.03] tracking-[-0.035em] text-white">
+    <h1 className="text-balance font-hero text-hero leading-[0.98] tracking-[-0.035em] text-ink">
       {HEADLINE_LINES.map((line, index) => (
         <motion.span
           key={line}
           className="block"
-          initial={reduced ? false : { opacity: 0, y: 18 }}
+          initial={reduced ? false : { opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={
             reduced
@@ -284,11 +29,6 @@ function HeroHeadline() {
                 }
           }
         >
-          {index === 0 ? (
-            <span aria-hidden className="mr-[0.14em] text-white/70">
-              {HEADLINE_MARK}
-            </span>
-          ) : null}
           {line}{' '}
         </motion.span>
       ))}
@@ -296,52 +36,346 @@ function HeroHeadline() {
   );
 }
 
-export function Hero() {
-  const navigate = useNavigate();
-  const [query, setQuery] = useState('');
+function HeroScene() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+    >
+      <div className="hero-sky absolute inset-0" />
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const trimmed = query.trim();
-    navigate(trimmed ? `/problems?q=${encodeURIComponent(trimmed)}` : '/problems');
-  }
+      {/* A soft sun and a handful of drifting clouds keep the scene alive
+          without pulling attention away from the copy. */}
+      <div className="absolute right-[9%] top-[9%] size-48 rounded-full bg-sky/40 blur-3xl dark:bg-sky/10" />
+      <div className="absolute left-[2%] top-[42%] size-56 rounded-full bg-sky/20 blur-3xl dark:bg-sky/10" />
+
+      <div
+        className="cloud-drift absolute left-[8%] top-[24%] h-14 w-56 rounded-full bg-white/80 blur-xl dark:bg-sky/10"
+        style={{ animationDuration: '34s' }}
+      />
+      <div
+        className="cloud-drift absolute left-[22%] top-[17%] h-10 w-40 rounded-full bg-white/70 blur-lg dark:bg-sky/10"
+        style={{ animationDuration: '28s', animationDelay: '-6s' }}
+      />
+      <div
+        className="cloud-drift absolute right-[14%] top-[30%] h-12 w-48 rounded-full bg-white/75 blur-xl dark:bg-sky/10"
+        style={{ animationDuration: '40s', animationDelay: '-14s' }}
+      />
+      <div
+        className="cloud-drift absolute right-[30%] top-[12%] h-8 w-32 rounded-full bg-white/60 blur-lg dark:bg-sky/10"
+        style={{ animationDuration: '30s', animationDelay: '-3s' }}
+      />
+      <div
+        className="cloud-drift absolute left-[42%] top-[8%] h-7 w-28 rounded-full bg-white/55 blur-lg dark:bg-sky/10"
+        style={{ animationDuration: '38s', animationDelay: '-20s' }}
+      />
+
+      <div className="absolute inset-0 hidden md:block">
+        <svg
+          className="twinkle absolute left-[12%] top-[34%] text-ink/15"
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          style={{ animationDelay: '-1.5s' }}
+        >
+          <path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12C7 11 11 7 12 0Z" />
+        </svg>
+        <svg
+          className="twinkle absolute right-[13%] top-[25%] text-sky-strong"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          style={{ animationDelay: '-3.4s' }}
+        >
+          <path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12C7 11 11 7 12 0Z" />
+        </svg>
+        <svg
+          className="twinkle absolute left-[17%] top-[56%] text-ink/10"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          style={{ animationDelay: '-5s' }}
+        >
+          <path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12C7 11 11 7 12 0Z" />
+        </svg>
+      </div>
+
+      <div
+        className="cloud-drift absolute right-[20%] top-[22%] hidden sm:block"
+        style={{ animationDuration: '46s', animationDelay: '-11s' }}
+      >
+        <svg width="58" height="78" viewBox="0 0 64 86" fill="none" aria-hidden>
+          <path
+            d="M32 2c17 0 28 13 28 28 0 17-18 31-28 39C22 61 4 47 4 30 4 15 15 2 32 2Z"
+            fill="var(--sky)"
+            stroke="var(--ink)"
+            strokeOpacity="0.12"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M32 2c-8 8-12 20-12 34 0 13 5 24 12 32"
+            stroke="var(--scene-snow)"
+            strokeOpacity="0.7"
+            strokeWidth="2"
+          />
+          <path
+            d="M32 2c8 8 12 20 12 34 0 13-5 24-12 32"
+            stroke="var(--scene-snow)"
+            strokeOpacity="0.45"
+            strokeWidth="2"
+          />
+          <path
+            d="M27 62l-4 10M37 62l4 10"
+            stroke="var(--ink)"
+            strokeOpacity="0.35"
+            strokeWidth="1.5"
+          />
+          <rect x="22" y="72" width="20" height="12" rx="3" fill="var(--ink)" opacity="0.85" />
+        </svg>
+      </div>
+
+      <svg
+        className="absolute inset-x-0 bottom-0 h-[68%] w-full"
+        viewBox="0 0 1440 760"
+        preserveAspectRatio="none"
+        fill="none"
+        aria-hidden
+      >
+        <defs>
+          <g id="hero-tree">
+            <rect x="-3" y="-40" width="6" height="40" rx="3" fill="var(--scene-tree)" />
+            <circle cx="0" cy="-54" r="27" fill="var(--scene-tree)" />
+            <circle cx="-21" cy="-38" r="18" fill="var(--scene-tree)" />
+            <circle cx="21" cy="-38" r="18" fill="var(--scene-tree)" />
+          </g>
+          <g id="hero-bush">
+            <circle cx="-14" cy="0" r="13" fill="var(--scene-tree)" />
+            <circle cx="0" cy="-9" r="18" fill="var(--scene-tree)" />
+            <circle cx="16" cy="0" r="12" fill="var(--scene-tree)" />
+          </g>
+        </defs>
+
+        {/* Distant peaks give the horizon some architecture. */}
+        <path
+          d="M0 448L118 328L214 412L332 296L454 424L572 346L692 440L822 310L962 438L1082 362L1202 430L1322 330L1440 418V760H0V448Z"
+          fill="var(--scene-far)"
+        />
+        <g fill="var(--scene-snow)" opacity="0.32">
+          <path d="M332 296L364 332L344 344L328 330L310 340L302 328Z" />
+          <path d="M822 310L850 342L832 352L818 340L802 348L796 336Z" />
+          <path d="M1322 330L1348 360L1330 370L1318 358L1304 366L1298 354Z" />
+        </g>
+        <path
+          d="M0 512L152 400L282 490L412 380L562 510L702 424L842 518L982 410L1122 518L1262 440L1382 510L1440 468V760H0V512Z"
+          fill="var(--scene-mid)"
+          opacity="0.85"
+        />
+
+        {/* Rolling hills, back to front. */}
+        <path
+          d="M0 526C220 476 360 546 560 516C780 481 920 546 1120 511C1260 488 1360 526 1440 506V760H0V526Z"
+          fill="var(--scene-far)"
+          opacity="0.92"
+        />
+        <path
+          d="M0 596C180 526 360 586 560 556C760 526 930 606 1120 571C1280 542 1370 581 1440 566V760H0V596Z"
+          fill="var(--scene-mid)"
+        />
+        <path
+          d="M0 666C220 616 380 666 580 646C800 624 980 686 1180 656C1300 638 1380 666 1440 654V760H0V666Z"
+          fill="var(--scene-near)"
+        />
+
+        {/* A quiet river winding toward the viewer. */}
+        <path
+          d="M704 506C766 566 626 626 726 696C826 756 686 736 746 766L866 766C806 726 926 706 826 646C736 592 866 550 806 506Z"
+          fill="var(--scene-water)"
+          opacity="0.7"
+        />
+        <path
+          d="M720 546C766 592 664 638 734 700"
+          stroke="var(--scene-snow)"
+          strokeOpacity="0.85"
+          strokeWidth="2"
+        />
+        <path
+          d="M0 706C220 666 380 706 580 686C800 664 980 716 1180 694C1300 681 1380 706 1440 696V760H0V706Z"
+          fill="var(--scene-front)"
+        />
+        <path
+          d="M0 698C220 658 380 698 580 678C800 656 980 708 1180 686C1300 673 1380 698 1440 688"
+          stroke="var(--scene-snow)"
+          strokeOpacity="0.42"
+          strokeWidth="2"
+        />
+
+        {/* A windmill on the left hill keeps the horizon quietly moving. */}
+        <g
+          transform="translate(552 694) scale(1.15)"
+          opacity="0.55"
+          style={{ color: 'var(--ink)' }}
+        >
+          <path d="M-9 0h18l-5-50h-8Z" fill="currentColor" />
+          <rect x="-4" y="-34" width="8" height="9" rx="1" fill="var(--scene-snow)" opacity="0.7" />
+          <path d="M-3 0v-11h6V0Z" fill="var(--scene-snow)" opacity="0.35" />
+          <g transform="translate(0 -52)">
+            <g className="windmill-blades">
+              <path
+                d="M0 0V-34M0 0V34M0 0H34M0 0H-34"
+                stroke="currentColor"
+                strokeWidth="3.4"
+                strokeLinecap="round"
+              />
+              <circle r="4.5" fill="currentColor" />
+            </g>
+          </g>
+        </g>
+
+        {/* A tiny cabin on the right hill, with a chimney that keeps smoking. */}
+        <g
+          transform="translate(1012 706) scale(1.4)"
+          opacity="0.55"
+          style={{ color: 'var(--ink)' }}
+        >
+          <rect x="10" y="-42" width="5" height="14" fill="currentColor" />
+          <path d="M-20 0v-24h40V0Z" fill="currentColor" />
+          <path d="M-26-22L0-42L26-22Z" fill="currentColor" />
+          <rect x="-4" y="-14" width="9" height="14" rx="1" fill="var(--scene-snow)" opacity="0.65" />
+          <rect x="-16" y="-17" width="6" height="7" rx="1" fill="var(--scene-snow)" opacity="0.75" />
+          <rect x="9" y="-17" width="6" height="7" rx="1" fill="var(--scene-snow)" opacity="0.75" />
+          <g transform="translate(12 -50)">
+            <g className="smoke-rise" fill="var(--scene-snow)">
+              <circle cx="0" cy="0" r="3" opacity="0.8" />
+              <circle cx="3" cy="-7" r="4" opacity="0.6" />
+              <circle cx="-1" cy="-14" r="5" opacity="0.42" />
+              <circle cx="-5" cy="-22" r="6" opacity="0.25" />
+            </g>
+          </g>
+          <g stroke="currentColor" strokeWidth="1.8" strokeOpacity="0.7">
+            <path d="M-34-2v-10M-40-2v-10M-46-2v-10" />
+            <path d="M-48-8h16" />
+          </g>
+        </g>
+        <path
+          d="M1048 706c10 8 20 14 28 22"
+          stroke="var(--scene-snow)"
+          strokeOpacity="0.45"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+
+        {/* Trees, bushes and stones, sized by depth. */}
+        <g opacity="0.6">
+          <use href="#hero-tree" transform="translate(84 620) scale(0.42)" />
+          <use href="#hero-tree" transform="translate(164 628) scale(0.34)" />
+          <use href="#hero-tree" transform="translate(1300 616) scale(0.4)" />
+          <use href="#hero-tree" transform="translate(1372 628) scale(0.32)" />
+        </g>
+        <use href="#hero-tree" transform="translate(334 664) scale(0.72)" opacity="0.85" />
+        <use href="#hero-tree" transform="translate(380 670) scale(0.58)" opacity="0.8" />
+        <use href="#hero-tree" transform="translate(1068 662) scale(0.7)" opacity="0.85" />
+        <use href="#hero-tree" transform="translate(1128 672) scale(0.55)" opacity="0.8" />
+        <use href="#hero-bush" transform="translate(468 712) scale(0.9)" opacity="0.8" />
+        <use href="#hero-bush" transform="translate(1020 716) scale(0.8)" opacity="0.75" />
+        <use href="#hero-bush" transform="translate(1236 690) scale(0.7)" opacity="0.7" />
+        <use href="#hero-tree" transform="translate(118 760) scale(1.42)" />
+        <use href="#hero-tree" transform="translate(252 744) scale(0.9)" />
+        <use href="#hero-tree" transform="translate(1336 760) scale(1.5)" />
+        <use href="#hero-tree" transform="translate(1228 748) scale(0.82)" />
+
+        <g fill="var(--scene-tree)" opacity="0.35">
+          <ellipse cx="414" cy="744" rx="44" ry="14" />
+          <ellipse cx="446" cy="740" rx="22" ry="9" />
+          <ellipse cx="800" cy="748" rx="50" ry="15" />
+          <ellipse cx="762" cy="744" rx="22" ry="9" />
+        </g>
+
+        <g fill="var(--scene-snow)" opacity="0.8">
+          <circle cx="188" cy="722" r="2.4" />
+          <circle cx="216" cy="730" r="1.8" />
+          <circle cx="300" cy="736" r="2.2" />
+          <circle cx="352" cy="726" r="1.6" />
+          <circle cx="916" cy="736" r="2" />
+          <circle cx="984" cy="728" r="1.7" />
+          <circle cx="1092" cy="742" r="2.3" />
+          <circle cx="1280" cy="724" r="1.8" />
+        </g>
+
+        <g
+          className="bird-fly"
+          style={{ animationDuration: '18s' }}
+          stroke="var(--ink)"
+          strokeOpacity="0.2"
+          strokeWidth="2"
+          strokeLinecap="round"
+        >
+          <path d="M240 186c5-5 10-5 15 0 5-5 10-5 15 0" />
+          <path d="M300 158c4-4 8-4 12 0 4-4 8-4 12 0" />
+          <path d="M356 182c4-4 8-4 12 0 4-4 8-4 12 0" />
+          <path d="M412 152c3-3 6-3 9 0 3-3 6-3 9 0" />
+        </g>
+        <g
+          className="bird-fly"
+          style={{ animationDuration: '24s', animationDelay: '-7s' }}
+          stroke="var(--ink)"
+          strokeOpacity="0.26"
+          strokeWidth="2"
+          strokeLinecap="round"
+        >
+          <path d="M1000 214c6-6 12-6 18 0 6-6 12-6 18 0" />
+          <path d="M1080 182c5-5 10-5 15 0 5-5 10-5 15 0" />
+          <path d="M930 168c5-5 10-5 15 0 5-5 10-5 15 0" />
+          <path d="M1044 148c4-4 8-4 12 0 4-4 8-4 12 0" />
+          <path d="M1140 150c4-4 8-4 12 0 4-4 8-4 12 0" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
+export function Hero() {
+  const reduced = usePrefersReducedMotion();
 
   return (
-    <>
-      <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden bg-[#05283a]">
-        <img
-          src="/hero-sea-meadow.jpg"
-          alt=""
-          aria-hidden
-          draggable={false}
-          className="absolute inset-0 size-full object-cover object-[50%_42%] sm:object-[50%_48%] xl:object-[50%_56%]"
-        />
-        {/* The scene is the design: only enough scrim to hold the copy and the
-            navigation at a comfortable contrast. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(3,24,35,0.55)_0%,rgba(3,24,35,0.10)_28%,rgba(3,24,35,0.08)_62%,rgba(3,24,35,0.45)_100%)]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(58%_50%_at_50%_50%,rgba(3,24,35,0.42),transparent_78%)]"
-        />
+    <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden">
+        <HeroScene />
 
-        <div className="relative mx-auto flex w-[min(1240px,94vw)] flex-1 flex-col justify-center pb-14 pt-36 text-center sm:pb-20">
-          <div className="mx-auto max-w-4xl">
+        <div className="relative mx-auto flex w-[min(1180px,94vw)] flex-1 flex-col justify-center pb-28 pt-40 text-center sm:pb-32">
+          <div className="mx-auto max-w-5xl">
             <HeroHeadline />
 
-            <p className="mx-auto mt-6 max-w-2xl text-balance text-lead leading-relaxed text-white/85">
-              Tired of Googling project ideas and still not knowing what to build?
-              MANABI is a curated index of real problems across every domain,
-              filtered by difficulty. Pick one that fits your skills, then prove it
-              with a public repo.
-            </p>
+            <motion.p
+              initial={reduced ? false : { opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={
+                reduced
+                  ? { duration: 0 }
+                  : { duration: 0.6, delay: 0.45, ease: EASE_SNAP }
+              }
+              className="mx-auto mt-7 max-w-2xl text-balance text-lead leading-relaxed text-ink-soft"
+            >
+              Stop Googling project ideas. Browse 260+ real problems for
+              learning, resumes and hackathons, from beginner to final-year.
+              Build one, link your GitHub repo and live demo, and show your work
+              to everyone.
+            </motion.p>
 
-            <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+            <motion.div
+              initial={reduced ? false : { opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={
+                reduced
+                  ? { duration: 0 }
+                  : { duration: 0.6, delay: 0.6, ease: EASE_SNAP }
+              }
+              className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4"
+            >
               <Link
                 to="/problems"
-                className="group inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-[0.9375rem] font-semibold text-[#0a2938] transition-colors hover:bg-white/90"
+                className="press group inline-flex items-center justify-center gap-2 rounded-full bg-ink px-7 py-4 text-[0.9375rem] font-semibold text-paper transition-colors hover:bg-ink/90"
               >
                 Explore Projects
                 <ArrowRight
@@ -353,114 +387,13 @@ export function Hero() {
               </Link>
               <Link
                 to="/about"
-                className="inline-flex items-center justify-center rounded-full border border-white/50 px-6 py-3.5 text-[0.9375rem] font-semibold text-white transition-colors hover:border-white/80 hover:bg-white/10"
+                className="press inline-flex items-center justify-center rounded-full bg-sky px-7 py-4 text-[0.9375rem] font-semibold text-[#0a0b0d] transition-colors hover:bg-sky-strong"
               >
                 Learn More
               </Link>
-            </div>
+            </motion.div>
           </div>
         </div>
-      </section>
-
-      <section
-        id="index"
-        className="scroll-mt-6 border-b border-line bg-paper py-16 md:py-20"
-      >
-        <div className="mx-auto w-[min(1240px,96vw)]">
-          <div className="flex flex-wrap items-end justify-between gap-8 border-b border-line pb-8">
-            <div className="max-w-2xl">
-              <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
-                <span className="text-accent">01</span> / The index
-              </p>
-              <h2 className="mt-3 text-balance font-display text-display leading-[1.05] tracking-[-0.03em] text-ink">
-                A brief for the thing you keep meaning to build.
-              </h2>
-            </div>
-
-            <dl className="flex flex-wrap items-end gap-8">
-              {HERO_STATS.map((stat) => (
-                <div key={stat.key}>
-                  <dt className="font-mono text-label font-bold uppercase leading-snug tracking-[0.14em] text-muted">
-                    {stat.label}
-                  </dt>
-                  <dd className="mt-1 font-display text-[1.75rem] leading-none text-ink">
-                    <StatsNumber statKey={stat.key} />
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-
-          <form
-            role="search"
-            noValidate
-            onSubmit={handleSubmit}
-            className="mt-8 flex w-full max-w-3xl flex-col gap-2 rounded-pill border border-line bg-sheet p-1.5 shadow-soft transition-colors focus-within:border-ink/25 sm:flex-row sm:items-center"
-          >
-            <label htmlFor="index-search" className="sr-only">
-              Search problem briefs
-            </label>
-            <input
-              id="index-search"
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search the index: leaf blight, SLAs…"
-              className="min-w-0 flex-1 rounded-full bg-transparent px-4 py-2.5 text-body text-ink outline-none placeholder:text-muted"
-            />
-            <button
-              type="submit"
-              className="inline-flex shrink-0 items-center justify-center rounded-full bg-ink px-5 py-2.5 text-[0.8125rem] font-semibold text-paper transition-colors hover:bg-ink/90"
-            >
-              Browse projects
-            </button>
-          </form>
-
-          <div className="mt-10 grid items-start gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
-            <div>
-              <p className="max-w-md text-body leading-relaxed text-ink-soft">
-                Every brief is written and reviewed by the MANABI team, with the
-                stakeholders, scope and starting stack attached. Filter the index
-                by field and difficulty, or search for the problem you recognise.
-              </p>
-              <div className="mt-7 flex flex-wrap items-center gap-3">
-                <Link to="/problems" className={buttonClasses('primary')}>
-                  Browse the index
-                  <ArrowUpRight aria-hidden size={14} strokeWidth={2.6} />
-                </Link>
-                <Link to="/about" className={buttonClasses('secondary')}>
-                  How MANABI works
-                </Link>
-              </div>
-              <ul className="mt-8 flex flex-col gap-2.5 border-t border-line pt-6 text-body leading-snug text-ink-soft">
-                <li>Real problems, sourced and reviewed, never scraped.</li>
-                <li>Progress read from your public GitHub repo.</li>
-                <li>A verification gate that can say no.</li>
-              </ul>
-            </div>
-
-            <BriefShowcase />
-          </div>
-        </div>
-      </section>
-    </>
+    </section>
   );
-}
-
-const HERO_STATS = [
-  { key: 'problems', label: 'Briefs curated' },
-  { key: 'fields', label: 'Fields' },
-  { key: 'projects', label: 'Projects' },
-] as const;
-
-function StatsNumber({
-  statKey,
-}: {
-  statKey: (typeof HERO_STATS)[number]['key'];
-}) {
-  const stats = useStats();
-  if (!stats.data) {
-    return <span aria-hidden>-</span>;
-  }
-  return <CountUp value={stats.data[statKey]} />;
 }

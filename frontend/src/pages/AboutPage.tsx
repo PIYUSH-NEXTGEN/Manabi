@@ -212,9 +212,7 @@ export function AboutPage() {
         <RefNote tone="accent">
           MANABI is a working prototype, not a company. The catalog, GitHub
           verification, progress tracking, dashboard and catalog chat are live.
-          The Repo Analyzer is still being built, so its form is visible but
-          disabled. Data may be reset while the project is under active
-          development.
+          Data may be reset while the project is under active development.
         </RefNote>
         <RefList>
           <RefItem>
