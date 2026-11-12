@@ -31,7 +31,7 @@ export function FilterSelect({
     <div className="flex flex-col gap-1.5">
       <label
         htmlFor={id}
-        className="font-mono text-label font-bold uppercase tracking-[0.14em] text-ink-soft"
+        className="text-sm font-medium text-muted"
       >
         {label}
       </label>

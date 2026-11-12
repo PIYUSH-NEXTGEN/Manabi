@@ -1,57 +1,58 @@
 import { Link } from 'react-router-dom';
-import { buttonClasses, Stamp } from '@/design/primitives';
-import { StaticShell } from './StaticShell';
+import { buttonClasses } from '@/design/primitives';
+import { ProsePage, ProseSection } from './staticParts';
 
 export function ContributePage() {
   return (
-    <StaticShell kicker="Contribute" title="Build on someone else's repo" wide>
-      <div className="flex items-center gap-4">
-        <Stamp tone="open" />
-        <p className="font-mono text-label font-bold uppercase tracking-widest">
-          Projects marked open are looking for contributors
+    <ProsePage
+      kicker="Contribute"
+      title="Build on someone else's repo"
+      intro="Some MANABI projects are open for contributors. You can join one, take a good-first issue, and open a pull request without leaving the GitHub workflow you already use."
+    >
+      <ProseSection id="join" title="How to join">
+        <ol className="list-decimal space-y-2 pl-5">
+          <li>
+            <span className="text-ink">Find an open project.</span> Open a
+            problem and look for the &quot;Open for contributors&quot; label in
+            its submitted projects.
+          </li>
+          <li>
+            <span className="text-ink">Pick an issue.</span> The project page
+            lists its GitHub issues, good-first-issue first. Read the
+            maintainer&apos;s notes before you start.
+          </li>
+          <li>
+            <span className="text-ink">Open a pull request.</span> Work in your
+            fork and open a PR as you would on any repository. MANABI follows
+            the commits from GitHub.
+          </li>
+        </ol>
+      </ProseSection>
+
+      <ProseSection id="none" title="If no project fits">
+        <p>
+          Claim the problem yourself and build the first version. When you
+          submit, turn on &quot;open for contributors&quot; so the next person
+          can join your repository instead of starting from an empty folder.
         </p>
-      </div>
+      </ProseSection>
 
-      <ol className="flex flex-col gap-4">
-        <li className="rounded-panel border border-line bg-sheet p-4 shadow-soft">
-          <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
-            01. Find a live project
-          </p>
-          <p className="mt-1">
-            Open a problem, scroll to its submitted projects, and look for the
-            'Open for contributors' stamp.
-          </p>
-        </li>
-        <li className="rounded-panel border border-line bg-sheet p-4 shadow-soft">
-          <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
-            02. Take a good-first-issue
-          </p>
-          <p className="mt-1">
-            Each project page lists contributor issues straight from GitHub,
-            good-first-issue first.
-          </p>
-        </li>
-        <li className="rounded-panel border border-line bg-sheet p-4 shadow-soft">
-          <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
-            03. Open a PR like everywhere else
-          </p>
-          <p className="mt-1">
-            MANABI does not fork your workflow. Commits show up on the project
-            page automatically.
-          </p>
-        </li>
-      </ol>
+      <ProseSection id="rules" title="What to expect">
+        <p>
+          MANABI lists the issues; the repository maintainer decides what gets
+          merged. Be respectful, keep the discussion in the issue, and do not
+          ask for access you do not need.
+        </p>
+      </ProseSection>
 
-      <p>
-        No project yet for a problem you like? Claim it and be the first,
-        then tick 'open for contributors' when you submit.
-      </p>
-
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-3 border-t border-line pt-8">
         <Link to="/problems" className={buttonClasses('primary')}>
           Find a problem
         </Link>
+        <Link to="/faq" className={buttonClasses('secondary')}>
+          Read the FAQ
+        </Link>
       </div>
-    </StaticShell>
+    </ProsePage>
   );
 }

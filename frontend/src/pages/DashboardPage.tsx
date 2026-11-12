@@ -22,9 +22,9 @@ import { cx } from '@/lib/cx';
 import { SOLUTION_SUMMARY_MAX } from '@/lib/limits';
 
 const STATUS_TAGS: Record<ProjectOut['verification_status'], { label: string; tone: string }> = {
-  verified: { label: 'verified · public', tone: 'text-accent' },
-  needs_review: { label: 'pending review', tone: 'text-ink/60' },
-  rejected: { label: 'rejected', tone: 'text-danger' },
+  verified: { label: 'Verified', tone: 'text-ink' },
+  needs_review: { label: 'Pending review', tone: 'text-muted' },
+  rejected: { label: 'Rejected', tone: 'text-danger' },
 };
 
 function checkCompletionError(error: unknown): CompletionChecklistItem[] | null {
@@ -122,7 +122,7 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
             maxLength={SOLUTION_SUMMARY_MAX}
             className="field mt-1 w-full"
           />
-          <span className="mt-1 block text-label text-ink-soft">
+          <span className="mt-1 block text-sm text-muted">
             Editing the description re-runs the automatic relevance check at most
             once per day.
           </span>
@@ -256,14 +256,14 @@ function CompleteProjectDialog({ project }: { project: ProjectOut }) {
         </label>
         {checklist ? (
           <div className="rounded-panel border border-danger/30 bg-danger-soft/60 p-3.5">
-            <p className="font-mono text-label font-bold uppercase tracking-widest text-danger">
+            <p className="text-sm font-semibold text-danger">
               Not ready yet. Missing:
             </p>
             <CompleteChecklistRow checklist={checklist} />
           </div>
         ) : null}
         {failure ? (
-          <p role="alert" className="font-mono text-label font-bold uppercase tracking-widest text-danger">
+          <p role="alert" className="text-sm font-medium text-danger">
             {failure}
           </p>
         ) : null}
@@ -299,7 +299,7 @@ function RemoveProjectDialog({ project }: { project: ProjectOut }) {
           repository itself is untouched.
         </p>
         {failure ? (
-          <p role="alert" className="font-mono text-label font-bold uppercase tracking-widest text-danger">
+          <p role="alert" className="text-sm font-medium text-danger">
             {failure}
           </p>
         ) : null}
@@ -338,7 +338,7 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
   }
 
   return (
-    <li className="flex flex-col gap-3 px-5 py-4">
+    <li className="flex flex-col gap-3 py-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           <Link
@@ -347,30 +347,23 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
           >
             {project.repo_name}
           </Link>
-          <p className="mt-1 truncate font-mono text-label font-bold uppercase tracking-[0.12em] text-muted">
+          <p className="mt-1 truncate text-sm text-muted">
             {project.problem_title}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
           {statusTag ? (
-            <span
-              className={cx(
-                'font-mono text-label font-bold uppercase tracking-widest',
-                statusTag.tone,
-              )}
-            >
+            <span className={cx('text-sm font-medium', statusTag.tone)}>
               {statusTag.label}
             </span>
           ) : null}
           {completed ? (
-            <span className="font-mono text-label font-bold uppercase tracking-widest text-accent">
+            <span className="text-sm font-medium text-ink">
               ✓ Completed
             </span>
           ) : null}
           {progress.isLoading ? (
-            <span className="font-mono text-label font-bold uppercase tracking-widest text-ink/60">
-              Checking GitHub…
-            </span>
+            <span className="text-sm text-muted">Checking GitHub…</span>
           ) : (
             <ProjectProgressBadge progress={progress.data ?? null} />
           )}
@@ -396,7 +389,7 @@ function verifiedOrBetter(project: ProjectOut): boolean {
   return project.verification_status === 'verified' && project.completed_at == null;
 }
 
-const fieldLabelClasses = 'font-mono text-label font-bold uppercase tracking-widest';
+const fieldLabelClasses = 'text-sm font-medium text-muted';
 
 export function DashboardPage() {
   const me = useMe();
@@ -410,13 +403,13 @@ export function DashboardPage() {
   const buildingCount = rows.length - completedCount;
 
   return (
-    <main className="mx-auto w-[min(1200px,96vw)] flex-1 py-12">
-      <div className="flex items-start justify-between gap-4">
+    <main className="mx-auto w-[min(1000px,94vw)] flex-1 py-12 md:py-16">
+      <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-6">
         <div>
           <h1 className="font-display text-display leading-[1.02] tracking-[-0.03em]">
             Dashboard
           </h1>
-          <p className="mt-2 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
+          <p className="mt-2 text-body text-muted">
             {displayName ? `Logged in as ${displayName}` : 'Loading…'}
           </p>
         </div>
@@ -432,37 +425,37 @@ export function DashboardPage() {
         ) : null}
       </div>
 
-      <section aria-label="Your projects" className="mt-8">
+      <section aria-label="Your projects" className="mt-10">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <h2 className="font-display text-[1.25rem] tracking-[-0.015em] text-ink">
             Your projects
           </h2>
           {rows.length > 0 ? (
-            <p className="font-mono text-label font-bold uppercase tracking-[0.08em] text-muted">
+            <p className="text-sm text-muted">
               {rows.length} total · {buildingCount} building · {inReview} in
               review · {completedCount} completed
             </p>
           ) : null}
         </div>
         {projects.isLoading ? (
-          <p className="mt-2 text-body">Loading projects…</p>
+          <p className="mt-4 text-body text-muted">Loading projects…</p>
         ) : projects.data && projects.data.length > 0 ? (
-          <ul className="mt-4 divide-y divide-line overflow-hidden rounded-card border border-line bg-sheet shadow-soft">
+          <ul className="mt-4 divide-y divide-line border-y border-line">
             {projects.data.map((project) => (
               <MyProjectRow key={project.id} project={project} />
             ))}
           </ul>
         ) : (
-          <p className="mt-4 rounded-card border border-line bg-sheet p-5 text-body leading-relaxed shadow-soft">
+          <p className="mt-4 border-y border-line py-6 text-body leading-relaxed text-ink-soft">
             No projects yet.{' '}
-            <Link to="/problems" className="underline underline-offset-4">
+            <Link to="/problems" className="text-ink underline underline-offset-4">
               Pick a problem
             </Link>{' '}
             and submit your repo against it.
           </p>
         )}
         {projects.error ? (
-          <p className="mt-2 font-mono text-label font-bold uppercase tracking-widest text-danger">
+          <p className="mt-3 text-sm text-danger">
             {projects.error.detail}
           </p>
         ) : null}

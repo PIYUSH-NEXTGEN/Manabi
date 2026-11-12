@@ -1,14 +1,6 @@
 import { useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
-import {
-  GraduationCap,
-  Search,
-  SlidersHorizontal,
-  Trophy,
-  X,
-  FileBadge,
-} from 'lucide-react';
 import { cx } from '@/lib/cx';
 import type { ProblemOut } from '@/api/client';
 import { EASE_SNAP } from '@/design/motion';
@@ -19,34 +11,12 @@ import { useFacets } from '@/hooks/useFacets';
 import { fieldLabel } from '@/lib/fields';
 import { useInfiniteProblems } from '@/hooks/useInfiniteProblems';
 
-const microLabel = 'font-mono text-label font-bold uppercase tracking-[0.16em]';
-
 type GoalKey = 'resume' | 'hackathon' | 'learning';
 
-const GOAL_OPTIONS: {
-  value: GoalKey;
-  label: string;
-  description: string;
-  icon: typeof Trophy;
-}[] = [
-  {
-    value: 'resume',
-    label: 'Resume',
-    description: 'Interview-ready builds that show recruiters proof of work.',
-    icon: FileBadge,
-  },
-  {
-    value: 'hackathon',
-    label: 'Hackathon',
-    description: 'Deadline-tight briefs for team sprints and demo days.',
-    icon: Trophy,
-  },
-  {
-    value: 'learning',
-    label: 'Learning',
-    description: 'Skill-builder projects to grow at your own pace.',
-    icon: GraduationCap,
-  },
+const GOAL_OPTIONS: { value: GoalKey; label: string }[] = [
+  { value: 'resume', label: 'Resume' },
+  { value: 'hackathon', label: 'Hackathon' },
+  { value: 'learning', label: 'Learning' },
 ];
 
 function goalOf(problem: ProblemOut): GoalKey | undefined {
@@ -55,9 +25,12 @@ function goalOf(problem: ProblemOut): GoalKey | undefined {
 
 function BoardSkeletons() {
   return (
-    <div className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
+    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: 6 }, (_, index) => (
-        <div key={index} className="overflow-hidden rounded-card border border-line bg-sheet shadow-soft">
+        <div
+          key={index}
+          className="overflow-hidden rounded-card border border-line bg-sheet"
+        >
           <div className="flex items-center justify-between border-b border-line px-4 py-3">
             <Skeleton className="h-2.5 w-16" />
             <Skeleton className="h-2.5 w-8" />
@@ -102,16 +75,6 @@ export function ProblemBoardPage() {
   const shownTotal = goal ? visibleProblems.length : total;
   const hasFilters = Boolean(q || field || domain || difficulty || source);
 
-  const activeFilters: { key: string; label: string; value: string }[] = [
-    ...(q ? [{ key: 'q', label: 'search', value: q }] : []),
-    ...(field ? [{ key: 'field', label: 'field', value: fieldLabel(field) }] : []),
-    ...(domain ? [{ key: 'domain', label: 'domain', value: domain }] : []),
-    ...(difficulty
-      ? [{ key: 'difficulty', label: 'difficulty', value: difficulty }]
-      : []),
-    ...(source ? [{ key: 'source', label: 'source', value: source }] : []),
-  ];
-
   function setParam(key: string, value: string) {
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
@@ -124,40 +87,60 @@ export function ProblemBoardPage() {
     });
   }
 
-  function removeFilter(key: string) {
-    setParam(key, '');
-  }
-
   function clearFilters() {
     setSearchParams({});
   }
 
   return (
     <main className="border-b border-line bg-paper">
-      <div className="mx-auto w-[min(1240px,96vw)] py-10 md:py-12">
-
-
-        <div className="mt-8 flex flex-wrap items-end justify-between gap-6 border-b border-line pb-8">
-          <div>
-            <p className="font-mono text-label font-bold uppercase tracking-[0.2em] text-accent">
-              Collection 01
-            </p>
-            <h1 className="mt-3 font-display text-display leading-[1.02] tracking-[-0.03em] text-ink">
-              Projects
-            </h1>
-          </div>
-          <p className="max-w-md text-body leading-relaxed text-ink-soft">
+      <div className="mx-auto w-[min(1120px,94vw)] py-12 md:py-16">
+        <header className="max-w-2xl">
+          <h1 className="font-display text-display leading-[1.02] tracking-[-0.03em] text-ink">
+            Projects
+          </h1>
+          <p className="mt-4 text-lead leading-relaxed text-ink-soft">
             Every brief is written and reviewed by the MANABI team. Filter it
             down, pick the one you can finish, and build the thing.
           </p>
-        </div>
+        </header>
 
-        <div className="mt-8" role="group" aria-label="Project tracks">
-          <p className={cx(microLabel, 'text-muted')}>Browse by track</p>
-          <div className="mt-3 grid gap-5 sm:grid-cols-3">
+        <section
+          aria-label="Search and filters"
+          className="mt-8 border-y border-line py-5"
+        >
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
+            <Input
+              label="Search"
+              type="search"
+              placeholder="Leaf blight, stock-outs, SLAs…"
+              value={q}
+              onChange={(event) => setParam('q', event.target.value)}
+            />
+            <FilterSelect
+              label="Field"
+              value={field}
+              onChange={(value) => setParam('field', value)}
+              options={facets.data?.fields ?? []}
+              labelFor={fieldLabel}
+            />
+            <FilterSelect
+              label="Difficulty"
+              value={difficulty}
+              onChange={(value) => setParam('difficulty', value)}
+              options={facets.data?.difficulties ?? []}
+            />
+            <FilterSelect
+              label="Domain"
+              value={domain}
+              onChange={(value) => setParam('domain', value)}
+              options={facets.data?.domains ?? []}
+            />
+          </div>
+
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-sm text-muted">Goal</span>
             {GOAL_OPTIONS.map((option) => {
               const active = goal === option.value;
-              const Icon = option.icon;
               const count = problems.filter(
                 (problem) => goalOf(problem) === option.value,
               ).length;
@@ -168,31 +151,18 @@ export function ProblemBoardPage() {
                   aria-pressed={active}
                   onClick={() => setParam('goal', active ? '' : option.value)}
                   className={cx(
-                    'flex flex-col gap-2 rounded-card border px-5 py-5 text-left transition-[transform,box-shadow,background-color] duration-300',
+                    'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
                     active
-                      ? 'border-transparent bg-ink text-paper shadow-soft'
-                      : 'border-line bg-sheet text-ink shadow-soft hover:-translate-y-0.5 hover:border-ink/20',
+                      ? 'border-ink bg-ink text-paper'
+                      : 'border-line bg-paper text-ink-soft hover:border-ink/30 hover:text-ink',
                   )}
                 >
-                  <span className="flex items-center gap-2 text-[0.875rem] font-semibold">
-                    <Icon
-                      aria-hidden
-                      size={14}
-                      strokeWidth={2.4}
-                      className={active ? 'text-accent-soft' : 'text-accent'}
-                    />
-                    {option.label}
-                  </span>
+                  {option.label}
                   <span
                     className={cx(
-                      'text-body leading-relaxed',
-                      active ? 'text-paper/75' : 'text-ink-soft',
+                      'text-xs',
+                      active ? 'text-paper/70' : 'text-muted',
                     )}
-                  >
-                    {option.description}
-                  </span>
-                  <span
-                    className={cx(microLabel, active ? 'text-paper/55' : 'text-muted')}
                   >
                     {board.data
                       ? `${count} ${count === 1 ? 'project' : 'projects'}`
@@ -202,194 +172,102 @@ export function ProblemBoardPage() {
               );
             })}
           </div>
-        </div>
+        </section>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[276px_minmax(0,1fr)] lg:gap-10">
-          <aside className="lg:sticky lg:top-24 lg:self-start">
-            <section
-              aria-label="Search and filters"
-              className="overflow-hidden rounded-card border border-line bg-sheet shadow-soft"
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-muted">
+            {board.data ? `${shownTotal} projects in the index` : 'Counting…'}
+          </p>
+          {hasFilters ? (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="text-sm text-ink underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
             >
-              <div className="flex items-center justify-between border-b border-line px-4 py-3">
-                <h2 className={cx(microLabel, 'flex items-center gap-2')}>
-                  <SlidersHorizontal
-                    aria-hidden
-                    size={12}
-                    strokeWidth={2.4}
-                    className="text-accent"
-                  />
-                  Filter index
-                </h2>
-              </div>
-
-              <div className="p-4">
-                <form
-                  noValidate
-                  onSubmit={(event) => event.preventDefault()}
-                >
-                  <div className="relative">
-                    <Search
-                      aria-hidden
-                      size={14}
-                      strokeWidth={2.4}
-                      className="pointer-events-none absolute left-3 top-[2.3rem] text-muted"
-                    />
-                    <Input
-                      label="Search"
-                      type="search"
-                      placeholder="Leaf blight, stock-outs, SLAs…"
-                      value={q}
-                      onChange={(event) => setParam('q', event.target.value)}
-                      style={{ paddingLeft: '2.25rem' }}
-                    />
-                  </div>
-                </form>
-
-                <div className="mt-4 grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
-                  <FilterSelect
-                    label="Field"
-                    value={field}
-                    onChange={(value) => setParam('field', value)}
-                    options={facets.data?.fields ?? []}
-                    labelFor={fieldLabel}
-                  />
-                  <FilterSelect
-                    label="Difficulty"
-                    value={difficulty}
-                    onChange={(value) => setParam('difficulty', value)}
-                    options={facets.data?.difficulties ?? []}
-                  />
-                  <FilterSelect
-                    label="Domain"
-                    value={domain}
-                    onChange={(value) => setParam('domain', value)}
-                    options={facets.data?.domains ?? []}
-                  />
-                </div>
-              </div>
-            </section>
-          </aside>
-
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line pb-3">
-              <p className={cx(microLabel, 'text-muted')}>
-                {board.data
-                  ? `${shownTotal} projects in the index`
-                  : 'Counting…'}
-              </p>
-            </div>
-
-            {hasFilters ? (
-              <div className="flex flex-wrap items-center gap-2 border-b border-line py-3">
-                <span className={cx(microLabel, 'text-muted')}>
-                  Filtered by
-                </span>
-                {activeFilters.map((filter) => (
-                  <button
-                    key={`${filter.key}-${filter.value}`}
-                    type="button"
-                    onClick={() => removeFilter(filter.key)}
-                    aria-label={`Remove ${filter.label}: ${filter.value}`}
-                    className="group inline-flex items-center gap-1.5 rounded-full border border-line bg-sheet px-2.5 py-1 font-mono text-label font-bold uppercase tracking-[0.1em] transition-colors hover:border-ink/25 hover:text-accent"
-                  >
-                    <span className="text-muted group-hover:text-paper/70">
-                      {filter.label}
-                    </span>
-                    {filter.value}
-                    <X aria-hidden size={10} strokeWidth={3} />
-                  </button>
-                ))}
-                <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="inline-flex items-center rounded-full border border-line px-3 py-1.5 font-mono text-label font-bold uppercase tracking-[0.1em] transition-colors hover:border-ink/25 hover:text-accent"
-                >
-                  Clear filters
-                </button>
-              </div>
-            ) : null}
-
-            {board.isPending || board.isPlaceholderData ? (
-              <div className="mt-6">
-                <BoardSkeletons />
-              </div>
-            ) : null}
-
-            {board.isError && !board.isPlaceholderData && !board.data ? (
-              <section className="mt-6 rounded-card border border-line bg-sheet p-6 shadow-soft">
-                <p className="max-w-2xl text-body leading-relaxed">
-                  The board could not be loaded. That is almost certainly a
-                  backend or network problem and it will not fix itself by
-                  refreshing faster.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => board.refetch()}
-                  className={cx(buttonClasses('primary'), 'mt-4')}
-                >
-                  Try again
-                </button>
-              </section>
-            ) : null}
-
-            {board.data &&
-            visibleProblems.length === 0 &&
-            (!goal ? hasFilters : true) ? (
-              <section className="mt-6 rounded-card border border-line bg-sheet p-6 shadow-soft">
-                {goal ? (
-                  <p className="text-body leading-relaxed">
-                    No projects in this track yet. New briefs land here as
-                    soon as they're tagged for the{' '}
-                    {goal === 'resume'
-                      ? 'resume'
-                      : goal === 'hackathon'
-                        ? 'hackathon'
-                        : 'learning'}{' '}
-                    track.
-                  </p>
-                ) : (
-                  <p className="text-body leading-relaxed">
-                    Nothing in the index matches those filters yet. Clear one
-                    or two and look again.
-                  </p>
-                )}
-              </section>
-            ) : null}
-
-            {visibleProblems.length > 0 ? (
-              <div className="mt-6 grid items-stretch gap-5 sm:grid-cols-2 2xl:grid-cols-3">
-                {visibleProblems.map((problem, index) => (
-                  <motion.div
-                    key={problem.id}
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      duration: 0.32,
-                      delay: Math.min(index * 0.035, 0.28),
-                      ease: EASE_SNAP,
-                    }}
-                    className="h-full min-w-0"
-                  >
-                    <ProblemCard problem={problem} className="h-full" />
-                  </motion.div>
-                ))}
-              </div>
-            ) : null}
-
-            {board.hasNextPage && !goal ? (
-              <div className="mt-10 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => board.fetchNextPage()}
-                  disabled={board.isFetchingNextPage}
-                  className={buttonClasses('primary')}
-                >
-                  {board.isFetchingNextPage ? 'Loading…' : 'Load more'}
-                </button>
-              </div>
-            ) : null}
-          </div>
+              Clear filters
+            </button>
+          ) : null}
         </div>
+
+        {board.isPending || board.isPlaceholderData ? (
+          <div className="mt-6">
+            <BoardSkeletons />
+          </div>
+        ) : null}
+
+        {board.isError && !board.isPlaceholderData && !board.data ? (
+          <section className="mt-6 border-y border-line py-6">
+            <p className="max-w-2xl text-body leading-relaxed text-ink-soft">
+              The board could not be loaded. That is almost certainly a backend
+              or network problem and it will not fix itself by refreshing
+              faster.
+            </p>
+            <button
+              type="button"
+              onClick={() => board.refetch()}
+              className={cx(buttonClasses('primary'), 'mt-4')}
+            >
+              Try again
+            </button>
+          </section>
+        ) : null}
+
+        {board.data &&
+        visibleProblems.length === 0 &&
+        (!goal ? hasFilters : true) ? (
+          <section className="mt-6 border-y border-line py-6">
+            {goal ? (
+              <p className="text-body leading-relaxed text-ink-soft">
+                No projects in this track yet. New briefs land here as soon as
+                they&apos;re tagged for the{' '}
+                {goal === 'resume'
+                  ? 'resume'
+                  : goal === 'hackathon'
+                    ? 'hackathon'
+                    : 'learning'}{' '}
+                track.
+              </p>
+            ) : (
+              <p className="text-body leading-relaxed text-ink-soft">
+                Nothing in the index matches those filters yet. Clear one or two
+                and look again.
+              </p>
+            )}
+          </section>
+        ) : null}
+
+        {visibleProblems.length > 0 ? (
+          <div className="mt-6 grid items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            {visibleProblems.map((problem, index) => (
+              <motion.div
+                key={problem.id}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.32,
+                  delay: Math.min(index * 0.035, 0.28),
+                  ease: EASE_SNAP,
+                }}
+                className="h-full min-w-0"
+              >
+                <ProblemCard problem={problem} className="h-full" />
+              </motion.div>
+            ))}
+          </div>
+        ) : null}
+
+        {board.hasNextPage && !goal ? (
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              onClick={() => board.fetchNextPage()}
+              disabled={board.isFetchingNextPage}
+              className={buttonClasses('primary')}
+            >
+              {board.isFetchingNextPage ? 'Loading…' : 'Load more'}
+            </button>
+          </div>
+        ) : null}
       </div>
     </main>
   );
