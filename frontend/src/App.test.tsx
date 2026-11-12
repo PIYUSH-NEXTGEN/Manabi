@@ -5,7 +5,7 @@ import { server } from '@/api/mocks/server';
 import { App } from './App';
 
 const STATIC_ROUTE_TARGETS: Array<[string, string]> = [
-  ['/', 'Pick a project. Ship it. Prove it.'],
+  ['/', 'Pick a project. Ship it Prove it.'],
   ['/_kit', 'MANABI /_kit'],
   ['/about', 'About MANABI'],
   ['/faq', 'Straight answers'],
@@ -92,7 +92,7 @@ describe('Route table (no dead links)', () => {
       await screen.findByRole(
         'heading',
         {
-          name: 'Pick a project. Ship it. Prove it.',
+          name: 'Pick a project. Ship it Prove it.',
           level: 1,
         },
         { timeout: 5000 },

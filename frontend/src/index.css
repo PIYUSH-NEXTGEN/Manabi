@@ -175,24 +175,250 @@ body {
 
 /* Daylight landscape behind the landing hero. Sky above, three soft ridges
    below, all in the same light-blue family so the black copy stays legible. */
+.hero-scene {
+  --mx: 0;
+  --my: 0;
+  --scroll: 0;
+}
+
 .hero-sky {
   background:
     radial-gradient(
-      52% 44% at 82% 6%,
-      color-mix(in srgb, var(--scene-sun) 40%, transparent) 0%,
-      transparent 70%
+      52% 46% at 14% 2%,
+      color-mix(in srgb, var(--scene-sun) 30%, transparent) 0%,
+      transparent 68%
     ),
     radial-gradient(
-      44% 36% at 12% 30%,
-      color-mix(in srgb, var(--scene-blossom) 24%, transparent) 0%,
-      transparent 72%
+      46% 40% at 82% 24%,
+      color-mix(in srgb, var(--scene-blossom) 12%, transparent) 0%,
+      transparent 74%
     ),
     linear-gradient(
       to bottom,
       var(--paper) 0%,
-      var(--dawn-peach) 46%,
+      var(--dawn-peach) 58%,
       var(--dawn-sky) 100%
     );
+}
+
+.dark .hero-sky {
+  background:
+    radial-gradient(
+      52% 46% at 14% 2%,
+      color-mix(in srgb, var(--scene-sun) 14%, transparent) 0%,
+      transparent 68%
+    ),
+    radial-gradient(
+      46% 40% at 82% 24%,
+      color-mix(in srgb, var(--scene-blossom) 8%, transparent) 0%,
+      transparent 74%
+    ),
+    linear-gradient(
+      to bottom,
+      var(--paper) 0%,
+      var(--dawn-peach) 58%,
+      var(--dawn-sky) 100%
+    );
+}
+
+.hero-parallax {
+  will-change: transform;
+}
+
+.hero-parallax--far {
+  transform: translate3d(
+    calc(var(--mx) * -5px),
+    calc(var(--my) * -3px + var(--scroll) * 22px),
+    0
+  );
+}
+
+.hero-parallax--mid {
+  transform: translate3d(
+    calc(var(--mx) * -9px),
+    calc(var(--my) * -5px + var(--scroll) * 16px),
+    0
+  );
+}
+
+.hero-parallax--near {
+  transform: translate3d(
+    calc(var(--mx) * -14px),
+    calc(var(--my) * -8px + var(--scroll) * 10px),
+    0
+  );
+}
+
+.hero-parallax--front {
+  transform: translate3d(
+    calc(var(--mx) * -20px),
+    calc(var(--my) * -11px + var(--scroll) * 4px),
+    0
+  );
+}
+
+.hero-grain {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: soft-light;
+  opacity: 0.15;
+}
+
+.dark .hero-grain {
+  mix-blend-mode: overlay;
+  opacity: 0.2;
+}
+
+.hero-light-shimmer {
+  background: radial-gradient(
+    38% 34% at 18% 8%,
+    color-mix(in srgb, var(--scene-sun) 22%, transparent) 0%,
+    transparent 72%
+  );
+  mix-blend-mode: soft-light;
+  animation: hero-light-shimmer 16s ease-in-out infinite;
+}
+
+@keyframes hero-light-shimmer {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: translate3d(-1.5%, 0, 0);
+  }
+
+  50% {
+    opacity: 0.36;
+    transform: translate3d(1.5%, 0, 0);
+  }
+}
+
+.pollen {
+  background: #ffe6a8;
+  box-shadow: 0 0 8px 2px rgba(255, 214, 120, 0.38);
+  animation: pollen-float 18s ease-in-out infinite;
+}
+
+@keyframes pollen-float {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0) scale(0.75);
+  }
+
+  22% {
+    opacity: 0.75;
+  }
+
+  50% {
+    opacity: 0.38;
+    transform: translate3d(14px, -12px, 0) scale(1);
+  }
+
+  74% {
+    opacity: 0.65;
+  }
+}
+
+.balloon-drift {
+  animation: balloon-drift 32s ease-in-out infinite;
+}
+
+@keyframes balloon-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-1.5deg);
+  }
+
+  50% {
+    transform: translate3d(18px, -12px, 0) rotate(1.5deg);
+  }
+}
+
+.bird-drift {
+  animation: bird-drift 40s ease-in-out infinite;
+}
+
+@keyframes bird-drift {
+  0%,
+  100% {
+    transform: translate3d(-12px, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(26px, -12px, 0);
+  }
+}
+
+.tree-sway {
+  animation: tree-sway 8s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+@keyframes tree-sway {
+  0%,
+  100% {
+    transform: rotate(-0.55deg);
+  }
+
+  50% {
+    transform: rotate(0.7deg);
+  }
+}
+
+.grass-sway {
+  animation: grass-sway 5s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+
+@keyframes grass-sway {
+  0%,
+  100% {
+    transform: skewX(-1.5deg);
+  }
+
+  50% {
+    transform: skewX(1.8deg);
+  }
+}
+
+.river-flow {
+  stroke-dasharray: 18 62;
+  animation: river-flow 8s linear infinite;
+}
+
+@keyframes river-flow {
+  to {
+    stroke-dashoffset: -160;
+  }
+}
+
+.fish-swim {
+  animation: fish-swim 10s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes fish-swim {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(-2deg);
+  }
+
+  30% {
+    transform: translate3d(10px, -3px, 0) rotate(2deg);
+  }
+
+  65% {
+    transform: translate3d(20px, 2px, 0) rotate(-1deg);
+  }
+}
+
+.windmill-shadow-spin {
+  animation: windmill-spin 22s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
 @keyframes cloud-drift {
@@ -553,9 +779,22 @@ body {
   .cloud-drift,
   .twinkle,
   .windmill-blades,
+  .windmill-shadow-spin,
   .bird-fly,
-  .smoke-rise {
+  .bird-drift,
+  .balloon-drift,
+  .smoke-rise,
+  .tree-sway,
+  .grass-sway,
+  .river-flow,
+  .fish-swim,
+  .pollen,
+  .hero-light-shimmer {
     animation: none;
+  }
+
+  .hero-parallax {
+    transform: none;
   }
 
   .skeleton {

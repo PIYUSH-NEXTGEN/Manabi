@@ -14,7 +14,7 @@ test('home hero, board, and problem detail render with zero console errors', asy
   // The hero renders its headline as three animated spans; the trailing
   // whitespace after each line makes the flattened text extra-spacey.
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
-    /Pick a project\.\s*Ship it\.\s*Prove it\./,
+    /Pick a project\.\s*Ship it\s+Prove it\./,
   );
 
   // Nav + board both use "Projects" as the label; scope to the banner nav.

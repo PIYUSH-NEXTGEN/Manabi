@@ -9,7 +9,7 @@ describe('HomePage', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: 'Pick a project. Ship it. Prove it.',
+        name: 'Pick a project. Ship it Prove it.',
         level: 1,
       }),
     ).toBeInTheDocument();

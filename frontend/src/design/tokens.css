@@ -24,27 +24,62 @@
   --line-strong: var(--ink);
 
   /* Atmospheric tints for wide washes and the hero landscape. */
-  --dawn-sky: #e9f9ef;
-  --dawn-peach: #fff1e4;
-  --dawn-sage: #dff7e8;
-  --dawn-lavender: #f3ebff;
+  --dawn-sky: #dfe9dd;
+  --dawn-peach: #f3d9d6;
+  --dawn-sage: #e5efe0;
+  --dawn-lavender: #efe2e2;
 
-  /* Hero landscape layers: brown peaks, green hills and a bright river. */
-  --scene-mountain-far: #c9a27e;
-  --scene-mountain-mid: #a97b5c;
-  --scene-far: #d9f3df;
-  --scene-mid: #b8e8c8;
-  --scene-near: #8ed7aa;
-  --scene-front: #6fc38f;
-  --scene-tree: #2f7f5b;
-  --scene-tree-alt: #5cad82;
-  --scene-trunk: #8a5a3c;
-  --scene-snow: #fffdf7;
-  --scene-water: #72cfe6;
-  --scene-water-deep: #3aafc9;
+  /* Hero landscape: hazy brown peaks, muted sage meadows and teal water. */
+  --scene-mountain-far: #b99a88;
+  --scene-mountain-far-light: #d7b49d;
+  --scene-mountain-far-shadow: #8d8390;
+  --scene-mountain-mid: #9a745f;
+  --scene-mountain-mid-light: #c39678;
+  --scene-mountain-mid-shadow: #5f5266;
+  --scene-mountain-rim: #ffe0ae;
+  --scene-snow: #fff8ef;
+  --scene-mist: #f4e7dc;
+  --scene-haze: #e9ddd6;
+  --scene-cloud: #fff4ea;
+  --scene-cloud-light: #fffdf8;
+
+  --scene-far: #b7d6b0;
+  --scene-mid: #94c493;
+  --scene-near: #72b37b;
+  --scene-front: #4f9265;
+  --scene-grass-light: #c8e6ad;
+  --scene-grass-shadow: #3f7653;
+  --scene-tree: #2f7253;
+  --scene-tree-alt: #5a9f73;
+  --scene-tree-deep: #1f563e;
+  --scene-trunk: #7d5135;
+  --scene-trunk-light: #a9754e;
+  --scene-birch: #efe6d6;
+  --scene-birch-mark: #51483f;
+  --scene-path: #b89b70;
+
+  --scene-water: #b9ece4;
+  --scene-water-mid: #4db6b3;
+  --scene-water-deep: #1f7f86;
+  --scene-foam: #effff9;
+  --scene-fish: #d98b5f;
+  --scene-fish-light: #f2c08f;
+  --scene-sky-tint: #f6dfe2;
   --scene-sun: #ffe2a0;
   --scene-bloom: #ffcf5c;
-  --scene-blossom: #ff9fb1;
+  --scene-blossom: #e98b9d;
+  --scene-lavender: #b89cc8;
+
+  --scene-wood: #8a5a3f;
+  --scene-wood-light: #b47e56;
+  --scene-wood-dark: #513326;
+  --scene-stone: #8c8071;
+  --scene-stone-light: #b9ad9b;
+  --scene-roof: #6d4b3d;
+  --scene-roof-light: #8d6551;
+  --scene-window: #ffd37a;
+  --scene-window-glow: #ffb84e;
+  --scene-lantern: #ffd88a;
 
   /* Type: a single calm sans for display and body, mono kept as the technical
      voice of the catalog. */
@@ -106,21 +141,56 @@
   --dawn-sage: #123029;
   --dawn-lavender: #1a1526;
 
-  --scene-mountain-far: #4a3a30;
-  --scene-mountain-mid: #362a23;
-  --scene-far: #16322a;
-  --scene-mid: #1c4434;
-  --scene-near: #1e5a42;
-  --scene-front: #256b4c;
-  --scene-tree: #4a9b78;
-  --scene-tree-alt: #6bbd95;
-  --scene-trunk: #6e4a35;
+  --scene-mountain-far: #3f3638;
+  --scene-mountain-far-light: #57443f;
+  --scene-mountain-far-shadow: #2e2a36;
+  --scene-mountain-mid: #4e3a32;
+  --scene-mountain-mid-light: #6b4c3c;
+  --scene-mountain-mid-shadow: #30263a;
+  --scene-mountain-rim: #b98d5c;
   --scene-snow: #e8f7ff;
-  --scene-water: #2a6e82;
-  --scene-water-deep: #1c5364;
+  --scene-mist: #2a2a30;
+  --scene-haze: #281f26;
+  --scene-cloud: #27313b;
+  --scene-cloud-light: #3a4650;
+
+  --scene-far: #163029;
+  --scene-mid: #1a3d2f;
+  --scene-near: #1e4a37;
+  --scene-front: #23573e;
+  --scene-grass-light: #3f7a56;
+  --scene-grass-shadow: #0d241c;
+  --scene-tree: #2f6b50;
+  --scene-tree-alt: #4a906a;
+  --scene-tree-deep: #1b4a37;
+  --scene-trunk: #5a3d2c;
+  --scene-trunk-light: #7a543a;
+  --scene-birch: #b8c4c2;
+  --scene-birch-mark: #26302f;
+  --scene-path: #6b5742;
+
+  --scene-water: #1f5c62;
+  --scene-water-mid: #277b7d;
+  --scene-water-deep: #0d3b44;
+  --scene-foam: #a9e7e4;
+  --scene-fish: #a76d52;
+  --scene-fish-light: #c99773;
+  --scene-sky-tint: #253c46;
   --scene-sun: #c79a52;
   --scene-bloom: #d8b45c;
   --scene-blossom: #c57c91;
+  --scene-lavender: #8f7aa8;
+
+  --scene-wood: #5a3c2d;
+  --scene-wood-light: #7a4f38;
+  --scene-wood-dark: #32211a;
+  --scene-stone: #4e4842;
+  --scene-stone-light: #6d655b;
+  --scene-roof: #3c2b26;
+  --scene-roof-light: #553a31;
+  --scene-window: #ffd37a;
+  --scene-window-glow: #ff9e4f;
+  --scene-lantern: #ffd88a;
 
   --shadow-soft:
     0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -18px rgba(0, 0, 0, 0.6);
