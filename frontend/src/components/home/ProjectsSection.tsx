@@ -5,7 +5,6 @@ import {
   ArrowRight,
   ArrowUpRight,
   Check,
-  Clock,
 } from 'lucide-react';
 import type { ProblemOut } from '@/api/client';
 import { EASE_SNAP } from '@/design/motion';
@@ -13,6 +12,7 @@ import { cx } from '@/lib/cx';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import { useProblems } from '@/hooks/useProblems';
 import { useStats } from '@/hooks/useStats';
+import { openChatWidget } from '@/components/chat/ChatWidget';
 import { FIELD_LABELS, FIELD_VALUES, fieldLabel } from '@/lib/fields';
 import { CountUp } from './CountUp';
 
@@ -196,10 +196,6 @@ function BriefCarousel() {
 
                 <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-4">
                   <span className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-label font-bold uppercase tracking-[0.13em] text-muted">
-                    <span className="flex items-center gap-1">
-                      <Clock aria-hidden size={11} strokeWidth={2.4} />
-                      {`~${active.est_hours}h`}
-                    </span>
                     {showDomain ? <span>{domainLabel(active.domain)}</span> : null}
                     {active.project_count > 0 ? (
                       <span>{active.project_count} built</span>
@@ -226,17 +222,16 @@ function BriefCarousel() {
                 The index
               </p>
               <p className="mt-2 font-display text-[1.5rem] leading-snug text-ink">
-                Briefs unavailable
+                Couldn’t load briefs
               </p>
               <p className="mt-3 max-w-xs text-body leading-relaxed text-ink-soft">
-                The problems API did not respond. Open the board while it comes
-                back online.
+                The board didn’t load just now. Try opening it again in a moment.
               </p>
               <Link
                 to="/problems"
                 className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-full border border-line bg-sheet px-4 py-2.5 text-[0.8125rem] font-semibold text-ink transition-colors hover:border-ink/25"
               >
-                Browse problems
+                Open the board
                 <ArrowUpRight aria-hidden size={12} strokeWidth={2.6} />
               </Link>
             </div>
@@ -312,7 +307,6 @@ export function ProjectsSection() {
   const statItems = [
     { label: 'Briefs curated', value: stats.data?.problems },
     { label: 'Fields', value: stats.data?.fields },
-    { label: 'Sources', value: stats.data?.sources },
     { label: 'Projects built', value: stats.data?.projects },
   ];
 
@@ -331,7 +325,7 @@ export function ProjectsSection() {
       />
 
       <div className="relative mx-auto w-[min(1240px,96vw)]">
-        <div className="flex flex-wrap items-end justify-between gap-6 border-b border-line pb-8">
+        <div className="border-b border-line pb-8">
           <div className="max-w-3xl">
             <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
               <span className="text-ink">01</span> / The project board
@@ -347,11 +341,6 @@ export function ProjectsSection() {
               </span>
             </h2>
           </div>
-          <p className="max-w-sm text-body leading-relaxed text-ink-soft">
-            Real problems from the field, scoped into briefs you can actually
-            finish. Pick a lane, match your level, and ship something worth
-            showing.
-          </p>
         </div>
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[0.86fr_1.14fr] lg:items-center lg:gap-16">
@@ -362,12 +351,12 @@ export function ProjectsSection() {
             transition={{ duration: reduced ? 0 : 0.45, ease: EASE_SNAP }}
           >
             <p className="max-w-xl text-lead leading-relaxed text-ink-soft">
-              Every brief starts with a real user, a clear outcome and a stack
-              you can start from. Filter by field or difficulty, then turn the
-              build into proof on your GitHub, your resume and your portfolio.
+              Every brief starts with a real problem someone actually had. Pick
+              one that fits your level, build it, then put it on your GitHub and
+              portfolio.
             </p>
 
-            <dl className="mt-8 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2">
+            <dl className="mt-8 grid grid-cols-3 gap-2">
               {statItems.map((stat) => (
                 <div
                   key={stat.label}
@@ -403,6 +392,19 @@ export function ProjectsSection() {
                 How the platform works
               </Link>
             </div>
+
+            <p className="mt-5 max-w-xl text-body leading-relaxed text-ink-soft">
+              Not sure what to build? The AI guide can help. Tell it what you
+              know and how much time you have, and it will suggest a brief you
+              can finish.{' '}
+              <button
+                type="button"
+                onClick={openChatWidget}
+                className="font-semibold text-ink underline decoration-ink/30 underline-offset-4 transition-colors hover:text-sky-strong"
+              >
+                Chat with the AI guide
+              </button>
+            </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-2 border-t border-line pt-5">
               <span className="mr-1 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
