@@ -1,6 +1,27 @@
 import { useEffect, useRef } from 'react';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 
+const STARS = [
+  { left: '7%', top: '10%', size: 2, delay: '0s' },
+  { left: '13%', top: '22%', size: 1.5, delay: '-1.4s' },
+  { left: '21%', top: '8%', size: 2.5, delay: '-2.8s' },
+  { left: '29%', top: '18%', size: 1.5, delay: '-0.7s' },
+  { left: '38%', top: '6%', size: 2, delay: '-3.6s' },
+  { left: '47%', top: '15%', size: 1.5, delay: '-2.1s' },
+  { left: '56%', top: '7%', size: 2.5, delay: '-4.4s' },
+  { left: '64%', top: '20%', size: 1.5, delay: '-1.8s' },
+  { left: '73%', top: '10%', size: 2, delay: '-3.1s' },
+  { left: '81%', top: '24%', size: 1.5, delay: '-0.4s' },
+  { left: '89%', top: '12%', size: 2.5, delay: '-5.2s' },
+  { left: '95%', top: '28%', size: 2, delay: '-2.5s' },
+  { left: '34%', top: '30%', size: 1.5, delay: '-4.8s' },
+  { left: '68%', top: '33%', size: 2, delay: '-1.2s' },
+  { left: '17%', top: '36%', size: 1.5, delay: '-3.9s' },
+  { left: '86%', top: '38%', size: 1.5, delay: '-0.9s' },
+  { left: '53%', top: '27%', size: 2, delay: '-2.3s' },
+  { left: '42%', top: '40%', size: 1.5, delay: '-5.5s' },
+];
+
 type TreeProps = {
   href: string;
   x: number;
@@ -113,7 +134,7 @@ function Cloud({
         animationDelay: delay ? `${delay}s` : undefined,
       }}
     >
-      <svg viewBox="0 0 220 72" fill="none" aria-hidden>
+      <svg className="hero-cloud" viewBox="0 0 220 72" fill="none" aria-hidden>
         <path
           d="M20 58c-12 0-18-7-15-16 2-8 10-12 18-11 3-13 14-21 27-20 10 1 18 6 22 15 5-5 12-7 19-5 10 2 16 10 15 19 9 0 16 6 17 14 1 9-6 15-17 15H20Z"
           fill="var(--scene-cloud)"
@@ -186,29 +207,34 @@ export function HeroScene() {
     >
       <div className="hero-sky absolute inset-0" />
 
-      <div className="absolute left-[13%] top-[6%] size-52 rounded-full bg-[#ffe9b7]/55 blur-3xl dark:bg-[#c79a52]/15" />
-      <div className="absolute left-[15%] top-[8%] size-16 rounded-full bg-[#fff4cf]/80 blur-xl dark:bg-[#c79a52]/20" />
-      <div className="absolute right-[7%] top-[24%] size-64 rounded-full bg-[#e8cfd2]/30 blur-3xl dark:bg-[#4a3a30]/20" />
+      <div className="absolute left-[13%] top-[6%] size-52 rounded-full bg-[#ffe9b7]/55 blur-3xl dark:bg-[#a9c4ff]/10" />
+      <div className="absolute left-[15%] top-[8%] size-16 rounded-full bg-[#fff4cf]/80 blur-xl dark:bg-[#eef4ff] dark:blur-none dark:shadow-[0_0_50px_16px_rgba(180,205,255,0.24)]" />
+      <div className="absolute right-[7%] top-[24%] size-64 rounded-full bg-[#e8cfd2]/30 blur-3xl dark:bg-[#3f4f76]/12" />
 
-      <Cloud className="cloud-drift absolute left-[7%] top-[20%] w-52 opacity-80" duration={38} />
+      <div className="absolute inset-0 hidden dark:block">
+        {STARS.map((star, index) => (
+          <span
+            key={index}
+            className="twinkle absolute rounded-full bg-[#eaf2ff]"
+            style={{
+              left: star.left,
+              top: star.top,
+              width: star.size,
+              height: star.size,
+              animationDelay: star.delay,
+              boxShadow: '0 0 6px rgba(190, 215, 255, 0.55)',
+            }}
+          />
+        ))}
+      </div>
+
       <Cloud
-        className="cloud-drift absolute left-[26%] top-[12%] w-36 opacity-60"
-        duration={31}
-        delay={-8}
-      />
-      <Cloud
-        className="cloud-drift absolute right-[10%] top-[17%] w-60 opacity-70"
-        duration={45}
-        delay={-14}
-      />
-      <Cloud
-        className="cloud-drift absolute right-[31%] top-[8%] w-32 opacity-50"
-        duration={34}
-        delay={-4}
+        className="cloud-drift absolute left-[7%] top-[20%] w-52 opacity-95 dark:opacity-55"
+        duration={38}
       />
 
       <svg
-        className="bird-drift absolute right-[12%] top-[15%] w-40 text-ink/45 dark:text-paper/40"
+        className="bird-drift absolute right-[29%] top-[19%] w-40 text-ink/45 dark:text-paper/40"
         viewBox="0 0 180 80"
         fill="none"
         aria-hidden
@@ -237,7 +263,7 @@ export function HeroScene() {
       </svg>
 
       <div
-        className="balloon-drift absolute right-[17%] top-[27%] hidden w-20 sm:block"
+        className="balloon-drift absolute right-[17%] top-[27%] hidden w-20 dark:opacity-40 sm:block"
         style={{ animationDuration: '32s' }}
       >
         <svg viewBox="0 0 72 96" fill="none" aria-hidden>

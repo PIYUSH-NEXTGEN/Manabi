@@ -115,6 +115,10 @@ body {
     radial-gradient(130% 65% at 50% 108%, var(--dawn-sage) 0%, transparent 72%);
 }
 
+.dark .dawn-field {
+  background-image: none;
+}
+
 /* Soft floating panel: the reference's default container. */
 .panel {
   border: 1px solid var(--line);
@@ -204,25 +208,24 @@ body {
 .dark .hero-sky {
   background:
     radial-gradient(
-      52% 46% at 14% 2%,
-      color-mix(in srgb, var(--scene-sun) 14%, transparent) 0%,
-      transparent 68%
+      34% 30% at 18% 12%,
+      color-mix(in srgb, #dbe7ff 12%, transparent) 0%,
+      transparent 70%
     ),
     radial-gradient(
-      46% 40% at 82% 24%,
-      color-mix(in srgb, var(--scene-blossom) 8%, transparent) 0%,
-      transparent 74%
+      46% 38% at 84% 28%,
+      color-mix(in srgb, var(--scene-lavender) 8%, transparent) 0%,
+      transparent 76%
     ),
-    linear-gradient(
-      to bottom,
-      var(--paper) 0%,
-      var(--dawn-peach) 58%,
-      var(--dawn-sky) 100%
-    );
+    linear-gradient(to bottom, #04070d 0%, #07111f 54%, #0d1a2b 100%);
 }
 
 .hero-parallax {
   will-change: transform;
+}
+
+.dark .hero-parallax {
+  filter: saturate(0.6) brightness(0.75) contrast(1.05);
 }
 
 .hero-parallax--far {
@@ -277,6 +280,10 @@ body {
   );
   mix-blend-mode: soft-light;
   animation: hero-light-shimmer 16s ease-in-out infinite;
+}
+
+.dark .hero-light-shimmer {
+  display: none;
 }
 
 @keyframes hero-light-shimmer {
@@ -436,6 +443,14 @@ body {
   animation: cloud-drift 26s ease-in-out infinite;
 }
 
+.hero-cloud {
+  filter: drop-shadow(0 8px 12px rgba(90, 74, 64, 0.18));
+}
+
+.dark .hero-cloud {
+  filter: none;
+}
+
 @keyframes twinkle {
   0%,
   100% {
@@ -556,6 +571,12 @@ body {
   );
   background-size: 220% 100%;
   animation: skeleton-sweep 1.6s var(--ease-snap) infinite;
+}
+
+.dark .skeleton {
+  background-image: none;
+  background-color: var(--tint);
+  animation: none;
 }
 
 @keyframes skeleton-sweep {
@@ -696,6 +717,37 @@ body {
 
 .thinking-dot:nth-child(3) {
   animation-delay: 300ms;
+}
+
+.chat-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.chat-composer {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chat-composer::-webkit-scrollbar {
+  display: none;
+}
+
+.chat-composer:focus-visible {
+  outline: none;
 }
 
 .marquee-track {

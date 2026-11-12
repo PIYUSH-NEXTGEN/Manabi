@@ -11,11 +11,11 @@ export function Sponsors() {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-28 top-6 size-[24rem] rounded-full bg-sky/20 blur-3xl dark:bg-sky/10"
+        className="pointer-events-none absolute -right-28 top-6 size-[24rem] rounded-full bg-sky/20 blur-3xl dark:hidden"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-20 -left-32 size-[20rem] rounded-full bg-lime/15 blur-3xl dark:bg-lime/5"
+        className="pointer-events-none absolute -bottom-20 -left-32 size-[20rem] rounded-full bg-lime/15 blur-3xl dark:hidden"
       />
 
       <div className="relative mx-auto w-[min(1240px,96vw)] py-16 md:py-20">

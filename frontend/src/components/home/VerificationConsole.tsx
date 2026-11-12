@@ -566,7 +566,7 @@ export function VerificationConsole() {
         <motion.span
           key={cycle}
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-accent/10 to-transparent"
+          className="pointer-events-none absolute inset-0 bg-gradient-to-r from-transparent via-accent/10 to-transparent dark:opacity-0"
           initial={{ x: '-100%' }}
           animate={{ x: '100%' }}
           transition={{ duration: 0.9, ease: 'easeInOut' }}

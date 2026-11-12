@@ -103,7 +103,7 @@ function BriefCarousel() {
     >
       <div
         aria-hidden
-        className="absolute -inset-8 -z-10 rounded-[3rem] bg-gradient-to-br from-sky/50 via-sky/15 to-lime/30 blur-2xl dark:from-sky/10 dark:via-transparent dark:to-lime/10"
+        className="absolute -inset-8 -z-10 rounded-[3rem] bg-gradient-to-br from-sky/50 via-sky/15 to-lime/30 blur-2xl dark:hidden"
       />
 
       <div className="overflow-hidden rounded-[2rem] border border-ink/10 bg-sheet shadow-lift transition-shadow duration-300 hover:shadow-[0_38px_90px_-42px_rgba(10,11,13,0.38)] motion-reduce:transition-none">
@@ -317,11 +317,11 @@ export function ProjectsSection() {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-32 top-4 size-[32rem] rounded-full bg-sky/25 blur-3xl dark:bg-sky/10"
+        className="pointer-events-none absolute -right-32 top-4 size-[32rem] rounded-full bg-sky/25 blur-3xl dark:hidden"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-24 -left-40 size-[26rem] rounded-full bg-lime/20 blur-3xl dark:bg-lime/5"
+        className="pointer-events-none absolute -bottom-24 -left-40 size-[26rem] rounded-full bg-lime/20 blur-3xl dark:hidden"
       />
 
       <div className="relative mx-auto w-[min(1240px,96vw)]">
@@ -360,7 +360,7 @@ export function ProjectsSection() {
               {statItems.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-line bg-sky/20 px-4 py-4 dark:bg-sky/10"
+                  className="rounded-2xl border border-line bg-sky/20 px-4 py-4 dark:bg-sheet"
                 >
                   <dd className="font-display text-[2rem] leading-none tracking-[-0.03em] text-ink">
                     <StatValue value={stat.value} />

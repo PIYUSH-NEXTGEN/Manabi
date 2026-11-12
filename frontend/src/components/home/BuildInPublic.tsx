@@ -69,10 +69,10 @@ export function BuildInPublic() {
   return (
     <section className="border-b border-line bg-paper">
       <div className="mx-auto w-[min(1240px,96vw)] py-14 md:py-20">
-        <div className="relative overflow-hidden rounded-[2rem] border border-ink/10 bg-accent-soft text-ink shadow-lift">
+        <div className="relative overflow-hidden rounded-[2rem] border border-ink/10 bg-accent-soft text-ink shadow-lift dark:bg-sheet">
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 dark:hidden"
             style={{
               backgroundImage:
                 'radial-gradient(58% 80% at 94% -10%, rgba(255,255,255,0.7) 0%, transparent 60%), radial-gradient(55% 70% at 0% 112%, rgba(201,242,109,0.28) 0%, transparent 62%)',

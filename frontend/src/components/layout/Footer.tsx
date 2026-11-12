@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowUpRight, Mail, Star } from 'lucide-react';
+import { ArrowUpRight, Star } from 'lucide-react';
 import { Logo } from './Logo';
 import { GithubMark } from '@/components/icons/GithubMark';
 import { XMark } from '@/components/icons/XMark';
@@ -34,14 +34,6 @@ const FOOTER_COLUMNS = [
       { label: 'Privacy', to: '/privacy' },
       { label: 'Terms', to: '/terms' },
     ],
-  },
-];
-
-const SOCIALS = [
-  {
-    label: 'GitHub',
-    href: REPO_URL,
-    icon: GithubMark,
   },
 ];
 
@@ -208,30 +200,9 @@ export function Footer() {
             />
 
             <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-2">
-                {SOCIALS.map(({ label, href, icon: Icon }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label={`MANABI on ${label}`}
-                    className="press flex size-9 items-center justify-center rounded-full border border-line bg-paper text-ink-soft transition-colors hover:border-ink/25 hover:bg-tint hover:text-ink"
-                  >
-                    <Icon aria-hidden size={15} />
-                  </a>
-                ))}
-                <Link
-                  to="/contact"
-                  aria-label="Contact MANABI"
-                  className="press flex size-9 items-center justify-center rounded-full border border-line bg-paper text-ink-soft transition-colors hover:border-ink/25 hover:bg-tint hover:text-ink"
-                >
-                  <Mail aria-hidden size={15} strokeWidth={2.2} />
-                </Link>
-                <span className="ml-1 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
-                  Open source · built in public
-                </span>
-              </div>
+              <p className="font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
+                Real problems · public builds · open source
+              </p>
 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
                 <Link to="/privacy" className="transition-colors hover:text-ink">
