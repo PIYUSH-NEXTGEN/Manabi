@@ -24,19 +24,27 @@
   --line-strong: var(--ink);
 
   /* Atmospheric tints for wide washes and the hero landscape. */
-  --dawn-sky: #eaf6ff;
-  --dawn-peach: #f7fbff;
-  --dawn-sage: #dff0ff;
-  --dawn-lavender: #eef7ff;
+  --dawn-sky: #e9f9ef;
+  --dawn-peach: #fff1e4;
+  --dawn-sage: #dff7e8;
+  --dawn-lavender: #f3ebff;
 
-  /* Hero landscape layers, all in the same light-blue family. */
-  --scene-far: #eaf6ff;
-  --scene-mid: #d6edff;
-  --scene-near: #bfe3ff;
-  --scene-front: #a8d5f7;
-  --scene-tree: #7bbdf0;
-  --scene-snow: #ffffff;
-  --scene-water: #ffffff;
+  /* Hero landscape layers: brown peaks, green hills and a bright river. */
+  --scene-mountain-far: #c9a27e;
+  --scene-mountain-mid: #a97b5c;
+  --scene-far: #d9f3df;
+  --scene-mid: #b8e8c8;
+  --scene-near: #8ed7aa;
+  --scene-front: #6fc38f;
+  --scene-tree: #2f7f5b;
+  --scene-tree-alt: #5cad82;
+  --scene-trunk: #8a5a3c;
+  --scene-snow: #fffdf7;
+  --scene-water: #72cfe6;
+  --scene-water-deep: #3aafc9;
+  --scene-sun: #ffe2a0;
+  --scene-bloom: #ffcf5c;
+  --scene-blossom: #ff9fb1;
 
   /* Type: a single calm sans for display and body, mono kept as the technical
      voice of the catalog. */
@@ -93,18 +101,26 @@
   --line: rgba(244, 248, 252, 0.12);
   --line-strong: var(--ink);
 
-  --dawn-sky: #0f1c28;
-  --dawn-peach: #0d141c;
-  --dawn-sage: #123049;
-  --dawn-lavender: #101a24;
+  --dawn-sky: #0c1f1b;
+  --dawn-peach: #1c1622;
+  --dawn-sage: #123029;
+  --dawn-lavender: #1a1526;
 
-  --scene-far: #0b1622;
-  --scene-mid: #0d1c2b;
-  --scene-near: #102539;
-  --scene-front: #143049;
-  --scene-tree: #1e4e74;
-  --scene-snow: #d6ecff;
-  --scene-water: #1f4d70;
+  --scene-mountain-far: #4a3a30;
+  --scene-mountain-mid: #362a23;
+  --scene-far: #16322a;
+  --scene-mid: #1c4434;
+  --scene-near: #1e5a42;
+  --scene-front: #256b4c;
+  --scene-tree: #4a9b78;
+  --scene-tree-alt: #6bbd95;
+  --scene-trunk: #6e4a35;
+  --scene-snow: #e8f7ff;
+  --scene-water: #2a6e82;
+  --scene-water-deep: #1c5364;
+  --scene-sun: #c79a52;
+  --scene-bloom: #d8b45c;
+  --scene-blossom: #c57c91;
 
   --shadow-soft:
     0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -18px rgba(0, 0, 0, 0.6);

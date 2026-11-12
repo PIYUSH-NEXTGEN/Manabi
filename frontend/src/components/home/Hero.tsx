@@ -46,33 +46,33 @@ function HeroScene() {
 
       {/* A soft sun and a handful of drifting clouds keep the scene alive
           without pulling attention away from the copy. */}
-      <div className="absolute right-[9%] top-[9%] size-48 rounded-full bg-sky/40 blur-3xl dark:bg-sky/10" />
-      <div className="absolute left-[2%] top-[42%] size-56 rounded-full bg-sky/20 blur-3xl dark:bg-sky/10" />
+      <div className="absolute right-[9%] top-[9%] size-48 rounded-full bg-[#ffe0a3]/60 blur-3xl dark:bg-sky/10" />
+      <div className="absolute left-[2%] top-[42%] size-56 rounded-full bg-[#ffd7e5]/40 blur-3xl dark:bg-sky/10" />
 
       <div
-        className="cloud-drift absolute left-[8%] top-[24%] h-14 w-56 rounded-full bg-white/80 blur-xl dark:bg-sky/10"
+        className="cloud-drift absolute left-[8%] top-[24%] h-14 w-56 rounded-full bg-[#fff2e2]/85 blur-xl dark:bg-sky/10"
         style={{ animationDuration: '34s' }}
       />
       <div
-        className="cloud-drift absolute left-[22%] top-[17%] h-10 w-40 rounded-full bg-white/70 blur-lg dark:bg-sky/10"
+        className="cloud-drift absolute left-[22%] top-[17%] h-10 w-40 rounded-full bg-[#ffe4ec]/70 blur-lg dark:bg-sky/10"
         style={{ animationDuration: '28s', animationDelay: '-6s' }}
       />
       <div
-        className="cloud-drift absolute right-[14%] top-[30%] h-12 w-48 rounded-full bg-white/75 blur-xl dark:bg-sky/10"
+        className="cloud-drift absolute right-[14%] top-[30%] h-12 w-48 rounded-full bg-[#eee4ff]/70 blur-xl dark:bg-sky/10"
         style={{ animationDuration: '40s', animationDelay: '-14s' }}
       />
       <div
-        className="cloud-drift absolute right-[30%] top-[12%] h-8 w-32 rounded-full bg-white/60 blur-lg dark:bg-sky/10"
+        className="cloud-drift absolute right-[30%] top-[12%] h-8 w-32 rounded-full bg-[#e4f8ea]/70 blur-lg dark:bg-sky/10"
         style={{ animationDuration: '30s', animationDelay: '-3s' }}
       />
       <div
-        className="cloud-drift absolute left-[42%] top-[8%] h-7 w-28 rounded-full bg-white/55 blur-lg dark:bg-sky/10"
+        className="cloud-drift absolute left-[42%] top-[8%] h-7 w-28 rounded-full bg-white/70 blur-lg dark:bg-sky/10"
         style={{ animationDuration: '38s', animationDelay: '-20s' }}
       />
 
       <div className="absolute inset-0 hidden md:block">
         <svg
-          className="twinkle absolute left-[12%] top-[34%] text-ink/15"
+          className="twinkle absolute left-[12%] top-[34%] text-[#f2c14e]/60 dark:text-[#ffd98a]/50"
           width="26"
           height="26"
           viewBox="0 0 24 24"
@@ -145,34 +145,69 @@ function HeroScene() {
         aria-hidden
       >
         <defs>
+          <linearGradient id="hero-river" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="var(--scene-water)" stopOpacity="0.55" />
+            <stop offset="0.55" stopColor="var(--scene-water)" stopOpacity="0.8" />
+            <stop offset="1" stopColor="var(--scene-water-deep)" stopOpacity="0.9" />
+          </linearGradient>
           <g id="hero-tree">
-            <rect x="-3" y="-40" width="6" height="40" rx="3" fill="var(--scene-tree)" />
+            <rect x="-2.6" y="-42" width="5.2" height="42" rx="2.6" fill="var(--scene-trunk)" />
             <circle cx="0" cy="-54" r="27" fill="var(--scene-tree)" />
             <circle cx="-21" cy="-38" r="18" fill="var(--scene-tree)" />
             <circle cx="21" cy="-38" r="18" fill="var(--scene-tree)" />
+            <circle cx="-9" cy="-61" r="14" fill="var(--scene-tree-alt)" opacity="0.55" />
+            <circle cx="13" cy="-47" r="11" fill="var(--scene-tree-alt)" opacity="0.4" />
+            <circle cx="-19" cy="-43" r="8" fill="var(--scene-tree-alt)" opacity="0.28" />
+          </g>
+          <g id="hero-pine">
+            <rect x="-1.8" y="-30" width="3.6" height="30" rx="1.8" fill="var(--scene-trunk)" />
+            <path d="M0-58L14-34H-14Z" fill="var(--scene-tree)" />
+            <path d="M0-47L18-20H-18Z" fill="var(--scene-tree)" />
+            <path d="M0-35L22-5H-22Z" fill="var(--scene-tree)" />
+            <path d="M0-51L10-37H-10Z" fill="var(--scene-tree-alt)" opacity="0.35" />
+            <path d="M0-41L13-27H-13Z" fill="var(--scene-tree-alt)" opacity="0.3" />
           </g>
           <g id="hero-bush">
             <circle cx="-14" cy="0" r="13" fill="var(--scene-tree)" />
             <circle cx="0" cy="-9" r="18" fill="var(--scene-tree)" />
             <circle cx="16" cy="0" r="12" fill="var(--scene-tree)" />
+            <circle cx="-2" cy="-16" r="9" fill="var(--scene-tree-alt)" opacity="0.45" />
           </g>
         </defs>
 
         {/* Distant peaks give the horizon some architecture. */}
         <path
           d="M0 448L118 328L214 412L332 296L454 424L572 346L692 440L822 310L962 438L1082 362L1202 430L1322 330L1440 418V760H0V448Z"
-          fill="var(--scene-far)"
+          fill="var(--scene-mountain-far)"
         />
         <g fill="var(--scene-snow)" opacity="0.32">
           <path d="M332 296L364 332L344 344L328 330L310 340L302 328Z" />
           <path d="M822 310L850 342L832 352L818 340L802 348L796 336Z" />
           <path d="M1322 330L1348 360L1330 370L1318 358L1304 366L1298 354Z" />
         </g>
+        <g
+          stroke="var(--scene-mountain-mid)"
+          strokeOpacity="0.35"
+          strokeWidth="2"
+          strokeLinecap="round"
+        >
+          <path d="M332 296L304 344M332 296L358 352" />
+          <path d="M822 310L790 356M822 310L852 364" />
+          <path d="M1322 330L1290 372M1322 330L1352 382" />
+        </g>
         <path
           d="M0 512L152 400L282 490L412 380L562 510L702 424L842 518L982 410L1122 518L1262 440L1382 510L1440 468V760H0V512Z"
-          fill="var(--scene-mid)"
-          opacity="0.85"
+          fill="var(--scene-mountain-mid)"
+          opacity="0.9"
         />
+        <g opacity="0.55">
+          <use href="#hero-pine" transform="translate(146 406) scale(0.22)" />
+          <use href="#hero-pine" transform="translate(252 468) scale(0.17)" />
+          <use href="#hero-pine" transform="translate(438 398) scale(0.19)" />
+          <use href="#hero-pine" transform="translate(822 318) scale(0.15)" />
+          <use href="#hero-pine" transform="translate(1180 487) scale(0.19)" />
+          <use href="#hero-pine" transform="translate(1304 468) scale(0.17)" />
+        </g>
 
         {/* Rolling hills, back to front. */}
         <path
@@ -192,15 +227,32 @@ function HeroScene() {
         {/* A quiet river winding toward the viewer. */}
         <path
           d="M704 506C766 566 626 626 726 696C826 756 686 736 746 766L866 766C806 726 926 706 826 646C736 592 866 550 806 506Z"
-          fill="var(--scene-water)"
-          opacity="0.7"
+          fill="url(#hero-river)"
         />
         <path
-          d="M720 546C766 592 664 638 734 700"
-          stroke="var(--scene-snow)"
-          strokeOpacity="0.85"
-          strokeWidth="2"
+          d="M704 506C766 566 626 626 726 696C826 756 686 736 746 766"
+          stroke="var(--scene-water-deep)"
+          strokeOpacity="0.35"
+          strokeWidth="2.5"
+          strokeLinecap="round"
         />
+        <path
+          d="M806 506C866 550 736 592 826 646C926 706 806 726 866 766"
+          stroke="var(--scene-water-deep)"
+          strokeOpacity="0.25"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <g stroke="var(--scene-snow)" strokeLinecap="round">
+          <path d="M720 546C766 592 664 638 734 700" strokeWidth="2.5" strokeOpacity="0.85" />
+          <path d="M764 590C784 614 742 636 766 662" strokeWidth="1.8" strokeOpacity="0.55" />
+          <path d="M738 678C754 696 730 712 744 734" strokeWidth="1.6" strokeOpacity="0.45" />
+        </g>
+        <g fill="var(--scene-snow)" opacity="0.55">
+          <ellipse cx="746" cy="620" rx="12" ry="2.2" />
+          <ellipse cx="774" cy="700" rx="10" ry="2" />
+          <ellipse cx="704" cy="664" rx="8" ry="1.8" />
+        </g>
         <path
           d="M0 706C220 666 380 706 580 686C800 664 980 716 1180 694C1300 681 1380 706 1440 696V760H0V706Z"
           fill="var(--scene-front)"
@@ -214,21 +266,46 @@ function HeroScene() {
 
         {/* A windmill on the left hill keeps the horizon quietly moving. */}
         <g
-          transform="translate(552 694) scale(1.15)"
-          opacity="0.55"
+          transform="translate(552 696) scale(1.25)"
+          opacity="0.62"
           style={{ color: 'var(--ink)' }}
         >
-          <path d="M-9 0h18l-5-50h-8Z" fill="currentColor" />
-          <rect x="-4" y="-34" width="8" height="9" rx="1" fill="var(--scene-snow)" opacity="0.7" />
-          <path d="M-3 0v-11h6V0Z" fill="var(--scene-snow)" opacity="0.35" />
+          <path d="M-15 0h30l-3-6h-24Z" fill="currentColor" />
+          <path d="M-10-5h20l-3-42h-14Z" fill="currentColor" />
+          <path d="M-12-47h24l-4-9h-16Z" fill="currentColor" />
+          <path d="M-4-5v-11h8v11Z" fill="var(--scene-snow)" opacity="0.6" />
+          <rect x="-3" y="-36" width="6" height="8" rx="1.5" fill="var(--scene-snow)" opacity="0.75" />
+          <path d="M-13-47h26" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <path
+            d="M-11-47v-5M-6-47v-5M0-47v-5M6-47v-5M11-47v-5"
+            stroke="currentColor"
+            strokeWidth="1"
+            opacity="0.7"
+          />
           <g transform="translate(0 -52)">
             <g className="windmill-blades">
-              <path
-                d="M0 0V-34M0 0V34M0 0H34M0 0H-34"
-                stroke="currentColor"
-                strokeWidth="3.4"
-                strokeLinecap="round"
-              />
+              {[0, 90, 180, 270].map((rotation) => (
+                <g key={rotation} transform={`rotate(${rotation})`}>
+                  <rect x="-2.2" y="-45" width="4.4" height="39" rx="2.2" fill="currentColor" />
+                  <rect
+                    x="-8"
+                    y="-39"
+                    width="16"
+                    height="23"
+                    rx="2"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    opacity="0.7"
+                  />
+                  <path
+                    d="M-8-32h16M-8-25h16"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                    opacity="0.45"
+                  />
+                </g>
+              ))}
               <circle r="4.5" fill="currentColor" />
             </g>
           </g>
@@ -293,7 +370,7 @@ function HeroScene() {
           <ellipse cx="762" cy="744" rx="22" ry="9" />
         </g>
 
-        <g fill="var(--scene-snow)" opacity="0.8">
+        <g fill="var(--scene-bloom)" opacity="0.9">
           <circle cx="188" cy="722" r="2.4" />
           <circle cx="216" cy="730" r="1.8" />
           <circle cx="300" cy="736" r="2.2" />
@@ -302,6 +379,12 @@ function HeroScene() {
           <circle cx="984" cy="728" r="1.7" />
           <circle cx="1092" cy="742" r="2.3" />
           <circle cx="1280" cy="724" r="1.8" />
+        </g>
+        <g fill="var(--scene-blossom)" opacity="0.8">
+          <circle cx="262" cy="734" r="2.1" />
+          <circle cx="940" cy="746" r="1.7" />
+          <circle cx="1174" cy="736" r="2" />
+          <circle cx="1330" cy="732" r="1.6" />
         </g>
 
         <g
