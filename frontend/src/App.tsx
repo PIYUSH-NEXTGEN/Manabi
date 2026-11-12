@@ -6,6 +6,7 @@ import { RequireAuth } from '@/components/auth/RequireAuth';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { ToastProvider } from '@/design/primitives';
+import { useSmoothScroll } from '@/lib/useSmoothScroll';
 
 const AboutPage = lazy(() =>
   import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })),
@@ -117,6 +118,8 @@ function RouteFallback() {
 }
 
 export function App() {
+  useSmoothScroll();
+
   useEffect(() => {
     schedulePrefetch();
   }, []);

@@ -59,6 +59,10 @@
 
 html {
   scroll-behavior: smooth;
+  /* Keep the page from shifting when a dialog locks the body, and land anchor
+     jumps below the sticky header. */
+  scrollbar-gutter: stable;
+  scroll-padding-top: 6rem;
 }
 
 html,
@@ -103,6 +107,49 @@ body {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
   border-radius: var(--radius-xs);
+}
+
+/*
+ * Scrollbars: a slim, inset thumb on the paper ground. The transparent border
+ * plus background-clip keeps the visible rail narrower than the hit area, so it
+ * stays comfortable to grab without looking heavy.
+ */
+::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: var(--radius-pill);
+  background-color: var(--scrollbar-thumb);
+  background-clip: padding-box;
+  transition: background-color var(--dur-press) var(--ease-snap);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--scrollbar-thumb-active);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Chromium ignores ::-webkit-scrollbar once the standard properties are set,
+   so the Firefox fallback is scoped to Gecko. */
+@supports (-moz-appearance: none) {
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
 }
 
 /* Large, quiet dawn wash used behind the hero and the closing surfaces. */
@@ -845,12 +892,11 @@ body {
 }
 
 .chat-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: var(--line) transparent;
+  scrollbar-gutter: stable;
 }
 
 .chat-scroll::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 .chat-scroll::-webkit-scrollbar-track {
@@ -858,8 +904,21 @@ body {
 }
 
 .chat-scroll::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: var(--line);
+  border: 2px solid transparent;
+  border-radius: var(--radius-pill);
+  background-color: var(--scrollbar-thumb);
+  background-clip: padding-box;
+}
+
+.chat-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+@supports (-moz-appearance: none) {
+  .chat-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
 }
 
 .chat-composer {
