@@ -394,8 +394,18 @@ body {
 }
 
 .river-flow {
-  stroke-dasharray: 18 62;
+  stroke-dasharray: 14 38;
   animation: river-flow 8s linear infinite;
+}
+
+.river-flow-soft {
+  stroke-dasharray: 8 30;
+  animation: river-flow 11s linear infinite;
+}
+
+.river-flow-strong {
+  stroke-dasharray: 18 46;
+  animation: river-flow 6.5s linear infinite;
 }
 
 @keyframes river-flow {
@@ -982,6 +992,8 @@ body {
   .tree-sway,
   .grass-sway,
   .river-flow,
+  .river-flow-soft,
+  .river-flow-strong,
   .fish-swim,
   .pollen,
   .hero-light-shimmer {

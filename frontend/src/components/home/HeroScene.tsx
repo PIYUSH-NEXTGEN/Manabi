@@ -324,6 +324,9 @@ export function HeroScene() {
             <stop offset="0.42" stopColor="var(--sketch-wash)" />
             <stop offset="1" stopColor="var(--sketch-shade)" />
           </linearGradient>
+          <clipPath id="river-clip">
+            <path d="M828 448C822 464 812 476 806 494C798 518 806 542 798 566C790 592 770 612 750 638C730 664 692 694 640 742L830 742C818 714 826 690 828 668C830 644 826 618 824 594C822 570 830 550 836 528C842 506 844 480 842 462C841 452 836 448 828 448Z" />
+          </clipPath>
           <filter id="hero-blur" x="-20%" y="-60%" width="140%" height="220%">
             <feGaussianBlur stdDeviation="18" />
           </filter>
@@ -610,99 +613,102 @@ export function HeroScene() {
 
         <g className="hero-parallax hero-parallax--near">
           <path
-            d="M880 426C884 464 790 512 820 582C930 648 704 680 788 742L1018 742C926 680 1084 642 982 582C878 522 950 468 880 426Z"
-            stroke="var(--scene-grass-shadow)"
-            strokeWidth="22"
-            strokeOpacity="0.22"
-            fill="none"
-            filter="url(#hero-soft)"
-          />
-          <path
-            d="M880 426C884 464 790 512 820 582C930 648 704 680 788 742L1018 742C926 680 1084 642 982 582C878 522 950 468 880 426Z"
+            d="M828 448C822 464 812 476 806 494C798 518 806 542 798 566C790 592 770 612 750 638C730 664 692 694 640 742L830 742C818 714 826 690 828 668C830 644 826 618 824 594C822 570 830 550 836 528C842 506 844 480 842 462C841 452 836 448 828 448Z"
             fill="url(#river)"
             stroke="var(--sketch-ink-soft)"
             strokeWidth="1.5"
             strokeOpacity="0.65"
           />
+          <g stroke="var(--scene-foam)" strokeLinecap="round" fill="none" clipPath="url(#river-clip)">
+            <path
+              d="M826 470C818 500 822 540 812 574C802 608 782 636 762 668C748 690 740 714 736 742"
+              strokeWidth="2.4"
+              strokeOpacity="0.55"
+              className="river-flow river-flow-strong"
+            />
+            <path
+              d="M834 486C828 514 832 548 822 580C812 612 798 640 786 672C778 694 772 718 768 742"
+              strokeWidth="2.2"
+              strokeOpacity="0.5"
+              className="river-flow river-flow-soft"
+              style={{ animationDelay: '-2.4s' }}
+            />
+            <path
+              d="M812 500C806 530 810 562 800 594C790 626 772 654 758 684C750 706 744 724 740 742"
+              strokeWidth="1.8"
+              strokeOpacity="0.3"
+              className="river-flow river-flow-soft"
+              style={{ animationDelay: '-1.6s' }}
+            />
+            <path
+              d="M828 512C824 540 830 570 820 600C810 630 798 658 788 688C780 708 774 726 770 742"
+              strokeWidth="2"
+              strokeOpacity="0.28"
+              className="river-flow"
+              style={{ animationDelay: '-3.6s', animationDuration: '9.5s' }}
+            />
+          </g>
+          <g>
+            <path
+              d="M724 596C730 520 762 458 828 444C894 458 926 520 932 596C896 604 862 606 828 606C794 606 760 604 724 596Z"
+              fill="url(#meadow-mid)"
+            />
+            <path
+              d="M860 456C902 478 924 530 929 590C917 594 903 597 890 598C895 542 884 494 854 462Z"
+              fill="url(#sketch-hatch)"
+              opacity="0.32"
+              stroke="none"
+            />
+            <path
+              d="M724 596C730 520 762 458 828 444C894 458 926 520 932 596"
+              stroke="var(--sketch-ink-soft)"
+              strokeWidth="1.5"
+              strokeOpacity="0.55"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <Tree href="#tree-pine" x={786} y={464} scale={0.6} opacity={0.92} duration={9} delay={-2} />
+            <use href="#bush" transform="translate(884 476) scale(0.6)" />
+          </g>
+          <g
+            fill="var(--sketch-paper)"
+            stroke="var(--sketch-ink-soft)"
+            strokeWidth="1.1"
+          >
+            <ellipse cx="788" cy="648" rx="16" ry="5.5" />
+            <path d="M788 648l10-3" stroke="var(--sketch-ink-soft)" strokeWidth="1" />
+            <ellipse cx="800" cy="704" rx="14" ry="5" />
+            <path d="M800 704l10-3" stroke="var(--sketch-ink-soft)" strokeWidth="1" />
+            <ellipse cx="736" cy="700" rx="14" ry="5" />
+            <path d="M736 700l9-2.5" stroke="var(--sketch-ink-soft)" strokeWidth="1" />
+            <ellipse cx="770" cy="728" rx="16" ry="5.5" />
+            <path d="M770 728l10-3" stroke="var(--sketch-ink-soft)" strokeWidth="1" />
+          </g>
+          <g
+            fill="var(--scene-stone)"
+            stroke="var(--sketch-ink-soft)"
+            strokeWidth="1"
+            strokeOpacity="0.5"
+          >
+            <ellipse cx="820" cy="616" rx="8" ry="3" />
+            <ellipse cx="810" cy="676" rx="10" ry="4" />
+            <ellipse cx="700" cy="732" rx="12" ry="4.5" />
+          </g>
           <g
             stroke="var(--sketch-ink-faint)"
-            strokeOpacity="0.38"
-            strokeWidth="1.1"
+            strokeOpacity="0.25"
+            strokeWidth="1"
             strokeLinecap="round"
             fill="none"
+            clipPath="url(#river-clip)"
           >
-            <path d="M874 452C844 470 730 516 818 574C846 592 850 610 840 628" />
-            <path d="M905 452C938 474 1024 520 944 568C916 588 912 608 924 626" />
-            <path d="M856 478C842 500 790 520 822 548C854 576 854 600 844 620" />
-            <path d="M918 508C936 532 978 552 950 580C922 608 926 630 938 650" />
-            <path d="M806 650C830 672 798 696 812 720" />
-          </g>
-          <g stroke="var(--scene-foam)" strokeLinecap="round">
-            <path
-              d="M850 462C878 496 806 522 850 556"
-              strokeWidth="2.4"
-              strokeOpacity="0.7"
-              className="river-flow"
-            />
-            <path
-              d="M876 548C916 584 844 612 886 646"
-              strokeWidth="2.8"
-              strokeOpacity="0.62"
-              className="river-flow"
-              style={{ animationDelay: '-2.5s', animationDuration: '7.5s' }}
-            />
-            <path
-              d="M840 636C866 664 824 684 850 712"
-              strokeWidth="3"
-              strokeOpacity="0.55"
-              className="river-flow"
-              style={{ animationDelay: '-4s', animationDuration: '8.5s' }}
-            />
-            <path
-              d="M934 500C958 526 912 548 942 576"
-              strokeWidth="1.8"
-              strokeOpacity="0.45"
-              className="river-flow"
-              style={{ animationDelay: '-1.2s', animationDuration: '9s' }}
-            />
-            <path
-              d="M950 604C972 626 936 648 958 672"
-              strokeWidth="2"
-              strokeOpacity="0.42"
-              className="river-flow"
-              style={{ animationDelay: '-3.2s', animationDuration: '10s' }}
-            />
-          </g>
-          <g fill="var(--scene-sky-tint)" opacity="0.32">
-            <ellipse cx="860" cy="470" rx="22" ry="3.5" />
-            <ellipse cx="900" cy="538" rx="30" ry="4" />
-            <ellipse cx="842" cy="612" rx="36" ry="5" />
-            <ellipse cx="892" cy="690" rx="44" ry="6" />
-          </g>
-          <g fill="var(--scene-stone)">
-            <ellipse cx="842" cy="660" rx="14" ry="5" />
-            <ellipse cx="902" cy="682" rx="17" ry="6" />
-            <ellipse cx="966" cy="704" rx="20" ry="7" />
-          </g>
-          <g fill="var(--scene-stone-light)" opacity="0.65">
-            <ellipse cx="838" cy="658" rx="8" ry="2.4" />
-            <ellipse cx="897" cy="680" rx="10" ry="2.8" />
-            <ellipse cx="960" cy="702" rx="12" ry="3.2" />
-          </g>
-          <g stroke="var(--scene-water-deep)" strokeOpacity="0.4" strokeWidth="1.5">
-            <path d="M830 654c8-3 16-3 24 0M890 676c9-3 18-3 27 0M952 698c10-3 20-3 30 0" />
+            <path d="M812 528c8-2 16-2 24 0M800 566c8-2 16-2 24 0M786 604c9-2 18-2 27 0M782 644c9-2 18-2 27 0M772 684c10-3 20-3 30 0M756 716c10-3 20-3 30 0" />
           </g>
         </g>
 
         <g className="hero-parallax hero-parallax--near">
-          <Tree href="#tree-round" x={452} y={652} scale={0.98} opacity={0.95} duration={8} delay={-3} />
-          <Tree href="#tree-round" x={1200} y={642} scale={0.86} opacity={0.9} duration={8.5} delay={-4} />
-        </g>
-
-        <g className="hero-parallax hero-parallax--near">
-          <ellipse cx="344" cy="660" rx="88" ry="15" fill="var(--scene-grass-shadow)" opacity="0.18" />
+          <ellipse cx="300" cy="660" rx="40" ry="7" fill="var(--scene-shadow)" opacity="0.12" stroke="none" />
           <g transform="translate(300 656) scale(1.36)">
-            <path d="M48 4c54-2 86 2 114 12-38 4-78 3-114-12Z" fill="var(--scene-grass-shadow)" opacity="0.28" />
             <path d="M-18 0h36l-4-10h-28Z" fill="var(--scene-stone)" />
             <path d="M-14-10h28l-3-8h-22Z" fill="var(--scene-stone-light)" opacity="0.5" />
             <path d="M-12-18h24l-4-46h-16Z" fill="var(--scene-wood)" />
