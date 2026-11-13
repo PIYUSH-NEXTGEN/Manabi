@@ -17,6 +17,7 @@ const FOOTER_COLUMNS = [
     links: [
       { label: 'About', to: '/about' },
       { label: 'FAQ', to: '/faq' },
+      { label: 'Sponsors', to: '/sponsors' },
       { label: 'Contact', to: '/contact' },
     ],
   },

@@ -25,6 +25,11 @@ const ContactPage = lazy(() =>
 const FaqPage = lazy(() =>
   import('@/pages/FaqPage').then((m) => ({ default: m.FaqPage })),
 );
+const SponsorsPage = lazy(() =>
+  import('@/pages/SponsorsPage').then((m) => ({
+    default: m.SponsorsPage,
+  })),
+);
 const HomePage = lazy(() =>
   import('@/pages/HomePage').then((m) => ({ default: m.HomePage })),
 );
@@ -49,6 +54,7 @@ const PAGE_PRELOADS = [
   () => import('@/pages/FaqPage'),
   () => import('@/pages/ContributePage'),
   () => import('@/pages/ContactPage'),
+  () => import('@/pages/SponsorsPage'),
   () => import('@/pages/PrivacyPage'),
   () => import('@/pages/TermsPage'),
   () => import('@/pages/NotFoundPage'),
@@ -163,6 +169,7 @@ export function App() {
                   <Route path="/faq" element={<FaqPage />} />
                   <Route path="/contribute" element={<ContributePage />} />
                   <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/sponsors" element={<SponsorsPage />} />
                   <Route path="/privacy" element={<PrivacyPage />} />
                   <Route path="/terms" element={<TermsPage />} />
                   <Route path="/404" element={<NotFoundPage />} />

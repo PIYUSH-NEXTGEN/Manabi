@@ -11,6 +11,7 @@ const STATIC_ROUTE_TARGETS: Array<[string, string]> = [
   ['/faq', 'Straight answers'],
   ['/contribute', 'Contribute to MANABI'],
   ['/contact', 'Talk to us'],
+  ['/sponsors', 'Partner with MANABI.'],
   ['/privacy', 'Privacy, in plain English'],
   ['/terms', 'Terms, in plain English'],
 ];
