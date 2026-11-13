@@ -40,6 +40,15 @@ function Tree({
 }: TreeProps) {
   return (
     <g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity}>
+      <ellipse
+        cx={8}
+        cy={2}
+        rx={30}
+        ry={6}
+        fill="var(--scene-shadow)"
+        opacity="0.24"
+        stroke="none"
+      />
       <g
         className="tree-sway"
         style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
@@ -386,43 +395,29 @@ export function HeroScene() {
             />
           </pattern>
 
-          <g id="tree-round">
-            <rect x="-3.2" y="-50" width="6.4" height="50" rx="3.2" fill="var(--scene-trunk)" />
+          <g id="tree-round" stroke="var(--sketch-ink-soft)" strokeWidth="1.1" strokeOpacity="0.6" strokeLinejoin="round">
             <path
-              d="M-1-50l-8-14M1-50l8-14"
-              stroke="var(--scene-trunk)"
-              strokeWidth="1.8"
-              strokeLinecap="round"
+              d="M-3.5 0C-3.2-6-2.9-13-2.7-22L-2.3-48H2.3L2.7-22C2.9-13 3.2-6 3.5 0Z"
+              fill="var(--scene-trunk)"
             />
+            <circle cx="-17" cy="-74" r="22" fill="var(--scene-tree-deep)" />
+            <circle cx="17" cy="-74" r="22" fill="var(--scene-tree-deep)" />
+            <circle cx="0" cy="-90" r="27" fill="var(--scene-tree)" />
+            <circle cx="-8" cy="-66" r="19" fill="var(--scene-tree)" />
+            <circle cx="8" cy="-66" r="19" fill="var(--scene-tree)" />
+            <ellipse cx="10" cy="-64" rx="17" ry="14" fill="url(#sketch-hatch)" opacity="0.35" stroke="none" />
             <path
-              d="M-1.4-44v7M1.4-34v6M0-25v5"
+              d="M-22-80c6-4 13-5 18-2M14-74c5-3 10-3 14 1M-8-98c7-3 14-3 19 0"
               stroke="var(--sketch-ink-soft)"
               strokeWidth="0.9"
-              strokeOpacity="0.5"
-              strokeLinecap="round"
-            />
-            <circle cx="-18" cy="-56" r="20" fill="var(--scene-tree-deep)" />
-            <circle cx="18" cy="-54" r="21" fill="var(--scene-tree-deep)" />
-            <circle cx="0" cy="-70" r="25" fill="var(--scene-tree)" />
-            <circle cx="-22" cy="-62" r="17" fill="var(--scene-tree)" />
-            <circle cx="20" cy="-64" r="18" fill="var(--scene-tree)" />
-            <circle cx="-8" cy="-78" r="16" fill="var(--scene-tree-alt)" opacity="0.85" />
-            <circle cx="12" cy="-72" r="12" fill="var(--scene-tree-alt)" opacity="0.7" />
-            <circle cx="-24" cy="-60" r="8" fill="var(--scene-tree-alt)" opacity="0.35" />
-            <circle cx="14" cy="-62" r="15" fill="url(#sketch-hatch)" opacity="0.5" stroke="none" />
-            <circle cx="-18" cy="-58" r="12" fill="url(#sketch-hatch-soft)" opacity="0.4" stroke="none" />
-            <path
-              d="M-26-50C-18-42-10-39-2-41M2-58C10-50 17-46 22-38M-14-72c5-4 11-4 16 0"
-              stroke="var(--sketch-ink-soft)"
-              strokeWidth="0.9"
-              strokeOpacity="0.45"
+              strokeOpacity="0.35"
               strokeLinecap="round"
               fill="none"
             />
-            <circle cx="-4" cy="-81" r="5" fill="var(--scene-grass-light)" opacity="0.55" />
+            <circle cx="-9" cy="-102" r="6" fill="var(--scene-grass-light)" opacity="0.5" stroke="none" />
           </g>
 
-          <g id="tree-birch">
+          <g id="tree-birch" stroke="var(--sketch-ink-soft)" strokeWidth="1.05" strokeOpacity="0.6" strokeLinejoin="round">
             <path d="M-3 0L-1-62H3L4 0Z" fill="var(--scene-birch)" />
             <path
               d="M-2-12h4M-2-25h4M-1-38h4M-1-50h3"
@@ -452,7 +447,7 @@ export function HeroScene() {
             />
           </g>
 
-          <g id="tree-pine">
+          <g id="tree-pine" stroke="var(--sketch-ink-soft)" strokeWidth="1.05" strokeOpacity="0.6" strokeLinejoin="round">
             <rect x="-2.4" y="-34" width="4.8" height="34" rx="2.4" fill="var(--scene-trunk)" />
             <path d="M0-100L22-62H-22Z" fill="var(--scene-tree-deep)" />
             <path d="M0-86L26-48H-26Z" fill="var(--scene-tree)" />
@@ -465,7 +460,7 @@ export function HeroScene() {
             <path d="M0-72L30-34H0Z" fill="url(#sketch-hatch-soft)" opacity="0.5" stroke="none" />
           </g>
 
-          <g id="tree-cypress">
+          <g id="tree-cypress" stroke="var(--sketch-ink-soft)" strokeWidth="1.05" strokeOpacity="0.6" strokeLinejoin="round">
             <rect x="-2" y="-26" width="4" height="26" rx="2" fill="var(--scene-trunk)" />
             <path d="M0-96C12-74 16-50 10-26H-10C-16-50-12-74 0-96Z" fill="var(--scene-tree-deep)" />
             <path d="M0-88C7-70 9-50 5-30H-5C-9-50-7-70 0-88Z" fill="var(--scene-tree)" />
@@ -479,7 +474,7 @@ export function HeroScene() {
             <path d="M0-88C7-70 9-50 5-30H0Z" fill="url(#sketch-hatch)" opacity="0.5" stroke="none" />
           </g>
 
-          <g id="bush">
+          <g id="bush" stroke="var(--sketch-ink-soft)" strokeWidth="1.05" strokeOpacity="0.6" strokeLinejoin="round">
             <circle cx="-18" cy="-10" r="16" fill="var(--scene-tree-deep)" />
             <circle cx="0" cy="-20" r="22" fill="var(--scene-tree)" />
             <circle cx="20" cy="-9" r="15" fill="var(--scene-tree-deep)" />
