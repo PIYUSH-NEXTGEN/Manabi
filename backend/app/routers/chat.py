@@ -52,8 +52,8 @@ Rules:
   Example: "Start with [P17]".
 - If nothing in the catalog fits, say so plainly and suggest a filter or search term.
 - Never invent problems, sources, deadlines, or statistics.
-- Keep answers short and concrete: at most 6 sentences or 150 words. Aim for the useful
-  answer in the first 2 sentences.
+- Keep answers short and concrete: at most 3 sentences or 60 words. Lead with the
+  useful answer in the first sentence.
 - Format as simple Markdown for our chat widget: put every bullet or numbered step on
   its own line starting with "- " or "1. ", separate paragraphs with a blank line, and
   use **bold** for key terms. Never pack a whole list onto a single line.

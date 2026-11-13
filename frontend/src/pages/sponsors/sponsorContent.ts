@@ -158,7 +158,7 @@ export const FAQ = {
       id: 'prohibited',
       question: 'What can’t you promote?',
       answer:
-        'Anything misleading, illegal, adult, gambling or harmful. We only accept sponsors whose products are useful to students, and we may decline or remove any placement that is not.',
+        'Anything misleading, illegal, adult, gambling or harmful.',
     },
     {
       id: 'data',

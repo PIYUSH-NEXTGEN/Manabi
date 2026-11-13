@@ -226,7 +226,7 @@ describe('ChatWidget', () => {
     expect(historyLengths).toEqual([1, 3, 5, 6]);
   });
 
-  it('shows honest errors when the chat API is rate limited', async () => {
+  it('keeps the quota message and countdown when rate limited', async () => {
     server.use(
       http.post('*/api/chat', () =>
         HttpResponse.json(
@@ -245,13 +245,41 @@ describe('ChatWidget', () => {
     );
     await user.click(screen.getByRole('button', { name: 'Send' }));
 
-    expect(
-      await screen.findByRole('alert'),
-    ).toHaveTextContent('Chat hourly quota exhausted. Try again later.');
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Chat hourly quota exhausted. Try again later.',
+    );
     expect(await screen.findByText(/Try again in/)).toHaveTextContent(
       'Try again in 5:00',
     );
     expect(screen.queryByText(/linked under this/i)).not.toBeInTheDocument();
+  });
+
+  it('shows one short human message when the AI is down for any other reason', async () => {
+    server.use(
+      http.post('*/api/chat', () =>
+        HttpResponse.json(
+          { detail: 'The AI could not answer right now' },
+          { status: 502 },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<ChatWidget />);
+
+    await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
+    await user.type(
+      screen.getByPlaceholderText(/What do you want to build/i),
+      'another question',
+    );
+    await user.click(screen.getByRole('button', { name: 'Send' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Manabi is down right now. It should be back in a few hours.',
+    );
+    expect(
+      screen.queryByText(/could not answer right now/i),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText(/Try again in/)).not.toBeInTheDocument();
   });
 
   it('shows a typing indicator while the reply is being generated', async () => {

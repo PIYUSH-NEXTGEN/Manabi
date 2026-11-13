@@ -12,7 +12,7 @@ ANTHROPIC_VERSION = "2023-06-01"
 DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
 DEFAULT_GEMINI_CHAT_MODEL = "gemini-3.5-flash-lite"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-5"
-MAX_TOKENS_CHAT = 512
+MAX_TOKENS_CHAT = 320
 
 
 class LLMConfigError(Exception):

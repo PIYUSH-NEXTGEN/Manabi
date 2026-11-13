@@ -30,6 +30,10 @@ import { ThinkingIndicator } from './ThinkingIndicator';
 const OPEN_CHAT_EVENT = 'manabi:open-chat';
 const MAX_HISTORY = 6;
 const MAX_MESSAGE_LENGTH = 500;
+// One plain message for every AI failure (out of quota, provider error, outage).
+const AI_DOWN_MESSAGE =
+  'Manabi is down right now. It should be back in a few hours.';
+const RATE_LIMITED_STATUS = 429;
 
 const SUGGESTIONS = [
   'I know Python and pandas. Find me a weekend data project.',
@@ -122,16 +126,19 @@ export function ChatWidget() {
       setRetryAfter(null);
     },
     onError: (mutationError) => {
-      setError(
-        mutationError instanceof ApiError
-          ? mutationError.detail
-          : 'The chatbot is unreachable right now. Try again later.',
-      );
-      setRetryAfter(
-        mutationError instanceof ApiError
-          ? mutationError.retryAfterSeconds
-          : null,
-      );
+      // Quota limits are the user's own countdown, so keep the exact detail and
+      // timer. Every other failure (provider error, bad config, outage) gets one
+      // plain message instead of raw server text.
+      if (
+        mutationError instanceof ApiError &&
+        mutationError.status === RATE_LIMITED_STATUS
+      ) {
+        setError(mutationError.detail);
+        setRetryAfter(mutationError.retryAfterSeconds);
+        return;
+      }
+      setError(AI_DOWN_MESSAGE);
+      setRetryAfter(null);
     },
   });
 
@@ -313,8 +320,6 @@ export function ChatWidget() {
               <ul className="space-y-4">
                 {entries.map((entry, index) => {
                   const isUser = entry.message.role === 'user';
-                  const isLast = index === entries.length - 1;
-                  const sending = isUser && isLast && chat.isPending;
 
                   return (
                     <motion.li
@@ -358,17 +363,6 @@ export function ChatWidget() {
                             <ReplyProblems problems={entry.problems} />
                           ) : null}
                         </div>
-
-                        {sending ? (
-                          <span className="flex items-center gap-1.5 pr-1 font-mono text-[0.5625rem] font-bold uppercase tracking-[0.12em] text-muted">
-                            <span aria-hidden className="flex items-center gap-0.5">
-                              <span className="thinking-dot size-1 rounded-full bg-current" />
-                              <span className="thinking-dot size-1 rounded-full bg-current" />
-                              <span className="thinking-dot size-1 rounded-full bg-current" />
-                            </span>
-                            Sending
-                          </span>
-                        ) : null}
                       </div>
                     </motion.li>
                   );
