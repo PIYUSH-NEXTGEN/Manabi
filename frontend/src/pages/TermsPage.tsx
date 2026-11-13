@@ -7,19 +7,21 @@ export function TermsPage() {
     <ProsePage
       kicker="Legal"
       title="Terms, in plain English"
-      intro="The rules for using MANABI, the limits of a prototype, and what happens to the work you submit. If a sentence here is unclear, that is a bug worth reporting."
+      intro="The rules for using MANABI, what you can submit, and what happens to the work you post. If a sentence here is unclear, that is a bug worth reporting."
     >
       <ProseSection id="service" title="The service">
         <p>
-          MANABI is a catalog of real problems with a path from brief to public
-          proof: browse and claim briefs, submit a GitHub repository, have it
-          verified, and track progress from the repository itself. It also
-          includes a catalog chat and a dashboard of your projects.
+          MANABI is a free catalog of project ideas for students and developers.
+          Each idea is written up as a brief and labelled for learning, a
+          hackathon or a resume. You can browse and claim briefs, submit a
+          public GitHub repository, have it checked, and track progress from the
+          repository itself. The platform also includes a catalog chat and a
+          dashboard of your projects.
         </p>
         <p>
-          MANABI is a free prototype provided as-is. Features can change, pause
-          or disappear. There is no uptime guarantee, support desk or service
-          credit.
+          MANABI is free to use and has no paid plans. It is provided as-is.
+          Features can change, pause or disappear, and there is no uptime
+          guarantee, support desk or service credit.
         </p>
       </ProseSection>
 
@@ -52,6 +54,9 @@ export function TermsPage() {
           </li>
           <li>
             Do not submit unlawful, harmful, deceptive or infringing content.
+          </li>
+          <li>
+            Do not suggest a project idea or source you have no right to share.
           </li>
           <li>
             Do not attempt to enter the admin review queue or any other
@@ -88,9 +93,15 @@ export function TermsPage() {
           to use that information to operate the service.
         </p>
         <p>
-          Problem statements belong to the organisations that published them;
-          MANABI credits and links each source. The MANABI code is released
-          under the MIT licence.
+          If you suggest a project idea, you allow MANABI to write it up and
+          publish it as part of the catalog. The team may edit the wording, add
+          a source or leave the idea out.
+        </p>
+        <p>
+          Briefs are researched and written by the MANABI team. Where a brief
+          comes from a published problem statement, the source belongs to the
+          organisation that published it and stays credited and linked. The
+          MANABI code is released under the MIT licence.
         </p>
       </ProseSection>
 
@@ -100,7 +111,7 @@ export function TermsPage() {
           model provider for relevance and chat, and on hosting and database
           providers. Those services have their own terms and availability. When
           one is unavailable, a verification may go to review or a feature may
-          pause; that is expected behaviour, not a guarantee of service.
+          pause. That is expected behaviour, not a guarantee of service.
         </p>
       </ProseSection>
 
@@ -108,9 +119,8 @@ export function TermsPage() {
         <p>
           You can remove your projects from the dashboard. MANABI may remove or
           pause content, or suspend access, for abuse, legal reasons, or to
-          protect the service and its users. Prototype data may be reset during
-          development. Requests to delete account data belong on the Contact
-          page.
+          protect the service and its users. Requests to delete account data
+          belong on the Contact page.
         </p>
       </ProseSection>
 

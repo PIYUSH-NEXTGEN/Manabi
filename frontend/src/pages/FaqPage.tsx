@@ -14,7 +14,11 @@ const GROUPS = [
     items: [
       {
         q: 'What is MANABI?',
-        a: 'A catalog of real problems. You pick a brief, build the solution in a public GitHub repository, and MANABI checks the work and tracks progress from that repository.',
+        a: 'A free catalog of project ideas for students and developers. Every idea is documented as a brief, sorted by field, goal and difficulty, and ready to build for learning, a hackathon or your resume. Build one in a public GitHub repo, submit it, and your work is shown on the platform.',
+      },
+      {
+        q: 'What does MANABI mean?',
+        a: 'MANABI comes from the Japanese word for learning. The name fits. The platform is about learning by building real projects, not collecting tutorial certificates.',
       },
       {
         q: 'Do I need an account?',
@@ -22,11 +26,15 @@ const GROUPS = [
       },
       {
         q: 'Is MANABI free?',
-        a: 'Yes. It is a free prototype and the code is MIT-licensed. There are no paid plans.',
+        a: 'Yes, completely free. There are no paid plans, no premium briefs and no locked features. The code is open source and MIT-licensed.',
       },
       {
         q: 'Do I have to use the suggested stack?',
         a: 'No. The stack and approaches are suggestions. Verification looks at whether the repository matches the problem, not whether you followed the suggested tools.',
+      },
+      {
+        q: 'How long does it take to find an idea?',
+        a: 'Usually one visit. Filter by field, goal and difficulty, open two or three briefs, and pick one. If you would rather describe what you know, ask the chat assistant for a shortlist.',
       },
     ],
   },
@@ -35,20 +43,56 @@ const GROUPS = [
     title: 'The catalog',
     items: [
       {
-        q: 'Are the problems real?',
-        a: 'Yes. Briefs come from published problem statements, competitions and public programs. Each one is reviewed by hand and keeps its source attached. MANABI does not scrape or invent a source.',
+        q: 'Where do the project ideas come from?',
+        a: 'The MANABI team curates them by hand. Some come from quality problem statements published across the internet: hackathons, competitions, public programs and open challenges. Others are written by us. Every brief is documented by a person and keeps its source attached. MANABI does not scrape sources or invent one.',
+      },
+      {
+        q: 'Which fields are covered?',
+        a: 'Seven for now: web development, app development, AI and machine learning, data science, cyber security, DevOps and cloud, and blockchain. Each field also carries a domain, such as healthcare, education, agriculture or fintech, so you can find a problem area you care about.',
       },
       {
         q: 'What is in a brief?',
-        a: 'A summary, who is affected, why it matters, difficulty, an hour estimate, a suggested stack, approaches, datasets and the original source. Some briefs also have a build guide, team plan or resume notes.',
+        a: 'A summary, who is affected, why it matters, difficulty, an hour estimate, a suggested stack, approaches, datasets and the original source. Track briefs go further.',
+      },
+      {
+        q: 'Which briefs are "quality"?',
+        a: 'A brief goes in when the problem is real, the scope fits the stated difficulty, and there is a clear way to build and show it. Briefs that cannot be scoped or verified stay out.',
+      },
+      {
+        q: 'Can I suggest a project idea?',
+        a: (
+          <>
+            Yes. Send it through the{' '}
+            <Link to="/contact" className={linkClass}>
+              Contact page
+            </Link>{' '}
+            or open an issue on GitHub with the source and why it is worth
+            building. The team reviews suggestions, documents the good ones and
+            adds them to the catalog.
+          </>
+        ),
+      },
+    ],
+  },
+  {
+    id: 'tracks',
+    title: 'Goals and difficulty',
+    items: [
+      {
+        q: 'What are the goal tracks?',
+        a: 'Resume, Hackathon and Learning are the three major categories. They describe what a brief suits. They narrow the board and each one unlocks extra material on the brief page.',
+      },
+      {
+        q: 'What does each track add?',
+        a: 'Resume briefs can include scope levels, target roles, CV bullet templates and interview questions. Hackathon briefs can include a role-based team plan and a pitch guide with likely judge questions. Learning briefs can include a build guide and the concepts you will practise.',
       },
       {
         q: 'What do the difficulty levels mean?',
-        a: 'They describe scope, not skill level. Beginner is one flow in one stack. Intermediate adds persistence, authentication or an API. Advanced is systems work such as event delivery, consistency or offline sync.',
+        a: 'The Learning track is split into beginner, intermediate and advanced. The levels describe scope, not skill level. Beginner is one flow in one stack. Intermediate adds persistence, authentication or an API. Advanced is systems work such as event delivery, consistency or offline sync.',
       },
       {
-        q: 'What are the goal tracks?',
-        a: 'Resume, Hackathon and Learning are labels for what a brief suits. They narrow the board; they do not change the brief.',
+        q: 'Can a brief be in more than one category?',
+        a: 'Each brief carries one goal on the board, so the filters stay simple and predictable. A project built from a learning brief can still go on a resume. The track describes the brief, not what you can do with the project.',
       },
     ],
   },
@@ -56,6 +100,10 @@ const GROUPS = [
     id: 'submit',
     title: 'Submitting a project',
     items: [
+      {
+        q: 'What happens when I submit my repository?',
+        a: 'MANABI checks that the repo is yours, public and has a README with at least five commits, then compares your description and README with the brief. A clear match is verified and published on the brief page. An unclear match goes to human review.',
+      },
       {
         q: 'Which repositories can I submit?',
         a: 'A public repository you own or have the required access to. It cannot be a fork or archived, it needs a README and at least five commits, and a repository can only be linked to one problem.',
@@ -88,7 +136,7 @@ const GROUPS = [
       },
       {
         q: 'What does "verified" mean?',
-        a: 'The submission passed those checks and becomes public. It is not an endorsement of the project\'s quality, and it does not mean the work is finished.',
+        a: 'The submission passed those checks and becomes public on the brief page. It is not an endorsement of the project\'s quality, and it does not mean the work is finished.',
       },
       {
         q: 'Why did my project go to review?',
@@ -128,7 +176,7 @@ const GROUPS = [
     items: [
       {
         q: 'What does Ask MANABI do?',
-        a: 'It answers from the catalog only. Tell it your stack and the time you have, and it suggests briefs that exist, with links. If nothing fits, it says so.',
+        a: 'It is the platform chat assistant. It answers from the catalog only. Tell it your stack and the time you have, and it suggests briefs that exist, with links. If nothing fits, it says so.',
       },
       {
         q: 'Is my chat stored?',
@@ -177,7 +225,7 @@ export function FaqPage() {
     <ProsePage
       kicker="FAQ"
       title="Straight answers"
-      intro="How the catalog, verification and tracking work. These answers match the behaviour the API enforces."
+      intro="How the catalog, the goal tracks, verification and tracking work. These answers match the behaviour the API enforces."
     >
       {GROUPS.map((group) => (
         <ProseSection key={group.id} id={group.id} title={group.title}>

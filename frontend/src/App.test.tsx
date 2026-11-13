@@ -9,7 +9,7 @@ const STATIC_ROUTE_TARGETS: Array<[string, string]> = [
   ['/_kit', 'MANABI /_kit'],
   ['/about', 'About MANABI'],
   ['/faq', 'Straight answers'],
-  ['/contribute', "Build on someone else's repo"],
+  ['/contribute', 'Contribute to MANABI'],
   ['/contact', 'Talk to us'],
   ['/privacy', 'Privacy, in plain English'],
   ['/terms', 'Terms, in plain English'],
