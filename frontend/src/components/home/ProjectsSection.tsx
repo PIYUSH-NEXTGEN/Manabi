@@ -1,11 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
-import {
-  ArrowRight,
-  ArrowUpRight,
-  Check,
-} from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import type { ProblemOut } from '@/api/client';
 import { EASE_SNAP } from '@/design/motion';
 import { cx } from '@/lib/cx';
@@ -24,8 +20,6 @@ const DIFFICULTY_FILL: Record<ProblemOut['difficulty'], number> = {
   intermediate: 2,
   advanced: 3,
 };
-
-const CHECKS = ['Own repo', 'README', '5+ commits'];
 
 function pad(value: number) {
   return String(value).padStart(2, '0');
@@ -177,22 +171,6 @@ function BriefCarousel() {
                     ))}
                   </ul>
                 ) : null}
-
-                <div className="mt-6 grid grid-cols-3 gap-2">
-                  {CHECKS.map((label) => (
-                    <div
-                      key={label}
-                      className="rounded-xl border border-line bg-paper/80 px-2 py-2.5 text-center"
-                    >
-                      <span className="mx-auto flex size-5 items-center justify-center rounded-full bg-lime text-[#0a0b0d]">
-                        <Check aria-hidden size={11} strokeWidth={3} />
-                      </span>
-                      <span className="mt-1.5 block font-mono text-[0.6rem] font-bold uppercase tracking-[0.08em] text-ink-soft">
-                        {label}
-                      </span>
-                    </div>
-                  ))}
-                </div>
 
                 <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-4">
                   <span className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-label font-bold uppercase tracking-[0.13em] text-muted">

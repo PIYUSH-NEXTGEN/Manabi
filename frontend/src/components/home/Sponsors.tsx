@@ -10,10 +10,17 @@ type Sponsor = {
   href: string;
   /** Path or URL to the sponsor's icon. Falls back to their initial. */
   icon?: string;
+  /** One or two lines about the sponsor's product, shown under the block. */
+  blurb?: string;
 };
 
 const SPONSORS: Sponsor[] = [
-  // { name: 'Acme', href: 'https://acme.com', icon: '/sponsors/acme.svg' },
+  // {
+  //   name: 'Acme',
+  //   href: 'https://acme.com',
+  //   icon: '/sponsors/acme.svg',
+  //   blurb: 'One or two lines about what Acme makes.',
+  // },
 ];
 
 export function Sponsors() {
@@ -62,7 +69,7 @@ export function Sponsors() {
           {status}
         </p>
 
-        <ul className="mt-4 grid max-w-3xl grid-cols-3 gap-3 sm:grid-cols-5">
+        <ul className="mt-6 grid max-w-4xl grid-cols-2 gap-6 sm:grid-cols-3 sm:gap-7 lg:grid-cols-5 lg:gap-8">
           {Array.from({ length: SLOT_COUNT }, (_, index) => {
             const sponsor = SPONSORS[index];
 
@@ -73,32 +80,39 @@ export function Sponsors() {
                     href={sponsor.href}
                     target="_blank"
                     rel="noreferrer noopener"
-                    className="group flex aspect-square flex-col items-center justify-center gap-2.5 rounded-[1.4rem] border border-line bg-paper p-3 text-center shadow-soft transition-colors hover:border-ink/25 hover:bg-tint"
+                    className="group flex flex-col"
                   >
-                    {sponsor.icon ? (
-                      <img
-                        src={sponsor.icon}
-                        alt=""
-                        loading="lazy"
-                        className="size-9 rounded-[0.6rem] object-contain"
-                      />
-                    ) : (
-                      <span
-                        aria-hidden
-                        className="flex size-9 items-center justify-center rounded-[0.6rem] bg-tint font-display text-[1rem] leading-none text-ink"
-                      >
-                        {sponsor.name.slice(0, 1)}
-                      </span>
-                    )}
-                    <span className="font-mono text-[0.625rem] font-bold uppercase leading-tight tracking-[0.08em] text-ink-soft">
+                    <span className="flex aspect-square items-center justify-center rounded-[1.2rem] border border-line bg-paper p-3 shadow-soft transition-colors group-hover:border-ink/25 group-hover:bg-tint">
+                      {sponsor.icon ? (
+                        <img
+                          src={sponsor.icon}
+                          alt=""
+                          loading="lazy"
+                          className="size-9 rounded-[0.6rem] object-contain"
+                        />
+                      ) : (
+                        <span
+                          aria-hidden
+                          className="flex size-9 items-center justify-center rounded-[0.6rem] bg-tint font-display text-[1rem] leading-none text-ink"
+                        >
+                          {sponsor.name.slice(0, 1)}
+                        </span>
+                      )}
+                    </span>
+                    <span className="mt-3 block text-balance text-center font-display text-[0.875rem] font-medium leading-snug text-ink">
                       {sponsor.name}
                     </span>
+                    {sponsor.blurb ? (
+                      <span className="mt-1 block text-balance text-center text-[0.75rem] leading-snug text-muted">
+                        {sponsor.blurb}
+                      </span>
+                    ) : null}
                   </a>
                 ) : (
                   <Link
                     to="/sponsors"
                     aria-label={`Sponsor slot ${index + 1}, open`}
-                    className="group flex aspect-square items-center justify-center rounded-[1.4rem] border border-dashed border-line bg-tint/40 text-muted transition-colors hover:border-sky-strong hover:bg-sky/20 hover:text-ink dark:bg-sheet"
+                    className="group flex aspect-square items-center justify-center rounded-[1.2rem] border border-dashed border-line bg-tint/40 text-muted transition-colors hover:border-sky-strong hover:bg-sky/20 hover:text-ink dark:bg-sheet"
                   >
                     <Plus
                       aria-hidden

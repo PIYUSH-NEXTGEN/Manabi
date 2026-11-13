@@ -393,18 +393,6 @@ body {
   }
 }
 
-/* Vertical dashes scroll downstream one full pattern tile, so the loop is
-   seamless and the water reads as moving. */
-.river-lines {
-  animation: river-lines 3.4s linear infinite;
-}
-
-@keyframes river-lines {
-  to {
-    transform: translateY(58px);
-  }
-}
-
 .fish-swim {
   animation: fish-swim 10s ease-in-out infinite;
   transform-box: fill-box;
@@ -985,7 +973,6 @@ body {
   .smoke-rise,
   .tree-sway,
   .grass-sway,
-  .river-lines,
   .fish-swim,
   .pollen,
   .hero-light-shimmer {

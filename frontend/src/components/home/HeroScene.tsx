@@ -319,35 +319,6 @@ export function HeroScene() {
             <stop offset="0" stopColor="var(--sketch-deep)" />
             <stop offset="1" stopColor="var(--scene-front)" />
           </linearGradient>
-          <linearGradient id="river" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="var(--scene-water-mid)" />
-            <stop offset="0.45" stopColor="var(--scene-water)" />
-            <stop offset="1" stopColor="var(--scene-water-deep)" />
-          </linearGradient>
-          <clipPath id="river-clip">
-            <path d="M852 430C836 468 792 498 770 528C752 552 748 574 756 598C764 622 780 632 786 652C794 678 796 712 800 742L980 742C952 694 922 650 892 620C866 594 838 566 830 540C824 514 850 480 882 430Z" />
-          </clipPath>
-          <pattern
-            id="river-flow-lines"
-            width="28"
-            height="58"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M2 0V20"
-              stroke="var(--sketch-ink-soft)"
-              strokeWidth="1.4"
-              strokeOpacity="0.4"
-              strokeLinecap="round"
-            />
-            <path
-              d="M2 30V44"
-              stroke="var(--sketch-ink-soft)"
-              strokeWidth="1.4"
-              strokeOpacity="0.24"
-              strokeLinecap="round"
-            />
-          </pattern>
           <filter id="hero-blur" x="-20%" y="-60%" width="140%" height="220%">
             <feGaussianBlur stdDeviation="18" />
           </filter>
@@ -641,26 +612,6 @@ export function HeroScene() {
 
         <g className="hero-parallax hero-parallax--near">
           <Tree href="#tree-round" x={580} y={615} scale={1.15} opacity={0.95} duration={8.5} delay={-3} />
-        </g>
-
-        <g className="hero-parallax hero-parallax--near">
-          <path
-            d="M852 430C836 468 792 498 770 528C752 552 748 574 756 598C764 622 780 632 786 652C794 678 796 712 800 742L980 742C952 694 922 650 892 620C866 594 838 566 830 540C824 514 850 480 882 430Z"
-            fill="url(#river)"
-            stroke="var(--sketch-ink-soft)"
-            strokeWidth="1.5"
-            strokeOpacity="0.65"
-            strokeLinejoin="round"
-          />
-          <rect
-            x="740"
-            y="372"
-            width="320"
-            height="430"
-            fill="url(#river-flow-lines)"
-            clipPath="url(#river-clip)"
-            className="river-lines"
-          />
         </g>
 
         <g className="hero-parallax hero-parallax--near">
