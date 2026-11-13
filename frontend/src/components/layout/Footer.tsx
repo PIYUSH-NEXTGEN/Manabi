@@ -196,7 +196,7 @@ export function Footer() {
           <div className="relative border-t border-line px-6 py-6 sm:px-10 lg:px-12">
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-sky/20 to-transparent dark:from-sky/5"
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-sky/20 to-transparent dark:bg-none"
             />
 
             <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">

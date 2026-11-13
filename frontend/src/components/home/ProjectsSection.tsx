@@ -328,7 +328,7 @@ export function ProjectsSection() {
         <div className="border-b border-line pb-8">
           <div className="max-w-3xl">
             <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
-              <span className="text-ink">01</span> / The project board
+              <span className="text-ink">02</span> / The project board
             </p>
             <h2 className="mt-3 text-balance font-display text-display leading-[1.03] tracking-[-0.03em] text-ink">
               Find a project worth{' '}
@@ -351,9 +351,8 @@ export function ProjectsSection() {
             transition={{ duration: reduced ? 0 : 0.45, ease: EASE_SNAP }}
           >
             <p className="max-w-xl text-lead leading-relaxed text-ink-soft">
-              Every brief starts with a real problem someone actually had. Pick
-              one that fits your level, build it, then put it on your GitHub and
-              portfolio.
+              Find a real problem. Build it yourself. End up with a repo you can
+              show anyone.
             </p>
 
             <dl className="mt-8 grid grid-cols-3 gap-2">

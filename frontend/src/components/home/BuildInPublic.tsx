@@ -88,7 +88,7 @@ export function BuildInPublic() {
               className="border-b border-ink/10 pb-3"
             >
               <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-ink/65">
-                <span className="text-ink">02</span> / Submission &amp; review
+                <span className="text-ink">03</span> / Submission &amp; review
               </p>
             </motion.div>
 

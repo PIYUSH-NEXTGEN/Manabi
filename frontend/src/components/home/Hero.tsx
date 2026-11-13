@@ -63,8 +63,8 @@ export function Hero() {
             className="mx-auto mt-7 max-w-2xl text-balance text-lead leading-relaxed font-medium text-ink/85"
           >
             Stop Googling project ideas. Browse 260+ real problems for learning,
-            resumes and hackathons. Build one, submit your repo, and show your
-            work to everyone.
+            resumes and hackathons. Build one, submit your repo, show your work
+            on Manabi.
           </motion.p>
 
           <motion.div
