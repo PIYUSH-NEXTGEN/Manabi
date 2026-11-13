@@ -451,59 +451,59 @@ body {
 }
 
 .hero-cloud path:first-child {
-  fill: #fbf8f1;
-  stroke: #3e3a33;
+  fill: #ffffff;
+  stroke: #000000;
   stroke-width: 1.2;
   stroke-opacity: 0.45;
 }
 
 .hero-cloud path:last-child {
-  stroke: #7c766b;
+  stroke: #000000;
   opacity: 0.45;
 }
 
 .dark .hero-cloud path:first-child {
-  fill: #0f161d;
-  stroke: #c9c3b7;
+  fill: #000000;
+  stroke: #a8a8a8;
   stroke-opacity: 0.55;
 }
 
 .dark .hero-cloud path:last-child {
-  stroke: #c9c3b7;
+  stroke: #a8a8a8;
 }
 
 .hero-balloon {
-  --sky: #f7f3ea;
-  --sky-strong: #3e3a33;
+  --sky: #ffffff;
+  --sky-strong: #ffffff;
 }
 
 .dark .hero-balloon {
-  --sky: #101821;
-  --sky-strong: #d7d1c4;
+  --sky: #000000;
+  --sky-strong: #000000;
 }
 
 .hero-balloon [fill]:not([fill="none"]):not([stroke]) {
-  stroke: #3e3a33;
+  stroke: #000000;
   stroke-width: 0.8;
   stroke-opacity: 0.55;
   stroke-linejoin: round;
 }
 
 .dark .hero-balloon [fill]:not([fill="none"]):not([stroke]) {
-  stroke: #d7d1c4;
+  stroke: #a8a8a8;
   stroke-opacity: 0.6;
 }
 
 /* Ink-and-paper landscape: graphite washes, hatched shadows, drawn edges. */
 .hero-sketch {
-  --sketch-ink: #171512;
-  --sketch-ink-soft: #3e3a33;
-  --sketch-ink-faint: #7c766b;
-  --sketch-paper: #f7f3ea;
-  --sketch-wash: #e6e0d4;
-  --sketch-shade: #c9c1b2;
-  --sketch-deep: #a79e8f;
-  --sketch-highlight: #fdfbf6;
+  --sketch-ink: #000000;
+  --sketch-ink-soft: #000000;
+  --sketch-ink-faint: #000000;
+  --sketch-paper: #ffffff;
+  --sketch-wash: #ffffff;
+  --sketch-shade: #ffffff;
+  --sketch-deep: #ffffff;
+  --sketch-highlight: #ffffff;
 
   --scene-mountain-far: var(--sketch-wash);
   --scene-mountain-far-light: var(--sketch-highlight);
@@ -512,17 +512,18 @@ body {
   --scene-mountain-mid-light: var(--sketch-wash);
   --scene-mountain-mid-shadow: var(--sketch-deep);
   --scene-mountain-rim: var(--sketch-ink-faint);
-  --scene-snow: var(--sketch-highlight);
+  --scene-snow: var(--sketch-ink-faint);
   --scene-mist: var(--sketch-paper);
   --scene-haze: var(--sketch-paper);
   --scene-cloud: var(--sketch-highlight);
-  --scene-cloud-light: var(--sketch-highlight);
+  --scene-cloud-light: var(--sketch-ink-faint);
   --scene-far: var(--sketch-wash);
   --scene-mid: var(--sketch-shade);
   --scene-near: var(--sketch-deep);
-  --scene-front: #c3bbae;
-  --scene-grass-light: var(--sketch-highlight);
+  --scene-front: #ffffff;
+  --scene-grass-light: var(--sketch-ink-faint);
   --scene-grass-shadow: var(--sketch-ink-soft);
+  --scene-shadow: #000000;
   --scene-tree: var(--sketch-shade);
   --scene-tree-alt: var(--sketch-wash);
   --scene-tree-deep: var(--sketch-deep);
@@ -530,12 +531,12 @@ body {
   --scene-trunk-light: var(--sketch-ink-faint);
   --scene-birch: var(--sketch-highlight);
   --scene-birch-mark: var(--sketch-ink);
-  --scene-path: var(--sketch-shade);
+  --scene-path: var(--sketch-ink-faint);
   --scene-water: var(--sketch-paper);
   --scene-water-mid: var(--sketch-wash);
-  --scene-water-deep: var(--sketch-shade);
+  --scene-water-deep: var(--sketch-ink-faint);
   --scene-foam: var(--sketch-ink-faint);
-  --scene-sky-tint: var(--sketch-highlight);
+  --scene-sky-tint: var(--sketch-ink-faint);
   --scene-bloom: var(--sketch-ink-faint);
   --scene-blossom: var(--sketch-ink-faint);
   --scene-lavender: var(--sketch-ink-faint);
@@ -552,16 +553,16 @@ body {
 }
 
 .dark .hero-sketch {
-  --sketch-ink: #f7f3e9;
-  --sketch-ink-soft: #c9c3b7;
-  --sketch-ink-faint: #8a847a;
-  --sketch-paper: #0a0f15;
-  --sketch-wash: #111921;
-  --sketch-shade: #1a232d;
-  --sketch-deep: #242f3a;
-  --sketch-highlight: #151e27;
+  --sketch-ink: #a8a8a8;
+  --sketch-ink-soft: #989898;
+  --sketch-ink-faint: #858585;
+  --sketch-paper: #000000;
+  --sketch-wash: #000000;
+  --sketch-shade: #000000;
+  --sketch-deep: #000000;
+  --sketch-highlight: #000000;
 
-  --scene-front: #2b3742;
+  --scene-front: #000000;
 }
 
 .hero-sketch [fill]:not([fill="none"]):not([stroke]) {
@@ -572,12 +573,12 @@ body {
 }
 
 .hero-scene .pollen {
-  background: #8a8479;
+  background: #8a8a8a;
   box-shadow: none;
 }
 
 .dark .hero-scene .pollen {
-  background: #a9a397;
+  background: #a9a9a9;
 }
 
 @keyframes twinkle {
