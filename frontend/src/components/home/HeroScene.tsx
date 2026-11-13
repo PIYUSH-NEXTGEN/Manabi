@@ -1,6 +1,3 @@
-import { useEffect, useRef } from 'react';
-import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
-
 const STARS = [
   { left: '7%', top: '10%', size: 2, delay: '0s' },
   { left: '13%', top: '22%', size: 1.5, delay: '-1.4s' },
@@ -48,37 +45,6 @@ function Tree({
         style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
       >
         <use href={href} />
-      </g>
-    </g>
-  );
-}
-
-type TuftProps = {
-  x: number;
-  y: number;
-  scale?: number;
-  opacity?: number;
-  color?: string;
-  duration?: number;
-  delay?: number;
-};
-
-function Tuft({
-  x,
-  y,
-  scale = 1,
-  opacity = 1,
-  color = 'var(--scene-grass-shadow)',
-  duration = 5,
-  delay = 0,
-}: TuftProps) {
-  return (
-    <g transform={`translate(${x} ${y}) scale(${scale})`} opacity={opacity}>
-      <g
-        className="grass-sway"
-        style={{ animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
-      >
-        <use href="#grass-tuft" style={{ color }} />
       </g>
     </g>
   );
@@ -153,76 +119,28 @@ function Cloud({
 }
 
 export function HeroScene() {
-  const ref = useRef<HTMLDivElement>(null);
-  const reduced = usePrefersReducedMotion();
-
-  useEffect(() => {
-    const node = ref.current;
-    if (!node || reduced) return;
-
-    let frame = 0;
-    let mouseX = 0;
-    let mouseY = 0;
-    let scroll = 0;
-
-    const apply = () => {
-      frame = 0;
-      node.style.setProperty('--mx', mouseX.toFixed(3));
-      node.style.setProperty('--my', mouseY.toFixed(3));
-      node.style.setProperty('--scroll', scroll.toFixed(3));
-    };
-
-    const schedule = () => {
-      if (!frame) frame = window.requestAnimationFrame(apply);
-    };
-
-    const onPointerMove = (event: PointerEvent) => {
-      mouseX = (event.clientX / window.innerWidth - 0.5) * 2;
-      mouseY = (event.clientY / window.innerHeight - 0.5) * 2;
-      schedule();
-    };
-
-    const onScroll = () => {
-      const rect = node.getBoundingClientRect();
-      scroll = Math.min(Math.max(-rect.top / window.innerHeight, 0), 1);
-      schedule();
-    };
-
-    window.addEventListener('pointermove', onPointerMove, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
-
-    return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('scroll', onScroll);
-    };
-  }, [reduced]);
-
   return (
     <div
-      ref={ref}
       aria-hidden
       className="hero-scene pointer-events-none absolute inset-0 -z-10 overflow-hidden"
     >
       <div className="hero-sky absolute inset-0" />
 
-      <div className="absolute left-[13%] top-[6%] size-52 rounded-full bg-[#fffdf8]/80 blur-3xl dark:bg-[#a9c4ff]/10" />
-      <div className="absolute left-[15%] top-[8%] hidden size-16 rounded-full dark:block dark:bg-[#eef4ff] dark:shadow-[0_0_50px_16px_rgba(180,205,255,0.24)]" />
-      <div className="absolute right-[7%] top-[24%] size-64 rounded-full bg-[#e9e5dc]/35 blur-3xl dark:bg-[#3f4f76]/12" />
+      <div className="absolute left-[13%] top-[6%] size-52 rounded-full bg-white/80 blur-3xl dark:hidden" />
+      <div className="absolute right-[7%] top-[24%] size-64 rounded-full bg-white/35 blur-3xl dark:hidden" />
 
       <div className="absolute inset-0 hidden dark:block">
         {STARS.map((star, index) => (
           <span
             key={index}
-            className="twinkle absolute rounded-full bg-[#eaf2ff]"
+            className="twinkle absolute rounded-full bg-white"
             style={{
               left: star.left,
               top: star.top,
               width: star.size,
               height: star.size,
               animationDelay: star.delay,
-              boxShadow: '0 0 6px rgba(190, 215, 255, 0.55)',
+              boxShadow: '0 0 6px rgba(255, 255, 255, 0.55)',
             }}
           />
         ))}
@@ -570,15 +488,6 @@ export function HeroScene() {
             <circle cx="10" cy="-16" r="13" fill="url(#sketch-hatch)" opacity="0.45" stroke="none" />
           </g>
 
-          <g id="grass-tuft">
-            <path
-              d="M0 0C-4-12-10-18-16-22M0 0C-2-14-4-24-8-32M0 0C0-14 0-26 0-34M0 0C2-14 5-24 9-30M0 0C4-12 10-18 16-22M0 0C-6-8-12-10-18-12M0 0C6-8 12-10 18-12"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-          </g>
-
           <g id="flower">
             <circle cx="0" cy="-3" r="1.5" fill="var(--scene-bloom)" />
             <circle cx="-3" cy="0" r="1.4" fill="var(--scene-bloom)" />
@@ -602,11 +511,6 @@ export function HeroScene() {
             <path d="M1136 396C1110 402 1086 408 1064 412C1088 418 1112 416 1140 410C1138 404 1136 400 1136 396Z" />
             <path d="M1474 392C1450 400 1428 404 1408 406C1430 414 1454 416 1482 410C1478 404 1476 398 1474 392Z" />
           </g>
-          <g fill="url(#sketch-hatch-soft)" opacity="0.9">
-            <path d="M222 354C234 372 246 390 262 404C238 412 218 408 200 400C210 386 218 370 222 354Z" />
-            <path d="M1246 424C1260 430 1274 430 1288 426C1276 420 1264 414 1254 408Z" />
-            <path d="M1362 410C1376 416 1390 416 1404 410C1394 404 1384 398 1376 392Z" />
-          </g>
           <g fill="var(--sketch-highlight)" opacity="0.55">
             <path d="M216 350C222 356 228 362 232 370C224 368 218 360 212 354Z" />
             <path d="M1468 388C1474 394 1480 400 1484 408C1476 406 1470 398 1464 392Z" />
@@ -627,6 +531,15 @@ export function HeroScene() {
           >
             <path d="M232 368C240 384 248 396 260 406M304 410C322 416 340 420 360 418M1026 418C1040 420 1054 420 1068 416M1136 396C1148 404 1162 410 1178 414" />
             <path d="M56 414C104 394 152 366 196 360M430 402C474 384 508 376 552 382M704 420C748 408 786 398 826 404M934 414C972 406 1008 400 1044 404M1210 424C1248 420 1286 416 1320 420M1518 412C1554 414 1590 414 1622 408" />
+          </g>
+          <g
+            stroke="var(--sketch-ink-faint)"
+            strokeOpacity="0.45"
+            strokeWidth="1.1"
+            strokeLinecap="round"
+          >
+            <path d="M128 380C156 360 184 350 210 358M306 410C332 402 358 404 382 414M528 376C556 380 584 392 610 408M780 400C806 392 832 390 858 396M898 396C924 404 950 412 976 414M1022 418C1048 414 1074 406 1098 398M1246 424C1272 428 1298 428 1322 422M1474 392C1500 398 1526 406 1550 414" />
+            <path d="M64 420C108 402 152 382 196 374M352 416C394 408 436 404 478 408M622 418C664 414 706 406 746 398M946 414C988 410 1030 404 1070 398M1320 420C1360 414 1400 406 1438 396M1560 416C1592 418 1622 416 1650 410" />
           </g>
           <ellipse
             cx="826"
@@ -651,10 +564,6 @@ export function HeroScene() {
             <path d="M136 440C186 420 242 402 300 400C250 412 204 426 164 442C154 446 144 446 136 440Z" />
             <path d="M1174 430C1226 420 1272 404 1324 400C1280 410 1240 422 1204 434C1192 438 1182 438 1174 430Z" />
           </g>
-          <g fill="url(#sketch-hatch)" opacity="0.9">
-            <path d="M300 400C358 398 408 418 462 432C406 434 354 424 314 412C306 408 302 404 300 400Z" />
-            <path d="M1324 400C1376 396 1428 414 1482 430C1430 432 1382 424 1342 412C1334 408 1328 404 1324 400Z" />
-          </g>
           <g
             stroke="var(--sketch-ink-faint)"
             strokeOpacity="0.55"
@@ -672,18 +581,6 @@ export function HeroScene() {
             <path d="M182 424C236 412 286 412 328 422M1204 426C1258 416 1306 414 1352 420" />
             <path d="M360 408C410 408 452 418 492 430M616 442C656 436 696 426 732 420M862 426C906 430 948 438 988 440M1100 438C1140 436 1180 430 1216 424M1390 406C1436 416 1480 428 1524 434" />
           </g>
-        </g>
-
-        <g
-          className="hero-parallax hero-parallax--mid"
-          stroke="var(--sketch-ink-faint)"
-          strokeOpacity="0.28"
-          strokeWidth="1.1"
-          strokeLinecap="round"
-          opacity="0.8"
-        >
-          <path d="M140 446C220 438 302 442 384 448M462 452C536 446 612 448 688 454M760 444C836 438 912 440 988 446M1060 458C1138 450 1218 452 1298 458M1370 446C1444 440 1520 442 1596 448" />
-          <path d="M250 462C322 456 396 458 470 462M700 466C772 460 846 462 918 466M1150 468C1222 462 1296 464 1368 468" />
         </g>
 
         <g className="hero-parallax hero-parallax--mid">
@@ -710,39 +607,10 @@ export function HeroScene() {
             fill="var(--scene-front)"
             stroke="none"
           />
-          <path
-            d="M312 626C406 654 486 682 560 720"
-            stroke="var(--scene-path)"
-            strokeOpacity="0.28"
-            strokeWidth="26"
-            strokeLinecap="round"
-          />
-          <path
-            d="M312 626C406 654 486 682 560 720"
-            stroke="var(--scene-grass-light)"
-            strokeOpacity="0.16"
-            strokeWidth="9"
-            strokeLinecap="round"
-          />
-          <path
-            d="M1370 636C1296 664 1226 690 1160 720"
-            stroke="var(--scene-path)"
-            strokeOpacity="0.3"
-            strokeWidth="24"
-            strokeLinecap="round"
-          />
-          <path
-            d="M1370 636C1296 664 1226 690 1160 720"
-            stroke="var(--scene-grass-light)"
-            strokeOpacity="0.18"
-            strokeWidth="8"
-            strokeLinecap="round"
-          />
         </g>
 
         <g className="hero-parallax hero-parallax--near">
-          <Tree href="#tree-round" x={92} y={596} scale={0.58} opacity={0.62} duration={9} delay={-2} />
-          <Tree href="#tree-cypress" x={1520} y={592} scale={0.6} opacity={0.6} duration={9.5} delay={-4} />
+          <Tree href="#tree-round" x={580} y={615} scale={1.15} opacity={0.95} duration={8.5} delay={-3} />
         </g>
 
         <g className="hero-parallax hero-parallax--near">
@@ -909,28 +777,11 @@ export function HeroScene() {
                 <circle r="2.5" fill="var(--scene-wood-light)" />
               </g>
             </g>
-            <g transform="translate(46 4) scale(1 -0.22) skewX(-28)" opacity="0.13">
-              <g className="windmill-shadow-spin">
-                {[0, 90, 180, 270].map((rotation) => (
-                  <rect
-                    key={rotation}
-                    x="-2"
-                    y="-58"
-                    width="4"
-                    height="54"
-                    fill="var(--scene-wood-dark)"
-                    transform={`rotate(${rotation})`}
-                  />
-                ))}
-              </g>
-            </g>
           </g>
         </g>
 
         <g className="hero-parallax hero-parallax--near">
-          <ellipse cx="1356" cy="660" rx="100" ry="17" fill="var(--scene-grass-shadow)" opacity="0.2" />
           <g transform="translate(1336 654) scale(1.34)">
-            <path d="M-34 2h68l38 12H-50Z" fill="var(--scene-grass-shadow)" opacity="0.24" />
             <g stroke="var(--scene-wood-dark)" strokeWidth="2" strokeLinecap="round" opacity="0.8">
               <path d="M-66 0v-23M-56 0v-23M-46 0v-23M-36 0v-23M-26 0v-23" />
               <path d="M-70-14h48M-66-6h40" strokeWidth="1.4" />
@@ -986,11 +837,6 @@ export function HeroScene() {
           </g>
         </g>
 
-        <g className="hero-parallax hero-parallax--front">
-          <Tree href="#tree-pine" x={44} y={742} scale={1.42} opacity={0.92} duration={7} delay={-2} />
-          <Tree href="#tree-pine" x={1660} y={742} scale={1.2} opacity={0.9} duration={9} delay={-4} />
-        </g>
-
         <g fill="var(--scene-bloom)" opacity="0.8">
           <circle cx="214" cy="682" r="2.6" />
           <circle cx="556" cy="710" r="2.4" />
@@ -1007,41 +853,10 @@ export function HeroScene() {
         <use href="#flower" transform="translate(342 718) scale(1.1)" />
         <use href="#flower" transform="translate(1452 708) scale(1)" />
 
-        <g style={{ color: 'var(--sketch-ink-soft)' }} opacity="0.42">
-          <use href="#grass-tuft" transform="translate(168 664) scale(0.42)" />
-          <use href="#grass-tuft" transform="translate(248 682) scale(0.34)" />
-          <use href="#grass-tuft" transform="translate(386 676) scale(0.4)" />
-          <use href="#grass-tuft" transform="translate(566 696) scale(0.38)" />
-          <use href="#grass-tuft" transform="translate(676 684) scale(0.32)" />
-          <use href="#grass-tuft" transform="translate(1044 672) scale(0.42)" />
-          <use href="#grass-tuft" transform="translate(1148 690) scale(0.34)" />
-          <use href="#grass-tuft" transform="translate(1244 660) scale(0.4)" />
-          <use href="#grass-tuft" transform="translate(1330 684) scale(0.3)" />
-          <use href="#grass-tuft" transform="translate(1484 684) scale(0.4)" />
-          <use href="#grass-tuft" transform="translate(1572 668) scale(0.34)" />
-          <use href="#grass-tuft" transform="translate(744 706) scale(0.3)" />
-          <use href="#grass-tuft" transform="translate(966 704) scale(0.32)" />
-        </g>
-
         <g fill="var(--sketch-ink-faint)" opacity="0.5">
-          <circle cx="298" cy="674" r="1.5" />
           <circle cx="520" cy="690" r="1.3" />
-          <circle cx="636" cy="674" r="1.4" />
           <circle cx="1114" cy="678" r="1.5" />
-          <circle cx="1310" cy="672" r="1.3" />
           <circle cx="1540" cy="700" r="1.4" />
-        </g>
-
-        <g className="hero-parallax hero-parallax--front">
-          <Tuft x={16} y={720} scale={2.1} opacity={0.85} duration={6} delay={-2} />
-          <Tuft x={204} y={720} scale={1.5} opacity={0.7} duration={8} delay={-1} />
-          <Tuft x={486} y={720} scale={1.3} opacity={0.65} duration={7.5} delay={-3} />
-          <Tuft x={606} y={720} scale={1.2} opacity={0.6} duration={7} delay={-2.4} />
-          <Tuft x={940} y={720} scale={1.15} opacity={0.55} duration={8.2} delay={-4.2} />
-          <Tuft x={1138} y={720} scale={1.35} opacity={0.65} duration={8.5} delay={-5} color="var(--scene-grass-light)" />
-          <Tuft x={1420} y={720} scale={1.5} opacity={0.72} duration={6} delay={-4} color="var(--scene-grass-light)" />
-          <Tuft x={1556} y={720} scale={1.25} opacity={0.6} duration={7.6} delay={-1.6} />
-          <Tuft x={1664} y={720} scale={2} opacity={0.85} duration={6.5} delay={-5} />
         </g>
       </svg>
 

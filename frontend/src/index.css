@@ -227,84 +227,16 @@ body {
 
 /* Daylight landscape behind the landing hero. Sky above, three soft ridges
    below, all in the same light-blue family so the black copy stays legible. */
-.hero-scene {
-  --mx: 0;
-  --my: 0;
-  --scroll: 0;
-}
-
 .hero-sky {
-  background:
-    radial-gradient(
-      52% 46% at 14% 2%,
-      rgba(255, 255, 255, 0.85) 0%,
-      transparent 68%
-    ),
-    radial-gradient(
-      46% 40% at 82% 24%,
-      rgba(23, 21, 18, 0.045) 0%,
-      transparent 74%
-    ),
-    linear-gradient(to bottom, #fcfaf5 0%, #f6f1e8 58%, #ebe5d9 100%);
+  background: #ffffff;
 }
 
 .dark .hero-sky {
-  background:
-    radial-gradient(
-      34% 30% at 18% 12%,
-      color-mix(in srgb, #dbe7ff 12%, transparent) 0%,
-      transparent 70%
-    ),
-    radial-gradient(
-      46% 38% at 84% 28%,
-      color-mix(in srgb, var(--scene-lavender) 8%, transparent) 0%,
-      transparent 76%
-    ),
-    linear-gradient(to bottom, #04070d 0%, #07111f 54%, #0d1a2b 100%);
+  background: #000000;
 }
 
 .hero-parallax {
-  will-change: transform;
-}
-
-.dark .hero-parallax {
-  filter: saturate(0.6) brightness(0.75) contrast(1.05);
-}
-
-.dark .hero-sketch .hero-parallax {
-  filter: none;
-}
-
-.hero-parallax--far {
-  transform: translate3d(
-    calc(var(--mx) * -5px),
-    calc(var(--my) * -3px + var(--scroll) * 22px),
-    0
-  );
-}
-
-.hero-parallax--mid {
-  transform: translate3d(
-    calc(var(--mx) * -9px),
-    calc(var(--my) * -5px + var(--scroll) * 16px),
-    0
-  );
-}
-
-.hero-parallax--near {
-  transform: translate3d(
-    calc(var(--mx) * -14px),
-    calc(var(--my) * -8px + var(--scroll) * 10px),
-    0
-  );
-}
-
-.hero-parallax--front {
-  transform: translate3d(
-    calc(var(--mx) * -20px),
-    calc(var(--my) * -11px + var(--scroll) * 4px),
-    0
-  );
+  transform: none;
 }
 
 .hero-grain {
