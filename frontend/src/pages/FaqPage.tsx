@@ -170,54 +170,6 @@ const GROUPS = [
       },
     ],
   },
-  {
-    id: 'data',
-    title: 'Chat, data and rules',
-    items: [
-      {
-        q: 'What does Ask MANABI do?',
-        a: 'It is the platform chat assistant. It answers from the catalog only. Tell it your stack and the time you have, and it suggests briefs that exist, with links. If nothing fits, it says so.',
-      },
-      {
-        q: 'Is my chat stored?',
-        a: 'No. Messages are sent to the model to produce a reply and are not written to the database. The daily message limit is tracked per account.',
-      },
-      {
-        q: 'Where does my GitHub token go?',
-        a: (
-          <>
-            It is stored on the server and used for GitHub API calls. It is never
-            returned to the browser. The{' '}
-            <Link to="/privacy" className={linkClass}>
-              Privacy page
-            </Link>{' '}
-            lists everything that is stored.
-          </>
-        ),
-      },
-      {
-        q: 'How do recommendations work?',
-        a: 'They score briefs against the languages and topics on your GitHub profile. With no profile signals, the newest briefs are shown instead.',
-      },
-      {
-        q: 'How do I report a project?',
-        a: 'Sign in and use the report action on a published project. You can report a project once and cannot report your own. Three reports send it back to review.',
-      },
-      {
-        q: 'How do I report a bug or a security issue?',
-        a: (
-          <>
-            Use the{' '}
-            <Link to="/contact" className={linkClass}>
-              Contact page
-            </Link>
-            . Bugs can go in the public issue tracker. Security reports should
-            ask for a private channel first.
-          </>
-        ),
-      },
-    ],
-  },
 ];
 
 export function FaqPage() {

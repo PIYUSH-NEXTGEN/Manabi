@@ -159,15 +159,15 @@ export function SponsorsPage() {
             <p className="font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
               {OFFER.previewCaption}
             </p>
-            <ul className="mt-3 grid max-w-xl grid-cols-5 gap-2 sm:gap-3">
+            <ul className="mt-3 grid max-w-md grid-cols-5 gap-2 sm:gap-3">
               {Array.from({ length: SPONSOR_SLOTS }, (_, index) => (
                 <li
                   key={index}
                   className={cx(
-                    'flex min-h-16 items-center justify-center rounded-xl border px-1.5 py-2 text-center font-mono text-[0.5625rem] font-bold uppercase leading-tight tracking-[0.05em]',
+                    'flex aspect-square items-center justify-center rounded-[1.2rem] border border-dashed border-line px-1 text-center font-mono text-[0.5625rem] font-bold uppercase leading-tight tracking-[0.05em] dark:bg-sheet',
                     index === 0
-                      ? 'border-dashed border-ink/30 bg-paper text-ink-soft'
-                      : 'border-line bg-tint/60 text-ink-soft dark:bg-sheet',
+                      ? 'bg-tint/40 text-ink-soft'
+                      : 'bg-paper text-muted',
                   )}
                 >
                   {index === 0

@@ -12,6 +12,7 @@ import {
   SPONSOR_EMAIL,
   SPONSOR_EMAIL_BODY,
   SPONSOR_EMAIL_SUBJECT,
+  SPONSOR_PRICE,
 } from './sponsors/sponsorContent';
 
 function renderPage() {
@@ -92,7 +93,7 @@ describe('SponsorsPage', () => {
     expect(
       screen.getByRole('heading', { name: 'One placement. Five slots.' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('₹999')).toBeInTheDocument();
+    expect(screen.getByText(SPONSOR_PRICE)).toBeInTheDocument();
     expect(screen.getByText('/ month')).toBeInTheDocument();
     expect(screen.getByText('Founding price')).toBeInTheDocument();
     expect(screen.queryByText(/on request/i)).not.toBeInTheDocument();

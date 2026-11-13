@@ -5,7 +5,7 @@
 
 export const SPONSOR_EMAIL = 'manabi.build@gmail.com';
 export const SPONSOR_EMAIL_SUBJECT = 'MANABI sponsorship enquiry';
-export const SPONSOR_PRICE = '₹999';
+export const SPONSOR_PRICE = '₹799';
 export const SPONSOR_PRICE_NOTE = 'Founding price';
 export const SPONSOR_SLOTS = 5;
 
