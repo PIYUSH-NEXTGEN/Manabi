@@ -398,26 +398,37 @@ export function HeroScene() {
             />
           </pattern>
 
-          <g id="tree-round" stroke="var(--sketch-ink-soft)" strokeWidth="1.1" strokeOpacity="0.6" strokeLinejoin="round">
+          <g id="tree-round" stroke="var(--sketch-ink-soft)" strokeWidth="1.15" strokeOpacity="0.62" strokeLinejoin="round">
             <path
-              d="M-3.5 0C-3.2-6-2.9-13-2.7-22L-2.3-48H2.3L2.7-22C2.9-13 3.2-6 3.5 0Z"
+              d="M-4 0C-4.2-10-3.8-22-3.2-34L-2.4-52H2.4L3.2-34C3.8-22 4.2-10 4 0Z"
               fill="var(--scene-trunk)"
             />
-            <circle cx="-17" cy="-74" r="22" fill="var(--scene-tree-deep)" />
-            <circle cx="17" cy="-74" r="22" fill="var(--scene-tree-deep)" />
-            <circle cx="0" cy="-90" r="27" fill="var(--scene-tree)" />
-            <circle cx="-8" cy="-66" r="19" fill="var(--scene-tree)" />
-            <circle cx="8" cy="-66" r="19" fill="var(--scene-tree)" />
-            <ellipse cx="10" cy="-64" rx="17" ry="14" fill="url(#sketch-hatch)" opacity="0.35" stroke="none" />
             <path
-              d="M-22-80c6-4 13-5 18-2M14-74c5-3 10-3 14 1M-8-98c7-3 14-3 19 0"
+              d="M-2.2-46C-6-56-9-64-12-74M2.2-46C6-56 9-64 13-72"
+              stroke="var(--scene-trunk)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <path
+              d="M0-112C18-112 30-102 31-88C42-84 47-72 41-62C46-51 38-41 26-42L-26-42C-38-41-46-51-41-62C-47-72-42-84-31-88C-30-102-18-112 0-112Z"
+              fill="var(--scene-tree-deep)"
+            />
+            <path
+              d="M0-104C14-104 23-96 24-85C31-79 33-68 27-61C25-55 17-50 8-51L-8-51C-19-51-27-58-28-66C-33-74-29-85-21-89C-17-99-9-104 0-104Z"
+              fill="var(--scene-tree)"
+              stroke="none"
+            />
+            <ellipse cx="-10" cy="-84" rx="12" ry="9" fill="var(--scene-tree-alt)" opacity="0.45" stroke="none" />
+            <ellipse cx="14" cy="-59" rx="13" ry="8" fill="url(#sketch-hatch)" opacity="0.38" stroke="none" />
+            <path
+              d="M-20-96C-10-101 2-102 12-99"
               stroke="var(--sketch-ink-soft)"
               strokeWidth="0.9"
               strokeOpacity="0.35"
               strokeLinecap="round"
               fill="none"
             />
-            <circle cx="-9" cy="-102" r="6" fill="var(--scene-grass-light)" opacity="0.5" stroke="none" />
           </g>
 
           <g id="tree-birch" stroke="var(--sketch-ink-soft)" strokeWidth="1.05" strokeOpacity="0.6" strokeLinejoin="round">
