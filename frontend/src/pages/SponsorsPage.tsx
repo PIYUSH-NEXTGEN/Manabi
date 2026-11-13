@@ -1,65 +1,37 @@
-import type { ReactNode } from 'react';
-import { ArrowUpRight, Check, Plus } from 'lucide-react';
-
-const CONTACT_EMAIL = 'piyush.intech@gmail.com';
-const SPONSOR_SUBJECT = 'Manabi sponsorship enquiry';
-const MAILTO_URL = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(
-  SPONSOR_SUBJECT,
-)}`;
-
-const AUDIENCE = [
-  {
-    title: 'Students',
-    body: 'Looking for a real project for a resume, a portfolio or a final-year submission.',
-  },
-  {
-    title: 'Developers',
-    body: 'Early-career devs who want shipped work to show, not another tutorial to list.',
-  },
-  {
-    title: 'Beginners',
-    body: 'Starting their coding journey, with ideas sorted by difficulty so the next step is clear.',
-  },
-  {
-    title: 'Resume and hackathon builders',
-    body: 'Hunting for something they can defend in an interview or build inside a weekend.',
-  },
-];
-
-const INCLUDES = [
-  'Your icon and name in the home-page sponsor strip',
-  'Clicking the block opens your website in a new tab',
-  'Labelled “Sponsor”, never presented as a recommendation',
-  'One of five slots, placed in the order sponsors are confirmed',
-];
-
-const FAQ = [
-  {
-    q: 'How long does a sponsorship last?',
-    a: 'Placements run for one or three months. The period is agreed before we invoice.',
-  },
-  {
-    q: 'Can we see the placement first?',
-    a: 'Yes. We show you a preview of your icon, name and link before it goes live.',
-  },
-  {
-    q: 'What if we want to stop?',
-    a: 'Tell us before the next billing period and the placement is removed at the end of the current month. Unused full months are refunded; part months are not.',
-  },
-  {
-    q: 'What can’t you promote?',
-    a: 'Anything misleading, adult, gambling or harmful. We only accept sponsors whose products are useful to students, and we may decline or remove any placement that is not.',
-  },
-  {
-    q: 'Do you collect or share student data with sponsors?',
-    a: 'No. Sponsors only see aggregate placement statistics. No individual student, account or repository data is shared.',
-  },
-];
-
-const linkClass =
-  'text-ink underline decoration-line underline-offset-4 transition-colors hover:decoration-ink';
+import { useState, type MouseEvent, type ReactNode } from 'react';
+import { ArrowDown, ArrowUpRight, Check, Plus } from 'lucide-react';
+import { buttonClasses } from '@/design/primitives';
+import { useStats } from '@/hooks/useStats';
+import { cx } from '@/lib/cx';
+import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
+import {
+  AUDIENCE,
+  FAQ,
+  HERO,
+  HOW_IT_WORKS,
+  MAILTO_URL,
+  OFFER,
+  PROMISE,
+  SPONSOR_EMAIL,
+  SPONSOR_PRICE,
+  SPONSOR_PRICE_NOTE,
+  SPONSOR_SLOTS,
+} from './sponsors/sponsorContent';
 
 export function SponsorsPage() {
+  const reduced = usePrefersReducedMotion();
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
+
+  const jumpToOffer = (event: MouseEvent<HTMLAnchorElement>) => {
+    const target = document.getElementById('offer');
+    if (!target) return;
+    event.preventDefault();
+    target.scrollIntoView({
+      behavior: reduced ? 'auto' : 'smooth',
+      block: 'start',
+    });
+  };
+
   return (
     <main className="border-b border-line bg-paper">
       <section className="relative overflow-hidden border-b border-line bg-tint/40">
@@ -74,68 +46,90 @@ export function SponsorsPage() {
 
         <div className="relative mx-auto w-[min(1120px,96vw)] py-14 md:py-20">
           <h1 className="max-w-3xl text-balance font-display text-display leading-[1.03] tracking-[-0.03em] text-ink">
-            Partner with MANABI.
+            {HERO.title}
           </h1>
           <p className="mt-5 max-w-2xl text-lead leading-relaxed text-ink-soft">
-            Put your product in front of students and developers who are actively
-            choosing what to build.
+            {HERO.subline}
           </p>
 
+          <div className="mt-8">
+            <a
+              href="#offer"
+              onClick={jumpToOffer}
+              className={buttonClasses('primary')}
+            >
+              {HERO.cta}
+              <ArrowDown aria-hidden size={13} strokeWidth={2.6} />
+            </a>
+          </div>
+
+          <p className="mt-4 max-w-md text-label leading-relaxed text-muted">
+            {HERO.note}
+          </p>
         </div>
       </section>
 
       <div className="mx-auto w-[min(1120px,96vw)]">
         <Section
           id="audience"
-          index="01"
-          label="Audience"
-          title="Who uses MANABI"
-          intro="MANABI helps students, developers and beginners pick real projects to build: for a resume, a hackathon or their first steps in code. Visitors browse 200+ problem ideas by domain and difficulty, build them, and prove their work with a verified GitHub repo."
+          index={AUDIENCE.index}
+          label={AUDIENCE.label}
+          title={AUDIENCE.title}
+          intro={AUDIENCE.intro}
         >
-          <div className="grid gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-2">
-            {AUDIENCE.map((group) => (
-              <div key={group.title} className="bg-paper p-5">
+          <ul className="grid gap-px overflow-hidden rounded-card border border-line bg-line md:grid-cols-3">
+            {AUDIENCE.cards.map((card) => (
+              <li key={card.title} className="bg-paper p-5">
                 <h3 className="font-display text-[1.0625rem] leading-snug text-ink">
-                  {group.title}
+                  {card.title}
                 </h3>
                 <p className="mt-2 text-body leading-relaxed text-ink-soft">
-                  {group.body}
+                  {card.body}
                 </p>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
+
+          <TodayOnManabi />
         </Section>
 
         <Section
-          id="options"
-          index="02"
-          label="The offer"
-          title="One way to sponsor"
-          intro="There is a single placement. Your icon and name on the landing page, linking to your website. Pricing is agreed before we invoice."
+          id="offer"
+          index={OFFER.index}
+          label={OFFER.label}
+          title={OFFER.title}
+          intro={OFFER.intro}
         >
           <div className="rounded-card border border-line-strong bg-ink p-6 text-paper shadow-lift md:p-8 dark:border-line dark:bg-sheet dark:text-ink dark:shadow-soft">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex flex-wrap items-start justify-between gap-5">
               <div className="max-w-sm">
                 <h3 className="font-display text-[1.25rem] leading-snug text-paper dark:text-ink">
-                  Home-page sponsor
+                  {OFFER.cardTitle}
                 </h3>
                 <p className="mt-1.5 text-body leading-relaxed text-paper/70 dark:text-ink-soft">
-                  Your icon and name on the MANABI landing page, linked to your
-                  website.
+                  {OFFER.description}
                 </p>
               </div>
-              <p className="flex items-baseline gap-1.5">
-                <span className="font-display text-[1.5rem] leading-none text-paper dark:text-ink">
-                  On request
-                </span>
-                <span className="font-mono text-label font-bold uppercase tracking-[0.12em] text-paper/60 dark:text-muted">
-                  / month
-                </span>
-              </p>
+
+              <div className="text-left sm:text-right">
+                <p className="flex items-baseline gap-1.5 sm:justify-end">
+                  <span className="font-display text-[1.5rem] leading-none text-paper dark:text-ink">
+                    {SPONSOR_PRICE}
+                  </span>
+                  <span className="font-mono text-label font-bold uppercase tracking-[0.12em] text-paper/60 dark:text-muted">
+                    / month
+                  </span>
+                </p>
+                <p className="mt-2 flex sm:justify-end">
+                  <span className="rounded-full border border-paper/25 px-2.5 py-1 font-mono text-[0.625rem] font-bold uppercase tracking-[0.12em] text-paper/75 dark:border-line dark:text-ink-soft">
+                    {SPONSOR_PRICE_NOTE}
+                  </span>
+                </p>
+              </div>
             </div>
 
             <ul className="mt-6 flex flex-col gap-2.5">
-              {INCLUDES.map((item) => (
+              {OFFER.bullets.map((item) => (
                 <li key={item} className="flex gap-2.5 text-body leading-snug">
                   <Check
                     aria-hidden
@@ -152,63 +146,164 @@ export function SponsorsPage() {
               href={MAILTO_URL}
               className="press mt-7 inline-flex items-center justify-center gap-2 rounded-full border border-transparent bg-paper px-5 py-3 text-[0.875rem] font-semibold leading-none text-ink transition-colors hover:bg-tint dark:bg-ink dark:text-paper dark:hover:bg-ink/90"
             >
-              Email us about sponsorship
+              {OFFER.cta}
               <ArrowUpRight aria-hidden size={13} strokeWidth={2.6} />
             </a>
           </div>
 
           <p className="mt-4 text-label leading-relaxed text-muted">
-            Slots are limited to five on the home page and are sold in the order
-            they are confirmed.
+            {OFFER.footnote}
           </p>
+
+          <div className="mt-8">
+            <p className="font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
+              {OFFER.previewCaption}
+            </p>
+            <ul className="mt-3 grid max-w-md grid-cols-5 gap-2 sm:gap-3">
+              {Array.from({ length: SPONSOR_SLOTS }, (_, index) => (
+                <li
+                  key={index}
+                  className={cx(
+                    'flex aspect-square items-center justify-center rounded-[1.2rem] border border-dashed border-line px-1 text-center font-mono text-[0.5625rem] font-bold uppercase leading-tight tracking-[0.05em] dark:bg-sheet',
+                    index === 0
+                      ? 'bg-tint/40 text-ink-soft'
+                      : 'bg-paper text-muted',
+                  )}
+                >
+                  {index === 0
+                    ? OFFER.previewFirstSlot
+                    : OFFER.previewOtherSlot}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-8 rounded-card border border-line bg-tint/50 p-6">
+            <h3 className="font-display text-[1.0625rem] leading-snug text-ink">
+              {PROMISE.title}
+            </h3>
+            <p className="mt-2 text-body leading-relaxed text-ink-soft">
+              {PROMISE.text}
+            </p>
+          </div>
         </Section>
 
-        <section
-          id="faq"
-          className="scroll-mt-24 border-t border-line py-12 md:py-16"
+        <Section
+          id="how-it-works"
+          index={HOW_IT_WORKS.index}
+          label={HOW_IT_WORKS.label}
+          title={HOW_IT_WORKS.title}
         >
-          <div className="grid gap-8 lg:grid-cols-[minmax(0,260px)_minmax(0,1fr)] lg:gap-14">
-            <div>
-              <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
-                FAQ
-              </p>
-              <h2 className="mt-3 font-display text-[1.75rem] leading-[1.15] tracking-[-0.02em] text-ink">
-                Questions sponsors ask
-              </h2>
-              <p className="mt-3 text-body leading-relaxed text-ink-soft">
-                Anything else, email{' '}
-                <a href={MAILTO_URL} className={linkClass}>
-                  {CONTACT_EMAIL}
-                </a>
-                .
-              </p>
-            </div>
-
-            <div className="flex flex-col">
-              {FAQ.map((entry) => (
-                <details
-                  key={entry.q}
-                  className="group border-t border-line py-4 first:border-t-0 first:pt-0"
+          <ol className="grid gap-px overflow-hidden rounded-card border border-line bg-line sm:grid-cols-2">
+            {HOW_IT_WORKS.steps.map((step, position) => (
+              <li key={step.title} className="bg-paper p-5">
+                <span
+                  aria-hidden
+                  className="font-mono text-label font-bold tabular-nums tracking-[0.16em] text-accent"
                 >
-                  <summary className="flex cursor-pointer list-none items-start justify-between gap-4 [&::-webkit-details-marker]:hidden">
-                    <span className="font-medium text-ink">{entry.q}</span>
-                    <Plus
-                      aria-hidden
-                      size={14}
-                      strokeWidth={2}
-                      className="mt-1 shrink-0 text-muted transition-transform duration-200 group-open:rotate-45"
-                    />
-                  </summary>
-                  <p className="mt-2 max-w-2xl pr-6 text-body leading-relaxed text-ink-soft">
-                    {entry.a}
-                  </p>
-                </details>
-              ))}
-            </div>
+                  {String(position + 1).padStart(2, '0')}
+                </span>
+                <h3 className="mt-2 font-display text-[1.0625rem] leading-snug text-ink">
+                  {step.title}
+                </h3>
+                <p className="mt-1.5 text-body leading-relaxed text-ink-soft">
+                  {step.body}
+                </p>
+              </li>
+            ))}
+          </ol>
+        </Section>
+
+        <Section
+          id="faq"
+          index={FAQ.index}
+          label={FAQ.label}
+          title={FAQ.title}
+          intro={
+            <>
+              {FAQ.introPrefix}{' '}
+              <a
+                href={MAILTO_URL}
+                className="break-words text-ink underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
+              >
+                {SPONSOR_EMAIL}
+              </a>
+              .
+            </>
+          }
+        >
+          <div className="flex flex-col">
+            {FAQ.items.map((entry) => {
+              const open = openFaq === entry.id;
+              const panelId = `sponsor-faq-panel-${entry.id}`;
+              const buttonId = `sponsor-faq-toggle-${entry.id}`;
+
+              return (
+                <div
+                  key={entry.id}
+                  className="border-t border-line first:border-t-0"
+                >
+                  <h3>
+                    <button
+                      type="button"
+                      id={buttonId}
+                      aria-expanded={open}
+                      aria-controls={panelId}
+                      onClick={() => setOpenFaq(open ? null : entry.id)}
+                      className="flex w-full cursor-pointer list-none items-start justify-between gap-4 py-4 text-left font-medium text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                    >
+                      <span>{entry.question}</span>
+                      <Plus
+                        aria-hidden
+                        size={14}
+                        strokeWidth={2}
+                        className={cx(
+                          'mt-1 shrink-0 text-muted transition-transform duration-200',
+                          open && 'rotate-45',
+                        )}
+                      />
+                    </button>
+                  </h3>
+                  <div
+                    id={panelId}
+                    role="region"
+                    aria-labelledby={buttonId}
+                    hidden={!open}
+                    className="max-w-2xl pr-6 pb-4"
+                  >
+                    <p className="text-body leading-relaxed text-ink-soft">
+                      {entry.answer}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </section>
+        </Section>
       </div>
     </main>
+  );
+}
+
+/**
+ * Live counts only. Nothing renders while the stats are loading, withholding
+ * numbers, or missing, so the page never shows a figure we cannot back up.
+ */
+function TodayOnManabi() {
+  const stats = useStats();
+  const problems = stats.data?.problems;
+  const fields = stats.data?.fields;
+
+  if (!problems || !fields) return null;
+
+  return (
+    <p className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
+      <span>{AUDIENCE.statsLabel}</span>
+      <span aria-hidden>·</span>
+      <span className="text-ink-soft">{problems} project ideas</span>
+      <span aria-hidden>·</span>
+      <span className="text-ink-soft">{fields} fields</span>
+    </p>
   );
 }
 
