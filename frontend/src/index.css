@@ -393,24 +393,15 @@ body {
   }
 }
 
-.river-flow {
-  stroke-dasharray: 14 38;
-  animation: river-flow 8s linear infinite;
+/* Vertical dashes scroll downstream one full pattern tile, so the loop is
+   seamless and the water reads as moving. */
+.river-lines {
+  animation: river-lines 3.4s linear infinite;
 }
 
-.river-flow-soft {
-  stroke-dasharray: 8 30;
-  animation: river-flow 11s linear infinite;
-}
-
-.river-flow-strong {
-  stroke-dasharray: 18 46;
-  animation: river-flow 6.5s linear infinite;
-}
-
-@keyframes river-flow {
+@keyframes river-lines {
   to {
-    stroke-dashoffset: -160;
+    transform: translateY(58px);
   }
 }
 
@@ -542,9 +533,9 @@ body {
   --scene-birch: var(--sketch-highlight);
   --scene-birch-mark: var(--sketch-ink);
   --scene-path: var(--sketch-ink-faint);
-  --scene-water: var(--sketch-paper);
-  --scene-water-mid: var(--sketch-wash);
-  --scene-water-deep: var(--sketch-ink-faint);
+  --scene-water: #fbfbf9;
+  --scene-water-mid: #f4f4f1;
+  --scene-water-deep: #e6e6e2;
   --scene-foam: var(--sketch-ink-faint);
   --scene-sky-tint: var(--sketch-ink-faint);
   --scene-bloom: var(--sketch-ink-faint);
@@ -566,6 +557,9 @@ body {
   --sketch-ink: #a8a8a8;
   --sketch-ink-soft: #989898;
   --sketch-ink-faint: #858585;
+  --scene-water: #0a0a0a;
+  --scene-water-mid: #121212;
+  --scene-water-deep: #1c1c1c;
   --sketch-paper: #000000;
   --sketch-wash: #000000;
   --sketch-shade: #000000;
@@ -991,9 +985,7 @@ body {
   .smoke-rise,
   .tree-sway,
   .grass-sway,
-  .river-flow,
-  .river-flow-soft,
-  .river-flow-strong,
+  .river-lines,
   .fish-swim,
   .pollen,
   .hero-light-shimmer {
