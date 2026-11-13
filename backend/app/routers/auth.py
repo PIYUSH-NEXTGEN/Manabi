@@ -9,7 +9,7 @@ from authlib.integrations.starlette_client import OAuth
 from app.config import get_settings
 from app.deps import CurrentUser, DB
 from app.models import User
-from app.services.ratelimit import RateLimiter, human_wait
+from app.services.ratelimit import RateLimiter, human_wait, rate_limited
 from app.services.visibility import is_admin
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -63,11 +63,7 @@ def get_github_client():
 @router.get("/github/login")
 async def github_login(request: Request, db: DB):
     if (retry := _login_block(db, request)) is not None:
-        raise HTTPException(
-            status_code=429,
-            detail={"code": "rate_limited", "message": f"Too many login attempts. Try again in {human_wait(retry)}."},
-            headers={"Retry-After": str(retry)},
-        )
+        raise rate_limited(retry, f"Too many login attempts. Try again in {human_wait(retry)}.")
     client = get_github_client()
     if client is None:
         raise HTTPException(status_code=503, detail="GitHub login is not configured yet")
@@ -78,11 +74,7 @@ async def github_login(request: Request, db: DB):
 @router.get("/github/callback")
 async def github_callback(request: Request, db: DB):
     if (retry := _login_block(db, request)) is not None:
-        raise HTTPException(
-            status_code=429,
-            detail={"code": "rate_limited", "message": f"Too many login attempts. Try again in {human_wait(retry)}."},
-            headers={"Retry-After": str(retry)},
-        )
+        raise rate_limited(retry, f"Too many login attempts. Try again in {human_wait(retry)}.")
     client = get_github_client()
     if client is None:
         raise HTTPException(status_code=503, detail="GitHub login is not configured yet")

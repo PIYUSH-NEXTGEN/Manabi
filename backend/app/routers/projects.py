@@ -21,7 +21,7 @@ from app.models import (
 )
 from app.services import github, verification, visibility
 from app.services.presenters import project_out_safely
-from app.services.ratelimit import ADMIN_LIMITER, RateLimiter, human_wait
+from app.services.ratelimit import ADMIN_LIMITER, RateLimiter, human_wait, rate_limited
 from app.services.verification import SubmissionError
 
 router = APIRouter(tags=["projects"])
@@ -68,13 +68,10 @@ async def submit_project(problem_id: int, body: schemas.ProjectCreate, user: Cur
 
     retry = SUBMIT_LIMITER.check(db, f"submit:{user.id}")
     if retry is not None:
-        raise HTTPException(
-            status_code=429,
-            detail={
-                "code": "rate_limited",
-                "message": f"You have made {SUBMIT_LIMITER._limit()} submit attempts this hour. Fix the reported issues, then try again in {human_wait(retry)}.",
-            },
-            headers={"Retry-After": str(retry)},
+        raise rate_limited(
+            retry,
+            f"You have made {SUBMIT_LIMITER._limit()} submit attempts this hour. "
+            f"Fix the reported issues, then try again in {human_wait(retry)}.",
         )
 
     try:
@@ -103,8 +100,9 @@ def get_project(project_id: int, db: DB, user: OptionalUser):
     if not visibility.can_view_project(project, user):
         # Never reveal the existence of a non-verified project to others.
         raise HTTPException(status_code=404, detail="Project not found")
-    include_private = user is not None and (user.id == project.user_id or visibility.is_admin(user))
-    return project_out_safely(project, include_private=include_private, viewer=user)
+    return project_out_safely(
+        project, include_private=visibility.is_owner_or_admin(project, user), viewer=user
+    )
 
 
 @router.get("/api/projects/{project_id}/progress", response_model=schemas.Progress)
@@ -130,13 +128,10 @@ async def get_project_progress(
         )
         retry = limiter.check(db, f"{prefix}:{viewer_key}")
         if retry is not None:
-            raise HTTPException(
-                status_code=429,
-                detail={
-                    "code": "rate_limited",
-                    "message": f"Too many progress refreshes this hour. Try again in {human_wait(retry)} or open the repo on GitHub for the latest state.",
-                },
-                headers={"Retry-After": str(retry)},
+            raise rate_limited(
+                retry,
+                f"Too many progress refreshes this hour. Try again in "
+                f"{human_wait(retry)} or open the repo on GitHub for the latest state.",
             )
     now = datetime.now(timezone.utc)
     cached = project.progress_json
@@ -198,7 +193,7 @@ def my_projects(user: CurrentUser, db: DB):
 @router.delete("/api/projects/{project_id}", status_code=204)
 def delete_project(project_id: int, user: CurrentUser, db: DB):
     project = _project_or_404(db, project_id)
-    if user.id != project.user_id and not visibility.is_admin(user):
+    if not visibility.is_owner_or_admin(project, user):
         raise HTTPException(status_code=404, detail="Project not found")
     db.delete(project)
     db.commit()
@@ -207,7 +202,7 @@ def delete_project(project_id: int, user: CurrentUser, db: DB):
 @router.patch("/api/projects/{project_id}", response_model=schemas.ProjectOut)
 async def edit_project(project_id: int, body: schemas.ProjectPatch, user: CurrentUser, db: DB):
     project = _project_or_404(db, project_id)
-    if user.id != project.user_id and not visibility.is_admin(user):
+    if not visibility.is_owner_or_admin(project, user):
         raise HTTPException(status_code=404, detail="Project not found")
 
     try:
@@ -324,10 +319,8 @@ def report_project(project_id: int, body: schemas.ReportIn, user: CurrentUser, d
         )
     retry = REPORT_LIMITER.check(db, f"report:{user.id}")
     if retry is not None:
-        raise HTTPException(
-            status_code=429,
-            detail={"code": "rate_limited", "message": f"Too many reports this hour. Try again in {human_wait(retry)}."},
-            headers={"Retry-After": str(retry)},
+        raise rate_limited(
+            retry, f"Too many reports this hour. Try again in {human_wait(retry)}."
         )
     reason = verification.clean_text(body.reason)[:300]
     existing = db.scalar(
@@ -366,10 +359,8 @@ def star_project(project_id: int, user: CurrentUser, db: DB):
     if not visibility.can_view_project(project, user):
         raise HTTPException(status_code=404, detail="Project not found")
     if (retry := STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
-        raise HTTPException(
-            status_code=429,
-            detail={"code": "rate_limited", "message": f"Too many star actions this hour. Try again in {human_wait(retry)}."},
-            headers={"Retry-After": str(retry)},
+        raise rate_limited(
+            retry, f"Too many star actions this hour. Try again in {human_wait(retry)}."
         )
     existing = db.scalar(
         select(ProjectStar).where(
@@ -391,10 +382,8 @@ def unstar_project(project_id: int, user: CurrentUser, db: DB):
     if not visibility.can_view_project(project, user):
         raise HTTPException(status_code=404, detail="Project not found")
     if (retry := STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
-        raise HTTPException(
-            status_code=429,
-            detail={"code": "rate_limited", "message": f"Too many star actions this hour. Try again in {human_wait(retry)}."},
-            headers={"Retry-After": str(retry)},
+        raise rate_limited(
+            retry, f"Too many star actions this hour. Try again in {human_wait(retry)}."
         )
     star = db.scalar(
         select(ProjectStar).where(

@@ -15,7 +15,8 @@ const TONE_CLASSES: Record<StampTone, string> = {
   closed: 'bg-danger text-white',
   'ai-suggested': 'bg-olive text-paper',
   new: 'bg-accent text-white',
-  active: 'bg-olive/10 text-olive ring-1 ring-olive/25 dark:bg-dawn-sage dark:text-ink',
+  active:
+    'bg-olive/60 text-ink ring-1 ring-olive dark:bg-dawn-sage dark:text-ink dark:ring-dawn-sage',
   stale: 'bg-accent-soft text-accent',
   'not-started': 'bg-tint/60 text-muted',
 };

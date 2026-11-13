@@ -15,8 +15,8 @@ from app.models import (
     VERIFICATION_VERIFIED,
 )
 from app.services.presenters import problem_to_out, project_to_out
-from app.services.ratelimit import ADMIN_LIMITER, RateLimiter, human_wait
-from app.services.visibility import can_view_project, is_admin
+from app.services.ratelimit import ADMIN_LIMITER, RateLimiter, human_wait, rate_limited
+from app.services.visibility import can_view_project, is_admin, is_owner_or_admin
 
 router = APIRouter(prefix="/api/problems", tags=["problems"])
 
@@ -253,7 +253,7 @@ def get_problem(problem_id: int, db: DB, user: OptionalUser):
     detail["projects"] = [
         project_to_out(
             p,
-            include_private=(user is not None and (user.id == p.user_id or is_admin(user))),
+            include_private=is_owner_or_admin(p, user),
             viewer=user,
         ).model_dump(mode="json")
         for p in visible
@@ -271,10 +271,8 @@ def create_problem(body: schemas.ProblemIn, user: CurrentUser, db: DB):
     else:
         retry = PROBLEM_CREATE_LIMITER.check(db, f"problem-create:{user.id}")
     if retry is not None:
-        raise HTTPException(
-            status_code=429,
-            detail={"code": "rate_limited", "message": f"Too many problems created this hour. Try again in {human_wait(retry)}."},
-            headers={"Retry-After": str(retry)},
+        raise rate_limited(
+            retry, f"Too many problems created this hour. Try again in {human_wait(retry)}."
         )
     if body.source_id:
         existing = db.scalar(
@@ -336,10 +334,8 @@ def star_problem(problem_id: int, user: CurrentUser, db: DB):
     if problem is None:
         raise HTTPException(status_code=404, detail="Problem not found")
     if (retry := PROBLEM_STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
-        raise HTTPException(
-            status_code=429,
-            detail={"code": "rate_limited", "message": f"Too many star actions this hour. Try again in {human_wait(retry)}."},
-            headers={"Retry-After": str(retry)},
+        raise rate_limited(
+            retry, f"Too many star actions this hour. Try again in {human_wait(retry)}."
         )
     existing = db.scalar(
         select(ProblemStar).where(
@@ -359,10 +355,8 @@ def star_problem(problem_id: int, user: CurrentUser, db: DB):
 @router.delete("/{problem_id}/star", status_code=204)
 def unstar_problem(problem_id: int, user: CurrentUser, db: DB):
     if (retry := PROBLEM_STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
-        raise HTTPException(
-            status_code=429,
-            detail={"code": "rate_limited", "message": f"Too many star actions this hour. Try again in {human_wait(retry)}."},
-            headers={"Retry-After": str(retry)},
+        raise rate_limited(
+            retry, f"Too many star actions this hour. Try again in {human_wait(retry)}."
         )
     star = db.scalar(
         select(ProblemStar).where(

@@ -16,9 +16,9 @@ describe('Stamp', () => {
     expect(screen.getByText('AI-SUGGESTED')).toHaveClass('bg-olive', 'text-paper');
   });
 
-  it('uses a quiet olive for active and a soft accent for stale states', () => {
+  it('keeps the active stamp readable and a soft accent for stale states', () => {
     const { rerender } = render(<Stamp tone="active" />);
-    expect(screen.getByText('ACTIVE')).toHaveClass('bg-olive/10', 'text-olive');
+    expect(screen.getByText('ACTIVE')).toHaveClass('bg-olive/60', 'text-ink');
 
     rerender(<Stamp tone="stale" />);
     expect(screen.getByText('STALE')).toHaveClass('bg-accent-soft', 'text-accent');

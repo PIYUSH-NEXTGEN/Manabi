@@ -4,22 +4,16 @@ import { motion } from "motion/react";
 import { ArrowUpRight, Star } from "lucide-react";
 import { cx } from "@/lib/cx";
 import { EASE_SNAP, slideUpReveal } from "@/design/motion";
-import { Button, buttonClasses, Tag, useToast } from "@/design/primitives";
+import { Button, buttonClasses, Tag } from "@/design/primitives";
 import { LoadErrorPanel, PageSkeleton } from "@/pages/detailStates";
 import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ProjectProgressBadge } from "@/components/problems/ProjectProgressBadge";
 import { SubmitProjectPanel } from "@/components/problems/SubmitProjectPanel";
 import { GithubMark } from "@/components/icons/GithubMark";
 import { useProblem } from "@/hooks/useProblem";
-import { useMe } from "@/hooks/useMe";
-import {
-  useStarProblem,
-  useStarProject,
-  useUnstarProblem,
-  useUnstarProject,
-} from "@/hooks/useMyProjects";
+import { useStarToggle } from "@/hooks/useStarToggle";
 import { fieldLabel } from "@/lib/fields";
-import { ApiError, projectOwnerUsername } from "@/api/client";
+import { projectOwnerUsername } from "@/api/client";
 import type { ProblemDetail, ProblemOut } from "@/api/client";
 
 const panelHeading =
@@ -35,31 +29,13 @@ function MiniStarButton({
 }: {
   project: NonNullable<ProblemDetail["projects"]>[number];
 }) {
-  const me = useMe();
-  const star = useStarProject(project.id);
-  const unstar = useUnstarProject(project.id);
-  const toast = useToast();
   const starredByMe = Boolean(project.starred_by_me);
   const count = project.star_count ?? 0;
-
-  function toggle() {
-    if (starredByMe) {
-      unstar.mutate(undefined, {
-        onError: () => toast("Could not un-star the project. Try again.", "error"),
-      });
-      return;
-    }
-    star.mutate(undefined, {
-      onSuccess: () => toast("Starred. Thanks for the signal."),
-      onError: (err) => {
-        if (err instanceof ApiError && err.status === 409) {
-          toast("You already starred this project.", "error");
-        } else {
-          toast("Could not star the project. Try again.", "error");
-        }
-      },
-    });
-  }
+  const { loggedIn, pending, toggle } = useStarToggle(
+    'project',
+    project.id,
+    starredByMe,
+  );
 
   const label = (
     <>
@@ -73,7 +49,7 @@ function MiniStarButton({
     </>
   );
 
-  if (!me.data) {
+  if (!loggedIn) {
     return (
       <a
         href="/api/auth/github/login"
@@ -90,7 +66,7 @@ function MiniStarButton({
     <button
       type="button"
       onClick={toggle}
-      disabled={star.isPending || unstar.isPending}
+      disabled={pending}
       aria-pressed={starredByMe}
       aria-label={starredByMe ? "Un-star this project" : "Star this project"}
       title={starredByMe ? "Click to remove your star" : "Click to star this project"}
@@ -110,29 +86,11 @@ function ProblemStarButton({
   starCount: number;
   starredByMe: boolean;
 }) {
-  const me = useMe();
-  const star = useStarProblem(problemId);
-  const unstar = useUnstarProblem(problemId);
-  const toast = useToast();
-
-  function toggle() {
-    if (starredByMe) {
-      unstar.mutate(undefined, {
-        onError: () => toast("Could not un-star the problem. Try again.", "error"),
-      });
-      return;
-    }
-    star.mutate(undefined, {
-      onSuccess: () => toast("Starred. Thanks for the signal."),
-      onError: (err) => {
-        if (err instanceof ApiError && err.status === 409) {
-          toast("You already starred this problem.", "error");
-        } else {
-          toast("Could not star the problem. Try again.", "error");
-        }
-      },
-    });
-  }
+  const { loggedIn, pending, toggle } = useStarToggle(
+    'problem',
+    problemId,
+    starredByMe,
+  );
 
   const label = (
     <>
@@ -146,7 +104,7 @@ function ProblemStarButton({
     </>
   );
 
-  if (!me.data) {
+  if (!loggedIn) {
     return (
       <a
         href="/api/auth/github/login"
@@ -164,7 +122,7 @@ function ProblemStarButton({
       variant="secondary"
       size="small"
       onClick={toggle}
-      disabled={star.isPending || unstar.isPending}
+      disabled={pending}
       aria-pressed={starredByMe}
       aria-label={starredByMe ? "Un-star this problem" : "Star this problem"}
       title={starredByMe ? "Click to remove your star" : "Click to star this problem"}

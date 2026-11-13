@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+from fastapi import HTTPException
 from sqlalchemy import delete, func, select
 from sqlalchemy.orm import Session
 
@@ -75,6 +76,16 @@ class RateLimiter:
 
 
 CHAT_DAILY_LIMITER = RateLimiter("CHAT_RATE_LIMIT_PER_DAY", window_seconds=86400)
+
+
+def rate_limited(retry_after: int, message: str) -> HTTPException:
+    """The one 429 the API returns: a code clients can branch on plus a
+    Retry-After header so the UI can show a live countdown."""
+    return HTTPException(
+        status_code=429,
+        detail={"code": "rate_limited", "message": message},
+        headers={"Retry-After": str(retry_after)},
+    )
 
 
 def human_wait(seconds: int) -> str:

@@ -11,11 +11,8 @@ import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge
 import { useProject } from '@/hooks/useProject';
 import { useRefreshProgress } from '@/hooks/useRefreshProgress';
 import { useMe } from '@/hooks/useMe';
-import {
-  useReportProject,
-  useStarProject,
-  useUnstarProject,
-} from '@/hooks/useMyProjects';
+import { useReportProject } from '@/hooks/useMyProjects';
+import { useStarToggle } from '@/hooks/useStarToggle';
 import {
   asCommitSummary,
   asIssueSummary,
@@ -35,31 +32,13 @@ function StarButton({
   starCount: number;
   starredByMe: boolean;
 }) {
-  const me = useMe();
-  const star = useStarProject(projectId);
-  const unstar = useUnstarProject(projectId);
-  const toast = useToast();
+  const { loggedIn, pending, toggle } = useStarToggle(
+    'project',
+    projectId,
+    starredByMe,
+  );
 
-  function toggle() {
-    if (starredByMe) {
-      unstar.mutate(undefined, {
-        onError: () => toast('Could not un-star the project. Try again.', 'error'),
-      });
-      return;
-    }
-    star.mutate(undefined, {
-      onSuccess: () => toast('Starred. Thanks for the signal.'),
-      onError: (err) => {
-        if (err instanceof ApiError && err.status === 409) {
-          toast('You already starred this project.', 'error');
-        } else {
-          toast('Could not star the project. Try again.', 'error');
-        }
-      },
-    });
-  }
-
-  if (!me.data) {
+  if (!loggedIn) {
     return (
       <a
         href="/api/auth/github/login"
@@ -78,7 +57,7 @@ function StarButton({
       variant="secondary"
       size="small"
       onClick={toggle}
-      disabled={star.isPending || unstar.isPending}
+      disabled={pending}
       aria-pressed={starredByMe}
       aria-label={starredByMe ? 'Un-star this project' : 'Star this project'}
       title={starredByMe ? 'Click to remove your star' : 'Click to star this project'}
