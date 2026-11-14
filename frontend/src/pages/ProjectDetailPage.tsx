@@ -226,11 +226,6 @@ function ProjectView({ projectId }: { projectId: number }) {
             starredByMe={Boolean(data.starred_by_me)}
           />
           <ProjectProgressBadge progress={progress} />
-          {data.completed_at != null ? (
-            <span className="font-mono text-label font-bold uppercase tracking-widest text-accent">
-              ✓ Completed
-            </span>
-          ) : null}
           {data.open_for_contributors ? (
             <Tag>open for contributors</Tag>
           ) : null}

@@ -2,20 +2,14 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Dialog, useToast } from '@/design/primitives';
 import { ProjectProgressBadge } from '@/components/problems/ProjectProgressBadge';
-import type {
-  ProjectOut,
-  ProjectPatch,
-  CompletionChecklistItem,
-} from '@/api/client';
+import type { ProjectOut, ProjectPatch } from '@/api/client';
 import { ApiError } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
 import { useLogout } from '@/hooks/useLogout';
 import {
-  useCompleteProject,
   useDeleteProject,
   useMyProjects,
   usePatchProject,
-  useReopenProject,
 } from '@/hooks/useMyProjects';
 import { useProjectProgress } from '@/hooks/useProjectProgress';
 import { cx } from '@/lib/cx';
@@ -26,19 +20,6 @@ const STATUS_TAGS: Record<ProjectOut['verification_status'], { label: string; to
   needs_review: { label: 'Pending review', tone: 'text-muted' },
   rejected: { label: 'Rejected', tone: 'text-danger' },
 };
-
-function checkCompletionError(error: unknown): CompletionChecklistItem[] | null {
-  if (error instanceof ApiError && error.status === 422 && error.code === 'not_ready_to_complete') {
-    const detail = (error.payload as { detail?: { checklist?: unknown } } | undefined)?.detail;
-    if (Array.isArray(detail?.checklist)) {
-      return detail.checklist.filter(
-        (item): item is CompletionChecklistItem =>
-          typeof item?.item === 'string' && typeof item?.ok === 'boolean',
-      );
-    }
-  }
-  return null;
-}
 
 function EditProjectDialog({ project }: { project: ProjectOut }) {
   const patch = usePatchProject(project.id);
@@ -155,126 +136,6 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
   );
 }
 
-function CompleteChecklistRow({ checklist }: { checklist: CompletionChecklistItem[] }) {
-  return (
-    <ul className="space-y-1 text-body">
-      {checklist.map((item) => (
-        <li key={item.item}>
-          <span className={item.ok ? 'text-accent' : 'text-danger'}>
-            {item.ok ? '✓' : '✗'}
-          </span>{' '}
-          {item.item}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function CompleteProjectDialog({ project }: { project: ProjectOut }) {
-  const complete = useCompleteProject(project.id);
-  const toast = useToast();
-  const [open, setOpen] = useState(false);
-  const [demoUrl, setDemoUrl] = useState(project.demo_url ?? '');
-  const [reflection, setReflection] = useState('');
-  const [checklist, setChecklist] = useState<CompletionChecklistItem[] | null>(null);
-  const [failure, setFailure] = useState<string | null>(null);
-
-  function handleOpenChange(next: boolean) {
-    setOpen(next);
-    if (next) {
-      setDemoUrl(project.demo_url ?? '');
-      setReflection('');
-      setChecklist(null);
-      setFailure(null);
-    }
-  }
-
-  function markComplete() {
-    setChecklist(null);
-    setFailure(null);
-    complete.mutate(
-      {
-        demo_url: demoUrl.trim().length > 0 ? demoUrl.trim() : undefined,
-        reflection: reflection.trim().length > 0 ? reflection.trim() : undefined,
-      },
-      {
-        onSuccess: () => {
-          setOpen(false);
-          toast('Marked as completed. Nice ship.');
-        },
-        onError: (error) => {
-          const items = checkCompletionError(error);
-          if (items) {
-            setChecklist(items);
-          } else {
-            setFailure(
-              error instanceof ApiError
-                ? error.status >= 500
-                  ? 'GitHub is not reachable right now. Try again shortly.'
-                  : error.detail
-                : 'Could not mark as completed. Try again.',
-            );
-          }
-        },
-      },
-    );
-  }
-
-  return (
-    <Dialog
-      open={open}
-      onOpenChange={handleOpenChange}
-      title={`Complete ${project.repo_name}`}
-      triggerLabel="Mark complete"
-    >
-      <div className="flex flex-col gap-3">
-        <p className="text-body leading-snug">
-          Completing needs a verified submission, a README and at least 5
-          commits. MANABI checks GitHub again the moment you press the button.
-        </p>
-        <label className="block" htmlFor={`complete-demo-${project.id}`}>
-          <span className={fieldLabelClasses}>Demo URL (optional)</span>
-          <input
-            id={`complete-demo-${project.id}`}
-            type="url"
-            value={demoUrl}
-            onChange={(event) => setDemoUrl(event.target.value)}
-            placeholder="https://…"
-            className="field mt-1 w-full"
-          />
-        </label>
-        <label className="block" htmlFor={`complete-reflection-${project.id}`}>
-          <span className={fieldLabelClasses}>What did you learn? (optional)</span>
-          <textarea
-            id={`complete-reflection-${project.id}`}
-            value={reflection}
-            onChange={(event) => setReflection(event.target.value)}
-            rows={3}
-            maxLength={800}
-            className="field mt-1 w-full"
-          />
-        </label>
-        {checklist ? (
-          <div className="rounded-panel border border-danger/30 bg-danger-soft/60 p-3.5">
-            <p className="text-sm font-semibold text-danger">
-              Not ready yet. Missing:
-            </p>
-            <CompleteChecklistRow checklist={checklist} />
-          </div>
-        ) : null}
-        {failure ? (
-          <p role="alert" className="text-sm font-medium text-danger">
-            {failure}
-          </p>
-        ) : null}
-        <Button onClick={markComplete} disabled={complete.isPending}>
-          {complete.isPending ? 'Checking GitHub…' : 'Mark completed'}
-        </Button>
-      </div>
-    </Dialog>
-  );
-}
-
 function RemoveProjectDialog({ project }: { project: ProjectOut }) {
   const remove = useDeleteProject();
   const toast = useToast();
@@ -325,17 +186,7 @@ function RemoveProjectDialog({ project }: { project: ProjectOut }) {
 
 function MyProjectRow({ project }: { project: ProjectOut }) {
   const progress = useProjectProgress(project.id);
-  const reopen = useReopenProject(project.id);
-  const toast = useToast();
   const statusTag = STATUS_TAGS[project.verification_status] ?? null;
-  const completed = project.completed_at != null;
-
-  function handleReopen() {
-    reopen.mutate(undefined, {
-      onSuccess: () => toast('Back to building.'),
-      onError: () => toast('Could not reopen. Try again.', 'error'),
-    });
-  }
 
   return (
     <li className="flex flex-col gap-3 py-5">
@@ -357,11 +208,6 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
               {statusTag.label}
             </span>
           ) : null}
-          {completed ? (
-            <span className="text-sm font-medium text-ink">
-              ✓ Completed
-            </span>
-          ) : null}
           {progress.isLoading ? (
             <span className="text-sm text-muted">Checking GitHub…</span>
           ) : (
@@ -370,23 +216,11 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        {verifiedOrBetter(project) ? (
-          <CompleteProjectDialog project={project} />
-        ) : null}
         <EditProjectDialog project={project} />
-        {completed ? (
-          <Button variant="secondary" onClick={handleReopen} disabled={reopen.isPending}>
-            Reopen
-          </Button>
-        ) : null}
         <RemoveProjectDialog project={project} />
       </div>
     </li>
   );
-}
-
-function verifiedOrBetter(project: ProjectOut): boolean {
-  return project.verification_status === 'verified' && project.completed_at == null;
 }
 
 const fieldLabelClasses = 'text-sm font-medium text-muted';
@@ -399,8 +233,9 @@ export function DashboardPage() {
   const displayName = me.data?.name || me.data?.username;
   const rows = projects.data ?? [];
   const inReview = rows.filter((p) => p.verification_status === 'needs_review').length;
-  const completedCount = rows.filter((p) => p.completed_at != null).length;
-  const buildingCount = rows.length - completedCount;
+  const buildingCount = rows.filter(
+    (p) => p.verification_status !== 'needs_review',
+  ).length;
 
   return (
     <main className="mx-auto w-[min(1000px,94vw)] flex-1 py-12 md:py-16">
@@ -433,7 +268,7 @@ export function DashboardPage() {
           {rows.length > 0 ? (
             <p className="text-sm text-muted">
               {rows.length} total · {buildingCount} building · {inReview} in
-              review · {completedCount} completed
+              review
             </p>
           ) : null}
         </div>

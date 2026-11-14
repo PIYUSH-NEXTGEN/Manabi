@@ -28,7 +28,7 @@ export const HERO = {
   subline:
     'Put your product in front of students and developers who are actively choosing what to build.',
   cta: 'Become a sponsor',
-  note: 'MANABI is early-stage. Founding sponsors get founding pricing, locked for their first three months.',
+  note: 'MANABI is early-stage. Founding sponsor price: ₹799/month, locked for your first three months.',
 };
 
 export const AUDIENCE = {
@@ -65,14 +65,13 @@ export const OFFER = {
     'Your logo, name and one-line tagline on the MANABI landing page, linked to your website.',
   bullets: [
     'Your logo, name and one-line tagline in the home-page sponsor strip',
+    'A shoutout on our X and LinkedIn accounts',
     'Clicking the block opens your website in a new tab',
     'Labelled “Sponsor”, never presented as a recommendation',
     'Five slots, placed in the order sponsors are confirmed',
-    'Founding price locked for your first three months',
+    'Founding sponsor price: ₹799/month, locked for your first three months',
   ],
   cta: 'Email us about sponsorship',
-  footnote:
-    'Slots are limited to five on the home page and are sold in the order they are confirmed. Logos: SVG or PNG, transparent background, at least 400 px wide, under 200 KB.',
   previewCaption: 'Preview of the home-page sponsor strip',
   previewFirstSlot: 'Your logo here',
   previewOtherSlot: 'Available',

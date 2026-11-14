@@ -32,8 +32,8 @@ describe('SponsorsPage', () => {
     expect(document.getElementById('offer')).not.toBeNull();
 
     expect(
-      screen.getByText(/founding sponsors get founding pricing/i),
-    ).toBeInTheDocument();
+      screen.getAllByText(/founding sponsor price: ₹799\/month/i).length,
+    ).toBeGreaterThan(0);
   });
 
   it('shows the three audience cards and drops the old four-card copy', () => {

@@ -1,7 +1,14 @@
 import { Link } from 'react-router-dom';
-import { Plus } from 'lucide-react';
+import { Check, Plus } from 'lucide-react';
+import { SPONSOR_PRICE } from '@/pages/sponsors/sponsorContent';
 
 const SLOT_COUNT = 5;
+
+const PERKS = [
+  `Your logo and name on the MANABI home page`,
+  'A shoutout on our LinkedIn and X',
+  `Founding sponsor price: ${SPONSOR_PRICE}/month`,
+];
 
 // Sponsors appear in slot order. Add one here and its tile shows the sponsor's
 // icon and name; clicking it opens the sponsor's website.
@@ -126,6 +133,25 @@ export function Sponsors() {
             );
           })}
         </ul>
+
+        <div className="mt-10 max-w-md">
+          <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-muted">
+            What sponsors get
+          </p>
+          <ul className="mt-4 flex flex-col gap-2.5">
+            {PERKS.map((perk) => (
+              <li key={perk} className="flex gap-2.5 text-body leading-snug text-ink-soft">
+                <Check
+                  aria-hidden
+                  size={13}
+                  strokeWidth={2.6}
+                  className="mt-0.5 shrink-0 text-accent"
+                />
+                <span>{perk}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         <p className="mt-6 text-body leading-relaxed text-ink-soft">
           Want your project here?{' '}

@@ -151,10 +151,6 @@ export function SponsorsPage() {
             </a>
           </div>
 
-          <p className="mt-4 text-label leading-relaxed text-muted">
-            {OFFER.footnote}
-          </p>
-
           <div className="mt-8">
             <p className="font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
               {OFFER.previewCaption}
