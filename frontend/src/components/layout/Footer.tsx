@@ -6,9 +6,9 @@ import { Logo } from './Logo';
 import { GithubMark } from '@/components/icons/GithubMark';
 import { XMark } from '@/components/icons/XMark';
 import { EASE_SNAP } from '@/design/motion';
+import { X_URL } from '@/lib/socials';
 
 const REPO_URL = 'https://github.com/PIYUSH-NEXTGEN/Manabi';
-const X_URL = 'https://x.com/Piyush_NextGen';
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL;
 
 const FOOTER_COLUMNS = [

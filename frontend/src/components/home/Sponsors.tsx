@@ -1,13 +1,37 @@
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, Plus } from 'lucide-react';
+import { X_URL } from '@/lib/socials';
 import { SPONSOR_PRICE } from '@/pages/sponsors/sponsorContent';
 
 const SLOT_COUNT = 5;
 
-const PERKS = [
-  `Your logo and name on the MANABI home page`,
-  'A shoutout on our LinkedIn and X',
-  `Founding sponsor price: ${SPONSOR_PRICE}/month`,
+const PERKS: { id: string; content: ReactNode }[] = [
+  {
+    id: 'placement',
+    content: 'Your logo and name on the MANABI home page',
+  },
+  {
+    id: 'shoutout',
+    content: (
+      <>
+        A shoutout on our LinkedIn,{' '}
+        <a
+          href={X_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="font-semibold text-ink underline decoration-ink/30 underline-offset-4 transition-colors hover:text-sky-strong"
+        >
+          X
+        </a>{' '}
+        and our Discord community
+      </>
+    ),
+  },
+  {
+    id: 'price',
+    content: `Founding sponsor price: ${SPONSOR_PRICE}/month`,
+  },
 ];
 
 // Sponsors appear in slot order. Add one here and its tile shows the sponsor's
@@ -140,14 +164,14 @@ export function Sponsors() {
           </p>
           <ul className="mt-4 flex flex-col gap-2.5">
             {PERKS.map((perk) => (
-              <li key={perk} className="flex gap-2.5 text-body leading-snug text-ink-soft">
+              <li key={perk.id} className="flex gap-2.5 text-body leading-snug text-ink-soft">
                 <Check
                   aria-hidden
                   size={13}
                   strokeWidth={2.6}
                   className="mt-0.5 shrink-0 text-accent"
                 />
-                <span>{perk}</span>
+                <span>{perk.content}</span>
               </li>
             ))}
           </ul>

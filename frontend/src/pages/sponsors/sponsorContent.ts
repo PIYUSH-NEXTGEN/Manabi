@@ -65,7 +65,7 @@ export const OFFER = {
     'Your logo, name and one-line tagline on the MANABI landing page, linked to your website.',
   bullets: [
     'Your logo, name and one-line tagline in the home-page sponsor strip',
-    'A shoutout on our X and LinkedIn accounts',
+    'A shoutout on our LinkedIn, X and Discord community',
     'Clicking the block opens your website in a new tab',
     'Labelled “Sponsor”, never presented as a recommendation',
     'Five slots, placed in the order sponsors are confirmed',
@@ -75,6 +75,8 @@ export const OFFER = {
   previewCaption: 'Preview of the home-page sponsor strip',
   previewFirstSlot: 'Your logo here',
   previewOtherSlot: 'Available',
+  previewFirstName: 'Your product name',
+  previewOtherName: 'Sponsor name',
 };
 
 export const PROMISE = {

@@ -157,18 +157,29 @@ export function SponsorsPage() {
             </p>
             <ul className="mt-3 grid max-w-md grid-cols-5 gap-2 sm:gap-3">
               {Array.from({ length: SPONSOR_SLOTS }, (_, index) => (
-                <li
-                  key={index}
-                  className={cx(
-                    'flex aspect-square items-center justify-center rounded-[1.2rem] border border-dashed border-line px-1 text-center font-mono text-[0.5625rem] font-bold uppercase leading-tight tracking-[0.05em] dark:bg-sheet',
-                    index === 0
-                      ? 'bg-tint/40 text-ink-soft'
-                      : 'bg-paper text-muted',
-                  )}
-                >
-                  {index === 0
-                    ? OFFER.previewFirstSlot
-                    : OFFER.previewOtherSlot}
+                <li key={index} className="flex flex-col">
+                  <span
+                    className={cx(
+                      'flex aspect-square items-center justify-center rounded-[1.2rem] border border-dashed border-line px-1 text-center font-mono text-[0.5625rem] font-bold uppercase leading-tight tracking-[0.05em] dark:bg-sheet',
+                      index === 0
+                        ? 'bg-tint/40 text-ink-soft'
+                        : 'bg-paper text-muted',
+                    )}
+                  >
+                    {index === 0
+                      ? OFFER.previewFirstSlot
+                      : OFFER.previewOtherSlot}
+                  </span>
+                  <span
+                    className={cx(
+                      'mt-2 text-balance text-center font-display text-[0.75rem] leading-snug',
+                      index === 0 ? 'font-medium text-ink' : 'text-muted',
+                    )}
+                  >
+                    {index === 0
+                      ? OFFER.previewFirstName
+                      : OFFER.previewOtherName}
+                  </span>
                 </li>
               ))}
             </ul>
