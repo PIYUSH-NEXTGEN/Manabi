@@ -3,6 +3,7 @@ import { MotionConfig } from 'motion/react';
 import { Nav } from './Nav';
 import { Footer } from './Footer';
 import { ChatWidget } from '@/components/chat/ChatWidget';
+import { Mascot } from '@/components/mascot';
 
 export function AppLayout() {
   const { pathname } = useLocation();
@@ -22,7 +23,20 @@ export function AppLayout() {
         <div className="flex-1" id="content">
           <Outlet />
         </div>
-        <Footer />
+        <div className="relative">
+          <Footer />
+          {pathname === '/' ? (
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-end pr-[4%]"
+            >
+              <Mascot
+                state="working"
+                className="pointer-events-auto w-24 -translate-y-full -scale-x-100 sm:w-32 md:w-36"
+              />
+            </div>
+          ) : null}
+        </div>
         <ChatWidget />
       </div>
     </MotionConfig>
