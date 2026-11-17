@@ -1,6 +1,7 @@
 """Seed 20 web development resume projects."""
 
 from app.seed.runner import seed_problems
+from app.seed.webdev_plain import apply_plain_language
 from app.seed.webdev_resume_details import DETAILS as RESUME_DETAILS
 
 
@@ -2057,6 +2058,8 @@ for _problem in PROBLEMS:
     )
     _problem["resume_kit"]["target_roles"] = _detail["target_roles"]
     _problem["build_guide"] = _detail["build_guide"]
+
+PROBLEMS = apply_plain_language(PROBLEMS)
 
 
 if __name__ == "__main__":
