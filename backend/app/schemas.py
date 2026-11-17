@@ -317,6 +317,7 @@ class FacetsOut(BaseModel):
     fields: list[Facet]
     domains: list[Facet]
     difficulties: list[Facet]
+    goals: list[Facet]
     tech_tags: list[Facet]
     sources: list[Facet]
 

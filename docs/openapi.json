@@ -140,6 +140,27 @@
             }
           },
           {
+            "name": "goal",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "resume",
+                    "hackathon",
+                    "learning"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Goal"
+            }
+          },
+          {
             "name": "tech",
             "in": "query",
             "required": false,
@@ -175,11 +196,24 @@
             "schema": {
               "enum": [
                 "newest",
-                "popular"
+                "popular",
+                "discover"
               ],
               "type": "string",
               "default": "newest",
               "title": "Sort"
+            }
+          },
+          {
+            "name": "seed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 2147483646,
+              "minimum": 0,
+              "default": 0,
+              "title": "Seed"
             }
           },
           {
@@ -296,6 +330,65 @@
         ],
         "summary": "Facets",
         "operationId": "facets_api_problems_facets_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "name": "field",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "web-dev",
+                    "app-dev",
+                    "aiml",
+                    "data-science",
+                    "cyber-security",
+                    "devops-cloud",
+                    "blockchain"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Field"
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -303,6 +396,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FacetsOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -1867,6 +1970,13 @@
             "type": "array",
             "title": "Difficulties"
           },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/Facet"
+            },
+            "type": "array",
+            "title": "Goals"
+          },
           "tech_tags": {
             "items": {
               "$ref": "#/components/schemas/Facet"
@@ -1887,6 +1997,7 @@
           "fields",
           "domains",
           "difficulties",
+          "goals",
           "tech_tags",
           "sources"
         ],

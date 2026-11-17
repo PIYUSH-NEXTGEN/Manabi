@@ -630,6 +630,8 @@ export interface components {
             domains: components["schemas"]["Facet"][];
             /** Difficulties */
             difficulties: components["schemas"]["Facet"][];
+            /** Goals */
+            goals: components["schemas"]["Facet"][];
             /** Tech Tags */
             tech_tags: components["schemas"]["Facet"][];
             /** Sources */
@@ -1214,9 +1216,11 @@ export interface operations {
                 field?: ("web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain") | null;
                 domain?: ("healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "cybersecurity" | "computer-vision" | "iot-embedded" | "distributed-systems" | "ml" | "devops-cloud" | "nlp-llm" | "cloud" | "blockchain" | "web3" | "databases" | "systems" | "other") | null;
                 difficulty?: ("beginner" | "intermediate" | "advanced") | null;
+                goal?: ("resume" | "hackathon" | "learning") | null;
                 tech?: string[];
                 source?: string | null;
-                sort?: "newest" | "popular";
+                sort?: "newest" | "popular" | "discover";
+                seed?: number;
                 distinct?: ("field" | "domain") | null;
                 limit?: number;
                 offset?: number;
@@ -1282,7 +1286,11 @@ export interface operations {
     };
     facets_api_problems_facets_get: {
         parameters: {
-            query?: never;
+            query?: {
+                q?: string | null;
+                field?: ("web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain") | null;
+                source?: string | null;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -1296,6 +1304,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FacetsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

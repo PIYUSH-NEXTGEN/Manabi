@@ -161,6 +161,23 @@ def test_sort_popular_and_newest(client, seed):
     assert items[-1]["id"] == seed["old"].id
 
 
+def test_sort_discover_submitted_first_then_seeded_shuffle(client, seed):
+    first = client.get("/api/problems", params={"sort": "discover", "seed": 7}).json()["items"]
+    assert first[0]["id"] == seed["pop"].id
+
+    again = client.get("/api/problems", params={"sort": "discover", "seed": 7}).json()["items"]
+    assert [it["id"] for it in again] == [it["id"] for it in first]
+
+    orders = {
+        tuple(it["id"] for it in client.get(
+            "/api/problems", params={"sort": "discover", "seed": value}
+        ).json()["items"])
+        for value in range(1, 10)
+    }
+    assert len(orders) > 1
+    assert all(order[0] == seed["pop"].id for order in orders)
+
+
 def test_distinct_keeps_one_brief_per_field_or_domain(client, seed):
     res = client.get("/api/problems", params={"sort": "popular", "distinct": "field"})
     data = res.json()

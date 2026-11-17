@@ -1,7 +1,7 @@
 from typing import Literal
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import Text, case, func, select
+from sqlalchemy import BigInteger, Text, case, cast, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased, joinedload
 
@@ -20,7 +20,7 @@ from app.services.visibility import can_view_project, is_admin, is_owner_or_admi
 
 router = APIRouter(prefix="/api/problems", tags=["problems"])
 
-SortParam = Literal["newest", "popular"]
+SortParam = Literal["newest", "popular", "discover"]
 DistinctParam = Literal["field", "domain"]
 
 PROBLEM_CREATE_LIMITER = RateLimiter("PROBLEM_CREATE_PER_HOUR")
@@ -34,7 +34,7 @@ def _completed_count():
     ).label("completed")
 
 
-def apply_problem_filters(query, q, field, domain, difficulty, tech, source):
+def apply_problem_filters(query, q, field, domain, difficulty, tech, source, goal=None):
     """Shared WHERE filters for the board list and any aggregate over it."""
     if q:
         needle = f"%{q.lower()}%"
@@ -51,6 +51,8 @@ def apply_problem_filters(query, q, field, domain, difficulty, tech, source):
         query = query.where(Problem.domain == domain)
     if difficulty:
         query = query.where(Problem.difficulty == difficulty)
+    if goal:
+        query = query.where(Problem.goal == goal)
     for tag in tech:
         tag_text = func.lower(func.cast(Problem.tech_tags, Text))
         query = query.where(tag_text.like(f'%"{tag.lower()}"%'))
@@ -102,15 +104,17 @@ def list_problems(
     field: schemas.FieldEnum | None = None,
     domain: schemas.DomainEnum | None = None,
     difficulty: schemas.Difficulty | None = None,
+    goal: schemas.GoalEnum | None = None,
     tech: list[str] = Query(default=[]),
     source: str | None = None,
     sort: SortParam = "newest",
+    seed: int = Query(default=0, ge=0, le=2_147_483_646),
     distinct: DistinctParam | None = None,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ):
     query = apply_problem_filters(
-        select(Problem).where(Problem.status == STATUS_PUBLISHED), q, field, domain, difficulty, tech, source
+        select(Problem).where(Problem.status == STATUS_PUBLISHED), q, field, domain, difficulty, tech, source, goal
     )
 
     # One aggregate over the same popularity subquery serves ordering AND the
@@ -130,6 +134,19 @@ def list_problems(
     query = query.add_columns(popularity, counts_sub.c["completed"]).outerjoin(counts_sub, Problem.id == counts_sub.c.problem_id)
     if sort == "popular":
         ordering = [popularity.desc(), Problem.created_at.desc(), Problem.id.desc()]
+    elif sort == "discover":
+        # Verified submissions get first-screen placement; everything else is
+        # shuffled with a client seed so pages stay stable while the board is
+        # open, but a refresh gets a new mix.
+        has_projects = case((popularity > 0, 0), else_=1)
+        mixed_id_seed = func.mod(cast(Problem.id, BigInteger) * seed, 1_000_003)
+        shuffle_key = func.mod(
+            cast(Problem.id, BigInteger) * 1_103_515_245
+            + cast(seed, BigInteger) * 97_531
+            + mixed_id_seed * 2_654_435_761,
+            2_147_483_647,
+        )
+        ordering = [has_projects, shuffle_key, Problem.id]
     else:
         ordering = [Problem.created_at.desc(), Problem.id.desc()]
     query = query.order_by(*ordering)
@@ -148,7 +165,7 @@ def list_problems(
         # and the old form re-ran it per request (docs/PERF_2026-11-09.md, FIN-3).
         base_col = Problem.field if distinct == "field" else Problem.domain
         distinct_base = select(base_col).where(Problem.status == STATUS_PUBLISHED)
-        distinct_base = apply_problem_filters(distinct_base, q, field, domain, difficulty, tech, source)
+        distinct_base = apply_problem_filters(distinct_base, q, field, domain, difficulty, tech, source, goal)
         total = db.scalar(select(func.count()).select_from(distinct_base.distinct().subquery())) or 0
         rows = db.execute(
             select(
@@ -200,7 +217,23 @@ def list_problems(
 
 
 @router.get("/facets", response_model=schemas.FacetsOut, response_model_exclude_none=True)
-def facets(db: DB):
+def facets(
+    db: DB,
+    q: str | None = None,
+    field: schemas.FieldEnum | None = None,
+    source: str | None = None,
+):
+    goal_query = select(Problem.goal, func.count(Problem.id)).where(
+        Problem.status == STATUS_PUBLISHED
+    )
+    goal_query = apply_problem_filters(
+        goal_query, q, field, None, None, [], source
+    ).group_by(Problem.goal)
+    goal_counts = [
+        (str(value), int(count))
+        for value, count in db.execute(goal_query).all()
+        if value is not None
+    ]
     tech_rows = db.scalars(
         select(Problem.tech_tags).where(Problem.status == STATUS_PUBLISHED)
     ).all()
@@ -221,6 +254,7 @@ def facets(db: DB):
         fields=[schemas.Facet(value=v, count=c) for v, c in _counts_by_column(db, Problem.field)],
         domains=[schemas.Facet(value=v, count=c) for v, c in _counts_by_column(db, Problem.domain)],
         difficulties=[schemas.Facet(value=v, count=c) for v, c in _counts_by_column(db, Problem.difficulty)],
+        goals=[schemas.Facet(value=v, count=c) for v, c in goal_counts],
         tech_tags=[
             schemas.Facet(value=v, count=c)
             for v, c in sorted(tech_counter.items(), key=lambda kv: (-kv[1], kv[0]))
