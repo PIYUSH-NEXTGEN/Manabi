@@ -217,6 +217,32 @@ def test_facets_counts(client, seed):
     assert sources == {"Smart India Hackathon 2026": 1, "TCOE": 2}
 
 
+def test_facets_difficulty_counts_follow_field_and_goal(client, seed, db_session):
+    seed["old"].goal = "learning"
+    seed["new"].goal = "learning"
+    seed["pop"].goal = "resume"
+    db_session.commit()
+
+    data = client.get(
+        "/api/problems/facets", params={"field": "aiml", "goal": "learning"}
+    ).json()
+    difficulties = {f["value"]: f["count"] for f in data["difficulties"]}
+    assert difficulties == {"intermediate": 1}
+    listed = client.get(
+        "/api/problems",
+        params={"field": "aiml", "goal": "learning", "limit": 100},
+    ).json()
+    assert sum(difficulties.values()) == listed["total"]
+
+    data = client.get("/api/problems/facets", params={"field": "aiml"}).json()
+    difficulties = {f["value"]: f["count"] for f in data["difficulties"]}
+    assert difficulties == {"intermediate": 1, "advanced": 1}
+
+    data = client.get("/api/problems/facets", params={"goal": "learning"}).json()
+    difficulties = {f["value"]: f["count"] for f in data["difficulties"]}
+    assert difficulties == {"beginner": 1, "intermediate": 1}
+
+
 def test_detail_contains_original_text_projects_owner(client, seed):
     res = client.get(f"/api/problems/{seed['pop'].id}")
     assert res.status_code == 200

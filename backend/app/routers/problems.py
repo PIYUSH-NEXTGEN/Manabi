@@ -222,6 +222,7 @@ def facets(
     q: str | None = None,
     field: schemas.FieldEnum | None = None,
     source: str | None = None,
+    goal: schemas.GoalEnum | None = None,
 ):
     goal_query = select(Problem.goal, func.count(Problem.id)).where(
         Problem.status == STATUS_PUBLISHED
@@ -241,6 +242,17 @@ def facets(
     for tags in tech_rows:
         for tag in tags:
             tech_counter[tag.lower()] = tech_counter.get(tag.lower(), 0) + 1
+    difficulty_query = select(Problem.difficulty, func.count(Problem.id)).where(
+        Problem.status == STATUS_PUBLISHED
+    )
+    difficulty_query = apply_problem_filters(
+        difficulty_query, q, field, None, None, [], source, goal
+    ).group_by(Problem.difficulty)
+    difficulty_counts = [
+        (str(value), int(count))
+        for value, count in db.execute(difficulty_query).all()
+        if value is not None
+    ]
     source_rows = db.execute(
         select(
             Problem.source_name,
@@ -253,7 +265,7 @@ def facets(
     return schemas.FacetsOut(
         fields=[schemas.Facet(value=v, count=c) for v, c in _counts_by_column(db, Problem.field)],
         domains=[schemas.Facet(value=v, count=c) for v, c in _counts_by_column(db, Problem.domain)],
-        difficulties=[schemas.Facet(value=v, count=c) for v, c in _counts_by_column(db, Problem.difficulty)],
+        difficulties=[schemas.Facet(value=v, count=c) for v, c in difficulty_counts],
         goals=[schemas.Facet(value=v, count=c) for v, c in goal_counts],
         tech_tags=[
             schemas.Facet(value=v, count=c)
