@@ -99,7 +99,7 @@ export function KitPage() {
         <div className="grid gap-6 md:grid-cols-2">
           <IndexCard
             sourceId="SIH26017"
-            field="aiml"
+            field="web-dev"
             title="Crop disease triage"
             summary="Sample card for the design kit. Real cards come from the API."
             difficulty="beginner"
