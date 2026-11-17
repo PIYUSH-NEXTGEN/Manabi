@@ -11,8 +11,8 @@ python -m venv .venv                    # Windows:  .venv\Scripts\python
 .venv\Scripts\pip install -r requirements.txt
 copy .env.example .env                  # then edit (session secret, GitHub OAuth, LLM key)
 .venv\Scripts\python -m alembic upgrade head
-# Optional: populate briefs from the seed scripts (no network/LLM):
-.venv\Scripts\python scripts/seed_beginner_web_projects.py
+# Optional: populate briefs from a curated seed pack (no network/LLM):
+.venv\Scripts\python -m app.seed.seed_ml_projects
 .venv\Scripts\python -m uvicorn app.main:app --port 8000
 ```
 

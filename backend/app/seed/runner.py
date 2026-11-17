@@ -13,9 +13,36 @@ from app.db import get_session_factory
 from app.models import Problem, STATUS_PUBLISHED
 
 
-def seed_problems(problems: list[dict], label: str = "problems") -> None:
+def _apply_problem_fields(problem: Problem, p: dict) -> None:
+    problem.title = p["title"]
+    problem.summary = p["summary"]
+    problem.who_affected = p["who_affected"]
+    problem.why_matters = p["why_matters"]
+    problem.field = p["field"]
+    problem.domain = p["domain"]
+    problem.difficulty = p["difficulty"]
+    problem.est_hours = p["est_hours"]
+    problem.tech_tags = p["tech_tags"]
+    problem.datasets = p["datasets"]
+    problem.approaches = p["approaches"]
+    problem.source_name = p["source_name"]
+    problem.source_url = None
+    problem.source_note = p.get("source_note")
+    problem.original_text = p["original_text"]
+    problem.ai_fields = p["ai_fields"]
+    problem.status = STATUS_PUBLISHED
+    problem.goal = p.get("goal")
+    problem.learning_concepts = p.get("learning_concepts", [])
+    problem.build_guide = p.get("build_guide")
+    problem.team_plan = p.get("team_plan")
+    problem.pitch_guide = p.get("pitch_guide")
+    problem.resume_kit = p.get("resume_kit")
+
+
+def seed_problems(problems: list[dict], label: str = "problems", update: bool = False) -> None:
     session = get_session_factory()()
     inserted = 0
+    updated = 0
     skipped = 0
     try:
         for p in problems:
@@ -23,38 +50,20 @@ def seed_problems(problems: list[dict], label: str = "problems") -> None:
                 select(Problem).where(Problem.source_id == p["source_id"])
             )
             if existing is not None:
-                skipped += 1
+                if update:
+                    _apply_problem_fields(existing, p)
+                    updated += 1
+                else:
+                    skipped += 1
                 continue
-            problem = Problem(
-                title=p["title"],
-                summary=p["summary"],
-                who_affected=p["who_affected"],
-                why_matters=p["why_matters"],
-                field=p["field"],
-                domain=p["domain"],
-                difficulty=p["difficulty"],
-                est_hours=p["est_hours"],
-                tech_tags=p["tech_tags"],
-                datasets=p["datasets"],
-                approaches=p["approaches"],
-                source_name=p["source_name"],
-                source_id=p["source_id"],
-                source_url=None,
-                source_note=p.get("source_note"),
-                original_text=p["original_text"],
-                ai_fields=p["ai_fields"],
-                created_by=None,
-                status=STATUS_PUBLISHED,
-                goal=p.get("goal"),
-                learning_concepts=p.get("learning_concepts", []),
-                build_guide=p.get("build_guide"),
-                team_plan=p.get("team_plan"),
-                pitch_guide=p.get("pitch_guide"),
-                resume_kit=p.get("resume_kit"),
-            )
+            problem = Problem(source_id=p["source_id"], created_by=None)
+            _apply_problem_fields(problem, p)
             session.add(problem)
             inserted += 1
         session.commit()
-        print(f"Inserted: {inserted}, Skipped (already present): {skipped}")
+        print(
+            f"Inserted: {inserted}, Updated: {updated}, "
+            f"Skipped (already present): {skipped}"
+        )
     finally:
         session.close()

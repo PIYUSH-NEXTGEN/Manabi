@@ -104,7 +104,7 @@ MANABI/
 │   │   ├── config.py      # all env vars and their defaults
 │   │   └── main.py        # app assembly, SPA serving, health
 │   ├── alembic/           # migrations (source of truth for Postgres)
-│   ├── scripts/           # seed_*_web_projects.py, reverify_projects.py, export_openapi.py
+│   ├── scripts/           # reverify_projects.py, export_openapi.py
 │   ├── .env.example       # every setting with comments and defaults
 │   ├── requirements.txt   # runtime deps (pinned)
 │   ├── requirements-dev.txt
@@ -136,7 +136,6 @@ python -m venv .venv
 .venv/Scripts/pip install -r requirements.txt     # macOS/Linux: .venv/bin/pip
 copy .env.example .env                            # then edit secrets (never commit .env)
 .venv/Scripts/python -m alembic upgrade head
-.venv/Scripts/python scripts/seed_beginner_web_projects.py
 .venv/Scripts/python -m uvicorn app.main:app --port 8000
 
 # Terminal 2, frontend
@@ -152,13 +151,21 @@ the app without any provider key.
 
 ## Seed data and demos
 
-The app starts empty. Load briefs without any network or LLM call:
+The app starts empty. Load curated brief packs without any network or LLM call:
 
 ```sh
 cd backend
-.venv/Scripts/python scripts/seed_beginner_web_projects.py
-.venv/Scripts/python scripts/seed_intermediate_web_projects.py
+.venv/Scripts/python -m app.seed.seed_ml_projects
+.venv/Scripts/python -m app.seed.seed_ds_projects
+.venv/Scripts/python -m app.seed.seed_webdev_projects
+.venv/Scripts/python -m app.seed.seed_mobile_projects
+.venv/Scripts/python -m app.seed.seed_cloud_projects
+.venv/Scripts/python -m app.seed.seed_cybersecurity_projects
+.venv/Scripts/python -m app.seed.seed_web3_projects
 ```
+
+Append `--update` to refresh rows that already exist, for example
+`.venv/Scripts/python -m app.seed.seed_webdev_projects --update`.
 
 Summaries are clearly generated, never verbatim source text. Seed scripts are
 for local setups and demos; the production database is fully curated offline.
