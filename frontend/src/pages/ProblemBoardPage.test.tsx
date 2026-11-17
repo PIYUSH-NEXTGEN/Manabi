@@ -167,6 +167,27 @@ describe('ProblemBoardPage', () => {
     expect(await screen.findByText(/1 projects? in the index/i)).toBeInTheDocument();
   });
 
+  it('shows removed fields as disabled upcoming filter options', async () => {
+    renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
+
+    const appDev = await screen.findByRole('option', {
+      name: 'App Dev (coming soon)',
+    });
+    expect(appDev).toBeDisabled();
+    expect(
+      screen.getByRole('option', { name: 'Cyber Security (coming soon)' }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('option', { name: 'DevOps Cloud (coming soon)' }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('option', { name: 'Blockchain (coming soon)' }),
+    ).toBeDisabled();
+    expect(
+      await screen.findByRole('option', { name: 'AI / ML (3)' }),
+    ).not.toBeDisabled();
+  });
+
   it('scopes difficulty counts to the selected field and learning track', async () => {
     renderWithProviders(<ProblemBoardPage />, {
       route: '/problems?field=aiml&goal=learning',

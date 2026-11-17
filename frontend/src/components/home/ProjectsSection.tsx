@@ -9,7 +9,12 @@ import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import { useProblems } from '@/hooks/useProblems';
 import { useStats } from '@/hooks/useStats';
 import { openChatWidget } from '@/components/chat/ChatWidget';
-import { FIELD_LABELS, FIELD_VALUES, fieldLabel } from '@/lib/fields';
+import {
+  FIELD_LABELS,
+  FIELD_VALUES,
+  fieldLabel,
+  UPCOMING_FIELD_VALUES,
+} from '@/lib/fields';
 import { CountUp } from './CountUp';
 
 const SHOWCASE_LIMIT = 6;
@@ -376,7 +381,7 @@ export function ProjectsSection() {
               <span className="mr-1 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
                 Fields
               </span>
-              {FIELD_VALUES.slice(0, 4).map((field) => (
+              {FIELD_VALUES.map((field) => (
                 <Link
                   key={field}
                   to={`/problems?field=${field}`}
@@ -385,12 +390,19 @@ export function ProjectsSection() {
                   {FIELD_LABELS[field]}
                 </Link>
               ))}
-              <Link
-                to="/problems"
-                className="rounded-full px-2 py-1.5 text-[0.75rem] font-semibold text-ink underline underline-offset-4 transition-colors hover:text-sky-strong"
-              >
-                +3 more
-              </Link>
+              {UPCOMING_FIELD_VALUES.map((field) => (
+                <span
+                  key={field}
+                  title="Coming soon"
+                  aria-disabled="true"
+                  className="cursor-not-allowed rounded-full border border-dashed border-line px-3 py-1.5 text-[0.75rem] font-semibold text-muted"
+                >
+                  {FIELD_LABELS[field]}
+                  <span className="ml-1 font-mono text-[0.6rem] uppercase tracking-[0.12em]">
+                    soon
+                  </span>
+                </span>
+              ))}
             </div>
           </motion.div>
 

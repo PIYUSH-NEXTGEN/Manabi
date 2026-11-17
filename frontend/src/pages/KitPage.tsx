@@ -107,7 +107,7 @@ export function KitPage() {
           />
           <IndexCard
             sourceId="OGDC-04"
-            field="app-dev"
+            field="aiml"
             title="Ambulance ETA board"
             difficulty="intermediate"
             estHours={35}

@@ -8,7 +8,11 @@ import { ProblemCard } from '@/components/problems/ProblemCard';
 import { FilterSelect } from '@/components/problems/FilterSelect';
 import { useFacets } from '@/hooks/useFacets';
 import { discoverSeedFor } from '@/lib/discoverSeed';
-import { fieldLabel } from '@/lib/fields';
+import {
+  fieldLabel,
+  isActiveField,
+  UPCOMING_FIELD_VALUES,
+} from '@/lib/fields';
 import { useInfiniteProblems } from '@/hooks/useInfiniteProblems';
 
 type GoalKey = 'resume' | 'hackathon' | 'learning';
@@ -47,7 +51,8 @@ export function ProblemBoardPage() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get('q') ?? '';
-  const field = searchParams.get('field') ?? '';
+  const fieldParam = searchParams.get('field') ?? '';
+  const field = isActiveField(fieldParam) ? fieldParam : '';
   const source = searchParams.get('source') ?? '';
   const goalParam = searchParams.get('goal');
   const goal =
@@ -81,6 +86,17 @@ export function ProblemBoardPage() {
     (facets.data?.goals ?? []).map((facet) => [facet.value, facet.count]),
   );
   const hasFilters = Boolean(q || field || source || difficulty);
+  const fieldOptions = useMemo(
+    () => [
+      ...(facets.data?.fields ?? []),
+      ...UPCOMING_FIELD_VALUES.map((value) => ({
+        value,
+        disabled: true,
+        hint: 'coming soon',
+      })),
+    ],
+    [facets.data?.fields],
+  );
 
   function setParam(key: string, value: string) {
     setSearchParams((prev) => {
@@ -147,7 +163,7 @@ export function ProblemBoardPage() {
               label="Field"
               value={field}
               onChange={(value) => setParam('field', value)}
-              options={facets.data?.fields ?? []}
+              options={fieldOptions}
               labelFor={fieldLabel}
             />
             {showDifficulty ? (

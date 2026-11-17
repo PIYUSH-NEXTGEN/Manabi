@@ -73,7 +73,7 @@ const problems = [
       'District control rooms see stale ambulance locations; a live ETA board with honest uncertainty bands.',
     who_affected: 'District emergency controllers',
     why_matters: 'Minutes decide outcomes in emergencies.',
-    field: 'app-dev',
+    field: 'web-dev',
     domain: 'disaster-management',
     difficulty: 'intermediate',
     est_hours: 35,
@@ -101,7 +101,7 @@ const problems = [
       'A school network imports biometric attendance CSVs; silent row drops must become alerts with a dry-run mode.',
     who_affected: 'School network administrators',
     why_matters: 'Silent data loss hides absent children.',
-    field: 'app-dev',
+    field: 'web-dev',
     domain: 'education',
     difficulty: 'beginner',
     est_hours: 24,
@@ -188,7 +188,7 @@ const problems = [
 const facets = {
   fields: [
     { value: 'aiml', count: 3 },
-    { value: 'app-dev', count: 2 },
+    { value: 'web-dev', count: 2 },
   ],
   domains: [
     { value: 'agriculture', count: 1 },

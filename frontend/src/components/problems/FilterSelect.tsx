@@ -3,6 +3,8 @@ import { useId, type ChangeEvent } from 'react';
 export interface FilterOption {
   value: string;
   count?: number;
+  hint?: string;
+  disabled?: boolean;
 }
 
 interface FilterSelectProps {
@@ -43,9 +45,14 @@ export function FilterSelect({
       >
         <option value="">All</option>
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <option
+            key={option.value}
+            value={option.value}
+            disabled={option.disabled}
+          >
             {labelFor ? labelFor(option.value) : option.value}
             {option.count != null ? ` (${option.count})` : ''}
+            {option.hint ? ` (${option.hint})` : ''}
           </option>
         ))}
       </select>
