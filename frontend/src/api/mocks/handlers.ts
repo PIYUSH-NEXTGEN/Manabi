@@ -336,6 +336,7 @@ export const handlers = [
     const q = url.searchParams.get('q');
     const field = url.searchParams.get('field');
     const source = url.searchParams.get('source');
+    const goal = url.searchParams.get('goal');
 
     let scoped = problems;
     if (q) {
@@ -354,7 +355,13 @@ export const handlers = [
       count: scoped.filter((p) => p.goal === value).length,
     }));
 
-    return HttpResponse.json({ ...facets, goals });
+    if (goal) scoped = scoped.filter((p) => p.goal === goal);
+    const difficulties = ['beginner', 'intermediate', 'advanced'].map((value) => ({
+      value,
+      count: scoped.filter((p) => p.difficulty === value).length,
+    }));
+
+    return HttpResponse.json({ ...facets, difficulties, goals });
   }),
   http.get('*/api/problems', ({ request }) => {
     const url = new URL(request.url);

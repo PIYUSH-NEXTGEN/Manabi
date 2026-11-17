@@ -49,10 +49,10 @@ export function ProblemBoardPage() {
   const q = searchParams.get('q') ?? '';
   const field = searchParams.get('field') ?? '';
   const source = searchParams.get('source') ?? '';
-  const facets = useFacets({ q, field, source });
   const goalParam = searchParams.get('goal');
   const goal =
     GOAL_OPTIONS.find((option) => option.value === goalParam)?.value ?? '';
+  const facets = useFacets({ q, field, source, goal: goal || undefined });
   const showDifficulty = goal === 'learning';
   const difficulty = showDifficulty
     ? searchParams.get('difficulty') ?? ''

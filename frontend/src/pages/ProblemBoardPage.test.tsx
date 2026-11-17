@@ -167,6 +167,24 @@ describe('ProblemBoardPage', () => {
     expect(await screen.findByText(/1 projects? in the index/i)).toBeInTheDocument();
   });
 
+  it('scopes difficulty counts to the selected field and learning track', async () => {
+    renderWithProviders(<ProblemBoardPage />, {
+      route: '/problems?field=aiml&goal=learning',
+    });
+
+    await screen.findAllByRole('heading', { level: 3 });
+
+    expect(
+      await screen.findByRole('option', { name: 'advanced (1)' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('option', { name: 'beginner (0)' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('option', { name: 'beginner (2)' }),
+    ).not.toBeInTheDocument();
+  });
+
   it('clear filters resets the board', async () => {
     const user = userEvent.setup();
     renderWithProviders(<ProblemBoardPage />, { route: '/problems' });

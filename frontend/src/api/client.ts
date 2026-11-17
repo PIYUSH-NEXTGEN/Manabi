@@ -141,6 +141,7 @@ export interface FacetsQuery {
   q?: string;
   field?: string;
   source?: string;
+  goal?: 'resume' | 'hackathon' | 'learning';
 }
 
 export function getFacets(query: FacetsQuery = {}): Promise<FacetsOut> {
@@ -148,6 +149,7 @@ export function getFacets(query: FacetsQuery = {}): Promise<FacetsOut> {
   if (query.q) params.set('q', query.q);
   if (query.field) params.set('field', query.field);
   if (query.source) params.set('source', query.source);
+  if (query.goal) params.set('goal', query.goal);
   const search = params.toString();
   return apiFetch<FacetsOut>(`/api/problems/facets${search ? `?${search}` : ''}`);
 }
