@@ -1,9 +1,8 @@
-/** The seven problem fields MANABI keeps, with their display labels. */
+/** The six problem fields MANABI keeps, with their display labels. */
 export const FIELD_VALUES = [
   'web-dev',
   'app-dev',
   'aiml',
-  'data-science',
   'cyber-security',
   'devops-cloud',
   'blockchain',
@@ -15,7 +14,6 @@ export const FIELD_LABELS: Record<FieldValue, string> = {
   'web-dev': 'Web Dev',
   'app-dev': 'App Dev',
   aiml: 'AI / ML',
-  'data-science': 'Data Science',
   'cyber-security': 'Cyber Security',
   'devops-cloud': 'DevOps Cloud',
   blockchain: 'Blockchain',

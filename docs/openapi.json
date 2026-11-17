@@ -62,7 +62,6 @@
                     "web-dev",
                     "app-dev",
                     "aiml",
-                    "data-science",
                     "cyber-security",
                     "devops-cloud",
                     "blockchain"
@@ -358,7 +357,6 @@
                     "web-dev",
                     "app-dev",
                     "aiml",
-                    "data-science",
                     "cyber-security",
                     "devops-cloud",
                     "blockchain"
@@ -386,6 +384,27 @@
                 }
               ],
               "title": "Source"
+            }
+          },
+          {
+            "name": "goal",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "resume",
+                    "hackathon",
+                    "learning"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Goal"
             }
           }
         ],
@@ -1861,7 +1880,6 @@
               "web-dev",
               "app-dev",
               "aiml",
-              "data-science",
               "cyber-security",
               "devops-cloud",
               "blockchain"
@@ -2185,7 +2203,6 @@
               "web-dev",
               "app-dev",
               "aiml",
-              "data-science",
               "cyber-security",
               "devops-cloud",
               "blockchain"
@@ -2531,7 +2548,6 @@
               "web-dev",
               "app-dev",
               "aiml",
-              "data-science",
               "cyber-security",
               "devops-cloud",
               "blockchain"
@@ -2713,7 +2729,6 @@
               "web-dev",
               "app-dev",
               "aiml",
-              "data-science",
               "cyber-security",
               "devops-cloud",
               "blockchain"

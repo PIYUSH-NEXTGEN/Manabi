@@ -21,7 +21,7 @@ const CHAT_200 = {
     {
       id: 5,
       title: 'Attendance pipeline that fails loudly',
-      field: 'data-science',
+      field: 'aiml',
       difficulty: 'beginner',
     },
   ],
@@ -126,7 +126,7 @@ describe('ChatWidget', () => {
       'href',
       '/problems/5',
     );
-    expect(screen.getByText(/data science · beginner/i)).toBeInTheDocument();
+    expect(screen.getByText(/AI \/ ML · beginner/i)).toBeInTheDocument();
   });
 
   it('renders markdown replies as formatted elements with inline problem links', async () => {

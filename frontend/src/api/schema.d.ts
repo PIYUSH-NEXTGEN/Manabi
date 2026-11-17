@@ -599,7 +599,7 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain";
+            field: "web-dev" | "app-dev" | "aiml" | "cyber-security" | "devops-cloud" | "blockchain";
             /**
              * Difficulty
              * @enum {string}
@@ -720,7 +720,7 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain";
+            field: "web-dev" | "app-dev" | "aiml" | "cyber-security" | "devops-cloud" | "blockchain";
             /**
              * Domain
              * @enum {string}
@@ -824,7 +824,7 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain";
+            field: "web-dev" | "app-dev" | "aiml" | "cyber-security" | "devops-cloud" | "blockchain";
             /**
              * Domain
              * @enum {string}
@@ -873,7 +873,7 @@ export interface components {
              * Field
              * @enum {string}
              */
-            field: "web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain";
+            field: "web-dev" | "app-dev" | "aiml" | "cyber-security" | "devops-cloud" | "blockchain";
             /**
              * Domain
              * @enum {string}
@@ -1213,7 +1213,7 @@ export interface operations {
         parameters: {
             query?: {
                 q?: string | null;
-                field?: ("web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain") | null;
+                field?: ("web-dev" | "app-dev" | "aiml" | "cyber-security" | "devops-cloud" | "blockchain") | null;
                 domain?: ("healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "cybersecurity" | "computer-vision" | "iot-embedded" | "distributed-systems" | "ml" | "devops-cloud" | "nlp-llm" | "cloud" | "blockchain" | "web3" | "databases" | "systems" | "other") | null;
                 difficulty?: ("beginner" | "intermediate" | "advanced") | null;
                 goal?: ("resume" | "hackathon" | "learning") | null;
@@ -1288,8 +1288,9 @@ export interface operations {
         parameters: {
             query?: {
                 q?: string | null;
-                field?: ("web-dev" | "app-dev" | "aiml" | "data-science" | "cyber-security" | "devops-cloud" | "blockchain") | null;
+                field?: ("web-dev" | "app-dev" | "aiml" | "cyber-security" | "devops-cloud" | "blockchain") | null;
                 source?: string | null;
+                goal?: ("resume" | "hackathon" | "learning") | null;
             };
             header?: never;
             path?: never;

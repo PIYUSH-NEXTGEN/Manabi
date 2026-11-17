@@ -10,10 +10,11 @@
 
 import pytest
 from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.orm import Session
 
 from alembic import command
 from app.migrations import alembic_config, upgrade_to_head
-from app.models import Base
+from app.models import Base, Problem, ProblemStar, Project, ProjectReport, ProjectStar, User
 
 BASELINE_PROBLEM_SQL = """
 INSERT INTO problems (
@@ -73,6 +74,81 @@ def _seed_project_row(cfg, sqlite_url) -> None:
 @pytest.fixture
 def sqlite_url(tmp_path):
     return f"sqlite:///{tmp_path/'mig.db'}"
+
+
+def _problem(field: str, title: str) -> Problem:
+    return Problem(
+        title=title,
+        summary="summary",
+        who_affected="affected",
+        why_matters="why",
+        field=field,
+        domain="other",
+        difficulty="beginner",
+        est_hours=10,
+        tech_tags=[],
+        datasets=[],
+        approaches=[],
+        source_name="Test source",
+        original_text="verbatim",
+        ai_fields=[],
+    )
+
+
+def test_0015_removes_data_science_briefs_and_dependents(sqlite_url):
+    cfg = alembic_config(sqlite_url)
+    command.upgrade(cfg, "0014_rate_limit_hits")
+    engine = create_engine(sqlite_url)
+    with Session(engine) as session:
+        user = User(github_id=91, username="curator", signals_json={})
+        session.add(user)
+        session.flush()
+        removed = _problem("data-science", "Removed")
+        kept = _problem("aiml", "Kept")
+        session.add_all([removed, kept])
+        session.flush()
+        removed_project = Project(
+            problem_id=removed.id,
+            user_id=user.id,
+            repo_owner="owner",
+            repo_name="removed-repo",
+            repo_url="https://github.com/owner/removed-repo",
+        )
+        kept_project = Project(
+            problem_id=kept.id,
+            user_id=user.id,
+            repo_owner="owner",
+            repo_name="kept-repo",
+            repo_url="https://github.com/owner/kept-repo",
+        )
+        session.add_all([removed_project, kept_project])
+        session.flush()
+        session.add_all(
+            [
+                ProblemStar(problem_id=removed.id, user_id=user.id),
+                ProjectStar(project_id=removed_project.id, user_id=user.id),
+                ProjectStar(project_id=kept_project.id, user_id=user.id),
+                ProjectReport(
+                    project_id=removed_project.id,
+                    reporter_user_id=user.id,
+                    reason="test",
+                ),
+            ]
+        )
+        session.commit()
+    engine.dispose()
+
+    command.upgrade(cfg, "head")
+    engine = create_engine(sqlite_url)
+    with engine.connect() as conn:
+        assert conn.scalar(text("SELECT COUNT(*) FROM problems")) == 1
+        assert conn.scalar(text("SELECT title FROM problems")) == "Kept"
+        assert conn.scalar(text("SELECT COUNT(*) FROM projects")) == 1
+        assert conn.scalar(text("SELECT repo_name FROM projects")) == "kept-repo"
+        assert conn.scalar(text("SELECT COUNT(*) FROM problem_stars")) == 0
+        assert conn.scalar(text("SELECT COUNT(*) FROM project_stars")) == 1
+        assert conn.scalar(text("SELECT COUNT(*) FROM project_reports")) == 0
+    engine.dispose()
 
 
 def _seed_baseline_rows(cfg, sqlite_url):

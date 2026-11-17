@@ -13,7 +13,7 @@ const extendedProblems = [
     summary: `Summary ${index + 1}`,
     who_affected: 'someone',
     why_matters: 'because',
-    field: 'data-science',
+    field: 'aiml',
     domain: 'healthcare',
     difficulty: 'beginner',
     est_hours: 10,

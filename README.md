@@ -8,8 +8,7 @@ FastAPI service that also serves the built frontend.
 Problem briefs are curated manually, via seed scripts and the app itself; the
 app needs no network sources. Automated crawling was evaluated early on and
 intentionally removed: several public sources prohibit scraping. The seed files
-fill in web, mobile, ML, data science, cloud, cybersecurity, systems, and web3
-briefs.
+fill in web, mobile, ML, cloud, cybersecurity, systems, and web3 briefs.
 
 ## What the app does
 
@@ -156,7 +155,6 @@ The app starts empty. Load curated brief packs without any network or LLM call:
 ```sh
 cd backend
 .venv/Scripts/python -m app.seed.seed_ml_projects
-.venv/Scripts/python -m app.seed.seed_ds_projects
 .venv/Scripts/python -m app.seed.seed_webdev_projects
 .venv/Scripts/python -m app.seed.seed_mobile_projects
 .venv/Scripts/python -m app.seed.seed_cloud_projects

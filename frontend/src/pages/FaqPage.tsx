@@ -48,7 +48,7 @@ const GROUPS = [
       },
       {
         q: 'Which fields are covered?',
-        a: 'Seven for now: web development, app development, AI and machine learning, data science, cyber security, DevOps and cloud, and blockchain.',
+        a: 'Six for now: web development, app development, AI and machine learning, cyber security, DevOps and cloud, and blockchain.',
       },
       {
         q: 'What is in a brief?',

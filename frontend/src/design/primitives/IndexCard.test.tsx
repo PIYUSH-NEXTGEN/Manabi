@@ -22,7 +22,7 @@ describe('IndexCard', () => {
 
   it('shows difficulty as filled bars with a screen-reader label', () => {
     render(
-      <IndexCard field="data-science" title="Drift detector" difficulty="intermediate" />,
+      <IndexCard field="aiml" title="Drift detector" difficulty="intermediate" />,
     );
 
     const label = screen.getByText('intermediate');
@@ -34,7 +34,7 @@ describe('IndexCard', () => {
   });
 
   it('falls back to NO-ID when the source has no ID', () => {
-    render(<IndexCard field="data-science" title="Untitled draft" difficulty="advanced" />);
+    render(<IndexCard field="aiml" title="Untitled draft" difficulty="advanced" />);
     expect(screen.getByText('NO-ID')).toBeInTheDocument();
     expect(screen.getByText('advanced')).toBeInTheDocument();
   });
