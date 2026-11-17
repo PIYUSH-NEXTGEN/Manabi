@@ -203,16 +203,6 @@ describe('ProjectDetailPage', () => {
     expect(refreshCalls).toBe(1);
   });
 
-  it('shows the stale badge for project 2', async () => {
-    renderProject('/projects/2');
-
-    expect(await screen.findByText(/3 commits/i)).toBeInTheDocument();
-    expect((await screen.findAllByText(/stale/i)).length).toBeGreaterThan(0);
-    expect(
-      await screen.findByText(/Streetlight outage tracker/i),
-    ).toBeInTheDocument();
-  });
-
   it('renders the 404 page for a missing project', async () => {
     renderProject('/projects/999');
 

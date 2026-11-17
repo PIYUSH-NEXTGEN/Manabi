@@ -180,13 +180,6 @@ describe('ProblemDetailPage', () => {
     expect(await screen.findByText(/active/i)).toBeInTheDocument();
   });
 
-  it('shows the stale badge for problem 2', async () => {
-    renderDetail('/problems/2');
-
-    await screen.findByRole('heading', { name: 'Streetlight outage tracker' });
-    expect(await screen.findByText(/stale/i)).toBeInTheDocument();
-  });
-
   it('shows the login CTA when logged out', async () => {
     renderDetail('/problems/1');
 
@@ -256,19 +249,20 @@ describe('ProblemDetailPage', () => {
       http.get('*/api/problems/:id', () =>
         HttpResponse.json({
           id: 42,
-          title: 'Streetlight outage tracker',
-          summary: 'Citizens report dead streetlights and nothing comes back.',
-          who_affected: 'Municipal ward offices',
-          why_matters: 'Dark streets cost money and feel unsafe.',
-          field: 'web-dev',
-          domain: 'governance',
+          title: 'Ambulance ETA board for a district control room',
+          summary:
+            'District control rooms see stale ambulance locations and need honest ETA bands.',
+          who_affected: 'District emergency controllers',
+          why_matters: 'Minutes decide outcomes in emergencies.',
+          field: 'data-science',
+          domain: 'disaster-management',
           difficulty: 'intermediate',
-          est_hours: 40,
-          tech_tags: ['typescript', 'react', 'postgres'],
+          est_hours: 35,
+          tech_tags: ['python', 'leaflet', 'gtfs'],
           datasets: [],
-          approaches: ['Dedupe reports by pole', 'Escalate stale SLAs'],
-          source_name: 'TCOE',
-          source_id: 'TCOE PS12',
+          approaches: ['Blend last-known GPS with road speeds', 'Show ETA as a band'],
+          source_name: 'OpenGov Data Challenge',
+          source_id: null,
           source_url: null,
           source_note: null,
           project_count: 0,
@@ -288,9 +282,13 @@ describe('ProblemDetailPage', () => {
     expect(await screen.findByText('The problem')).toBeInTheDocument();
     expect(screen.getByText('Who faces it, and how')).toBeInTheDocument();
     expect(screen.getByText('How it gets fixed')).toBeInTheDocument();
-    expect(screen.getByText('Citizens report dead streetlights and nothing comes back.')).toBeInTheDocument();
     expect(
-      screen.getAllByText('Dedupe reports by pole').length,
+      screen.getByText(
+        'District control rooms see stale ambulance locations and need honest ETA bands.',
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getAllByText('Blend last-known GPS with road speeds').length,
     ).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText(/This project is for/)).not.toBeInTheDocument();
     expect(
@@ -314,19 +312,20 @@ describe('ProblemDetailPage', () => {
       http.get('*/api/problems/:id', () =>
         HttpResponse.json({
           id: 42,
-          title: 'Streetlight outage tracker',
-          summary: 'Citizens report dead streetlights and nothing comes back.',
-          who_affected: 'Municipal ward offices',
-          why_matters: 'Dark streets cost money and feel unsafe.',
-          field: 'web-dev',
-          domain: 'governance',
+          title: 'Ambulance ETA board for a district control room',
+          summary:
+            'District control rooms see stale ambulance locations and need honest ETA bands.',
+          who_affected: 'District emergency controllers',
+          why_matters: 'Minutes decide outcomes in emergencies.',
+          field: 'data-science',
+          domain: 'disaster-management',
           difficulty: 'intermediate',
-          est_hours: 40,
-          tech_tags: ['typescript', 'react', 'postgres'],
+          est_hours: 35,
+          tech_tags: ['python', 'leaflet', 'gtfs'],
           datasets: [],
-          approaches: ['Dedupe reports by pole'],
-          source_name: 'TCOE',
-          source_id: 'TCOE PS12',
+          approaches: ['Blend last-known GPS with road speeds'],
+          source_name: 'OpenGov Data Challenge',
+          source_id: null,
           source_url: null,
           source_note: null,
           project_count: 0,
@@ -336,21 +335,24 @@ describe('ProblemDetailPage', () => {
           team_plan: {
             note: '3 people, 24 hours.',
             roles: [
-              { role: 'API', covers: 'Reports + statuses.' },
-              { role: 'Web app', covers: 'Forms and dashboards.' },
+              { role: 'API', covers: 'ETA + unit statuses.' },
+              { role: 'Dispatch board', covers: 'Map and ETA bands.' },
             ],
             milestones: ['Hour 8: demo path works.'],
           },
           pitch_guide: {
-            one_liner: 'Complaints become trackable tickets.',
+            one_liner: 'Stale ETAs become honest arrival bands.',
             beats: [
-              { heading: 'Hook', text: 'Have you reported a pothole and never heard back?' },
-              { heading: 'Demo', text: 'File, assign, resolve, live.' },
+              {
+                heading: 'Hook',
+                text: 'What if the ETA board admitted when it was unsure?',
+              },
+              { heading: 'Demo', text: 'Track, estimate, hand off, live.' },
             ],
             judge_questions: [
               {
-                question: 'Why would a municipality adopt this?',
-                answer: 'It replaces a phone log at zero cost to try.',
+                question: 'Why would a control room adopt this?',
+                answer: 'It replaces a whiteboard at zero cost to try.',
               },
             ],
           },
@@ -367,19 +369,21 @@ describe('ProblemDetailPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('3 people, 24 hours.')).toBeInTheDocument();
     expect(screen.getByText('API')).toBeInTheDocument();
-    expect(screen.getByText('Reports + statuses.')).toBeInTheDocument();
+    expect(screen.getByText('ETA + unit statuses.')).toBeInTheDocument();
     expect(screen.getByText('Hour 8: demo path works.')).toBeInTheDocument();
 
     expect(
       screen.getByRole('heading', { name: 'Pitch guide' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Complaints become trackable tickets.')).toBeInTheDocument();
-    expect(screen.getByText('Have you reported a pothole and never heard back?')).toBeInTheDocument();
+    expect(screen.getByText('Stale ETAs become honest arrival bands.')).toBeInTheDocument();
+    expect(
+      screen.getByText('What if the ETA board admitted when it was unsure?'),
+    ).toBeInTheDocument();
     expect(
       screen.getByText('Questions the judges may ask'),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Why would a municipality adopt this?'),
+      screen.getByText('Why would a control room adopt this?'),
     ).toBeInTheDocument();
 
     // Build guide renders last among the numbered article sections.
@@ -580,19 +584,19 @@ describe('ProblemDetailPage', () => {
       http.get('*/api/problems/:id', () =>
         HttpResponse.json({
           id: 3,
-          title: 'Study Flashcards App',
-          summary: 'Cards return right before you forget them.',
-          who_affected: 'Self-learners',
-          why_matters: 'Cramming fades; spacing sticks.',
-          field: 'web-dev',
-          domain: 'education',
-          difficulty: 'beginner',
+          title: 'Pharmacy stock-out early warning',
+          summary: 'Weekly stock cards hide looming stock-outs.',
+          who_affected: 'Primary health centre pharmacists',
+          why_matters: 'A stock-out means no treatment that day.',
+          field: 'aiml',
+          domain: 'healthcare',
+          difficulty: 'intermediate',
           est_hours: 30,
-          tech_tags: ['react'],
+          tech_tags: ['python', 'sql'],
           datasets: [],
-          approaches: ['Implement SM-2'],
+          approaches: ['Two-week rolling consumption rate'],
           source_name: 'MANABI Curated',
-          source_id: 'manabi-learning-001',
+          source_id: 'manabi-curated-002',
           source_url: null,
           source_note: null,
           project_count: 0,
@@ -621,7 +625,7 @@ describe('ProblemDetailPage', () => {
     await screen.findByRole('heading', { level: 1 });
 
     expect(
-      await screen.findByText(/This project is for self-learners/),
+      await screen.findByText(/This project is for primary health centre pharmacists/),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('heading', { name: 'Team plan' }),

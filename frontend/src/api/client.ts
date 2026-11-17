@@ -106,9 +106,11 @@ export interface ProblemsQuery {
   q?: string;
   field?: string;
   difficulty?: string;
+  goal?: 'resume' | 'hackathon' | 'learning';
   tech?: string[];
   source?: string;
-  sort?: 'newest' | 'popular';
+  sort?: 'newest' | 'popular' | 'discover';
+  seed?: number;
   distinct?: 'field' | 'domain';
   limit?: number;
   offset?: number;
@@ -123,9 +125,11 @@ export function getProblems(query: ProblemsQuery = {}): Promise<ProblemsListOut>
   if (query.q) params.set('q', query.q);
   if (query.field) params.set('field', query.field);
   if (query.difficulty) params.set('difficulty', query.difficulty);
+  if (query.goal) params.set('goal', query.goal);
   for (const tech of query.tech ?? []) params.append('tech', tech);
   if (query.source) params.set('source', query.source);
   if (query.sort) params.set('sort', query.sort);
+  if (query.seed != null) params.set('seed', String(query.seed));
   if (query.distinct) params.set('distinct', query.distinct);
   if (query.limit != null) params.set('limit', String(query.limit));
   if (query.offset != null) params.set('offset', String(query.offset));
@@ -133,8 +137,19 @@ export function getProblems(query: ProblemsQuery = {}): Promise<ProblemsListOut>
   return apiFetch<ProblemsListOut>(`/api/problems${qs ? `?${qs}` : ''}`);
 }
 
-export function getFacets(): Promise<FacetsOut> {
-  return apiFetch<FacetsOut>('/api/problems/facets');
+export interface FacetsQuery {
+  q?: string;
+  field?: string;
+  source?: string;
+}
+
+export function getFacets(query: FacetsQuery = {}): Promise<FacetsOut> {
+  const params = new URLSearchParams();
+  if (query.q) params.set('q', query.q);
+  if (query.field) params.set('field', query.field);
+  if (query.source) params.set('source', query.source);
+  const search = params.toString();
+  return apiFetch<FacetsOut>(`/api/problems/facets${search ? `?${search}` : ''}`);
 }
 
 export function getProblem(id: number): Promise<ProblemDetail> {

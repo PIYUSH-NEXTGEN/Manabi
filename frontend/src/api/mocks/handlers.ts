@@ -3,10 +3,10 @@ import { GITHUB_REPO_URL_PATTERN, stripGitSuffix } from '@/lib/repoUrl';
 import { SOLUTION_SUMMARY_MAX } from '@/lib/limits';
 
 const stats = {
-  problems: 6,
+  problems: 5,
   sources: 3,
-  fields: 3,
-  projects: 2,
+  fields: 2,
+  projects: 1,
 };
 
 const problems = [
@@ -36,34 +36,6 @@ const problems = [
     ai_fields: ['approaches'],
     goal: null,
     star_count: 0,
-    starred_by_me: false,
-  },
-  {
-    id: 2,
-    title: 'Streetlight outage tracker',
-    summary:
-      'Citizens report dead streetlights; the civic ops desk needs a queue that dedupes by pole and escalates SLAs.',
-    who_affected: 'Municipal ward offices',
-    why_matters: 'Dark streets cost money and feel unsafe.',
-    field: 'web-dev',
-    domain: 'governance',
-    difficulty: 'intermediate',
-    est_hours: 40,
-    tech_tags: ['typescript', 'react', 'postgres'],
-    datasets: [],
-    approaches: [
-      'Geo-hash reports to dedupe by pole location',
-      'SLA escalation states per ward',
-    ],
-    source_name: 'TCOE',
-    source_id: 'TCOE PS12',
-    source_url: null,
-    source_note: null,
-    project_count: 1,
-    completed_count: 1,
-    ai_fields: ['approaches', 'est_hours'],
-    goal: 'hackathon',
-    star_count: 2,
     starred_by_me: false,
   },
   {
@@ -147,7 +119,7 @@ const problems = [
     completed_count: 0,
     ai_fields: ['approaches'],
     goal: null,
-    star_count: 0,
+    star_count: 2,
     starred_by_me: false,
   },
   {
@@ -216,12 +188,10 @@ const problems = [
 const facets = {
   fields: [
     { value: 'aiml', count: 3 },
-    { value: 'web-dev', count: 1 },
     { value: 'data-science', count: 2 },
   ],
   domains: [
     { value: 'agriculture', count: 1 },
-    { value: 'governance', count: 1 },
     { value: 'fintech', count: 1 },
     { value: 'disaster-management', count: 1 },
     { value: 'education', count: 1 },
@@ -229,18 +199,21 @@ const facets = {
   ],
   difficulties: [
     { value: 'beginner', count: 2 },
-    { value: 'intermediate', count: 3 },
+    { value: 'intermediate', count: 2 },
     { value: 'advanced', count: 1 },
+  ],
+  goals: [
+    { value: 'resume', count: 1 },
+    { value: 'learning', count: 1 },
   ],
   tech_tags: [
     { value: 'python', count: 5 },
-    { value: 'react', count: 1 },
     { value: 'pandas', count: 1 },
     { value: 'mobile', count: 1 },
   ],
   sources: [
     { value: 'SIH 2026', count: 3 },
-    { value: 'TCOE', count: 2 },
+    { value: 'TCOE', count: 1 },
     { value: 'OpenGov Data Challenge', count: 1 },
   ],
 };
@@ -286,39 +259,6 @@ const sampleProject = {
   starred_by_me: false,
 };
 
-const secondProject = {
-  id: 2,
-  problem_id: 2,
-  problem_title: 'Streetlight outage tracker',
-  repo_url: 'https://github.com/demo-civic/streetlight-ops',
-  repo_owner: 'demo-civic',
-  repo_name: 'streetlight-ops',
-  open_for_contributors: false,
-  verification_status: 'verified',
-  solution_summary:
-    'Geo-hashed civic reports deduped by pole with SLA escalation states per ward and a live ops desk queue.',
-  completed_at: '2026-10-20T09:00:00Z',
-  demo_url: 'https://streetlight-ops.demo.example',
-  reflection: 'Shipped after three ward pilots.',
-  relevance_reason: null,
-  ownership_basis: null,
-  review_note: null,
-  owner: { username: 'demo-civic', avatar_url: null },
-  progress: {
-    status: 'stale',
-    commit_count: 3,
-    last_commit_at: '2026-10-02T18:00:00Z',
-    has_readme: true,
-    recent_commits: [
-      { sha: 'f7g8h9i', message: 'Seed ward data', date: '2026-10-02' },
-    ],
-    open_issues: [],
-  },
-  progress_updated_at: '2026-10-02T19:00:00Z',
-  star_count: 0,
-  starred_by_me: false,
-};
-
 const adminSubmissions: Record<string, Array<{ [key: string]: unknown }>> = {
   needs_review: [
     {
@@ -348,6 +288,17 @@ const adminSubmissions: Record<string, Array<{ [key: string]: unknown }>> = {
   rejected: [],
   verified: [],
 };
+
+function discoverKey(id: number, seed: number): number {
+  const prime = 2_147_483_647;
+  const mixedIdSeed = (id * seed) % 1_000_003;
+  return (
+    (id * 1_103_515_245 +
+      seed * 97_531 +
+      mixedIdSeed * 2_654_435_761) %
+    prime
+  );
+}
 
 function adminSubmissionsOf(status: string): Array<{ [key: string]: unknown }> {
   return (adminSubmissions[status] ?? []).map((item) => ({ ...item }));
@@ -380,7 +331,31 @@ export const handlers = [
   ),
   http.post('*/api/auth/logout', () => HttpResponse.json({})),
   http.get('*/api/stats', () => HttpResponse.json(stats)),
-  http.get('*/api/problems/facets', () => HttpResponse.json(facets)),
+  http.get('*/api/problems/facets', ({ request }) => {
+    const url = new URL(request.url);
+    const q = url.searchParams.get('q');
+    const field = url.searchParams.get('field');
+    const source = url.searchParams.get('source');
+
+    let scoped = problems;
+    if (q) {
+      const needle = q.toLowerCase();
+      scoped = scoped.filter(
+        (p) =>
+          p.title.toLowerCase().includes(needle) ||
+          p.summary.toLowerCase().includes(needle),
+      );
+    }
+    if (field) scoped = scoped.filter((p) => p.field === field);
+    if (source) scoped = scoped.filter((p) => p.source_name === source);
+
+    const goals = ['resume', 'hackathon', 'learning'].map((value) => ({
+      value,
+      count: scoped.filter((p) => p.goal === value).length,
+    }));
+
+    return HttpResponse.json({ ...facets, goals });
+  }),
   http.get('*/api/problems', ({ request }) => {
     const url = new URL(request.url);
     const limit = Number(url.searchParams.get('limit') ?? '20');
@@ -389,8 +364,11 @@ export const handlers = [
     const field = url.searchParams.get('field');
     const domain = url.searchParams.get('domain');
     const difficulty = url.searchParams.get('difficulty');
+    const goal = url.searchParams.get('goal');
     const source = url.searchParams.get('source');
     const tech = url.searchParams.getAll('tech');
+    const sort = url.searchParams.get('sort');
+    const seed = Number(url.searchParams.get('seed') ?? '0');
 
     let filtered = problems;
     if (q) {
@@ -406,9 +384,20 @@ export const handlers = [
     if (difficulty) {
       filtered = filtered.filter((p) => p.difficulty === difficulty);
     }
+    if (goal) filtered = filtered.filter((p) => p.goal === goal);
     if (source) filtered = filtered.filter((p) => p.source_name === source);
     if (tech.length > 0) {
       filtered = filtered.filter((p) => tech.every((t) => p.tech_tags.includes(t)));
+    }
+    if (sort === 'discover') {
+      const submitted = filtered.filter((p) => (p.project_count ?? 0) > 0);
+      const rest = filtered
+        .filter((p) => (p.project_count ?? 0) === 0)
+        .sort(
+          (a, b) =>
+            discoverKey(a.id, seed) - discoverKey(b.id, seed) || a.id - b.id,
+        );
+      filtered = [...submitted, ...rest];
     }
 
     return HttpResponse.json({
@@ -421,8 +410,7 @@ export const handlers = [
     if (!found) {
       return HttpResponse.json({ detail: 'Problem not found' }, { status: 404 });
     }
-    const detailProjects =
-      found.id === 1 ? [sampleProject] : found.id === 2 ? [secondProject] : [];
+    const detailProjects = found.id === 1 ? [sampleProject] : [];
     return HttpResponse.json({
       ...found,
       original_text: `${found.title}\n\n${found.summary}`,
@@ -653,14 +641,11 @@ export const handlers = [
     if (id === sampleProject.id) {
       return HttpResponse.json(sampleProject);
     }
-    if (id === secondProject.id) {
-      return HttpResponse.json(secondProject);
-    }
     return HttpResponse.json({ detail: 'Project not found' }, { status: 404 });
   }),
   http.post('*/api/projects/:id/star', ({ params }) => {
     const id = Number(params.id);
-    if (id !== sampleProject.id && id !== secondProject.id) {
+    if (id !== sampleProject.id) {
       return HttpResponse.json({ detail: 'Project not found' }, { status: 404 });
     }
     return HttpResponse.json({ ok: true, star_count: 3 }, { status: 201 });
@@ -669,7 +654,7 @@ export const handlers = [
   http.get('*/api/projects/:id/progress', ({ params, request }) => {
     const id = Number(params.id);
     const refresh = new URL(request.url).searchParams.get('refresh') === 'true';
-    if (id !== sampleProject.id && id !== secondProject.id) {
+    if (id !== sampleProject.id) {
       return HttpResponse.json({ detail: 'Project not found' }, { status: 404 });
     }
     if (refresh) {

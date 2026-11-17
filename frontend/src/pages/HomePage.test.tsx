@@ -47,7 +47,7 @@ describe('HomePage', () => {
         () => {
           expect(
             within(showcase).getByRole('heading', {
-              name: 'Streetlight outage tracker',
+              name: 'Fraud pattern walkthrough for UPI micro-transactions',
             }),
           ).toBeInTheDocument();
         },

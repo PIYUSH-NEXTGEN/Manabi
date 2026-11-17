@@ -66,10 +66,10 @@ describe('apiFetch', () => {
     const stats = await getStats();
 
     expect(stats).toMatchObject({
-      problems: 6,
+      problems: 5,
       sources: 3,
-      fields: 3,
-      projects: 2,
+      fields: 2,
+      projects: 1,
     });
   });
 
@@ -84,8 +84,10 @@ describe('apiFetch', () => {
 
     await getProblems({
       q: 'crop',
+      goal: 'resume',
       tech: ['python', 'pandas'],
-      sort: 'popular',
+      sort: 'discover',
+      seed: 4242,
       distinct: 'field',
       limit: 6,
       offset: 3,
@@ -93,8 +95,10 @@ describe('apiFetch', () => {
 
     const params = new URLSearchParams(search);
     expect(params.get('q')).toBe('crop');
+    expect(params.get('goal')).toBe('resume');
     expect(params.getAll('tech')).toEqual(['python', 'pandas']);
-    expect(params.get('sort')).toBe('popular');
+    expect(params.get('sort')).toBe('discover');
+    expect(params.get('seed')).toBe('4242');
     expect(params.get('distinct')).toBe('field');
     expect(params.get('limit')).toBe('6');
     expect(params.get('offset')).toBe('3');

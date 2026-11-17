@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { ApiError, getFacets, type FacetsOut } from '@/api/client';
+import { ApiError, getFacets, type FacetsOut, type FacetsQuery } from '@/api/client';
 
-export function useFacets() {
+export function useFacets(filters: FacetsQuery = {}) {
   return useQuery<FacetsOut, ApiError>({
-    queryKey: ['problems', 'facets'],
-    queryFn: getFacets,
+    queryKey: ['problems', 'facets', filters],
+    queryFn: () => getFacets(filters),
   });
 }

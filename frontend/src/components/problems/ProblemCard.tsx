@@ -21,6 +21,7 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
 
   // Zero-star problems stay clean; the chip appears once someone stars.
   const starCount = problem.star_count ?? 0;
+  const showDifficulty = problem.goal === 'learning';
 
   return (
     <Link
@@ -30,10 +31,17 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
         className,
       )}
     >
-      <header className="flex items-center justify-between gap-3 px-5 pt-5">
-        <span className="rounded-full bg-accent-soft px-2.5 py-1 font-mono text-label font-bold uppercase tracking-[0.12em] text-accent">
-          {problem.difficulty}
-        </span>
+      <header
+        className={cx(
+          'flex items-center gap-3 px-5 pt-5',
+          showDifficulty ? 'justify-between' : 'justify-end',
+        )}
+      >
+        {showDifficulty ? (
+          <span className="rounded-full bg-accent-soft px-2.5 py-1 font-mono text-label font-bold uppercase tracking-[0.12em] text-accent">
+            {problem.difficulty}
+          </span>
+        ) : null}
         <span className="text-label font-semibold text-muted">{field}</span>
       </header>
 

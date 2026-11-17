@@ -1,8 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { cx } from '@/lib/cx';
-import type { ProblemOut } from '@/api/client';
 import { EASE_SNAP } from '@/design/motion';
 import { buttonClasses, Input, Skeleton } from '@/design/primitives';
 import { ProblemCard } from '@/components/problems/ProblemCard';
@@ -18,10 +17,6 @@ const GOAL_OPTIONS: { value: GoalKey; label: string }[] = [
   { value: 'hackathon', label: 'Hackathon' },
   { value: 'learning', label: 'Learning' },
 ];
-
-function goalOf(problem: ProblemOut): GoalKey | undefined {
-  return problem.goal ?? undefined;
-}
 
 function BoardSkeletons() {
   return (
@@ -49,30 +44,43 @@ function BoardSkeletons() {
 
 export function ProblemBoardPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const facets = useFacets();
-
   const q = searchParams.get('q') ?? '';
   const field = searchParams.get('field') ?? '';
-  const difficulty = searchParams.get('difficulty') ?? '';
   const source = searchParams.get('source') ?? '';
+  const facets = useFacets({ q, field, source });
   const goalParam = searchParams.get('goal');
   const goal =
     GOAL_OPTIONS.find((option) => option.value === goalParam)?.value ?? '';
+  const showDifficulty = goal === 'learning';
+  const difficulty = showDifficulty
+    ? searchParams.get('difficulty') ?? ''
+    : '';
 
-  const filterKey = [q, field, difficulty, source].join('|');
+  const [discoverSeed] = useState(
+    () => Math.floor(Math.random() * 2_000_000_000) + 1,
+  );
+  const filterKey = [q, field, source, goal, difficulty].join('|');
   const filters = useMemo(
-    () => ({ q, field, difficulty, source }),
-    [filterKey],
+    () => ({
+      q,
+      field,
+      source,
+      difficulty,
+      goal: goal || undefined,
+      sort: 'discover' as const,
+      seed: discoverSeed,
+    }),
+    [filterKey, discoverSeed],
   );
 
   const board = useInfiniteProblems(filters);
   const problems = board.data?.pages.flatMap((page) => page.items) ?? [];
   const total = board.data?.pages[0]?.total ?? 0;
-  const visibleProblems = goal
-    ? problems.filter((problem) => goalOf(problem) === goal)
-    : problems;
-  const shownTotal = goal ? visibleProblems.length : total;
-  const hasFilters = Boolean(q || field || difficulty || source);
+  const shownTotal = total;
+  const goalCounts = new Map(
+    (facets.data?.goals ?? []).map((facet) => [facet.value, facet.count]),
+  );
+  const hasFilters = Boolean(q || field || source || difficulty);
 
   function setParam(key: string, value: string) {
     setSearchParams((prev) => {
@@ -82,6 +90,19 @@ export function ProblemBoardPage() {
       } else {
         next.delete(key);
       }
+      return next;
+    });
+  }
+
+  function selectGoal(value: GoalKey | '') {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (value) {
+        next.set('goal', value);
+      } else {
+        next.delete('goal');
+      }
+      if (value !== 'learning') next.delete('difficulty');
       return next;
     });
   }
@@ -107,7 +128,14 @@ export function ProblemBoardPage() {
           aria-label="Search and filters"
           className="mt-8 border-y border-line py-5"
         >
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(0,1fr))]">
+          <div
+            className={cx(
+              'grid gap-4 sm:grid-cols-2',
+              showDifficulty
+                ? 'lg:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(0,1fr))]'
+                : 'lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]',
+            )}
+          >
             <Input
               label="Search"
               type="search"
@@ -122,27 +150,27 @@ export function ProblemBoardPage() {
               options={facets.data?.fields ?? []}
               labelFor={fieldLabel}
             />
-            <FilterSelect
-              label="Difficulty"
-              value={difficulty}
-              onChange={(value) => setParam('difficulty', value)}
-              options={facets.data?.difficulties ?? []}
-            />
+            {showDifficulty ? (
+              <FilterSelect
+                label="Difficulty"
+                value={difficulty}
+                onChange={(value) => setParam('difficulty', value)}
+                options={facets.data?.difficulties ?? []}
+              />
+            ) : null}
           </div>
 
           <div className="mt-5 flex flex-wrap items-center gap-2">
             <span className="mr-1 text-sm text-muted">Goal</span>
             {GOAL_OPTIONS.map((option) => {
               const active = goal === option.value;
-              const count = problems.filter(
-                (problem) => goalOf(problem) === option.value,
-              ).length;
+              const count = goalCounts.get(option.value) ?? 0;
               return (
                 <button
                   key={option.value}
                   type="button"
                   aria-pressed={active}
-                  onClick={() => setParam('goal', active ? '' : option.value)}
+                  onClick={() => selectGoal(active ? '' : option.value)}
                   className={cx(
                     'inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors',
                     active
@@ -206,7 +234,7 @@ export function ProblemBoardPage() {
         ) : null}
 
         {board.data &&
-        visibleProblems.length === 0 &&
+        problems.length === 0 &&
         (!goal ? hasFilters : true) ? (
           <section className="mt-6 border-y border-line py-6">
             {goal ? (
@@ -229,9 +257,9 @@ export function ProblemBoardPage() {
           </section>
         ) : null}
 
-        {visibleProblems.length > 0 ? (
+        {problems.length > 0 ? (
           <div className="mt-6 grid items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {visibleProblems.map((problem, index) => (
+            {problems.map((problem, index) => (
               <motion.div
                 key={problem.id}
                 initial={{ opacity: 0, y: 14 }}
@@ -249,7 +277,7 @@ export function ProblemBoardPage() {
           </div>
         ) : null}
 
-        {board.hasNextPage && !goal ? (
+        {board.hasNextPage ? (
           <div className="mt-10 flex justify-center">
             <button
               type="button"

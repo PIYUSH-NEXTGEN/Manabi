@@ -56,8 +56,8 @@ describe('SponsorsPage', () => {
   it('renders only live stats in the numbers strip', async () => {
     renderPage();
 
-    expect(await screen.findByText('6 project ideas')).toBeInTheDocument();
-    expect(screen.getByText('3 fields')).toBeInTheDocument();
+    expect(await screen.findByText('5 project ideas')).toBeInTheDocument();
+    expect(screen.getByText('2 fields')).toBeInTheDocument();
     expect(screen.getByText('Today on MANABI')).toBeInTheDocument();
   });
 

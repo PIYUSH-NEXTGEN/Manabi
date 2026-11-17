@@ -34,13 +34,22 @@ describe('ProblemBoardPage', () => {
     renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
 
     const cards = await screen.findAllByRole('heading', { level: 3 });
-    expect(cards).toHaveLength(6);
+    expect(cards).toHaveLength(5);
     expect(
-      await screen.findByText(/6 projects in the index/i),
+      await screen.findByText(/5 projects in the index/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText('Fraud pattern walkthrough for UPI micro-transactions'),
     ).toBeInTheDocument();
+  });
+
+  it('shows problems with submitted projects first', async () => {
+    renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
+
+    const cards = await screen.findAllByRole('heading', { level: 3 });
+    expect(cards[0]).toHaveTextContent(
+      'Crop disease triage for small farms',
+    );
   });
 
   it('each card links to its problem detail page', async () => {
@@ -57,9 +66,9 @@ describe('ProblemBoardPage', () => {
 
     await screen.findAllByRole('heading', { level: 3 });
 
-    // Streetlight outage tracker carries star_count: 2 in the fixtures...
+    // The attendance pipeline carries star_count: 2 in the fixtures...
     const starredCard = screen.getByRole('link', {
-      name: /streetlight outage tracker/i,
+      name: /attendance pipeline that fails loudly/i,
     });
     expect(within(starredCard).getByTitle('2 stars')).toBeInTheDocument();
 
@@ -87,20 +96,49 @@ describe('ProblemBoardPage', () => {
     expect(await screen.findByText(/1 projects? in the index/i)).toBeInTheDocument();
   });
 
-  it('the difficulty filter updates results', async () => {
+  it('shows the difficulty filter only on the learning track', async () => {
     const user = userEvent.setup();
-    renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
+    renderWithProviders(<ProblemBoardPage />, { route: '/problems?goal=resume' });
 
     await screen.findAllByRole('heading', { level: 3 });
-    await user.selectOptions(screen.getByLabelText('Difficulty'), 'beginner');
+    expect(screen.queryByLabelText('Difficulty')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Learning/i }));
+    expect(await screen.findByLabelText('Difficulty')).toBeInTheDocument();
+  });
+
+  it('shows difficulty on learning cards only', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ProblemBoardPage />, {
+      route: '/problems?goal=learning',
+    });
+
+    await screen.findAllByRole('heading', { level: 3 });
+    const learningCard = screen.getByRole('link', {
+      name: /Fraud pattern walkthrough/i,
+    });
+    expect(within(learningCard).getByText('advanced')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /Resume/i }));
+    const resumeCard = await screen.findByRole('link', {
+      name: /Pharmacy stock-out early warning/i,
+    });
+    expect(within(resumeCard).queryByText('intermediate')).not.toBeInTheDocument();
+  });
+
+  it('the difficulty filter updates learning results', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ProblemBoardPage />, {
+      route: '/problems?goal=learning',
+    });
+
+    await screen.findAllByRole('heading', { level: 3 });
+    await user.selectOptions(screen.getByLabelText('Difficulty'), 'advanced');
 
     expect(
-      await screen.findByText('Attendance pipeline that fails loudly'),
+      await screen.findByText('Fraud pattern walkthrough for UPI micro-transactions'),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByText('Streetlight outage tracker'),
-    ).not.toBeInTheDocument();
-    expect(await screen.findByText(/2 projects in the index/i)).toBeInTheDocument();
+    expect(await screen.findByText(/1 projects? in the index/i)).toBeInTheDocument();
   });
 
   it('clear filters resets the board', async () => {
@@ -108,14 +146,14 @@ describe('ProblemBoardPage', () => {
     renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
 
     await screen.findAllByRole('heading', { level: 3 });
-    await user.selectOptions(screen.getByLabelText('Difficulty'), 'beginner');
+    await user.type(screen.getByLabelText('Search'), 'crop');
 
     const clearButton = await screen.findByRole('button', {
       name: 'Clear filters',
     });
     await user.click(clearButton);
 
-    expect(await screen.findByText(/6 projects in the index/i)).toBeInTheDocument();
+    expect(await screen.findByText(/5 projects in the index/i)).toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Clear filters' }),
     ).not.toBeInTheDocument();
@@ -131,7 +169,7 @@ describe('ProblemBoardPage', () => {
     ).toHaveTextContent('1 project');
     expect(
       screen.getByRole('button', { name: /Hackathon/i }),
-    ).toHaveTextContent('1 project');
+    ).toHaveTextContent('0 projects');
     expect(
       screen.getByRole('button', { name: /Learning/i }),
     ).toHaveTextContent('1 project');
@@ -142,15 +180,15 @@ describe('ProblemBoardPage', () => {
     renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
 
     await screen.findAllByRole('heading', { level: 3 });
-    await user.click(screen.getByRole('button', { name: /Hackathon/i }));
+    await user.click(screen.getByRole('button', { name: /Learning/i }));
 
-    const chip = screen.getByRole('button', { name: /Hackathon/i });
+    const chip = screen.getByRole('button', { name: /Learning/i });
     expect(chip).toHaveAttribute('aria-pressed', 'true');
     expect(
       await screen.findByText(/1 projects in the index/i),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Streetlight outage tracker'),
+      screen.getByText('Fraud pattern walkthrough for UPI micro-transactions'),
     ).toBeInTheDocument();
     expect(
       screen.queryByText('Crop disease triage for small farms'),
@@ -158,7 +196,7 @@ describe('ProblemBoardPage', () => {
 
     await user.click(chip);
     expect(
-      await screen.findByText(/6 projects in the index/i),
+      await screen.findByText(/5 projects in the index/i),
     ).toBeInTheDocument();
     expect(
       screen.queryByText('Crop disease triage for small farms'),

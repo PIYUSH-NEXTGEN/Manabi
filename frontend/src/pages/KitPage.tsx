@@ -106,11 +106,11 @@ export function KitPage() {
             estHours={20}
           />
           <IndexCard
-            sourceId="TCOE PS12"
+            sourceId="OGDC-04"
             field="data-science"
-            title="Streetlight outage tracker"
+            title="Ambulance ETA board"
             difficulty="intermediate"
-            estHours={40}
+            estHours={35}
           />
         </div>
       </Section>
