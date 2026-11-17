@@ -49,9 +49,9 @@ export function AboutPage() {
 
       <ProseSection id="catalog" title="What the catalog covers">
         <p>
-          The catalog spans six fields: web development, app development, AI
-          and machine learning, cyber security, DevOps and cloud, and
-          blockchain.
+          The catalog currently spans two fields: web development and AI/ML.
+          App development, cyber security, DevOps and cloud, and blockchain
+          are marked coming soon.
         </p>
         <p>
           Every brief is sorted into one of three goals: <em>resume</em>,{' '}
