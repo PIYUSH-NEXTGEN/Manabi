@@ -336,7 +336,6 @@ function DetailView({ problemId }: { problemId: number }) {
               </dd>
             </div>
             <SpecRow label="Field">{fieldLabel(data.field)}</SpecRow>
-            <SpecRow label="Domain">{data.domain.replace(/-/g, " ")}</SpecRow>
             <SpecRow label="Difficulty">{data.difficulty}</SpecRow>
           </dl>
         </motion.header>

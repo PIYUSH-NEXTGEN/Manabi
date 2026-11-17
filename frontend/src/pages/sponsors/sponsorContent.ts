@@ -36,7 +36,7 @@ export const AUDIENCE = {
   label: 'Audience',
   title: 'Who uses MANABI',
   intro:
-    'MANABI helps students, developers and beginners pick real projects to build: for a resume, a hackathon or their first steps in code. Visitors browse project ideas by domain and difficulty, build them, and prove their work with a verified GitHub repo.',
+    'MANABI helps students, developers and beginners pick real projects to build: for a resume, a hackathon or their first steps in code. Visitors browse project ideas by field and difficulty, build them, and prove their work with a verified GitHub repo.',
   cards: [
     {
       title: 'Students and resume builders',

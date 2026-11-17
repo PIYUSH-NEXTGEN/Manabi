@@ -88,8 +88,8 @@ export function AboutPage() {
         <ol className="list-decimal space-y-2 pl-5">
           <li>
             <span className="text-ink">Browse and claim.</span> Filter the
-            catalog by field, difficulty, domain, tech stack or goal. Open a
-            brief and sign in with GitHub when you are ready to build it.
+            catalog by field, difficulty, tech stack or goal. Open a brief and
+            sign in with GitHub when you are ready to build it.
           </li>
           <li>
             <span className="text-ink">Build in public.</span> Work in a public

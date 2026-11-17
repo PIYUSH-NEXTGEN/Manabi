@@ -105,7 +105,6 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 export interface ProblemsQuery {
   q?: string;
   field?: string;
-  domain?: string;
   difficulty?: string;
   tech?: string[];
   source?: string;
@@ -123,7 +122,6 @@ export function getProblems(query: ProblemsQuery = {}): Promise<ProblemsListOut>
   const params = new URLSearchParams();
   if (query.q) params.set('q', query.q);
   if (query.field) params.set('field', query.field);
-  if (query.domain) params.set('domain', query.domain);
   if (query.difficulty) params.set('difficulty', query.difficulty);
   for (const tech of query.tech ?? []) params.append('tech', tech);
   if (query.source) params.set('source', query.source);

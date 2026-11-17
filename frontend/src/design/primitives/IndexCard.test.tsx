@@ -39,19 +39,18 @@ describe('IndexCard', () => {
     expect(screen.getByText('advanced')).toBeInTheDocument();
   });
 
-  it('renders summary, domain and est hours when present', () => {
+  it('renders summary and est hours when present', () => {
     render(
       <IndexCard
         field="web-dev"
         title="Permit tracker"
         summary="Track applications end to end."
         difficulty="beginner"
-        domain="governance"
         estHours={16}
       />,
     );
 
     expect(screen.getByText('Track applications end to end.')).toBeInTheDocument();
-    expect(screen.getByText('governance · 16 h')).toBeInTheDocument();
+    expect(screen.getByText('16 h')).toBeInTheDocument();
   });
 });

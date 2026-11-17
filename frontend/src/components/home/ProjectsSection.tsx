@@ -25,13 +25,6 @@ function pad(value: number) {
   return String(value).padStart(2, '0');
 }
 
-function domainLabel(value: string) {
-  return value
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-}
-
 function DifficultyMeter({ level }: { level: ProblemOut['difficulty'] }) {
   return (
     <span className="flex shrink-0 items-center gap-2">
@@ -85,9 +78,6 @@ function BriefCarousel() {
 
   const current = count > 0 ? index % count : 0;
   const active = count > 0 ? items[current] : null;
-  const showDomain =
-    active != null &&
-    active.domain.replace(/-/g, '') !== active.field.replace(/-/g, '');
 
   return (
     <figure
@@ -174,7 +164,6 @@ function BriefCarousel() {
 
                 <div className="mt-auto flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t border-line pt-4">
                   <span className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-label font-bold uppercase tracking-[0.13em] text-muted">
-                    {showDomain ? <span>{domainLabel(active.domain)}</span> : null}
                     {active.project_count > 0 ? (
                       <span>{active.project_count} built</span>
                     ) : null}

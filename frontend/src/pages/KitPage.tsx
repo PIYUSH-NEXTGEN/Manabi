@@ -103,7 +103,6 @@ export function KitPage() {
             title="Crop disease triage"
             summary="Sample card for the design kit. Real cards come from the API."
             difficulty="beginner"
-            domain="agriculture"
             estHours={20}
           />
           <IndexCard
@@ -111,7 +110,6 @@ export function KitPage() {
             field="data-science"
             title="Streetlight outage tracker"
             difficulty="intermediate"
-            domain="governance"
             estHours={40}
           />
         </div>

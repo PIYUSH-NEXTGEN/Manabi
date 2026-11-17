@@ -14,7 +14,6 @@ interface IndexCardProps {
   title: string;
   summary?: string | null;
   difficulty?: Difficulty | null;
-  domain?: string | null;
   estHours?: number | null;
   className?: string;
 }
@@ -25,14 +24,11 @@ export function IndexCard({
   title,
   summary,
   difficulty,
-  domain,
   estHours,
   className,
 }: IndexCardProps) {
   const filled = difficulty ? DIFFICULTY_FILL[difficulty] : 0;
-  const meta = [domain, estHours != null ? `${estHours} h` : null]
-    .filter(Boolean)
-    .join(' · ');
+  const meta = estHours != null ? `${estHours} h` : '';
 
   return (
     <article

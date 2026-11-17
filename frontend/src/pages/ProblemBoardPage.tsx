@@ -53,16 +53,15 @@ export function ProblemBoardPage() {
 
   const q = searchParams.get('q') ?? '';
   const field = searchParams.get('field') ?? '';
-  const domain = searchParams.get('domain') ?? '';
   const difficulty = searchParams.get('difficulty') ?? '';
   const source = searchParams.get('source') ?? '';
   const goalParam = searchParams.get('goal');
   const goal =
     GOAL_OPTIONS.find((option) => option.value === goalParam)?.value ?? '';
 
-  const filterKey = [q, field, domain, difficulty, source].join('|');
+  const filterKey = [q, field, difficulty, source].join('|');
   const filters = useMemo(
-    () => ({ q, field, domain, difficulty, source }),
+    () => ({ q, field, difficulty, source }),
     [filterKey],
   );
 
@@ -73,7 +72,7 @@ export function ProblemBoardPage() {
     ? problems.filter((problem) => goalOf(problem) === goal)
     : problems;
   const shownTotal = goal ? visibleProblems.length : total;
-  const hasFilters = Boolean(q || field || domain || difficulty || source);
+  const hasFilters = Boolean(q || field || difficulty || source);
 
   function setParam(key: string, value: string) {
     setSearchParams((prev) => {
@@ -108,7 +107,7 @@ export function ProblemBoardPage() {
           aria-label="Search and filters"
           className="mt-8 border-y border-line py-5"
         >
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,1fr))]">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(2,minmax(0,1fr))]">
             <Input
               label="Search"
               type="search"
@@ -128,12 +127,6 @@ export function ProblemBoardPage() {
               value={difficulty}
               onChange={(value) => setParam('difficulty', value)}
               options={facets.data?.difficulties ?? []}
-            />
-            <FilterSelect
-              label="Domain"
-              value={domain}
-              onChange={(value) => setParam('domain', value)}
-              options={facets.data?.domains ?? []}
             />
           </div>
 

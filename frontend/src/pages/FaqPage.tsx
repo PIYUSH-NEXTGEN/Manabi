@@ -48,7 +48,7 @@ const GROUPS = [
       },
       {
         q: 'Which fields are covered?',
-        a: 'Seven for now: web development, app development, AI and machine learning, data science, cyber security, DevOps and cloud, and blockchain. Each field also carries a domain, such as healthcare, education, agriculture or fintech, so you can find a problem area you care about.',
+        a: 'Seven for now: web development, app development, AI and machine learning, data science, cyber security, DevOps and cloud, and blockchain.',
       },
       {
         q: 'What is in a brief?',
