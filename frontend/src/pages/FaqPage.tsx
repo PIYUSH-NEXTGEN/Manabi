@@ -84,7 +84,7 @@ const GROUPS = [
       },
       {
         q: 'What does each track add?',
-        a: 'Resume briefs can include scope levels, target roles, CV bullet templates and interview questions. Hackathon briefs can include a role-based team plan and a pitch guide with likely judge questions. Learning briefs can include a build guide and the concepts you will practise.',
+        a: 'Resume briefs can include scope levels, target roles, CV bullet templates and interview questions. Hackathon briefs can include a pitch guide with likely judge questions. Learning briefs can include the concepts you will practise, and every brief can include a build guide.',
       },
       {
         q: 'What do the difficulty levels mean?',

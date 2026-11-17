@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowUpRight, GitBranch, Star } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import { fieldLabel } from '@/lib/fields';
+import { goalLabel } from '@/lib/goals';
 import type { ProblemOut } from '@/api/client';
 
 interface ProblemCardProps {
@@ -22,6 +23,7 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
   // Zero-star problems stay clean; the chip appears once someone stars.
   const starCount = problem.star_count ?? 0;
   const showDifficulty = problem.goal === 'learning';
+  const track = goalLabel(problem.goal);
 
   return (
     <Link
@@ -42,7 +44,19 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
             {problem.difficulty}
           </span>
         ) : null}
-        <span className="text-label font-semibold text-muted">{field}</span>
+        <span className="flex items-center gap-2 text-label font-semibold text-muted">
+          {track ? (
+            <>
+              <span className="font-mono font-bold uppercase tracking-[0.12em] text-accent">
+                {track}
+              </span>
+              <span aria-hidden className="text-muted/50">
+                ·
+              </span>
+            </>
+          ) : null}
+          <span>{field}</span>
+        </span>
       </header>
 
       <div className="flex flex-1 flex-col p-5">

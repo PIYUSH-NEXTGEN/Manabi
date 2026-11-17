@@ -57,8 +57,8 @@ export function AboutPage() {
           Every brief is sorted into one of three goals: <em>resume</em>,{' '}
           <em>hackathon</em> or <em>learning</em>. Resume briefs are chosen to
           give you something concrete to talk about in an interview. Hackathon
-          briefs fit a short build window and can include a team plan and a
-          pitch guide.
+          briefs fit a short build window and can include a pitch guide with
+          likely judge questions.
           Learning briefs are marked beginner, intermediate or advanced, so you
           can pick the next step above what you already know.
         </p>
@@ -76,11 +76,11 @@ export function AboutPage() {
           <li>The original problem statement and its source</li>
         </ul>
         <p>
-          Track briefs go further. Learning briefs can include a phase-by-phase
-          build guide and the concepts you will pick up. Hackathon briefs can
-          include a role-based team plan and a pitch guide with likely judge
-          questions. Resume briefs can include scope levels, target roles, CV
-          bullet templates and interview questions with answers.
+          Track briefs go further. Learning briefs can include the concepts you
+          will pick up. Hackathon briefs can include a pitch guide with likely
+          judge questions. Resume briefs can include scope levels, target roles,
+          CV bullet templates and interview questions with answers. Every brief
+          can include a phase-by-phase build guide.
         </p>
       </ProseSection>
 

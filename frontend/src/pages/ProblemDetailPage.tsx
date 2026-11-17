@@ -13,6 +13,7 @@ import { GithubMark } from "@/components/icons/GithubMark";
 import { useProblem } from "@/hooks/useProblem";
 import { useStarToggle } from "@/hooks/useStarToggle";
 import { fieldLabel } from "@/lib/fields";
+import { goalLabel } from "@/lib/goals";
 import { projectOwnerUsername } from "@/api/client";
 import type { ProblemDetail, ProblemOut } from "@/api/client";
 
@@ -134,15 +135,19 @@ function ProblemStarButton({
 
 type BuildGuidePhase = NonNullable<ProblemOut["build_guide"]>[number];
 
+function summaryParagraphs(summary: string): string[] {
+  return summary
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim().replace(/\s+/g, " "))
+    .filter(Boolean);
+}
+
 function descriptionParagraphs(
   summary: string,
   whoAffected: string,
   whyMatters: string,
 ): string[] {
-  const paragraphs = summary
-    .split(/\n\s*\n/)
-    .map((paragraph) => paragraph.trim().replace(/\s+/g, " "))
-    .filter(Boolean);
+  const paragraphs = summaryParagraphs(summary);
   paragraphs.push(
     `This project is for ${whoAffected.toLowerCase()}. ${whyMatters}`,
   );
@@ -249,9 +254,9 @@ function DetailView({ problemId }: { problemId: number }) {
   const guide = data.build_guide?.length
     ? data.build_guide
     : guideFromApproaches(data.approaches);
-  const teamPlan = isHackathon ? data.team_plan : undefined;
   const pitchGuide = isHackathon ? data.pitch_guide : undefined;
   const resumeKit = isResume ? data.resume_kit : undefined;
+  const track = goalLabel(data.goal);
 
   // Section numbers are assigned in render order, so the optional "what
   // you'll learn" section never leaves a gap in the numbering.
@@ -282,20 +287,25 @@ function DetailView({ problemId }: { problemId: number }) {
               <div className="mt-6 max-w-3xl space-y-6 border-l-2 border-accent/50 pl-5 text-body leading-relaxed text-ink-soft ">
                 <div>
                   <p className={cx(microLabel, "text-accent")}>The problem</p>
-                  <p className="mt-2">{data.summary}</p>
+                  <div className="mt-2 space-y-3">
+                    {summaryParagraphs(data.summary).map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
+                  </div>
                 </div>
                 <div>
                   <p className={cx(microLabel, "text-accent")}>
-                    Who faces it, and how
+                    Who has this problem
                   </p>
-                  <p className="mt-2">
-                    {data.who_affected} {data.why_matters}
-                  </p>
+                  <div className="mt-2 space-y-2">
+                    <p>{data.who_affected}</p>
+                    <p>{data.why_matters}</p>
+                  </div>
                 </div>
                 {data.approaches.length > 0 ? (
                   <div>
                     <p className={cx(microLabel, "text-accent")}>
-                      How it gets fixed
+                      How does our project solve it
                     </p>
                     <ul className="mt-2 space-y-2">
                       {data.approaches.map((approach) => (
@@ -336,6 +346,7 @@ function DetailView({ problemId }: { problemId: number }) {
               </dd>
             </div>
             <SpecRow label="Field">{fieldLabel(data.field)}</SpecRow>
+            {track ? <SpecRow label="Track">{track}</SpecRow> : null}
           </dl>
         </motion.header>
 
@@ -373,10 +384,9 @@ function DetailView({ problemId }: { problemId: number }) {
             {isResume ? null : (
               <Section number={nextSectionNumber()} title="Tech stack">
                 <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
-                  The stack below is a starting point, not a rule. If it lists a
-                  backend language you can swap it for another one - Python or
-                  Go, for example - and the same goes for the database,
-                  frontend, and anything else. Use what fits you.
+                  These tools are a suggestion. Swap the language, database or
+                  frontend for whatever you work with best. The project matters
+                  more than the exact stack.
                 </p>
                 {data.tech_tags.length > 0 ? (
                   <div className="mt-4 flex flex-wrap gap-1.5">
@@ -394,9 +404,8 @@ function DetailView({ problemId }: { problemId: number }) {
               <>
                 <Section number={nextSectionNumber()} title="MVP vs standout">
                   <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
-                    Two bars for the same project. The first level ships with
-                    honest numbers; the second one is what most people skip -
-                    and what makes a recruiter stop scrolling.
+                    There are two levels here. The first is a clean, honest MVP.
+                    The second is the extra work that makes the project stand out.
                   </p>
                   <div className="mt-5 grid gap-4 md:grid-cols-2">
                     {(resumeKit.scope_levels ?? []).map((scopeLevel) => (
@@ -454,8 +463,8 @@ function DetailView({ problemId }: { problemId: number }) {
                   title="Resume bullet template"
                 >
                   <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
-                    Fill the braces with your own numbers from the run - never
-                    invent them. The example shows what a filled bullet looks
+                    Replace the braces with numbers from your own build. Do not
+                    make them up. The example shows what a finished bullet looks
                     like.
                   </p>
                   <ul className="mt-4 max-w-3xl space-y-4">
@@ -503,48 +512,6 @@ function DetailView({ problemId }: { problemId: number }) {
                   </ul>
                 </Section>
               </>
-            ) : null}
-
-            {teamPlan ? (
-              <Section number={nextSectionNumber()} title="Team plan">
-                {teamPlan.note ? (
-                  <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
-                    {teamPlan.note}
-                  </p>
-                ) : null}
-                {(teamPlan.roles ?? []).length > 0 ? (
-                  <dl className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {(teamPlan.roles ?? []).map((teamRole) => (
-                      <div
-                        key={teamRole.role}
-                        className="rounded-panel border border-line bg-sheet p-4"
-                      >
-                        <dt className="font-display text-[1.0625rem] leading-snug text-ink">
-                          {teamRole.role}
-                        </dt>
-                        <dd className="mt-2 text-body leading-relaxed text-ink-soft">
-                          {teamRole.covers}
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                ) : null}
-                {(teamPlan.milestones ?? []).length > 0 ? (
-                  <ol className="mt-5 max-w-3xl space-y-2.5">
-                    {(teamPlan.milestones ?? []).map((milestone, index) => (
-                      <li
-                        key={milestone}
-                        className="flex gap-3 text-body leading-relaxed text-ink-soft"
-                      >
-                        <span className="shrink-0 font-mono text-label font-bold leading-relaxed text-accent">
-                          T+{String(index + 1).padStart(1, "0")}
-                        </span>
-                        {milestone}
-                      </li>
-                    ))}
-                  </ol>
-                ) : null}
-              </Section>
             ) : null}
 
             {pitchGuide ? (
@@ -603,10 +570,9 @@ function DetailView({ problemId }: { problemId: number }) {
 
             <Section number={nextSectionNumber()} title="Build guide">
               <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
-                Work through the phases in order - each one ends with something
-                working. No phase assumes a particular language, framework, or
-                database; pick tools you already know or want to learn, and swap
-                anything at any point.
+                Work through the phases in order. Each one should leave you with
+                something that works. Use any language, framework or database,
+                and swap tools whenever you want.
               </p>
               {guide.length > 0 ? (
                 <ol className="mt-5 flex list-none flex-col gap-6">
@@ -647,9 +613,9 @@ function DetailView({ problemId }: { problemId: number }) {
                 </ol>
               ) : (
                 <p className="mt-4 max-w-3xl text-body leading-relaxed text-ink-soft">
-                  No phased guide for this brief yet. Start with the smallest
-                  version where one core flow works end to end, then keep
-                  iterating on what annoys you most.
+                  This brief does not have a step-by-step guide yet. Start with
+                  the smallest version where one core flow works from start to
+                  finish. Then improve the part that bothers you most.
                 </p>
               )}
             </Section>

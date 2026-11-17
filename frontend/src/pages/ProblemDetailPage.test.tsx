@@ -24,7 +24,6 @@ describe('ProblemDetailPage', () => {
     'Why it matters',
     "What concepts you'll learn",
     'Tech stack',
-    'Team plan',
     'Pitch guide',
   ]);
 
@@ -56,10 +55,12 @@ describe('ProblemDetailPage', () => {
     expect(screen.getByText('python')).toBeInTheDocument();
     expect(
       screen.getByText(
-        /The stack below is a starting point, not a rule/i,
+        /These tools are a suggestion/i,
       ),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Python or Go/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/Swap the language, database or frontend/i),
+    ).toBeInTheDocument();
   });
 
   it('derives build-guide phases from approaches when there is no curated guide', async () => {
@@ -131,7 +132,7 @@ describe('ProblemDetailPage', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Build the scheduler')).toBeInTheDocument();
     expect(
-      screen.queryByText(/No phased guide for this brief yet/i),
+      screen.queryByText(/This brief does not have a step-by-step guide yet/i),
     ).not.toBeInTheDocument();
   });
 
@@ -167,7 +168,7 @@ describe('ProblemDetailPage', () => {
     await screen.findByRole('heading', { level: 1 });
 
     expect(
-      await screen.findByText(/No phased guide for this brief yet/i),
+      await screen.findByText(/This brief does not have a step-by-step guide yet/i),
     ).toBeInTheDocument();
   });
 
@@ -251,7 +252,7 @@ describe('ProblemDetailPage', () => {
           id: 42,
           title: 'Ambulance ETA board for a district control room',
           summary:
-            'District control rooms see stale ambulance locations and need honest ETA bands.',
+            'District control rooms see stale ambulance locations.\n\nThey need honest ETA bands even when a vehicle goes quiet.',
           who_affected: 'District emergency controllers',
           why_matters: 'Minutes decide outcomes in emergencies.',
           field: 'data-science',
@@ -279,12 +280,19 @@ describe('ProblemDetailPage', () => {
     renderDetail('/problems/42');
     await screen.findByRole('heading', { level: 1 });
 
+    expect(screen.getByText('Track')).toBeInTheDocument();
+    expect(screen.getByText('Hackathon')).toBeInTheDocument();
     expect(await screen.findByText('The problem')).toBeInTheDocument();
-    expect(screen.getByText('Who faces it, and how')).toBeInTheDocument();
-    expect(screen.getByText('How it gets fixed')).toBeInTheDocument();
+    expect(screen.getByText('Who has this problem')).toBeInTheDocument();
+    expect(
+      screen.getByText('How does our project solve it'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('District control rooms see stale ambulance locations.'),
+    ).toBeInTheDocument();
     expect(
       screen.getByText(
-        'District control rooms see stale ambulance locations and need honest ETA bands.',
+        'They need honest ETA bands even when a vehicle goes quiet.',
       ),
     ).toBeInTheDocument();
     expect(
@@ -294,7 +302,7 @@ describe('ProblemDetailPage', () => {
     expect(
       screen.queryByRole('heading', { name: 'Why it matters' }),
     ).not.toBeInTheDocument();
-    // Team plan and pitch guide stay hidden when there is no curated data.
+    // Team plan is gone and the pitch guide stays hidden without curated data.
     expect(
       screen.queryByRole('heading', { name: 'Team plan' }),
     ).not.toBeInTheDocument();
@@ -307,7 +315,7 @@ describe('ProblemDetailPage', () => {
     ).toBeInTheDocument();
   });
 
-  it('renders the team plan and pitch guide for a hackathon brief with a pitch kit', async () => {
+  it('renders the pitch guide for a hackathon brief and hides the team plan', async () => {
     server.use(
       http.get('*/api/problems/:id', () =>
         HttpResponse.json({
@@ -365,15 +373,16 @@ describe('ProblemDetailPage', () => {
     await screen.findByRole('heading', { level: 1 });
 
     expect(
-      await screen.findByRole('heading', { name: 'Team plan' }),
-    ).toBeInTheDocument();
-    expect(screen.getByText('3 people, 24 hours.')).toBeInTheDocument();
-    expect(screen.getByText('API')).toBeInTheDocument();
-    expect(screen.getByText('ETA + unit statuses.')).toBeInTheDocument();
-    expect(screen.getByText('Hour 8: demo path works.')).toBeInTheDocument();
+      screen.queryByRole('heading', { name: 'Team plan' }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('3 people, 24 hours.')).not.toBeInTheDocument();
+    expect(screen.queryByText('ETA + unit statuses.')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Hour 8: demo path works.'),
+    ).not.toBeInTheDocument();
 
     expect(
-      screen.getByRole('heading', { name: 'Pitch guide' }),
+      await screen.findByRole('heading', { name: 'Pitch guide' }),
     ).toBeInTheDocument();
     expect(screen.getByText('Stale ETAs become honest arrival bands.')).toBeInTheDocument();
     expect(
