@@ -242,6 +242,7 @@ function DetailView({ problemId }: { problemId: number }) {
   const data = problem.data;
   const isHackathon = data.goal === "hackathon";
   const isResume = data.goal === "resume";
+  const isLearning = data.goal === "learning";
   const paragraphs = descriptionParagraphs(
     data.summary,
     data.who_affected,
@@ -321,6 +322,29 @@ function DetailView({ problemId }: { problemId: number }) {
                   </div>
                 ) : null}
               </div>
+            ) : isLearning ? (
+              <div className="mt-6 max-w-3xl space-y-6 border-l-2 border-accent/50 pl-5 text-body leading-relaxed text-ink-soft ">
+                <div>
+                  <p className={cx(microLabel, "text-accent")}>The project</p>
+                  <div className="mt-2 space-y-3">
+                    {summaryParagraphs(data.summary).map((paragraph) => (
+                      <p key={paragraph}>{paragraph}</p>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <p className={cx(microLabel, "text-accent")}>
+                    Who it is for
+                  </p>
+                  <p className="mt-2">{data.who_affected}</p>
+                </div>
+                <div>
+                  <p className={cx(microLabel, "text-accent")}>
+                    Why it matters
+                  </p>
+                  <p className="mt-2">{data.why_matters}</p>
+                </div>
+              </div>
             ) : (
               <div className="mt-6 max-w-3xl space-y-4 border-l-2 border-accent/50 pl-5 text-body leading-relaxed text-ink-soft ">
                 {paragraphs.map((paragraph) => (
@@ -346,13 +370,16 @@ function DetailView({ problemId }: { problemId: number }) {
               </dd>
             </div>
             <SpecRow label="Field">{fieldLabel(data.field)}</SpecRow>
+            {isLearning ? (
+              <SpecRow label="Difficulty">{data.difficulty}</SpecRow>
+            ) : null}
             {track ? <SpecRow label="Track">{track}</SpecRow> : null}
           </dl>
         </motion.header>
 
         <div className="mt-10 grid gap-12 md:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
           <article>
-            {isHackathon || isResume ? null : (
+            {isHackathon || isResume || isLearning ? null : (
               <Section number={nextSectionNumber()} title="Why it matters">
                 <p className="max-w-3xl border-l-2 border-line pl-5 text-body leading-relaxed text-ink-soft">
                   {data.why_matters}
@@ -360,9 +387,7 @@ function DetailView({ problemId }: { problemId: number }) {
               </Section>
             )}
 
-            {!isHackathon &&
-            !isResume &&
-            learningConcepts.length > 0 ? (
+            {isLearning && learningConcepts.length > 0 ? (
               <Section
                 number={nextSectionNumber()}
                 title="What concepts you'll learn"

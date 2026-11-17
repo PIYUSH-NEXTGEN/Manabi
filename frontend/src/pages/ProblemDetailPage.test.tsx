@@ -588,13 +588,14 @@ describe('ProblemDetailPage', () => {
     expect(starCalls).toBe(1);
   });
 
-  it('keeps the paragraph description and no pitch sections for the learning brief', async () => {
+  it('renders learning blocks, difficulty and concepts without pitch sections', async () => {
     server.use(
       http.get('*/api/problems/:id', () =>
         HttpResponse.json({
           id: 3,
           title: 'Pharmacy stock-out early warning',
-          summary: 'Weekly stock cards hide looming stock-outs.',
+          summary:
+            'Weekly stock cards hide looming stock-outs.\n\nA small forecast can show which medicines need reordering now.',
           who_affected: 'Primary health centre pharmacists',
           why_matters: 'A stock-out means no treatment that day.',
           field: 'aiml',
@@ -612,6 +613,10 @@ describe('ProblemDetailPage', () => {
           completed_count: 0,
           ai_fields: [],
           goal: 'learning',
+          learning_concepts: [
+            'Reading stock cards into a weekly table',
+            'Forecasting demand from recent consumption',
+          ],
           team_plan: {
             note: 'Should not show on learning briefs.',
             roles: [],
@@ -633,8 +638,35 @@ describe('ProblemDetailPage', () => {
     renderDetail('/problems/3');
     await screen.findByRole('heading', { level: 1 });
 
+    expect(screen.getByText('Track')).toBeInTheDocument();
+    expect(screen.getByText('Learning')).toBeInTheDocument();
+    expect(screen.getByText('Difficulty')).toBeInTheDocument();
+    expect(screen.getByText('intermediate')).toBeInTheDocument();
+    expect(screen.getByText('The project')).toBeInTheDocument();
     expect(
-      await screen.findByText(/This project is for primary health centre pharmacists/),
+      screen.getByText('Weekly stock cards hide looming stock-outs.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'A small forecast can show which medicines need reordering now.',
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Who it is for')).toBeInTheDocument();
+    expect(
+      screen.getByText('Primary health centre pharmacists'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Why it matters')).toBeInTheDocument();
+    expect(
+      screen.getByText('A stock-out means no treatment that day.'),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/This project is for/),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: "What concepts you'll learn" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText('Forecasting demand from recent consumption'),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('heading', { name: 'Team plan' }),
