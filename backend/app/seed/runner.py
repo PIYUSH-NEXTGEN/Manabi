@@ -6,6 +6,7 @@ between packs:
 
     python -m app.seed.seed_webdev_projects
     python -m app.seed.seed_aiml_projects
+    python -m app.seed.seed_aiml_hackathon_projects
 """
 
 from sqlalchemy import select

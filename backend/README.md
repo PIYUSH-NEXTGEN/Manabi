@@ -14,6 +14,7 @@ copy .env.example .env                  # then edit (session secret, GitHub OAut
 # Optional: populate briefs from curated seed packs (no network/LLM):
 .venv\Scripts\python -m app.seed.seed_webdev_projects
 .venv\Scripts\python -m app.seed.seed_aiml_projects
+.venv\Scripts\python -m app.seed.seed_aiml_hackathon_projects
 .venv\Scripts\python -m uvicorn app.main:app --port 8000
 ```
 
