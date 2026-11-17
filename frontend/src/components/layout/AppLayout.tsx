@@ -1,14 +1,20 @@
+import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { MotionConfig } from 'motion/react';
 import { Nav } from './Nav';
 import { Footer } from './Footer';
 import { ChatWidget } from '@/components/chat/ChatWidget';
 import { Mascot } from '@/components/mascot';
+import { clearDiscoverSeeds } from '@/lib/discoverSeed';
 
 export function AppLayout() {
   const { pathname } = useLocation();
   // The homepage hero runs edge to edge behind the navigation.
   const overlayNav = pathname === '/';
+
+  useEffect(() => {
+    if (!pathname.startsWith('/problems')) clearDiscoverSeeds();
+  }, [pathname]);
 
   return (
     <MotionConfig reducedMotion="user">

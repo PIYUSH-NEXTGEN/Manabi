@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { cx } from '@/lib/cx';
 import { EASE_SNAP } from '@/design/motion';
@@ -7,6 +7,7 @@ import { buttonClasses, Input, Skeleton } from '@/design/primitives';
 import { ProblemCard } from '@/components/problems/ProblemCard';
 import { FilterSelect } from '@/components/problems/FilterSelect';
 import { useFacets } from '@/hooks/useFacets';
+import { discoverSeedFor } from '@/lib/discoverSeed';
 import { fieldLabel } from '@/lib/fields';
 import { useInfiniteProblems } from '@/hooks/useInfiniteProblems';
 
@@ -43,6 +44,7 @@ function BoardSkeletons() {
 }
 
 export function ProblemBoardPage() {
+  const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get('q') ?? '';
   const field = searchParams.get('field') ?? '';
@@ -56,9 +58,7 @@ export function ProblemBoardPage() {
     ? searchParams.get('difficulty') ?? ''
     : '';
 
-  const [discoverSeed] = useState(
-    () => Math.floor(Math.random() * 2_000_000_000) + 1,
-  );
+  const [discoverSeed] = useState(() => discoverSeedFor(location.key));
   const filterKey = [q, field, source, goal, difficulty].join('|');
   const filters = useMemo(
     () => ({

@@ -52,6 +52,32 @@ describe('ProblemBoardPage', () => {
     );
   });
 
+  it('keeps the same discover seed when the board remounts', async () => {
+    const seeds: string[] = [];
+    server.use(
+      http.get('*/api/problems', ({ request }) => {
+        const url = new URL(request.url);
+        seeds.push(url.searchParams.get('seed') ?? '');
+        return HttpResponse.json({
+          items: extendedProblems.slice(0, 5),
+          total: 5,
+        });
+      }),
+    );
+
+    const first = renderWithProviders(<ProblemBoardPage />, {
+      route: '/problems',
+    });
+    await screen.findAllByRole('heading', { level: 3 });
+    first.unmount();
+
+    renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
+    await screen.findAllByRole('heading', { level: 3 });
+
+    expect(seeds.length).toBeGreaterThanOrEqual(2);
+    expect(seeds[0]).toBe(seeds[1]);
+  });
+
   it('each card links to its problem detail page', async () => {
     renderWithProviders(<ProblemBoardPage />, { route: '/problems' });
 
