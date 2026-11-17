@@ -4,7 +4,8 @@ Every pack owns only its PROBLEMS data; inserting rows with the
 skip-if-already-present rule lives here once, so the rule cannot drift
 between packs:
 
-    python -m app.seed.seed_ml_projects
+    python -m app.seed.seed_webdev_projects
+    python -m app.seed.seed_aiml_projects
 """
 
 from sqlalchemy import select
