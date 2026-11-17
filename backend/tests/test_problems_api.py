@@ -53,7 +53,7 @@ def seed(db_session: Session):
         summary="Grade onions from a photo",
         who_affected="Ministry Y",
         why_matters="Fair procurement",
-        field="app-dev",
+        field="web-dev",
         domain="agriculture",
         difficulty="beginner",
         est_hours=20,
@@ -182,7 +182,7 @@ def test_distinct_keeps_one_brief_per_field_or_domain(client, seed):
     res = client.get("/api/problems", params={"sort": "popular", "distinct": "field"})
     data = res.json()
     assert data["total"] == 2
-    assert [item["field"] for item in data["items"]] == ["aiml", "app-dev"]
+    assert [item["field"] for item in data["items"]] == ["aiml", "web-dev"]
     assert data["items"][0]["id"] == seed["pop"].id
 
     domains = client.get("/api/problems", params={"distinct": "domain"}).json()
@@ -206,7 +206,7 @@ def test_facets_counts(client, seed):
     assert res.status_code == 200
     data = res.json()
     fields = {f["value"]: f["count"] for f in data["fields"]}
-    assert fields == {"aiml": 2, "app-dev": 1}
+    assert fields == {"aiml": 2, "web-dev": 1}
     domains = {f["value"]: f["count"] for f in data["domains"]}
     assert domains["agriculture"] == 1 and domains["healthcare"] == 1 and domains["disaster-management"] == 1
     difficulties = {f["value"]: f["count"] for f in data["difficulties"]}

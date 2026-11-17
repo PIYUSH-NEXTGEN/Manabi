@@ -42,7 +42,7 @@ def db_session():
                 title="Rust vuln scanner",
                 summary="Static analysis for vulnerable crates.",
                 who_affected="Maintainers", why_matters="Supply chain",
-                field="cyber-security", domain="developer-tools", difficulty="advanced",
+                field="web-dev", domain="developer-tools", difficulty="advanced",
                 est_hours=80, tech_tags=["rust"], datasets=[], approaches=[],
                 source_name="S", source_id="S2", original_text="verbatim",
             ),

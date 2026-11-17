@@ -4,9 +4,7 @@ from typing import Annotated, Literal
 from pydantic import BaseModel, Field
 
 Difficulty = Literal["beginner", "intermediate", "advanced"]
-FieldEnum = Literal[
-    "web-dev", "app-dev", "aiml", "cyber-security", "devops-cloud", "blockchain",
-]
+FieldEnum = Literal["web-dev", "aiml"]
 DomainEnum = Literal[
     "healthcare", "education", "agriculture", "fintech", "climate", "governance",
     "transport", "disaster-management", "industry", "social-impact", "developer-tools", "cybersecurity", "computer-vision", "iot-embedded", "distributed-systems", "ml", "devops-cloud", "nlp-llm", "cloud", "blockchain", "web3", "databases", "systems", "other",

@@ -12,11 +12,6 @@ SOURCE_NAME_BY_PREFIX = {"SIH": "Smart India Hackathon 2026", "TCOE PS": "TCOE",
 DEFAULT_EST_HOURS = 40
 
 FIELD_KEYWORDS = [
-    ("blockchain", "blockchain"),
-    ("web3", "blockchain"),
-    ("cybersecurity", "cyber-security"),
-    ("cyber security", "cyber-security"),
-    ("cryptography", "cyber-security"),
     ("computer vision", "aiml"),
     ("document ai", "aiml"),
     ("llm", "aiml"),
@@ -32,23 +27,12 @@ FIELD_KEYWORDS = [
     ("analytics", "aiml"),
     ("geospatial", "aiml"),
     ("time series", "aiml"),
-    ("devops", "devops-cloud"),
-    ("cloud", "devops-cloud"),
-    ("kubernetes", "devops-cloud"),
-    ("docker", "devops-cloud"),
-    ("distributed systems", "devops-cloud"),
-    ("observability", "devops-cloud"),
     ("full-stack", "web-dev"),
     ("full stack", "web-dev"),
     ("web app", "web-dev"),
     ("web", "web-dev"),
     ("dashboard", "web-dev"),
     ("portal", "web-dev"),
-    ("mobile", "app-dev"),
-    ("app", "app-dev"),
-    ("android", "app-dev"),
-    ("iot", "app-dev"),
-    ("embedded", "app-dev"),
 ]
 
 DOMAIN_KEYWORDS = [

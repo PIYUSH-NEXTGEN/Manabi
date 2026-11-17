@@ -77,7 +77,7 @@ def test_field_mapping_and_domain(fixture_text):
     entries = {e.source_id: e for e in parse_blocks(fixture_text)}
     assert entries["SIH26017"].field == "aiml"
     assert entries["SIH26017"].domain == "governance"
-    assert entries["SIH26153"].field == "cyber-security"
+    assert entries["SIH26153"].field == "web-dev"
     assert entries["TCOE PS12"].field == "aiml"
     assert entries["TCOE PS12"].domain == "agriculture"
     assert entries["SIH26032"].field == "web-dev"

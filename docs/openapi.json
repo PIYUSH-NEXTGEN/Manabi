@@ -60,11 +60,7 @@
                 {
                   "enum": [
                     "web-dev",
-                    "app-dev",
-                    "aiml",
-                    "cyber-security",
-                    "devops-cloud",
-                    "blockchain"
+                    "aiml"
                   ],
                   "type": "string"
                 },
@@ -355,11 +351,7 @@
                 {
                   "enum": [
                     "web-dev",
-                    "app-dev",
-                    "aiml",
-                    "cyber-security",
-                    "devops-cloud",
-                    "blockchain"
+                    "aiml"
                   ],
                   "type": "string"
                 },
@@ -1878,11 +1870,7 @@
             "type": "string",
             "enum": [
               "web-dev",
-              "app-dev",
-              "aiml",
-              "cyber-security",
-              "devops-cloud",
-              "blockchain"
+              "aiml"
             ],
             "title": "Field"
           },
@@ -2201,11 +2189,7 @@
             "type": "string",
             "enum": [
               "web-dev",
-              "app-dev",
-              "aiml",
-              "cyber-security",
-              "devops-cloud",
-              "blockchain"
+              "aiml"
             ],
             "title": "Field"
           },
@@ -2546,11 +2530,7 @@
             "type": "string",
             "enum": [
               "web-dev",
-              "app-dev",
-              "aiml",
-              "cyber-security",
-              "devops-cloud",
-              "blockchain"
+              "aiml"
             ],
             "title": "Field"
           },
@@ -2727,11 +2707,7 @@
             "type": "string",
             "enum": [
               "web-dev",
-              "app-dev",
-              "aiml",
-              "cyber-security",
-              "devops-cloud",
-              "blockchain"
+              "aiml"
             ],
             "title": "Field"
           },
