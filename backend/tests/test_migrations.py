@@ -151,6 +151,65 @@ def test_0015_removes_data_science_briefs_and_dependents(sqlite_url):
     engine.dispose()
 
 
+def test_0016_removes_upcoming_field_briefs_and_dependents(sqlite_url):
+    cfg = alembic_config(sqlite_url)
+    command.upgrade(cfg, "0015_remove_data_science_field")
+    engine = create_engine(sqlite_url)
+    with Session(engine) as session:
+        user = User(github_id=92, username="curator", signals_json={})
+        session.add(user)
+        session.flush()
+        removed = [
+            _problem(field, field)
+            for field in ("app-dev", "cyber-security", "devops-cloud", "blockchain")
+        ]
+        kept = _problem("web-dev", "Kept")
+        session.add_all([*removed, kept])
+        session.flush()
+        removed_project = Project(
+            problem_id=removed[0].id,
+            user_id=user.id,
+            repo_owner="owner",
+            repo_name="removed-repo",
+            repo_url="https://github.com/owner/removed-repo",
+        )
+        kept_project = Project(
+            problem_id=kept.id,
+            user_id=user.id,
+            repo_owner="owner",
+            repo_name="kept-repo",
+            repo_url="https://github.com/owner/kept-repo",
+        )
+        session.add_all([removed_project, kept_project])
+        session.flush()
+        session.add_all(
+            [
+                ProblemStar(problem_id=removed[1].id, user_id=user.id),
+                ProjectStar(project_id=removed_project.id, user_id=user.id),
+                ProjectStar(project_id=kept_project.id, user_id=user.id),
+                ProjectReport(
+                    project_id=removed_project.id,
+                    reporter_user_id=user.id,
+                    reason="test",
+                ),
+            ]
+        )
+        session.commit()
+    engine.dispose()
+
+    command.upgrade(cfg, "head")
+    engine = create_engine(sqlite_url)
+    with engine.connect() as conn:
+        assert conn.scalar(text("SELECT COUNT(*) FROM problems")) == 1
+        assert conn.scalar(text("SELECT title FROM problems")) == "Kept"
+        assert conn.scalar(text("SELECT COUNT(*) FROM projects")) == 1
+        assert conn.scalar(text("SELECT repo_name FROM projects")) == "kept-repo"
+        assert conn.scalar(text("SELECT COUNT(*) FROM problem_stars")) == 0
+        assert conn.scalar(text("SELECT COUNT(*) FROM project_stars")) == 1
+        assert conn.scalar(text("SELECT COUNT(*) FROM project_reports")) == 0
+    engine.dispose()
+
+
 def _seed_baseline_rows(cfg, sqlite_url):
     """Create the 0001 baseline + one row per kept table (pre-0003 layout)."""
     command.upgrade(cfg, "0001_baseline")
