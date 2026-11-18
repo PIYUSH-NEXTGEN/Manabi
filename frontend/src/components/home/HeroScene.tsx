@@ -221,7 +221,7 @@ function MobileLandscape() {
 
       {/* Same house artwork as the desktop panorama */}
       <g className="hero-parallax hero-parallax--near">
-        <g transform="translate(306 246) scale(0.78)">
+        <g transform="translate(306 246)">
           <g stroke="var(--scene-wood-dark)" strokeWidth="2" strokeLinecap="round" opacity="0.8">
             <path d="M-66 0v-23M-56 0v-23M-46 0v-23M-36 0v-23M-26 0v-23" />
             <path d="M-70-14h48M-66-6h40" strokeWidth="1.4" />
