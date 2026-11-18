@@ -409,32 +409,185 @@ def parse_relevance(reply: str) -> tuple[float, str, str] | None:
     return score, verdict, reason
 
 
-def _tokens(value: str) -> set[str]:
-    return {w for w in re.findall(r"[a-z0-9][a-z0-9+.#-]{2,}", value.lower())}
+_TOKEN_RE = re.compile(r"[a-z0-9][a-z0-9+.#-]+")
 
+# User-visible prefix. The presenter uses this exact prefix to set
+# ProjectOut.relevance_offline, so the UI can explain the fallback.
+OFFLINE_NOTICE = (
+    "Our AI reviewer is temporarily unavailable, so we used our offline "
+    "keyword system for this check."
+)
+
+
+def _offline_reason(detail: str, *, recheck: bool) -> str:
+    suffix = " It will be re-checked automatically." if recheck else ""
+    return f"{OFFLINE_NOTICE} {detail}{suffix}"[:_REASON_LIMIT]
 
 _STOP_WORDS = {
     "the", "and", "for", "with", "that", "this", "from", "into", "your", "are",
-    "you", "how", "what", "build", "builds", "app", "application", "project",
-    "projects", "problem", "problems", "solution", "solutions", "manabi",
-    "using", "use", "can", "will", "all", "any", "out", "new", "not", "one",
+    "you", "how", "what", "build", "builds", "app", "apps", "application",
+    "project", "projects", "problem", "problems", "solution", "solutions",
+    "manabi", "using", "use", "used", "can", "will", "all", "any", "out",
+    "new", "not", "one", "also", "have", "has", "its", "our", "their", "who",
+    "why", "when", "where", "which", "make", "makes", "made", "need", "needs",
+    "help", "helps", "real", "time", "based", "simple", "small", "system",
+    "tool", "tools", "user", "users", "data", "code", "github", "repo",
+    "repository", "readme", "website", "web", "mobile",
+    "in", "on", "of", "to", "by", "or", "as", "at", "an", "be", "is", "it",
+    "we", "us", "me", "my", "so", "up", "do", "if", "no", "via", "per",
+}
+
+# Cheap normalisation so "js", "javascript" and "JavaScript" match, and the
+# most common stack aliases compare equal. Keep this small and predictable:
+# the offline check must be explainable and dependency-free.
+_TECH_SYNONYMS = {
+    "js": "javascript",
+    "ts": "typescript",
+    "py": "python",
+    "reactjs": "react",
+    "nextjs": "next",
+    "nodejs": "node",
+    "node": "node",
+    "postgresql": "postgres",
+    "mongo": "mongodb",
+    "sklearn": "scikit",
+    "scikitlearn": "scikit",
+    "tf": "tensorflow",
+    "torch": "pytorch",
+    "k8s": "kubernetes",
+    "ml": "machinelearning",
+    "ai": "artificialintelligence",
+    "llms": "llm",
 }
 
 
-def _fallback_overlap(problem: Problem, summary: str, facts: RepoFacts, readme: str | None) -> tuple[float, set[str]]:
-    """Deterministic keyword overlap between problem language and repo text."""
-    problem_text = " ".join(
-        [problem.title, problem.summary, problem.field, problem.domain, " ".join(problem.tech_tags or [])]
+def _stem(token: str) -> str:
+    if token.endswith("ies") and len(token) > 4:
+        return token[:-3] + "y"
+    if token.endswith(("ses", "xes", "zes", "ches", "shes")) and len(token) > 4:
+        return token[:-2]
+    if token.endswith("s") and not token.endswith(("ss", "us", "is")) and len(token) > 3:
+        return token[:-1]
+    return token
+
+
+def _tokens(value: str) -> set[str]:
+    """Normalised content tokens: lower-case, singular, alias-mapped."""
+    tokens = set()
+    for raw in _TOKEN_RE.findall((value or "").lower()):
+        token = _stem(raw)
+        token = _TECH_SYNONYMS.get(token, token)
+        if token not in _STOP_WORDS and len(token) >= 2:
+            tokens.add(token)
+    return tokens
+
+
+def _add_terms(target: dict[str, float], value: str, weight: float) -> None:
+    """Keep the strongest weight per term instead of double-counting repeats."""
+    for token in _tokens(value):
+        if target.get(token, 0.0) < weight:
+            target[token] = weight
+
+
+def _offline_score(
+    problem: Problem, summary: str, facts: RepoFacts, readme: str | None
+) -> tuple[float, set[str], list[str], dict[str, float]]:
+    """Deterministic relevance signal for when no LLM is available.
+
+    Weighted term coverage (title/tech tags/field/domain weigh more than prose)
+    plus explicit tech-tag coverage. No network, no model, no randomness. The
+    score is only a triage signal: callers must never turn it into a
+    "verified" result, because lexical matching is easy to game.
+    """
+    problem_terms: dict[str, float] = {}
+    _add_terms(problem_terms, problem.title, 3.0)
+    _add_terms(problem_terms, " ".join(problem.tech_tags or []), 3.0)
+    _add_terms(problem_terms, f"{problem.field or ''} {problem.domain or ''}", 2.0)
+    _add_terms(problem_terms, problem.summary, 1.5)
+    _add_terms(
+        problem_terms,
+        f"{problem.who_affected or ''} {problem.why_matters or ''}",
+        0.5,
     )
-    problem_words = _tokens(problem_text) - _STOP_WORDS
-    repo_text = " ".join(
-        [facts.name, facts.description, facts.language or "", " ".join(facts.topics),
-         summary, readme or ""]
+
+    repo_terms: dict[str, float] = {}
+    _add_terms(repo_terms, " ".join(facts.topics), 3.0)
+    _add_terms(repo_terms, facts.language or "", 2.0)
+    _add_terms(repo_terms, facts.name, 2.0)
+    _add_terms(repo_terms, facts.description, 2.0)
+    _add_terms(repo_terms, summary, 1.5)
+    _add_terms(repo_terms, readme or "", 1.0)
+
+    total_weight = sum(problem_terms.values()) or 1.0
+    overlap = problem_terms.keys() & repo_terms.keys()
+    coverage = sum(problem_terms[word] for word in overlap) / total_weight
+
+    tags = [tag for tag in (problem.tech_tags or []) if _tokens(tag)]
+    tag_hits = [tag for tag in tags if _tokens(tag).issubset(repo_terms)]
+    tech_coverage = len(tag_hits) / len(tags) if tags else 0.0
+
+    score = 0.6 * coverage + 0.4 * tech_coverage
+    if _tokens(f"{problem.field or ''} {problem.domain or ''}") & overlap:
+        score += 0.05
+    return round(min(1.0, max(0.0, score)), 3), overlap, tag_hits, problem_terms
+
+
+def _offline_evaluation(
+    problem: Problem,
+    summary: str,
+    facts: RepoFacts,
+    readme: str | None,
+    pre_existing: bool,
+) -> RelevanceEvaluation:
+    """Map the offline signal to a safe outcome: never verified."""
+    score, overlap, tag_hits, problem_terms = _offline_score(
+        problem, summary, facts, readme
     )
-    repo_words = _tokens(repo_text)
-    overlap = problem_words & repo_words
-    ratio = len(overlap) / max(1, min(6, len(problem_words)))
-    return min(0.34, ratio), overlap  # fallback never reaches the verify threshold
+    if not overlap and not tag_hits:
+        return RelevanceEvaluation(
+            VERIFICATION_REJECTED,
+            score,
+            _offline_reason(
+                "The repository shows no connection to this problem's topic.",
+                recheck=False,
+            ),
+        )
+    if pre_existing:
+        return RelevanceEvaluation(
+            VERIFICATION_NEEDS_REVIEW,
+            score,
+            _offline_reason("Pre-existing repository.", recheck=True),
+        )
+    language_terms = _tokens(facts.language or "")
+    evidence = [
+        term
+        for term in sorted(
+            overlap - language_terms,
+            key=lambda term: problem_terms[term],
+            reverse=True,
+        )
+    ][:5]
+    if evidence:
+        detail = (
+            "Related terms found ("
+            + ", ".join(evidence)
+            + "), but it cannot confirm this submission."
+        )
+    elif tag_hits:
+        detail = (
+            "A matching technology was found ("
+            + ", ".join(tag_hits[:3])
+            + "), but it cannot confirm this submission."
+        )
+    else:
+        detail = (
+            "Only a language match was found, so it cannot confirm this submission."
+        )
+    return RelevanceEvaluation(
+        VERIFICATION_NEEDS_REVIEW,
+        score,
+        _offline_reason(detail, recheck=True),
+    )
 
 
 def _llm_input(problem: Problem, summary: str, facts: RepoFacts, readme: str | None) -> str:
@@ -485,17 +638,12 @@ def evaluate_relevance(
         )
         parsed = parse_relevance(reply)
     except LLMQuotaExhausted:
-        # Every key is out of quota. Sending the submission to review is
-        # friendlier (and safer) than the keyword fallback, which can reject
-        # an honest submission; the project is re-checked automatically later.
-        logger.warning("Relevance check skipped: all Gemini keys are out of quota")
-        return RelevanceEvaluation(
-            VERIFICATION_NEEDS_REVIEW,
-            None,
-            "Automatic review is temporarily unavailable. Your project will be re-checked automatically.",
-        )
+        # Both key pools are empty. The deterministic offline check still
+        # triages the submission; it never auto-verifies.
+        logger.warning("Relevance LLM unavailable (all keys out of quota); using offline check")
+        parsed = None
     except Exception:  # noqa: BLE001 - any LLM failure must fall back, never leak
-        logger.warning("Relevance LLM call failed", exc_info=True)
+        logger.warning("Relevance LLM call failed; using offline check", exc_info=True)
         parsed = None
     if parsed is not None:
         score, _verdict, llm_reason = parsed
@@ -508,20 +656,13 @@ def evaluate_relevance(
     pre_existing_note = "pre-existing repository"
 
     if not llm_ok:
-        # Deterministic fallback: keyword overlap only chooses between
-        # needs_review and a hard 422. It can never auto-verify.
-        ratio, overlap = _fallback_overlap(problem, summary, facts, readme)
-        if not overlap:
-            return RelevanceEvaluation(
-                VERIFICATION_REJECTED, None,
-                "The repository shows no connection to this problem's topic (automatic check).",
-            )
-        reason = (
-            pre_existing_note
-            if pre_existing
-            else "Linked to the problem by keywords. Automatic check could not fully confirm."
+        return _offline_evaluation(
+            problem,
+            summary,
+            facts,
+            readme,
+            pre_existing,
         )
-        return RelevanceEvaluation(VERIFICATION_NEEDS_REVIEW, None, reason)
 
     if score >= settings.RELEVANCE_VERIFY_MIN:
         if pre_existing and score < 0.85:
@@ -596,14 +737,26 @@ async def create_submission(
         evaluate_relevance, problem, summary, facts, readme, commit_count
     )
     if evaluation.status == VERIFICATION_REJECTED:
+        offline = bool(evaluation.reason and evaluation.reason.startswith(OFFLINE_NOTICE))
+        reasons = (
+            [
+                "Our AI reviewer was unavailable, so a deterministic keyword check compared the problem's text with your repository's name, topics, description, and README.",
+                "The check found no shared topic or technology between this problem and the repository.",
+                "Name the problem's topic and technologies in the repo description and README, then submit again.",
+            ]
+            if offline
+            else [
+                "The AI compared the problem with the README, the repo description, and your description and found them unrelated.",
+                "Your description is optional but helps: say explicitly what the repo does and how it solves the problem.",
+                "Grow the README too: it is the main thing the AI reads to judge relevance.",
+            ]
+        )
         raise SubmissionError(
             422,
             "not_relevant",
             evaluation.reason or "This repository does not relate to this problem.",
-            reasons=[
-                "The AI compared the problem with the README, the repo description, and your description and found them unrelated.",
-                "Your description is optional but helps: say explicitly what the repo does and how it solves the problem.",
-                "Grow the README too: it is the main thing the AI reads to judge relevance.",
+            reasons=reasons
+            + [
                 "Submissions are also rejected when the repo is a fork, has no README, has fewer than "
                 f"{MIN_COMMIT_COUNT} commits, is not owned by you, or was already linked to another problem.",
             ],
