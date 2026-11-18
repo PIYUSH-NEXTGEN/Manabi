@@ -10,7 +10,7 @@ interface ProsePageProps {
 export function ProsePage({ kicker, title, intro, children }: ProsePageProps) {
   return (
     <main className="border-b border-line bg-paper">
-      <div className="mx-auto w-[min(720px,92vw)] py-16 md:py-24">
+      <div className="mx-auto w-full max-w-[760px] px-5 py-16 sm:px-6 md:py-24">
         {kicker ? (
           <p className="text-sm font-medium text-muted">{kicker}</p>
         ) : null}

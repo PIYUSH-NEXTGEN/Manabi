@@ -54,7 +54,7 @@
   --text-lead--line-height: 1.6;
   --text-display: clamp(2rem, 4.2vw, 3.15rem);
   --text-display--line-height: 1.02;
-  --text-hero: clamp(2.75rem, 7.2vw, 5.4rem);
+  --text-hero: clamp(2.5rem, 7.2vw, 5.4rem);
   --text-hero--line-height: 1.0;
 }
 
@@ -237,6 +237,86 @@ body {
 
 .hero-parallax {
   transform: none;
+}
+
+/*
+ * Phone hero landscape. The portrait scene is drawn at its own aspect ratio and
+ * replaces the wide desktop panorama on narrow screens; landscape phones keep
+ * the wide scene, which suits their shape. The mobile scene is hidden by
+ * default, so a stale stylesheet can never push it onto the desktop hero.
+ */
+.hero-scene-mobile {
+  display: none;
+}
+
+.hero-scene-wide {
+  display: block;
+}
+
+@media (max-width: 639px) {
+  .hero-scene-mobile {
+    display: block;
+  }
+
+  .hero-scene-wide {
+    display: none;
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  .hero-scene-mobile {
+    display: none;
+  }
+
+  .hero-scene-wide {
+    display: block;
+  }
+}
+
+/*
+ * Short landscape phones: the navigation takes most of the height, so the hero
+ * compacts its gutters and headline to keep the pitch and CTA in view.
+ */
+@media (max-height: 560px) and (orientation: landscape) {
+  .hero-copy {
+    padding-top: 8rem;
+    padding-bottom: 1rem;
+  }
+
+  .hero-headline {
+    font-size: clamp(2rem, 8.6vh, 3rem);
+  }
+
+  .hero-sub {
+    margin-top: 1rem;
+  }
+
+  .hero-cta {
+    margin-top: 1.25rem;
+  }
+}
+
+/* Very short landscape viewports (320–380px tall): pack the hero tighter. */
+@media (max-height: 380px) and (min-width: 500px) and (orientation: landscape) {
+  .hero-copy {
+    padding-top: 5.25rem;
+    padding-bottom: 0.75rem;
+  }
+}
+
+@media (max-height: 380px) and (orientation: landscape) {
+  .hero-headline {
+    font-size: clamp(1.75rem, 9vh, 2.5rem);
+  }
+
+  .hero-sub {
+    margin-top: 0.625rem;
+    font-size: 0.9375rem;
+  }
+
+  .hero-cta {
+    margin-top: 0.75rem;
+  }
 }
 
 .hero-grain {

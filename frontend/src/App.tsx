@@ -115,7 +115,7 @@ const queryClient = new QueryClient({
 
 function RouteFallback() {
   return (
-    <div className="mx-auto w-[min(1100px,96vw)] animate-pulse space-y-4 py-16" aria-hidden>
+    <div className="mx-auto w-full max-w-[1140px] animate-pulse space-y-4 px-5 py-16 sm:px-6" aria-hidden>
       <div className="h-4 w-40 bg-ink/20" />
       <div className="h-16 w-2/3 bg-ink/20" />
       <div className="h-48 w-full bg-ink/20" />

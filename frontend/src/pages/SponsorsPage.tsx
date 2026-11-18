@@ -44,7 +44,7 @@ export function SponsorsPage() {
           className="pointer-events-none absolute -bottom-32 -left-24 size-[22rem] rounded-full bg-lime/20 blur-3xl dark:hidden"
         />
 
-        <div className="relative mx-auto w-[min(1120px,96vw)] py-14 md:py-20">
+        <div className="relative mx-auto w-full max-w-[1160px] px-5 py-14 sm:px-6 md:py-20">
           <h1 className="max-w-3xl text-balance font-display text-display leading-[1.03] tracking-[-0.03em] text-ink">
             {HERO.title}
           </h1>
@@ -69,7 +69,7 @@ export function SponsorsPage() {
         </div>
       </section>
 
-      <div className="mx-auto w-[min(1120px,96vw)]">
+      <div className="mx-auto w-full max-w-[1160px] px-5 sm:px-6">
         <Section
           id="audience"
           index={AUDIENCE.index}

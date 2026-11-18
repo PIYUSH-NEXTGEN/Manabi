@@ -39,13 +39,13 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
       className={cx(
         'z-30',
         overlay
-          ? 'absolute inset-x-0 top-0 px-4 pt-4 md:px-8 md:pt-6'
-          : 'sticky top-0 px-3 pt-3 md:px-5 md:pt-4',
+          ? 'absolute inset-x-0 top-0 px-3 pt-[max(1rem,env(safe-area-inset-top))] sm:px-4 md:px-8 md:pt-6'
+          : 'sticky top-0 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:px-5 md:pt-4',
       )}
     >
       <nav
         aria-label="Main"
-        className="relative mx-auto flex w-full max-w-[680px] items-center justify-between gap-3 rounded-full border border-ink/15 bg-paper/85 px-3 py-2 shadow-[0_18px_50px_-28px_rgba(10,11,13,0.35)] backdrop-blur-xl md:px-4"
+        className="relative mx-auto flex w-full max-w-[680px] items-center justify-between gap-2 rounded-full border border-ink/15 bg-paper/85 px-3 py-2 shadow-[0_18px_50px_-28px_rgba(10,11,13,0.35)] backdrop-blur-xl md:gap-3 md:px-4"
       >
         <div className="flex items-center gap-2 md:gap-4">
           <Link
@@ -57,7 +57,7 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
             </span>
           </Link>
 
-          <ul className="hidden items-center gap-1 md:flex">
+          <ul className="hidden items-center gap-1 min-[500px]:flex">
             {NAV_LINKS.map((link) => (
               <li key={link.to}>
                 <NavLink to={link.to} className={navLinkClasses}>
@@ -68,7 +68,7 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
           </ul>
         </div>
 
-        <div className="flex items-center justify-end gap-2">
+        <div className="flex shrink-0 items-center justify-end gap-2">
           {me.data ? (
             <Link
               to="/me"
@@ -83,7 +83,7 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
               ) : (
                 <span aria-hidden className="block size-6 rounded-full bg-sky" />
               )}
-              <span className="text-[0.8125rem] font-semibold leading-none text-ink">
+              <span className="max-w-[7.5rem] truncate text-[0.8125rem] font-semibold leading-none text-ink md:max-w-[10rem]">
                 {me.data.username}
               </span>
             </Link>
@@ -93,7 +93,7 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
               onClick={() => {
                 window.location.assign('/api/auth/github/login');
               }}
-              className="press inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[0.8125rem] font-semibold leading-none text-paper transition-colors hover:bg-ink/90"
+              className="press inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-ink px-3 py-2.5 text-[0.8125rem] font-semibold leading-none text-paper transition-colors hover:bg-ink/90 min-[360px]:px-4"
             >
               <GithubMark size={14} />
               GitHub login
@@ -123,7 +123,7 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
         </div>
       </nav>
 
-      <ul className="mx-auto mt-2 flex w-fit items-center gap-1 rounded-full border border-ink/15 bg-paper/85 p-1 shadow-soft backdrop-blur-xl md:hidden">
+      <ul className="mx-auto mt-2 flex w-fit items-center gap-1 rounded-full border border-ink/15 bg-paper/85 p-1 shadow-soft backdrop-blur-xl min-[500px]:hidden">
         {NAV_LINKS.map((link) => (
           <li key={link.to}>
             <NavLink to={link.to} className={navLinkClasses}>

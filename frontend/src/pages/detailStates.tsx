@@ -27,7 +27,7 @@ export function LoadErrorPanel({
 }) {
   return (
     <main className="border-b border-line">
-      <div className="mx-auto w-[min(760px,96vw)] space-y-4 py-16">
+      <div className="mx-auto w-full max-w-[800px] space-y-4 px-5 py-16 sm:px-6">
         <h1 className="font-display text-display leading-tight text-ink">{title}</h1>
         <p className="text-body leading-relaxed text-ink-soft">{message}</p>
         <Link

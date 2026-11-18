@@ -87,6 +87,240 @@ function Cloud({
   );
 }
 
+/**
+ * Portrait landscape for phones. Drawn at its own aspect ratio so the hills,
+ * windmill and house keep their proportions instead of being stretched from
+ * the wide desktop scene.
+ */
+function MobileLandscape() {
+  return (
+    <svg
+      className="hero-scene-mobile hero-sketch absolute inset-x-0 bottom-0 hidden w-full"
+      viewBox="0 0 390 360"
+      fill="none"
+      aria-hidden
+    >
+      <defs>
+        <pattern
+          id="mobile-hatch"
+          width="7"
+          height="7"
+          patternUnits="userSpaceOnUse"
+          patternTransform="rotate(-15)"
+        >
+          <path
+            d="M-1 7L7-1M4 8L8 4"
+            stroke="var(--sketch-ink-soft)"
+            strokeWidth="0.6"
+            strokeOpacity="0.42"
+            strokeLinecap="round"
+          />
+        </pattern>
+      </defs>
+
+      {/* Distant ridge */}
+      <path
+        d="M0 162C18 158 30 150 44 142C58 134 70 138 82 148C94 158 102 168 116 166C130 164 142 150 158 146C174 142 186 150 198 160C212 170 224 176 238 168C254 160 266 148 282 146C298 144 310 154 324 160C338 166 352 164 366 156C376 150 384 150 390 152V360H0V162Z"
+        fill="var(--sketch-wash)"
+        stroke="var(--sketch-ink-faint)"
+        strokeOpacity="0.6"
+        strokeWidth="1.2"
+      />
+      <g fill="var(--sketch-highlight)" opacity="0.65" stroke="none">
+        <path d="M44 142C52 150 62 156 74 156C66 148 58 142 44 142Z" />
+        <path d="M282 146C290 154 300 158 312 158C304 150 296 144 282 146Z" />
+      </g>
+
+      {/* Middle ridge */}
+      <path
+        d="M0 190C28 178 56 156 84 158C106 160 120 176 140 182C162 188 184 172 206 166C230 160 248 172 270 180C294 188 316 172 340 170C360 168 378 176 390 174V360H0V190Z"
+        fill="var(--sketch-shade)"
+        stroke="var(--sketch-ink-soft)"
+        strokeOpacity="0.6"
+        strokeWidth="1.3"
+      />
+      <path
+        d="M0 190C28 178 56 156 84 158C106 160 120 176 140 182C162 188 184 172 206 166C230 160 248 172 270 180C294 188 316 172 340 170C360 168 378 176 390 174V360H0V190Z"
+        fill="url(#mobile-hatch)"
+        opacity="0.2"
+        stroke="none"
+      />
+
+      {/* Meadows */}
+      <path
+        d="M0 224C64 210 116 226 176 216C236 206 288 224 342 214C360 211 376 214 390 210V360H0V224Z"
+        fill="var(--scene-far)"
+        stroke="none"
+      />
+      <path
+        d="M0 256C62 244 116 260 178 250C240 240 296 258 352 248C368 245 380 247 390 244V360H0V256Z"
+        fill="var(--scene-mid)"
+        stroke="none"
+      />
+      <path
+        d="M0 296C70 284 128 300 194 290C258 280 314 298 366 288C376 286 384 287 390 285V360H0V296Z"
+        fill="var(--scene-near)"
+        stroke="none"
+      />
+      <path
+        d="M0 330C74 322 140 334 208 328C270 322 330 330 390 324V360H0V330Z"
+        fill="var(--scene-front)"
+        stroke="none"
+      />
+
+      {/* Contour lines and grass */}
+      <g
+        stroke="var(--sketch-ink-faint)"
+        strokeOpacity="0.38"
+        strokeWidth="0.9"
+        strokeLinecap="round"
+      >
+        <path d="M18 232C56 224 96 230 128 240" />
+        <path d="M226 250C262 244 298 250 330 258" />
+        <path d="M38 274C82 266 124 272 160 280" />
+        <path d="M250 286C290 278 328 284 360 292" />
+        <path d="M58 306C104 298 150 302 188 310" />
+        <path d="M250 320C288 312 326 316 356 324" />
+
+      </g>
+
+      {/* Same windmill artwork as the desktop panorama */}
+      <g className="hero-parallax hero-parallax--near">
+        <ellipse cx="84" cy="314" rx="30" ry="5" fill="var(--scene-shadow)" opacity="0.12" stroke="none" />
+        <g transform="translate(84 310)">
+          <path d="M-18 0h36l-4-10h-28Z" fill="var(--scene-stone)" />
+          <path d="M-14-10h28l-3-8h-22Z" fill="var(--scene-stone-light)" opacity="0.5" />
+          <path d="M-12-18h24l-4-46h-16Z" fill="var(--scene-wood)" />
+          <path d="M-12-18l4-46h6l-2 46Z" fill="var(--scene-wood-light)" opacity="0.55" />
+          <path d="M4-64h8l-2 46h-6Z" fill="var(--scene-wood-dark)" opacity="0.5" />
+          <g stroke="var(--scene-wood-dark)" strokeOpacity="0.35" strokeWidth="0.8">
+            <path d="M-10-24h20M-9-32h19M-8-40h18M-7-48h17M-6-56h16" />
+          </g>
+          <path d="M-4-18v-13h8v13Z" fill="var(--scene-wood-dark)" />
+          <path d="M-4-29h8" stroke="var(--scene-wood-light)" strokeWidth="1.2" />
+          <rect x="-4" y="-46" width="8" height="8" rx="1" fill="var(--scene-window)" opacity="0.9" />
+          <path d="M0-46v8M-4-42h8" stroke="var(--scene-wood-dark)" strokeWidth="0.8" />
+          <path d="M-18-64h36" stroke="var(--scene-wood-dark)" strokeWidth="2.5" strokeLinecap="round" />
+          <path
+            d="M-16-64v-6M-10-64v-6M-4-64v-6M4-64v-6M10-64v-6M16-64v-6"
+            stroke="var(--scene-wood-dark)"
+            strokeWidth="1"
+          />
+          <path d="M-16-64h32l-6-12h-20Z" fill="var(--scene-roof)" />
+          <path d="M-13-64h26l-3-7h-20Z" fill="var(--scene-roof-light)" opacity="0.5" />
+          <path d="M0-76v-5" stroke="var(--scene-wood-dark)" strokeWidth="1.5" strokeLinecap="round" />
+          <circle cx="0" cy="-83" r="2.5" fill="var(--scene-wood-dark)" />
+          <g
+            transform="translate(15 -26)"
+            stroke="var(--scene-wood-dark)"
+            strokeWidth="1.1"
+            fill="none"
+            opacity="0.7"
+          >
+            <circle r="4.5" />
+            <circle r="2.5" />
+          </g>
+          <g transform="translate(0 -70)">
+            <g className="windmill-blades">
+              {[0, 90, 180, 270].map((rotation) => (
+                <g key={rotation} transform={`rotate(${rotation})`}>
+                  <rect
+                    x="-2.2"
+                    y="-58"
+                    width="4.4"
+                    height="54"
+                    rx="2.2"
+                    fill="var(--scene-wood-dark)"
+                  />
+                  <rect
+                    x="-10"
+                    y="-52"
+                    width="20"
+                    height="32"
+                    rx="1.5"
+                    fill="var(--scene-wood)"
+                    opacity="0.95"
+                  />
+                  <g stroke="var(--scene-wood-light)" strokeWidth="1" opacity="0.6">
+                    <path d="M-10-44h20M-10-36h20M-10-28h20" />
+                  </g>
+                  <path d="M0-52v32" stroke="var(--scene-wood-dark)" strokeWidth="1.2" />
+                  <path
+                    d="M-10-52l20 32M10-52l-20 32"
+                    stroke="var(--scene-wood-dark)"
+                    strokeWidth="0.7"
+                    opacity="0.5"
+                  />
+                </g>
+              ))}
+              <circle r="6" fill="var(--scene-wood-dark)" />
+              <circle r="2.5" fill="var(--scene-wood-light)" />
+            </g>
+          </g>
+        </g>
+      </g>
+
+      {/* Same house artwork as the desktop panorama */}
+      <g className="hero-parallax hero-parallax--near">
+        <g transform="translate(288 246) scale(0.78)">
+          <g stroke="var(--scene-wood-dark)" strokeWidth="2" strokeLinecap="round" opacity="0.8">
+            <path d="M-66 0v-23M-56 0v-23M-46 0v-23M-36 0v-23M-26 0v-23" />
+            <path d="M-70-14h48M-66-6h40" strokeWidth="1.4" />
+          </g>
+          <path d="M-34-2h68v-42h-68Z" fill="var(--scene-stone)" />
+          <path d="M-34-44h68v-8h-68Z" fill="var(--scene-wood)" />
+          <path d="M-34-2h20v-42h-20Z" fill="var(--scene-stone-light)" opacity="0.35" />
+          <path d="M-44-44L0-74L44-44Z" fill="var(--scene-roof)" />
+          <path d="M-44-44L0-74V-68L-36-44Z" fill="var(--scene-roof-light)" opacity="0.55" />
+          <g stroke="var(--scene-roof-light)" strokeOpacity="0.35" strokeWidth="1">
+            <path d="M-36-40h72M-30-34h60M-24-48h48M-18-42h36" />
+          </g>
+          <path d="M22-68h10v18h-10Z" fill="var(--scene-stone)" />
+          <path d="M20-70h14v4H20Z" fill="var(--scene-roof-light)" />
+          <ellipse cx="-15" cy="-27" rx="20" ry="16" fill="var(--scene-window-glow)" opacity="0.24" filter="url(#hero-glow)" />
+          <ellipse cx="16" cy="-27" rx="18" ry="15" fill="var(--scene-window-glow)" opacity="0.2" filter="url(#hero-glow)" />
+          <rect x="-22" y="-34" width="14" height="14" rx="2" fill="var(--scene-window)" />
+          <rect x="10" y="-34" width="12" height="14" rx="2" fill="var(--scene-window)" />
+          <path
+            d="M-15-34v14M-22-27h14M16-34v14M10-27h12"
+            stroke="var(--scene-wood-dark)"
+            strokeWidth="1.2"
+          />
+          <path d="M-5-2v-20h10v20Z" fill="var(--scene-wood-dark)" />
+          <circle cx="2" cy="-12" r="1" fill="var(--scene-window)" />
+          <g transform="translate(27 -70)">
+            <g className="smoke-rise" fill="var(--scene-snow)" opacity="0.55">
+              <circle cx="0" cy="0" r="3" />
+              <circle cx="3" cy="-7" r="4" opacity="0.7" />
+              <circle cx="-1" cy="-14" r="5" opacity="0.45" />
+              <circle cx="-5" cy="-22" r="6" opacity="0.24" />
+            </g>
+            <g
+              className="smoke-rise"
+              fill="var(--scene-snow)"
+              opacity="0.35"
+              style={{ animationDelay: '-2.2s' }}
+            >
+              <circle cx="1" cy="-4" r="2.5" />
+              <circle cx="4" cy="-11" r="3.5" opacity="0.7" />
+              <circle cx="0" cy="-18" r="4.5" opacity="0.4" />
+            </g>
+          </g>
+          <g transform="translate(-48 -15)">
+            <path d="M0-14v10" stroke="var(--scene-wood-dark)" strokeWidth="1.2" />
+            <rect x="-3" y="-4" width="6" height="8" rx="1" fill="var(--scene-lantern)" />
+            <circle cx="0" cy="0" r="7" fill="var(--scene-lantern)" opacity="0.18" filter="url(#hero-glow)" />
+          </g>
+          <g stroke="var(--scene-wood-dark)" strokeWidth="2" strokeLinecap="round" opacity="0.75">
+            <path d="M-64-2v-23M-54-2v-23M-44-2v-23M-34-2v-23" />
+            <path d="M-68-14h38M-64-6h30" strokeWidth="1.4" />
+          </g>
+        </g>
+      </g>
+    </svg>
+  );
+}
+
 export function HeroScene() {
   return (
     <div
@@ -116,12 +350,12 @@ export function HeroScene() {
       </div>
 
       <Cloud
-        className="cloud-drift absolute left-[7%] top-[20%] w-52 opacity-95 dark:opacity-55"
+        className="cloud-drift absolute left-[4%] top-[clamp(9.75rem,18%,11rem)] w-32 opacity-90 dark:opacity-55 sm:left-[7%] sm:top-[20%] sm:w-52 sm:opacity-95"
         duration={38}
       />
 
       <svg
-        className="bird-drift absolute right-[29%] top-[19%] w-40 text-ink/45 dark:text-paper/40"
+        className="bird-drift absolute right-[8%] top-[clamp(9.25rem,16%,10.5rem)] w-32 text-ink/45 dark:text-paper/40 sm:right-[29%] sm:top-[19%] sm:w-40"
         viewBox="0 0 180 80"
         fill="none"
         aria-hidden
@@ -136,7 +370,7 @@ export function HeroScene() {
         </g>
       </svg>
       <svg
-        className="bird-drift absolute left-[17%] top-[24%] w-24 text-ink/30 dark:text-paper/25"
+        className="bird-drift absolute left-[17%] top-[24%] hidden w-24 text-ink/30 dark:text-paper/25 sm:block"
         viewBox="0 0 120 44"
         fill="none"
         aria-hidden
@@ -249,8 +483,10 @@ export function HeroScene() {
 
       <Pollen />
 
+      <MobileLandscape />
+
       <svg
-        className="hero-sketch absolute inset-x-0 bottom-0 h-[78%] w-full"
+        className="hero-scene-wide hero-sketch absolute inset-x-0 bottom-0 h-[78%] w-full"
         viewBox="0 0 1680 720"
         preserveAspectRatio="none"
         fill="none"

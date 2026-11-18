@@ -6,7 +6,7 @@ import { useStats } from '@/hooks/useStats';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import { HeroScene } from '@/components/home/HeroScene';
 
-const HEADLINE_LINES = ['Pick a project.', 'Ship it Prove it.'];
+const HEADLINE_LINES = ['Pick a project.', 'Ship it. Prove it.'];
 const HEADLINE_STEP_MS = 700;
 
 /** Two-line centered headline, revealed without layout shift. */
@@ -14,7 +14,7 @@ function HeroHeadline() {
   const reduced = usePrefersReducedMotion();
 
   return (
-    <h1 className="text-balance font-hero text-hero leading-[0.98] tracking-[-0.035em] text-ink">
+    <h1 className="hero-headline text-balance font-hero text-hero leading-[0.98] tracking-[-0.035em] text-ink">
       {HEADLINE_LINES.map((line, index) => (
         <motion.span
           key={line}
@@ -55,8 +55,12 @@ export function Hero() {
     <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden">
       <HeroScene />
 
-      <div className="relative mx-auto flex w-[min(1180px,94vw)] flex-1 flex-col justify-center pb-28 pt-40 text-center sm:pb-32">
-        <div className="mx-auto max-w-5xl">
+      <div className="hero-copy relative mx-auto flex w-full max-w-[1220px] flex-1 flex-col justify-center px-5 pb-20 pt-32 text-center sm:px-6 sm:pb-28 sm:pt-40">
+        <div className="relative mx-auto max-w-5xl">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-x-6 -inset-y-5 -z-10 rounded-[50%] bg-[radial-gradient(ellipse_at_center,var(--paper)_0%,var(--paper)_46%,transparent_76%)] opacity-90 sm:hidden"
+          />
           <HeroHeadline />
 
           <motion.p
@@ -67,7 +71,7 @@ export function Hero() {
                 ? { duration: 0 }
                 : { duration: 0.6, delay: 0.45, ease: EASE_SNAP }
             }
-            className="mx-auto mt-7 max-w-2xl text-balance text-lead leading-relaxed font-medium text-ink/85"
+            className="hero-sub mx-auto mt-7 max-w-2xl text-balance text-lead leading-relaxed font-medium text-ink/85"
           >
             Stop Googling project ideas. Browse {projectsLabel} for learning,
             resumes and hackathons. Build one, submit your repo, show your work
@@ -82,7 +86,7 @@ export function Hero() {
                 ? { duration: 0 }
                 : { duration: 0.6, delay: 0.6, ease: EASE_SNAP }
             }
-            className="mt-9 flex justify-center"
+            className="hero-cta mt-9 flex justify-center"
           >
             <Link
               to="/problems"

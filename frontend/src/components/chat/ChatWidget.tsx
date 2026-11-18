@@ -198,7 +198,7 @@ export function ChatWidget() {
         whileHover={{ y: -2 }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.18, ease: EASE_SNAP }}
-        className="press group fixed bottom-4 right-4 z-40 inline-flex items-center gap-2.5 rounded-full border border-line bg-ink p-1.5 pr-4 text-paper shadow-lift lg:bottom-5 lg:right-5"
+        className="press group fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-40 inline-flex items-center gap-2.5 rounded-full border border-line bg-ink p-1.5 pr-4 text-paper shadow-lift lg:bottom-[max(1.25rem,env(safe-area-inset-bottom))] lg:right-5"
       >
         <span className="relative flex size-10 items-center justify-center rounded-full bg-accent text-paper">
           <MessageSquare aria-hidden size={16} strokeWidth={2.2} />
@@ -222,7 +222,7 @@ export function ChatWidget() {
       initial={{ opacity: 0, y: 18, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.24, ease: EASE_SNAP }}
-      className="fixed bottom-4 right-4 z-40 flex h-[min(620px,calc(100dvh-2rem))] w-[min(410px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[1.75rem] border border-line bg-sheet/95 shadow-lift backdrop-blur-xl lg:bottom-5 lg:right-5"
+      className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-4 z-40 flex h-[min(620px,calc(100dvh-2rem-env(safe-area-inset-bottom)))] w-[min(410px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[1.75rem] border border-line bg-sheet/95 shadow-lift backdrop-blur-xl lg:bottom-[max(1.25rem,env(safe-area-inset-bottom))] lg:right-5"
     >
       <header className="relative border-b border-line bg-sheet px-4 pb-3 pt-4">
         <div className="flex items-start justify-between gap-3">

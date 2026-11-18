@@ -129,7 +129,7 @@ export function ProblemBoardPage() {
 
   return (
     <main className="border-b border-line bg-paper">
-      <div className="mx-auto w-[min(1120px,94vw)] py-12 md:py-16">
+      <div className="mx-auto w-full max-w-[1160px] px-5 py-12 sm:px-6 md:py-16">
         <header className="max-w-2xl">
           <h1 className="font-display text-display leading-[1.02] tracking-[-0.03em] text-ink">
             Projects

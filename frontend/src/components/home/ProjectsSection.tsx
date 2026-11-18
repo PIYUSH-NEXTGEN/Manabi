@@ -347,7 +347,7 @@ export function ProjectsSection() {
         className="pointer-events-none absolute -bottom-24 -left-40 size-[26rem] rounded-full bg-lime/20 blur-3xl dark:hidden"
       />
 
-      <div className="relative mx-auto w-[min(1240px,96vw)]">
+      <div className="relative mx-auto w-full max-w-[1280px] px-5 sm:px-6 lg:px-8">
         <div className="border-b border-line pb-8">
           <div className="max-w-3xl">
             <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
@@ -382,7 +382,7 @@ export function ProjectsSection() {
               {statItems.map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-line bg-sky/20 px-4 py-4 dark:bg-sheet"
+                  className="rounded-2xl border border-line bg-sky/20 px-3 py-3 dark:bg-sheet sm:px-4 sm:py-4"
                 >
                   <dd className="font-display text-[2rem] leading-none tracking-[-0.03em] text-ink">
                     <StatValue value={stat.value} />

@@ -78,7 +78,7 @@ export function Sponsors() {
         className="pointer-events-none absolute -bottom-20 -left-32 size-[20rem] rounded-full bg-lime/15 blur-3xl dark:hidden"
       />
 
-      <div className="relative mx-auto w-[min(1240px,96vw)] pt-16 pb-24 sm:pb-16 md:py-20">
+      <div className="relative mx-auto w-full max-w-[1280px] px-5 pt-16 pb-24 sm:px-6 sm:pb-16 md:py-20 lg:px-8">
         <div className="max-w-xl">
           <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
             <span className="text-ink">04</span> / Sponsors

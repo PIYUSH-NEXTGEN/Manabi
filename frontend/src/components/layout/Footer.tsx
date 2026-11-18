@@ -69,7 +69,7 @@ export function Footer() {
         className="pointer-events-none absolute -right-24 bottom-0 size-[22rem] rounded-full bg-lime/20 blur-3xl dark:bg-lime/5"
       />
 
-      <div className="relative mx-auto w-[min(1240px,96vw)] px-2 pb-6 pt-10 sm:px-4 sm:pt-14">
+      <div className="relative mx-auto w-full max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-14">
         <motion.div
           variants={reveal}
           initial="hidden"

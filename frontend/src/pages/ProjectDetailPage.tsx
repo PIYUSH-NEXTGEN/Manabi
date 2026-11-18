@@ -171,7 +171,7 @@ function ProjectView({ projectId }: { projectId: number }) {
   if (project.isPending) {
     return (
       <main className="border-b border-line bg-paper">
-        <PageSkeleton width="w-[min(900px,96vw)]" />
+        <PageSkeleton width="w-full max-w-[940px] px-5 sm:px-6" />
       </main>
     );
   }
@@ -213,7 +213,7 @@ function ProjectView({ projectId }: { projectId: number }) {
 
   return (
     <main className="border-b border-line">
-      <div className="mx-auto w-[min(900px,96vw)] py-14">
+      <div className="mx-auto w-full max-w-[940px] px-5 py-14 sm:px-6">
         <p className={panelHeading}>Project · {data.repo_owner}/{data.repo_name}</p>
         <h1 className="mt-2 font-display text-display leading-[1.05] tracking-[-0.03em]">
           {data.repo_name}

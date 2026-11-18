@@ -4,7 +4,7 @@ import { buttonClasses } from '@/design/primitives';
 export function NotFoundPage() {
   return (
     <main className="dawn-field border-b border-line">
-      <div className="mx-auto flex w-[min(760px,96vw)] flex-col gap-6 py-20">
+      <div className="mx-auto flex w-full max-w-[800px] flex-col gap-6 px-5 py-20 sm:px-6">
         <h1
           aria-label="404. Page not found"
           className="font-display text-hero leading-none tracking-[-0.04em] text-danger"

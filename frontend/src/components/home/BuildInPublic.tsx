@@ -68,7 +68,7 @@ const ITEM = {
 export function BuildInPublic() {
   return (
     <section className="border-b border-line bg-paper">
-      <div className="mx-auto w-[min(1240px,96vw)] py-14 md:py-20">
+      <div className="mx-auto w-full max-w-[1280px] px-5 py-14 sm:px-6 md:py-20 lg:px-8">
         <div className="relative overflow-hidden rounded-[2rem] border border-ink/10 bg-accent-soft text-ink shadow-lift dark:bg-sheet">
           <div
             aria-hidden
@@ -120,7 +120,7 @@ export function BuildInPublic() {
                 viewport={{ once: true, amount: 0.2 }}
                 className="rounded-panel border border-ink/10 bg-paper/55 p-5 sm:p-6"
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                   <h3 className="font-mono text-label font-bold uppercase tracking-[0.16em] text-ink/70">
                     What you need to submit
                   </h3>
@@ -158,7 +158,7 @@ export function BuildInPublic() {
                 viewport={{ once: true, amount: 0.2 }}
                 className="rounded-panel border border-ink/10 bg-paper/55 p-5 sm:p-6"
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
                   <h3 className="font-mono text-label font-bold uppercase tracking-[0.16em] text-ink/70">
                     What happens next
                   </h3>

@@ -220,7 +220,7 @@ function DetailView({ problemId }: { problemId: number }) {
   if (problem.isPending) {
     return (
       <main className="border-b border-line bg-paper">
-        <PageSkeleton width="w-[min(1240px,96vw)]" />
+        <PageSkeleton width="w-full max-w-[1280px] px-5 sm:px-6 lg:px-8" />
       </main>
     );
   }
@@ -267,7 +267,7 @@ function DetailView({ problemId }: { problemId: number }) {
 
   return (
     <main className="border-b border-line bg-paper">
-      <div className="mx-auto w-[min(1240px,96vw)] py-10 md:py-14">
+      <div className="mx-auto w-full max-w-[1280px] px-5 py-10 sm:px-6 md:py-14 lg:px-8">
         <motion.header
           variants={slideUpReveal}
           initial="hidden"

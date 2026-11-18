@@ -18,7 +18,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
   if (me.isPending) {
     return (
       <main className="border-b border-line">
-        <div className="mx-auto w-[min(760px,96vw)] space-y-3 py-16">
+        <div className="mx-auto w-full max-w-[800px] space-y-3 px-5 py-16 sm:px-6">
           <Skeleton className="h-3 w-40" />
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-24 w-full" />

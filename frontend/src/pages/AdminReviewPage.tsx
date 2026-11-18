@@ -36,7 +36,7 @@ export function AdminReviewPage() {
 
   if (me.isPending) {
     return (
-      <main className="mx-auto w-[min(1100px,96vw)] space-y-3 py-16">
+      <main className="mx-auto w-full max-w-[1140px] space-y-3 px-5 py-16 sm:px-6">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-40" />
       </main>
@@ -45,7 +45,7 @@ export function AdminReviewPage() {
 
   if (!me.data?.is_admin) {
     return (
-      <main className="mx-auto w-[min(760px,96vw)] py-16">
+      <main className="mx-auto w-full max-w-[800px] px-5 py-16 sm:px-6">
         <h1 className="font-display text-display leading-[1.02] tracking-[-0.03em]">Submissions</h1>
         <p className="mt-4 rounded-panel border border-line bg-sheet p-4">
           Admin access required. Add your GitHub username to
@@ -79,7 +79,7 @@ export function AdminReviewPage() {
   }
 
   return (
-    <main className="mx-auto w-[min(1200px,96vw)] py-12">
+    <main className="mx-auto w-full max-w-[1240px] px-5 py-12 sm:px-6">
       <p className="font-mono text-label font-bold uppercase tracking-widest text-accent">
         Admin
       </p>

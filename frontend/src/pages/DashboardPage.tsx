@@ -238,7 +238,7 @@ export function DashboardPage() {
   ).length;
 
   return (
-    <main className="mx-auto w-[min(1000px,94vw)] flex-1 py-12 md:py-16">
+    <main className="mx-auto w-full max-w-[1040px] flex-1 px-5 py-12 sm:px-6 md:py-16">
       <div className="flex flex-wrap items-start justify-between gap-4 border-b border-line pb-6">
         <div>
           <h1 className="font-display text-display leading-[1.02] tracking-[-0.03em]">
