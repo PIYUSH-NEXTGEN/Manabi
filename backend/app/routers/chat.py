@@ -8,7 +8,7 @@ from app import schemas
 from app.deps import CurrentUser, DB
 from app.models import STATUS_PUBLISHED, Problem, Project
 from app.services.catalog_search import search_catalog
-from app.services.llm import LLMConfigError, LLMResponseError
+from app.services.llm import LLMConfigError, LLMQuotaExhausted, LLMResponseError
 from app.services.llm import chat as llm_chat
 from app.services.ratelimit import CHAT_DAILY_LIMITER, human_wait
 
@@ -244,6 +244,11 @@ def chat(body: schemas.ChatIn, db: DB, user: CurrentUser):
         system = build_system(db, body.messages, problem_id, user=user)
         reply = llm_chat(system, [m.model_dump() for m in body.messages], purpose="chat")
         cleaned, problems = postprocess_reply(db, reply)
+    except LLMQuotaExhausted as exc:
+        # All provider keys are out of daily quota. The message and Retry-After
+        # are user-facing but never mention keys or providers.
+        headers = {"Retry-After": str(exc.retry_after)} if exc.retry_after else None
+        raise HTTPException(status_code=503, detail=str(exc), headers=headers)
     except LLMConfigError:
         raise HTTPException(status_code=503, detail="AI is not configured yet")
     except LLMResponseError:

@@ -352,6 +352,25 @@ def test_chat_provider_error_502(client, db_session, user, monkeypatch):
     assert res.status_code == 502
 
 
+def test_chat_all_keys_exhausted_503_with_retry_after(client, db_session, user, monkeypatch):
+    from app.services.llm import LLMQuotaExhausted as _LQE
+
+    def boom(system, messages, **kwargs):
+        raise _LQE(
+            "Manabi's AI has reached its daily usage limit. Please try again in about 5 hours.",
+            retry_after=18_000,
+        )
+
+    monkeypatch.setattr("app.routers.chat.llm_chat", boom, raising=False)
+    res = client.post("/api/chat", json={"messages": [msg()]})
+    assert res.status_code == 503
+    assert res.headers["retry-after"] == "18000"
+    detail = res.json()["detail"]
+    assert "try again in about 5 hours" in detail
+    # The user must never learn that multiple keys exist.
+    assert "key" not in detail.lower()
+
+
 def test_chat_unexpected_exception_maps_to_502(client, db_session, user, monkeypatch):
     """Any non-LLM crash must still answer JSON with 502. Never a bare 500."""
     def boom(system, messages, **kwargs):

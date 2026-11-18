@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     LLM_PROVIDER: str = "mock"
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = ""
+    # Optional ordered Gemini key pools (comma-separated). Keys are tried in
+    # order: the first healthy key serves traffic until its daily quota is
+    # exhausted, then the next key takes over. A key that was exhausted becomes
+    # eligible again once its quota resets, restoring the original order.
+    GEMINI_API_KEYS_EVAL: str = ""
+    GEMINI_API_KEYS_CHAT: str = ""
     # Optional dedicated Gemini project for the catalog chat, so chat traffic
     # shares no quota with submission evaluation. Empty falls back to the
     # shared GEMINI_API_KEY (both features on one project's quota).

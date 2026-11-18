@@ -404,6 +404,24 @@ def test_llm_garbage_zero_overlap_rejected(client, user, db_session, monkeypatch
     assert res.json()["detail"]["code"] == "not_relevant"
 
 
+def test_llm_all_keys_exhausted_goes_to_review(client, user, db_session, monkeypatch):
+    """A quota outage must not keyword-reject an honest submission."""
+    from app.services import verification as V
+    from app.services.llm import LLMQuotaExhausted
+
+    def boom(*_args, **_kwargs):
+        raise LLMQuotaExhausted("quota exhausted", retry_after=3600)
+
+    monkeypatch.setattr(V, "llm_chat", boom)
+    problem = make_problem(db_session)
+    with mock_repo():
+        res = submit(client, problem.id)
+    assert res.status_code == 201
+    assert res.json()["verification_status"] == "needs_review"
+    project = db_session.query(Project).one()
+    assert "temporarily unavailable" in (project.relevance_reason or "")
+
+
 def test_too_few_commits_rejected_no_row(client, user, db_session):
     problem = make_problem(db_session)
     # README exists but the commit history is thinner than MIN_COMMIT_COUNT

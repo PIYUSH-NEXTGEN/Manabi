@@ -3,8 +3,10 @@ import pytest
 import respx
 
 from app import config
+from app.services import llm as llm_module
 from app.services.llm import (
     LLMConfigError,
+    LLMQuotaExhausted,
     LLMResponseError,
     chat,
     is_configured,
@@ -20,11 +22,17 @@ def llm_env(monkeypatch):
     # so developer machines with live keys cannot leak into tests.
     monkeypatch.setenv("GEMINI_API_KEY", "")
     monkeypatch.setenv("GEMINI_API_KEY_CHAT", "")
+    monkeypatch.setenv("GEMINI_API_KEYS_EVAL", "")
+    monkeypatch.setenv("GEMINI_API_KEYS_CHAT", "")
     monkeypatch.setenv("GEMINI_MODEL", "")
     monkeypatch.setenv("GEMINI_MODEL_CHAT", "")
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     get_settings.cache_clear()
+    llm_module._key_cooldown.clear()
+    llm_module._gemini_clients.clear()
     yield
+    llm_module._key_cooldown.clear()
+    llm_module._gemini_clients.clear()
     get_settings.cache_clear()
 
 
@@ -286,3 +294,175 @@ def test_anthropic_transport_error_maps_to_response_error(monkeypatch):
         )
         with pytest.raises(LLMResponseError):
             chat("s", [{"role": "user", "content": "u"}])
+
+
+# --- Gemini key pool -------------------------------------------------------
+
+
+def _quota_error(*, daily: bool) -> Exception:
+    from google.genai import errors as genai_errors
+
+    quota_id = (
+        "GenerateRequestsPerDayPerProjectPerModel-FreeTier"
+        if daily
+        else "GenerateRequestsPerMinutePerProjectPerModel-FreeTier"
+    )
+    return genai_errors.APIError(
+        429,
+        {
+            "error": {
+                "code": 429,
+                "message": "You exceeded your current quota",
+                "status": "RESOURCE_EXHAUSTED",
+                "details": [
+                    {
+                        "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+                        "violations": [{"quotaId": quota_id}],
+                    },
+                    {
+                        "@type": "type.googleapis.com/google.rpc.RetryInfo",
+                        "retryDelay": "1s" if not daily else "86400s",
+                    },
+                ],
+            }
+        },
+    )
+
+
+class _Reply:
+    def __init__(self, text: str):
+        self.text = text
+
+
+def _sequence_gemini(monkeypatch, behaviors: dict):
+    """Fake SDK: each key returns its text or raises its exception; logs calls."""
+    calls: list[str] = []
+
+    class Client:
+        def __init__(self, key: str):
+            self.key = key
+
+        @property
+        def models(self):
+            return self
+
+        def generate_content(self, **_kwargs):
+            calls.append(self.key)
+            action = behaviors[self.key]
+            if isinstance(action, Exception):
+                raise action
+            return _Reply(action)
+
+    monkeypatch.setattr("app.services.llm._gemini", lambda key: Client(key))
+    return calls
+
+
+def test_gemini_pool_switches_when_first_key_is_exhausted(monkeypatch):
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEYS_CHAT="k1,k2")
+    calls = _sequence_gemini(
+        monkeypatch,
+        {"k1": _quota_error(daily=True), "k2": "from second"},
+    )
+
+    reply = chat("Sys", [{"role": "user", "content": "hi"}], purpose="chat")
+
+    assert reply == "from second"
+    assert calls == ["k1", "k2"]
+    # The exhausted key stays out of rotation, so the next call goes straight
+    # to the backup (the user never sees the switch).
+    calls.clear()
+    assert chat("Sys", [{"role": "user", "content": "hi"}], purpose="chat") == "from second"
+    assert calls == ["k2"]
+
+
+def test_gemini_rate_limit_retries_same_key_and_never_switches(monkeypatch):
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEYS_EVAL="k1,k2")
+    calls = _sequence_gemini(
+        monkeypatch,
+        {"k1": _quota_error(daily=False), "k2": "must not be used"},
+    )
+    sleeps: list[float] = []
+    monkeypatch.setattr("app.services.llm.time.sleep", lambda s: sleeps.append(s))
+
+    with pytest.raises(LLMResponseError) as info:
+        chat("Sys", [{"role": "user", "content": "hi"}])
+
+    assert calls == ["k1", "k1", "k1"]
+    assert sleeps == [2, 4]
+    assert not isinstance(info.value, LLMQuotaExhausted)
+
+
+def test_gemini_invalid_key_switches_to_next(monkeypatch):
+    from google.genai import errors as genai_errors
+
+    invalid = genai_errors.APIError(
+        403,
+        {"error": {"code": 403, "message": "API key not valid", "status": "PERMISSION_DENIED"}},
+    )
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEYS_EVAL="k1,k2")
+    calls = _sequence_gemini(monkeypatch, {"k1": invalid, "k2": "from backup"})
+
+    assert chat("Sys", [{"role": "user", "content": "hi"}]) == "from backup"
+    assert calls == ["k1", "k2"]
+
+
+def test_gemini_all_keys_exhausted_reports_retry_hint(monkeypatch):
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEYS_EVAL="k1,k2")
+    calls = _sequence_gemini(
+        monkeypatch,
+        {"k1": _quota_error(daily=True), "k2": _quota_error(daily=True)},
+    )
+
+    with pytest.raises(LLMQuotaExhausted) as info:
+        chat("Sys", [{"role": "user", "content": "hi"}])
+
+    assert calls == ["k1", "k2"]
+    assert info.value.retry_after > 0
+    message = str(info.value)
+    assert "try again in about" in message
+    assert "k1" not in message and "k2" not in message
+
+
+def test_gemini_switches_back_to_first_key_after_quota_resets(monkeypatch):
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEYS_EVAL="k1,k2")
+    behaviors = {"k1": _quota_error(daily=True), "k2": "from second"}
+    calls = _sequence_gemini(monkeypatch, behaviors)
+
+    assert chat("Sys", [{"role": "user", "content": "hi"}]) == "from second"
+    assert calls == ["k1", "k2"]
+
+    # Simulate the daily quota reset: the primary is selectable again.
+    behaviors["k1"] = "back on first"
+    llm_module._key_cooldown["k1"] = 0
+    calls.clear()
+
+    assert chat("Sys", [{"role": "user", "content": "hi"}]) == "back on first"
+    assert calls == ["k1"]
+
+
+def test_chat_and_evaluation_use_separate_pools(monkeypatch):
+    set_provider(
+        monkeypatch,
+        "gemini",
+        GEMINI_API_KEYS_CHAT="c1,c2",
+        GEMINI_API_KEYS_EVAL="e1,e2",
+    )
+    calls = _sequence_gemini(
+        monkeypatch,
+        {"c1": "chat", "c2": "chat2", "e1": "eval", "e2": "eval2"},
+    )
+
+    assert chat("Sys", [{"role": "user", "content": "hi"}], purpose="chat") == "chat"
+    assert chat("Sys", [{"role": "user", "content": "hi"}]) == "eval"
+    assert calls == ["c1", "e1"]
+
+
+def test_pool_configures_both_features(monkeypatch):
+    set_provider(
+        monkeypatch,
+        "gemini",
+        GEMINI_API_KEYS_CHAT="c1",
+        GEMINI_API_KEYS_EVAL="e1",
+    )
+    assert is_configured("chat") is True
+    assert is_configured() is True

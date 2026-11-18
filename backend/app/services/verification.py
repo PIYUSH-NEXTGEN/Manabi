@@ -37,6 +37,7 @@ from app.models import (
 )
 from app.services import github
 from app.services.github import GitHubError
+from app.services.llm import LLMQuotaExhausted
 from app.services.llm import chat as llm_chat
 
 logger = logging.getLogger(__name__)
@@ -483,6 +484,16 @@ def evaluate_relevance(
             [{"role": "user", "content": _llm_input(problem, summary, facts, readme)}],
         )
         parsed = parse_relevance(reply)
+    except LLMQuotaExhausted:
+        # Every key is out of quota. Sending the submission to review is
+        # friendlier (and safer) than the keyword fallback, which can reject
+        # an honest submission; the project is re-checked automatically later.
+        logger.warning("Relevance check skipped: all Gemini keys are out of quota")
+        return RelevanceEvaluation(
+            VERIFICATION_NEEDS_REVIEW,
+            None,
+            "Automatic review is temporarily unavailable. Your project will be re-checked automatically.",
+        )
     except Exception:  # noqa: BLE001 - any LLM failure must fall back, never leak
         logger.warning("Relevance LLM call failed", exc_info=True)
         parsed = None
