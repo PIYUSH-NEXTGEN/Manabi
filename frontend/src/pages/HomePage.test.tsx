@@ -33,24 +33,21 @@ describe('HomePage', () => {
   });
 
   it(
-    'cycles the hero brief showcase every three seconds',
+    'cycles three random briefs every three seconds',
     async () => {
       renderWithProviders(<HomePage />, { route: '/' });
 
       const showcase = await screen.findByRole('figure');
       expect(
-        await within(showcase).findByRole('heading', {
-          name: 'Crop disease triage for small farms',
-        }),
+        await within(showcase).findByText('01 / 03'),
       ).toBeInTheDocument();
+      expect(
+        within(showcase).getAllByRole('button', { name: /Show brief/ }),
+      ).toHaveLength(3);
 
       await waitFor(
         () => {
-          expect(
-            within(showcase).getByRole('heading', {
-              name: 'Fraud pattern walkthrough for UPI micro-transactions',
-            }),
-          ).toBeInTheDocument();
+          expect(within(showcase).getByText('02 / 03')).toBeInTheDocument();
         },
         { timeout: 5000 },
       );

@@ -17,8 +17,52 @@ import {
 } from '@/lib/fields';
 import { CountUp } from './CountUp';
 
-const SHOWCASE_LIMIT = 6;
+const SHOWCASE_COUNT = 3;
+const SHOWCASE_POOL = 24;
+const SHOWCASE_CURSOR_KEY = 'manabi:brief-showcase-cursor';
 const CYCLE_MS = 3000;
+
+function seededRandom(seed: number) {
+  let state = seed >>> 0;
+  return () => {
+    state = (state * 1_664_525 + 1_013_904_223) >>> 0;
+    return state / 4_294_967_296;
+  };
+}
+
+function shuffle<T>(items: T[], seed: number): T[] {
+  const pool = [...items];
+  const random = seededRandom(seed);
+  for (let index = pool.length - 1; index > 0; index -= 1) {
+    const swap = Math.floor(random() * (index + 1));
+    [pool[index], pool[swap]] = [pool[swap], pool[index]];
+  }
+  return pool;
+}
+
+function nextShowcase(items: ProblemOut[], count: number): ProblemOut[] {
+  if (items.length <= count) return items;
+  const shuffled = shuffle(items, Math.floor(Math.random() * 2 ** 32));
+  let cursor = 0;
+  try {
+    cursor = Number(sessionStorage.getItem(SHOWCASE_CURSOR_KEY)) || 0;
+  } catch {
+    cursor = 0;
+  }
+  const picked = Array.from(
+    { length: count },
+    (_, offset) => shuffled[(cursor + offset) % shuffled.length],
+  );
+  try {
+    sessionStorage.setItem(
+      SHOWCASE_CURSOR_KEY,
+      String((cursor + count) % shuffled.length),
+    );
+  } catch {
+    // Private mode can block storage; the carousel still works per visit.
+  }
+  return picked;
+}
 
 const DIFFICULTY_FILL: Record<ProblemOut['difficulty'], number> = {
   beginner: 1,
@@ -61,16 +105,23 @@ function StatValue({ value }: { value?: number }) {
 function BriefCarousel() {
   const query = useProblems({
     sort: 'popular',
-    distinct: 'field',
-    limit: SHOWCASE_LIMIT,
+    limit: SHOWCASE_POOL,
   });
   const reduced = usePrefersReducedMotion();
+  const [items, setItems] = useState<ProblemOut[]>([]);
   const [index, setIndex] = useState(0);
   const [held, setHeld] = useState(false);
   const [manualPause, setManualPause] = useState(false);
 
-  const items = query.data?.items.slice(0, SHOWCASE_LIMIT) ?? [];
+  useEffect(() => {
+    if (!query.data) return;
+    setItems(nextShowcase(query.data.items, SHOWCASE_COUNT));
+  }, [query.data]);
+
   const count = items.length;
+  const loading =
+    query.isLoading ||
+    ((query.data?.items.length ?? 0) > 0 && items.length === 0);
   const paused = held || manualPause;
 
   useEffect(() => {
@@ -111,9 +162,9 @@ function BriefCarousel() {
 
         <div
           className="flex min-h-[360px] flex-col p-6 sm:p-8"
-          aria-busy={query.isLoading}
+          aria-busy={loading}
         >
-          {query.isLoading ? (
+          {loading ? (
             <div className="space-y-3" aria-hidden>
               <div className="flex items-center justify-between">
                 <div className="skeleton h-5 w-24 rounded-full" />
