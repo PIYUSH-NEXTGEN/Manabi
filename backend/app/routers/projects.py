@@ -50,6 +50,15 @@ def _project_or_404(db, project_id: int) -> Project:
     return project
 
 
+def _visible_project_or_404(db, project_id: int, user) -> Project:
+    """Project lookup for viewer-facing reads: non-public rows 404 for
+    everyone except their owner and admins (never a revealing 403)."""
+    project = _project_or_404(db, project_id)
+    if not visibility.can_view_project(project, user):
+        raise HTTPException(status_code=404, detail="Project not found")
+    return project
+
+
 # ---------------------------------------------------------------------------
 # Submit
 # ---------------------------------------------------------------------------
@@ -67,7 +76,7 @@ async def submit_project(problem_id: int, body: schemas.ProjectCreate, user: Cur
     if retry is not None:
         raise rate_limited(
             retry,
-            f"You have made {SUBMIT_LIMITER._limit()} submit attempts this hour. "
+            f"You have made {SUBMIT_LIMITER.limit} submit attempts this hour. "
             f"Fix the reported issues, then try again in {human_wait(retry)}.",
         )
 
@@ -93,10 +102,7 @@ async def submit_project(problem_id: int, body: schemas.ProjectCreate, user: Cur
 
 @router.get("/api/projects/{project_id}", response_model=schemas.ProjectOut)
 def get_project(project_id: int, db: DB, user: OptionalUser):
-    project = _project_or_404(db, project_id)
-    if not visibility.can_view_project(project, user):
-        # Never reveal the existence of a non-verified project to others.
-        raise HTTPException(status_code=404, detail="Project not found")
+    project = _visible_project_or_404(db, project_id, user)
     return project_out_safely(
         project, include_private=visibility.is_owner_or_admin(project, user), viewer=user
     )
@@ -110,12 +116,9 @@ async def get_project_progress(
     refresh: bool = Query(default=False),
     user: OptionalUser = None,
 ):
-    project = _project_or_404(db, project_id)
-    # Progress is as private as the project itself: a needs_review/rejected
-    # row must not leak its repo, commits or issues to anyone but its owner
-    # (or an admin). These checks also gate the verification side effects.
-    if not visibility.can_view_project(project, user):
-        raise HTTPException(status_code=404, detail="Project not found")
+    # Progress is as private as the project itself: this also gates the
+    # verification side effects below.
+    project = _visible_project_or_404(db, project_id, user)
     # refresh=true forces a GitHub API call and can write back to the DB, so
     # it is quota-sensitive. Owners refresh freely; everyone else (including
     # anonymous visitors) gets a modest hourly cap, and admins a higher
@@ -189,7 +192,7 @@ def my_projects(user: CurrentUser, db: DB):
 
 
 # ---------------------------------------------------------------------------
-# Remove / edit / complete (§7)
+# Owner management: remove / edit (§7)
 # ---------------------------------------------------------------------------
 
 
@@ -243,9 +246,7 @@ async def edit_project(project_id: int, body: schemas.ProjectPatch, user: Curren
 
 @router.post("/api/projects/{project_id}/report", status_code=201)
 def report_project(project_id: int, body: schemas.ReportIn, user: CurrentUser, db: DB):
-    project = _project_or_404(db, project_id)
-    if not visibility.can_view_project(project, user):
-        raise HTTPException(status_code=404, detail="Project not found")
+    project = _visible_project_or_404(db, project_id, user)
     if user.id == project.user_id:
         raise HTTPException(
             status_code=422,
@@ -294,9 +295,7 @@ def _star_count(db, project_id: int) -> int:
 
 @router.post("/api/projects/{project_id}/star", status_code=201)
 def star_project(project_id: int, user: CurrentUser, db: DB):
-    project = _project_or_404(db, project_id)
-    if not visibility.can_view_project(project, user):
-        raise HTTPException(status_code=404, detail="Project not found")
+    project = _visible_project_or_404(db, project_id, user)
     if (retry := STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
         raise rate_limited(
             retry, f"Too many star actions this hour. Try again in {human_wait(retry)}."
@@ -317,9 +316,7 @@ def star_project(project_id: int, user: CurrentUser, db: DB):
 
 @router.delete("/api/projects/{project_id}/star", status_code=204)
 def unstar_project(project_id: int, user: CurrentUser, db: DB):
-    project = _project_or_404(db, project_id)
-    if not visibility.can_view_project(project, user):
-        raise HTTPException(status_code=404, detail="Project not found")
+    project = _visible_project_or_404(db, project_id, user)
     if (retry := STAR_LIMITER.check(db, f"star:{user.id}")) is not None:
         raise rate_limited(
             retry, f"Too many star actions this hour. Try again in {human_wait(retry)}."

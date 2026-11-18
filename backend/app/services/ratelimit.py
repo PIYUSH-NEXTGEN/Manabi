@@ -29,7 +29,10 @@ class RateLimiter:
     def bucket(self) -> str:
         return self._limit_setting
 
-    def _limit(self) -> int:
+    @property
+    def limit(self) -> int:
+        """Configured cap for this bucket (at least 1, so a zero never locks
+        everyone out). Public so endpoints can quote it in 429 messages."""
         value = getattr(get_settings(), self._limit_setting)
         return max(1, int(value))
 
@@ -54,7 +57,7 @@ class RateLimiter:
                 bucket_filter, key_filter, in_window
             )
         ) or 0
-        if used >= self._limit():
+        if used >= self.limit:
             oldest = db.scalar(
                 select(func.min(RateLimitHit.created_at)).where(
                     bucket_filter, key_filter, in_window

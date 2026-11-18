@@ -64,24 +64,21 @@ export function ProblemBoardPage() {
     : '';
 
   const [discoverSeed] = useState(() => discoverSeedFor(location.key));
-  const filterKey = [q, field, source, goal, difficulty].join('|');
-  const filters = useMemo(
-    () => ({
-      q,
-      field,
-      source,
-      difficulty,
-      goal: goal || undefined,
-      sort: 'discover' as const,
-      seed: discoverSeed,
-    }),
-    [filterKey, discoverSeed],
-  );
+  // The query key is hashed structurally by React Query, so a fresh object
+  // here is stable; no memo/indirect dependency string is needed.
+  const filters = {
+    q,
+    field,
+    source,
+    difficulty,
+    goal: goal || undefined,
+    sort: 'discover' as const,
+    seed: discoverSeed,
+  };
 
   const board = useInfiniteProblems(filters);
   const problems = board.data?.pages.flatMap((page) => page.items) ?? [];
   const total = board.data?.pages[0]?.total ?? 0;
-  const shownTotal = total;
   const goalCounts = new Map(
     (facets.data?.goals ?? []).map((facet) => [facet.value, facet.count]),
   );
@@ -213,7 +210,7 @@ export function ProblemBoardPage() {
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-muted">
-            {board.data ? `${shownTotal} projects in the index` : 'Counting…'}
+            {board.data ? `${total} projects in the index` : 'Counting…'}
           </p>
           {hasFilters ? (
             <button

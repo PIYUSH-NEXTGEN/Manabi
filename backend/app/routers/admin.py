@@ -70,7 +70,6 @@ def _submission_reports(db, project_ids: list[int]) -> dict[int, tuple[int, str 
 
 
 def _submission_to_out(
-    db,
     project: Project,
     reports: tuple[int, str | None],
 ) -> schemas.AdminSubmissionOut:
@@ -118,29 +117,31 @@ def list_submissions(
     rows = db.scalars(query.order_by(Project.created_at.desc()).limit(limit).offset(offset)).all()
     reports = _submission_reports(db, [p.id for p in rows])
     return schemas.AdminSubmissionsOut(
-        items=[_submission_to_out(db, p, reports[p.id]) for p in rows], total=int(total)
+        items=[_submission_to_out(p, reports[p.id]) for p in rows], total=int(total)
+    )
+
+
+def _review_submission(
+    db, project_id: int, status: str, note: str | None
+) -> schemas.AdminSubmissionActionOut:
+    """Set an admin decision and its optional note (shared by approve/reject)."""
+    project = db.get(Project, project_id)
+    if project is None:
+        raise HTTPException(status_code=404, detail="Project not found")
+    project.verification_status = status
+    if note:
+        project.review_note = verification.clean_text(note)[:2000]
+    db.commit()
+    return schemas.AdminSubmissionActionOut(
+        ok=True, project_id=project.id, verification_status=project.verification_status
     )
 
 
 @router.post("/{project_id}/approve", response_model=schemas.AdminSubmissionActionOut)
 def approve_submission(project_id: int, user: AdminUser, db: DB, note: str | None = None):
-    project = db.scalar(select(Project).options(joinedload(Project.problem)).where(Project.id == project_id))
-    if project is None:
-        raise HTTPException(status_code=404, detail="Project not found")
-    project.verification_status = VERIFICATION_VERIFIED
-    if note:
-        project.review_note = verification.clean_text(note)[:2000]
-    db.commit()
-    return schemas.AdminSubmissionActionOut(ok=True, project_id=project.id, verification_status=project.verification_status)
+    return _review_submission(db, project_id, VERIFICATION_VERIFIED, note)
 
 
 @router.post("/{project_id}/reject", response_model=schemas.AdminSubmissionActionOut)
 def reject_submission(project_id: int, user: AdminUser, db: DB, note: str | None = None):
-    project = db.scalar(select(Project).where(Project.id == project_id))
-    if project is None:
-        raise HTTPException(status_code=404, detail="Project not found")
-    project.verification_status = VERIFICATION_REJECTED
-    if note:
-        project.review_note = verification.clean_text(note)[:2000]
-    db.commit()
-    return schemas.AdminSubmissionActionOut(ok=True, project_id=project.id, verification_status=project.verification_status)
+    return _review_submission(db, project_id, VERIFICATION_REJECTED, note)

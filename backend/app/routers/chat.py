@@ -235,7 +235,7 @@ def chat(body: schemas.ChatIn, db: DB, user: CurrentUser):
     if (retry := CHAT_DAILY_LIMITER.check(db, f"user:{user.id}")) is not None:
         raise HTTPException(
             status_code=429,
-            detail=f"You have used your {CHAT_DAILY_LIMITER._limit()} messages for today. Try again in {human_wait(retry)}.",
+            detail=f"You have used your {CHAT_DAILY_LIMITER.limit} messages for today. Try again in {human_wait(retry)}.",
             headers={"Retry-After": str(retry)},
         )
     try:

@@ -96,6 +96,24 @@ def _viewer_starred_ids(db, viewer, problem_ids: list[int]) -> set[int]:
     )
 
 
+def _problem_items(db, viewer, rows) -> list[schemas.ProblemOut]:
+    """Build card payloads for (Problem, project_count, completed_count) rows
+    with batched star lookups, shared by the list and distinct branches."""
+    ids = [problem.id for problem, _, _ in rows]
+    star_counts = _star_counts_by_problem(db, ids)
+    starred = _viewer_starred_ids(db, viewer, ids)
+    return [
+        problem_to_out(
+            problem,
+            int(project_count or 0),
+            int(completed_count or 0),
+            star_count=star_counts.get(problem.id, 0),
+            starred_by_me=problem.id in starred,
+        )
+        for problem, project_count, completed_count in rows
+    ]
+
+
 @router.get("", response_model=schemas.ProblemsListOut)
 def list_problems(
     db: DB,
@@ -178,20 +196,7 @@ def list_problems(
             .limit(limit)
             .offset(offset)
         ).all()
-        ids = [p.id for p, _, _ in rows]
-        star_counts = _star_counts_by_problem(db, ids)
-        starred = _viewer_starred_ids(db, user, ids)
-        items = [
-            problem_to_out(
-                p,
-                int(n or 0),
-                int(c or 0),
-                star_count=star_counts.get(p.id, 0),
-                starred_by_me=p.id in starred,
-            )
-            for p, n, c in rows
-        ]
-        return schemas.ProblemsListOut(items=items, total=total)
+        return schemas.ProblemsListOut(items=_problem_items(db, user, rows), total=total)
 
     total = (
         db.scalar(
@@ -200,20 +205,7 @@ def list_problems(
         or 0
     )  # popularity/completed columns are carried but ignored by count(*)
     rows = db.execute(query.limit(limit).offset(offset)).all()
-    ids = [p.id for p, _, _ in rows]
-    star_counts = _star_counts_by_problem(db, ids)
-    starred = _viewer_starred_ids(db, user, ids)
-    items = [
-        problem_to_out(
-            p,
-            int(n or 0),
-            int(c or 0),
-            star_count=star_counts.get(p.id, 0),
-            starred_by_me=p.id in starred,
-        )
-        for p, n, c in rows
-    ]
-    return schemas.ProblemsListOut(items=items, total=total)
+    return schemas.ProblemsListOut(items=_problem_items(db, user, rows), total=total)
 
 
 @router.get("/facets", response_model=schemas.FacetsOut, response_model_exclude_none=True)

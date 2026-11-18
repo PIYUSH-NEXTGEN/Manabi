@@ -80,7 +80,7 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
 
   if (!me.data || isOwner) return null;
 
-  function report_it() {
+  function submitReport() {
     if (reason.trim().length < 10) {
       setError('Add a short reason (10+ characters) so the maintainers know what is wrong.');
       return;
@@ -141,7 +141,7 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
       ) : null}
       <button
         type="button"
-        onClick={report_it}
+        onClick={submitReport}
         disabled={report.isPending}
         className={cx(buttonClasses('secondary'), 'mt-2')}
       >
@@ -201,6 +201,8 @@ function ProjectView({ projectId }: { projectId: number }) {
 
   const data = project.data;
   const owner = projectOwnerUsername(data.owner);
+  const repoHref = safeExternalUrl(data.repo_url);
+  const demoHref = safeExternalUrl(data.demo_url);
   const progress = data.progress;
   const commits = (progress?.recent_commits ?? [])
     .map((raw) => asCommitSummary(raw))
@@ -252,9 +254,9 @@ function ProjectView({ projectId }: { projectId: number }) {
         ) : null}
 
         <p className="mt-3">
-          {safeExternalUrl(data.repo_url) ? (
+          {repoHref ? (
             <a
-              href={safeExternalUrl(data.repo_url) ?? undefined}
+              href={repoHref}
               target="_blank"
               rel="noreferrer"
               className="break-all font-mono text-label font-bold underline underline-offset-4"
@@ -281,9 +283,9 @@ function ProjectView({ projectId }: { projectId: number }) {
             <p className="mt-2 text-body leading-relaxed text-ink-soft">
               {data.solution_summary}
             </p>
-            {data.demo_url && safeExternalUrl(data.demo_url) ? (
+            {demoHref ? (
               <a
-                href={safeExternalUrl(data.demo_url) ?? undefined}
+                href={demoHref}
                 target="_blank"
                 rel="noreferrer"
                 className="font-mono text-label font-bold underline underline-offset-4"
@@ -376,31 +378,34 @@ function ProjectView({ projectId }: { projectId: number }) {
           <h3 className={cx(panelHeading, 'mt-6')}>Open issues</h3>
           {issues.length > 0 ? (
             <ul className="mt-2 space-y-2">
-              {issues.map((issue) => (
-                <li key={issue.number} className="text-body">
-                  {safeExternalUrl(issue.url) ? (
-                    <a
-                      href={safeExternalUrl(issue.url) ?? undefined}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-mono text-label underline underline-offset-4"
-                    >
-                      #{issue.number} {issue.title}
-                    </a>
-                  ) : (
-                    <span className="font-mono text-label">
-                      #{issue.number} {issue.title}
-                    </span>
-                  )}
-                  {issue.labels.length > 0 ? (
-                    <span className="ml-2 inline-flex gap-1">
-                      {issue.labels.map((label) => (
-                        <Tag key={label}>{label}</Tag>
-                      ))}
-                    </span>
-                  ) : null}
-                </li>
-              ))}
+              {issues.map((issue) => {
+                const issueHref = safeExternalUrl(issue.url);
+                return (
+                  <li key={issue.number} className="text-body">
+                    {issueHref ? (
+                      <a
+                        href={issueHref}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-mono text-label underline underline-offset-4"
+                      >
+                        #{issue.number} {issue.title}
+                      </a>
+                    ) : (
+                      <span className="font-mono text-label">
+                        #{issue.number} {issue.title}
+                      </span>
+                    )}
+                    {issue.labels.length > 0 ? (
+                      <span className="ml-2 inline-flex gap-1">
+                        {issue.labels.map((label) => (
+                          <Tag key={label}>{label}</Tag>
+                        ))}
+                      </span>
+                    ) : null}
+                  </li>
+                );
+              })}
             </ul>
           ) : (
             <p className="mt-2 text-body">No open issues right now.</p>
