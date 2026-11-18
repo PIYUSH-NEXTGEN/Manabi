@@ -254,6 +254,37 @@ describe('ChatWidget', () => {
     expect(screen.queryByText(/linked under this/i)).not.toBeInTheDocument();
   });
 
+  it('shows the AI reset time when the provider is out of quota', async () => {
+    server.use(
+      http.post('*/api/chat', () =>
+        HttpResponse.json(
+          {
+            detail:
+              "Manabi's AI has reached its daily usage limit. Please try again in about 5 hours.",
+          },
+          { status: 503, headers: { 'Retry-After': '18000' } },
+        ),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<ChatWidget />);
+
+    await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
+    await user.type(
+      screen.getByPlaceholderText(/What do you want to build/i),
+      'another question',
+    );
+    await user.click(screen.getByRole('button', { name: 'Send' }));
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'daily usage limit',
+    );
+    expect(await screen.findByText(/Try again in/)).toHaveTextContent(
+      'Try again in 5h 00m',
+    );
+    expect(screen.queryByText(/key/i)).not.toBeInTheDocument();
+  });
+
   it('shows one short human message when the AI is down for any other reason', async () => {
     server.use(
       http.post('*/api/chat', () =>

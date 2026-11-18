@@ -126,6 +126,16 @@ export function ChatWidget() {
       setRetryAfter(null);
     },
     onError: (mutationError) => {
+      // A server-supplied Retry-After means the outage has a known reset time
+      // (e.g. the AI's daily quota). Show that exact message and countdown.
+      if (
+        mutationError instanceof ApiError &&
+        mutationError.retryAfterSeconds != null
+      ) {
+        setError(mutationError.detail);
+        setRetryAfter(mutationError.retryAfterSeconds);
+        return;
+      }
       // Quota limits are the user's own countdown, so keep the exact detail and
       // timer. Every other failure (provider error, bad config, outage) gets one
       // plain message instead of raw server text.
