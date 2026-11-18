@@ -213,9 +213,13 @@ describe('ChatWidget', () => {
 
     await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
     const box = screen.getByPlaceholderText(/What do you want to build/i);
+    const sendButton = screen.getByRole('button', { name: 'Send' });
     for (let i = 0; i < 4; i += 1) {
       await user.type(box, `question number ${i + 1}`);
-      await user.click(screen.getByRole('button', { name: 'Send' }));
+      // The reply renders before React Query clears isPending, so wait for
+      // the button to re-enable before starting the next turn.
+      await waitFor(() => expect(sendButton).toBeEnabled());
+      await user.click(sendButton);
       // waiting for this turn's reply guarantees the mutation completed, so
       // the recorded history lengths line up with turns.
       expect(
@@ -224,7 +228,7 @@ describe('ChatWidget', () => {
     }
 
     expect(historyLengths).toEqual([1, 3, 5, 6]);
-  });
+  }, 15_000);
 
   it('keeps the quota message and countdown when rate limited', async () => {
     server.use(

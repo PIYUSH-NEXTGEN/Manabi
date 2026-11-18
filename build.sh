@@ -5,7 +5,8 @@ set -e
 cd "$(dirname "$0")"
 
 echo "--- backend deps ---"
-pip install --no-cache-dir -r backend/requirements.txt
+python -m pip install --upgrade "pip==26.3"
+python -m pip install --no-cache-dir -r backend/requirements.txt
 
 echo "--- frontend build ---"
 cd frontend
