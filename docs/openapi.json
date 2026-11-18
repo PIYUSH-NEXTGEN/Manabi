@@ -3245,6 +3245,11 @@
             ],
             "title": "Relevance Reason"
           },
+          "relevance_offline": {
+            "type": "boolean",
+            "title": "Relevance Offline",
+            "default": false
+          },
           "ownership_basis": {
             "anyOf": [
               {

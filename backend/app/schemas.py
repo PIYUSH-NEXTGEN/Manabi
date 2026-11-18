@@ -252,6 +252,9 @@ class ProjectOut(BaseModel):
     starred_by_me: bool = False
     # owner/admin-only fields: never shown to anonymous viewers or other users
     relevance_reason: str | None = None
+    # True when the AI reviewer was unavailable and the offline keyword check
+    # produced the outcome; the UI explains the fallback to the owner.
+    relevance_offline: bool = False
     ownership_basis: str | None = None
     review_note: str | None = None
 

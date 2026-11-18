@@ -335,6 +335,7 @@ def test_llm_verified_high_score(client, user, db_session, monkeypatch):
     assert res.status_code == 201
     data = res.json()
     assert data["verification_status"] == "verified"
+    assert data["relevance_offline"] is False
     assert "relevance_score" not in data  # score is admin-only, never published
 
 
@@ -404,8 +405,8 @@ def test_llm_garbage_zero_overlap_rejected(client, user, db_session, monkeypatch
     assert res.json()["detail"]["code"] == "not_relevant"
 
 
-def test_llm_all_keys_exhausted_goes_to_review(client, user, db_session, monkeypatch):
-    """A quota outage must not keyword-reject an honest submission."""
+def test_llm_all_keys_exhausted_uses_offline_check(client, user, db_session, monkeypatch):
+    """A quota outage still triages honestly: related work goes to review."""
     from app.services import verification as V
     from app.services.llm import LLMQuotaExhausted
 
@@ -418,8 +419,132 @@ def test_llm_all_keys_exhausted_goes_to_review(client, user, db_session, monkeyp
         res = submit(client, problem.id)
     assert res.status_code == 201
     assert res.json()["verification_status"] == "needs_review"
+    assert res.json()["relevance_offline"] is True
     project = db_session.query(Project).one()
-    assert "temporarily unavailable" in (project.relevance_reason or "")
+    assert "offline keyword system" in (project.relevance_reason or "")
+    assert project.relevance_score is not None
+    assert project.verification_status != "verified"
+
+
+def test_llm_transport_failure_uses_offline_check(client, user, db_session, monkeypatch):
+    """A network/provider outage is not a rejection: honest work goes to review."""
+    from app.services import verification as V
+    from app.services.llm import LLMResponseError
+
+    def boom(*_args, **_kwargs):
+        raise LLMResponseError("Gemini request failed: timed out")
+
+    monkeypatch.setattr(V, "llm_chat", boom)
+    problem = make_problem(db_session)
+    with mock_repo():
+        res = submit(client, problem.id)
+    assert res.status_code == 201
+    assert res.json()["verification_status"] == "needs_review"
+    assert res.json()["relevance_offline"] is True
+    assert "offline keyword system" in res.json()["relevance_reason"]
+
+
+def test_both_api_keys_invalid_uses_offline_check(client, user, db_session, monkeypatch):
+    """Both keys rejected by the provider: the pool gives up, offline triage runs."""
+    from google.genai import errors as genai_errors
+
+    from app.services import llm as L
+
+    monkeypatch.setenv("LLM_PROVIDER", "gemini")
+    monkeypatch.setenv("GEMINI_API_KEYS_EVAL", "bad-key-1,bad-key-2")
+    config.get_settings.cache_clear()
+    monkeypatch.setattr(L, "_key_cooldown", {})
+
+    invalid = genai_errors.APIError(
+        403,
+        {
+            "error": {
+                "code": 403,
+                "message": "API key not valid",
+                "status": "PERMISSION_DENIED",
+            }
+        },
+    )
+    calls: list[str] = []
+
+    class Client:
+        def __init__(self, key):
+            self.key = key
+
+        @property
+        def models(self):
+            return self
+
+        def generate_content(self, **_kwargs):
+            calls.append(self.key)
+            raise invalid
+
+    monkeypatch.setattr(L, "_gemini", lambda key: Client(key))
+
+    problem = make_problem(db_session)
+    with mock_repo():
+        res = submit(client, problem.id)
+    assert res.status_code == 201
+    assert calls == ["bad-key-1", "bad-key-2"]
+    assert res.json()["verification_status"] == "needs_review"
+    assert res.json()["relevance_offline"] is True
+    assert "offline keyword system" in res.json()["relevance_reason"]
+
+
+def test_no_api_keys_uses_offline_check(client, user, db_session, monkeypatch):
+    """No LLM configured at all still accepts honest work for review."""
+    monkeypatch.setenv("LLM_PROVIDER", "gemini")
+    monkeypatch.delenv("GEMINI_API_KEYS_EVAL", raising=False)
+    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    config.get_settings.cache_clear()
+
+    problem = make_problem(db_session)
+    with mock_repo():
+        res = submit(client, problem.id)
+    assert res.status_code == 201
+    assert res.json()["verification_status"] == "needs_review"
+    assert res.json()["relevance_offline"] is True
+    assert "offline keyword system" in res.json()["relevance_reason"]
+
+
+def test_llm_all_keys_exhausted_rejects_unrelated_repo(client, user, db_session, monkeypatch):
+    """The offline check can still reject a clearly unrelated submission."""
+    from app.services import verification as V
+    from app.services.llm import LLMQuotaExhausted
+
+    def boom(*_args, **_kwargs):
+        raise LLMQuotaExhausted("quota exhausted", retry_after=3600)
+
+    monkeypatch.setattr(V, "llm_chat", boom)
+    problem = make_problem(
+        db_session,
+        title="Analyze wildlife poaching patterns",
+        summary="Study illegal animal hunting",
+        field="biology",
+        domain="wildlife",
+        tech_tags=["gis"],
+    )
+    summary = "Atoms spin choreography visualiser with stereo rendering and orbit animations."
+    with mock_repo(
+        name="quantum",
+        full_name="octocat/quantum",
+        description="quantum simulator toolkit",
+        language="python",
+        topics=["physics"],
+    ):
+        res = submit(
+            client,
+            problem.id,
+            repo_url="https://github.com/octocat/quantum",
+            summary=summary,
+        )
+    assert res.status_code == 422
+    assert res.json()["detail"]["code"] == "not_relevant"
+    assert V.OFFLINE_NOTICE in res.json()["detail"]["message"]
+    reasons = " ".join(res.json()["detail"]["reasons"])
+    assert "keyword check" in reasons
+    assert "The AI compared" not in reasons
+    assert db_session.query(Project).count() == 0
 
 
 def test_too_few_commits_rejected_no_row(client, user, db_session):
@@ -451,6 +576,54 @@ def test_empty_repo_rejected_no_row(client, user, db_session):
     assert res.status_code == 422
     assert res.json()["detail"]["code"] == "readme_required"
     assert db_session.query(Project).count() == 0
+
+
+# --- offline (no-AI) relevance fallback ---
+
+
+def test_offline_check_never_verifies_even_on_full_overlap(db_session):
+    from app.services import verification as V
+
+    problem = make_problem(db_session)
+    facts = V.RepoFacts.from_repo(
+        repo_payload(
+            name="flood-alert-triage",
+            description="flood alert triage pipeline",
+            topics=["flood", "triage"],
+            language="Python",
+        )
+    )
+    result = V._offline_evaluation(
+        problem, SUMMARY, facts, README_BODY, pre_existing=False
+    )
+    assert result.status == V.VERIFICATION_NEEDS_REVIEW
+    assert result.score is not None and result.score > 0
+    assert "offline keyword system" in result.reason
+
+
+def test_offline_check_matches_technology_even_without_word_overlap(db_session):
+    from app.services import verification as V
+
+    problem = make_problem(
+        db_session,
+        title="Wildlife habitat mapping",
+        summary="Map animal migration corridors",
+        field="biology",
+        domain="wildlife",
+        tech_tags=["python"],
+    )
+    facts = V.RepoFacts.from_repo(
+        repo_payload(
+            name="corridor-viewer",
+            description="renders migration corridors",
+            language="Python",
+        )
+    )
+    result = V._offline_evaluation(
+        problem, "corridor renderer", facts, "corridor renderer", pre_existing=False
+    )
+    assert result.status == V.VERIFICATION_NEEDS_REVIEW
+    assert "offline keyword system" in result.reason
 
 
 # --- parse_relevance clamps ---

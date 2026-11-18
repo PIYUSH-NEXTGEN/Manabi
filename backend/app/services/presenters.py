@@ -7,6 +7,7 @@ here stops the response shape from drifting between endpoints.
 
 from app import schemas
 from app.models import Problem, Project, User
+from app.services.verification import OFFLINE_NOTICE
 
 
 def _validated(model, raw):
@@ -121,6 +122,10 @@ def project_to_out(
     )
     if include_private:
         out.relevance_reason = project.relevance_reason
+        out.relevance_offline = bool(
+            project.relevance_reason
+            and project.relevance_reason.startswith(OFFLINE_NOTICE)
+        )
         out.ownership_basis = project.ownership_basis
         out.review_note = project.review_note
     return out

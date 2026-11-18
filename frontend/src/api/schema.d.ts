@@ -1040,6 +1040,11 @@ export interface components {
             starred_by_me: boolean;
             /** Relevance Reason */
             relevance_reason?: string | null;
+            /**
+             * Relevance Offline
+             * @default false
+             */
+            relevance_offline: boolean;
             /** Ownership Basis */
             ownership_basis?: string | null;
             /** Review Note */
