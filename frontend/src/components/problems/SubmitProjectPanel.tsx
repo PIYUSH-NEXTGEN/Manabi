@@ -200,6 +200,13 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
       <aside ref={panelRef} className="flex flex-col gap-3 rounded-card border border-line bg-sheet p-5 shadow-soft">
         <h2 className={panelHeading}>Submitted</h2>
         <p className="text-body leading-snug">{statusLabel(submitted.verification_status)}</p>
+        {submitted.relevance_offline ? (
+          <p className="text-body leading-snug text-ink-soft">
+            Our AI reviewer is temporarily offline. This submission was checked
+            by our offline keyword system and will be re-checked automatically.
+            No action is needed.
+          </p>
+        ) : null}
         <p className="text-body leading-snug">
           Your repository has been added to the problem board with a progress badge.
         </p>

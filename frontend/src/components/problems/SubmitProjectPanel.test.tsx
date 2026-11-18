@@ -233,4 +233,48 @@ describe('SubmitProjectPanel', () => {
     );
     expect(await screen.findByRole('status')).toHaveTextContent('Submission received.');
   });
+
+  it('tells the owner when the offline keyword check was used', async () => {
+    const user = userEvent.setup();
+    server.use(
+      http.get('*/api/auth/me', () => HttpResponse.json(LOGGED_IN)),
+      http.post('*/api/problems/1/projects', () =>
+        HttpResponse.json(
+          {
+            id: 78,
+            problem_id: 1,
+            problem_title: 'Crop disease triage for small farms',
+            repo_url: 'https://github.com/demo-farmer/crop-triage',
+            repo_owner: 'demo-farmer',
+            repo_name: 'crop-triage',
+            open_for_contributors: false,
+            verification_status: 'needs_review',
+            solution_summary: null,
+            completed_at: null,
+            demo_url: null,
+            reflection: null,
+            relevance_offline: true,
+            relevance_reason:
+              'Our AI reviewer is temporarily unavailable, so we used our offline keyword system for this check.',
+            ownership_basis: 'push_access',
+            review_note: null,
+            owner: { username: 'demo-farmer', avatar_url: null },
+            progress: null,
+            progress_updated_at: null,
+          },
+          { status: 201 },
+        ),
+      ),
+    );
+    renderPanel();
+
+    await screen.findByLabelText(REPO_LABEL);
+    await user.type(screen.getByLabelText(REPO_LABEL), 'https://github.com/demo-farmer/crop-triage');
+    await user.click(screen.getByRole('button', { name: 'Submit project' }));
+
+    expect(await screen.findByText(/offline keyword system/i)).toHaveTextContent(
+      /AI reviewer is temporarily offline/i,
+    );
+    expect(screen.getByText(/re-checked automatically/i)).toBeInTheDocument();
+  });
 });

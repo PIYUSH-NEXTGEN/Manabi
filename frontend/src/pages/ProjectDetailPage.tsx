@@ -234,6 +234,14 @@ function ProjectView({ projectId }: { projectId: number }) {
           ) : null}
         </div>
 
+        {data.relevance_offline ? (
+          <p className="mt-4 text-body leading-snug text-ink-soft">
+            Our AI reviewer was temporarily offline when this project was
+            submitted, so it was checked by our offline keyword system. It will
+            be re-checked automatically — no action is needed.
+          </p>
+        ) : null}
+
         <p className="mt-3">
           {safeExternalUrl(data.repo_url) ? (
             <a
