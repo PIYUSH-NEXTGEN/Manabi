@@ -16,6 +16,7 @@ describe('HomePage', () => {
     expect(
       await screen.findByText(/briefs curated/i),
     ).toBeInTheDocument();
+    expect(await screen.findByText(/5 real projects/i)).toBeInTheDocument();
 
     expect(
       screen.getByRole('link', { name: 'Browse all projects' }),

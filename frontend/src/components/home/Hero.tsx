@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { EASE_SNAP } from '@/design/motion';
+import { useStats } from '@/hooks/useStats';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import { HeroScene } from '@/components/home/HeroScene';
 
@@ -43,6 +44,12 @@ function HeroHeadline() {
 
 export function Hero() {
   const reduced = usePrefersReducedMotion();
+  const stats = useStats();
+  const problemCount = stats.data?.problems;
+  const projectsLabel =
+    problemCount && problemCount > 0
+      ? `${problemCount.toLocaleString()} real project${problemCount === 1 ? '' : 's'}`
+      : 'real projects';
 
   return (
     <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden">
@@ -62,7 +69,7 @@ export function Hero() {
             }
             className="mx-auto mt-7 max-w-2xl text-balance text-lead leading-relaxed font-medium text-ink/85"
           >
-            Stop Googling project ideas. Browse 260+ real problems for learning,
+            Stop Googling project ideas. Browse {projectsLabel} for learning,
             resumes and hackathons. Build one, submit your repo, show your work
             on Manabi.
           </motion.p>
