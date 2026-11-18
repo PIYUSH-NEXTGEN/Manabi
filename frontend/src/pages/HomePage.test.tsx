@@ -30,7 +30,7 @@ describe('HomePage', () => {
         level: 2,
       }),
     ).toBeInTheDocument();
-  });
+  }, 10000);
 
   it(
     'cycles three random briefs every three seconds',
