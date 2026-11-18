@@ -145,8 +145,8 @@ function MobileLandscape() {
 
       {/* Same windmill artwork as the desktop panorama */}
       <g className="hero-parallax hero-parallax--near">
-        <ellipse cx="84" cy="314" rx="30" ry="5" fill="var(--scene-shadow)" opacity="0.12" stroke="none" />
-        <g transform="translate(84 310)">
+        <ellipse cx="84" cy="328" rx="30" ry="5" fill="var(--scene-shadow)" opacity="0.12" stroke="none" />
+        <g transform="translate(84 324)">
           <path d="M-18 0h36l-4-10h-28Z" fill="var(--scene-stone)" />
           <path d="M-14-10h28l-3-8h-22Z" fill="var(--scene-stone-light)" opacity="0.5" />
           <path d="M-12-18h24l-4-46h-16Z" fill="var(--scene-wood)" />
@@ -221,7 +221,7 @@ function MobileLandscape() {
 
       {/* Same house artwork as the desktop panorama */}
       <g className="hero-parallax hero-parallax--near">
-        <g transform="translate(306 246)">
+        <g transform="translate(306 260)">
           <g stroke="var(--scene-wood-dark)" strokeWidth="2" strokeLinecap="round" opacity="0.8">
             <path d="M-66 0v-23M-56 0v-23M-46 0v-23M-36 0v-23M-26 0v-23" />
             <path d="M-70-14h48M-66-6h40" strokeWidth="1.4" />
