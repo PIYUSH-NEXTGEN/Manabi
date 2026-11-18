@@ -100,24 +100,6 @@ function MobileLandscape() {
       fill="none"
       aria-hidden
     >
-      <defs>
-        <pattern
-          id="mobile-hatch"
-          width="7"
-          height="7"
-          patternUnits="userSpaceOnUse"
-          patternTransform="rotate(-15)"
-        >
-          <path
-            d="M-1 7L7-1M4 8L8 4"
-            stroke="var(--sketch-ink-soft)"
-            strokeWidth="0.6"
-            strokeOpacity="0.42"
-            strokeLinecap="round"
-          />
-        </pattern>
-      </defs>
-
       {/* Distant ridge */}
       <path
         d="M0 162C18 158 30 150 44 142C58 134 70 138 82 148C94 158 102 168 116 166C130 164 142 150 158 146C174 142 186 150 198 160C212 170 224 176 238 168C254 160 266 148 282 146C298 144 310 154 324 160C338 166 352 164 366 156C376 150 384 150 390 152V360H0V162Z"
@@ -139,13 +121,6 @@ function MobileLandscape() {
         strokeOpacity="0.6"
         strokeWidth="1.3"
       />
-      <path
-        d="M0 190C28 178 56 156 84 158C106 160 120 176 140 182C162 188 184 172 206 166C230 160 248 172 270 180C294 188 316 172 340 170C360 168 378 176 390 174V360H0V190Z"
-        fill="url(#mobile-hatch)"
-        opacity="0.2"
-        stroke="none"
-      />
-
       {/* Meadows */}
       <path
         d="M0 224C64 210 116 226 176 216C236 206 288 224 342 214C360 211 376 214 390 210V360H0V224Z"
@@ -167,22 +142,6 @@ function MobileLandscape() {
         fill="var(--scene-front)"
         stroke="none"
       />
-
-      {/* Contour lines and grass */}
-      <g
-        stroke="var(--sketch-ink-faint)"
-        strokeOpacity="0.38"
-        strokeWidth="0.9"
-        strokeLinecap="round"
-      >
-        <path d="M18 232C56 224 96 230 128 240" />
-        <path d="M226 250C262 244 298 250 330 258" />
-        <path d="M38 274C82 266 124 272 160 280" />
-        <path d="M250 286C290 278 328 284 360 292" />
-        <path d="M58 306C104 298 150 302 188 310" />
-        <path d="M250 320C288 312 326 316 356 324" />
-
-      </g>
 
       {/* Same windmill artwork as the desktop panorama */}
       <g className="hero-parallax hero-parallax--near">
@@ -262,7 +221,7 @@ function MobileLandscape() {
 
       {/* Same house artwork as the desktop panorama */}
       <g className="hero-parallax hero-parallax--near">
-        <g transform="translate(288 246) scale(0.78)">
+        <g transform="translate(306 246) scale(0.78)">
           <g stroke="var(--scene-wood-dark)" strokeWidth="2" strokeLinecap="round" opacity="0.8">
             <path d="M-66 0v-23M-56 0v-23M-46 0v-23M-36 0v-23M-26 0v-23" />
             <path d="M-70-14h48M-66-6h40" strokeWidth="1.4" />
