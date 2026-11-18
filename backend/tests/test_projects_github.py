@@ -397,9 +397,55 @@ def cached_progress(commits_ago_days: float):
     }
 
 
+def test_progress_hides_non_public_project_from_anonymous(db_session, client, user, problem, anon):
+    """A needs_review row is not public: its progress must 404 like the detail."""
+    project = make_project(
+        db_session, user, problem,
+        progress_json=cached_progress(1),
+        progress_updated_at=datetime.now(timezone.utc),
+    )
+    res = client.get(f"/api/projects/{project.id}/progress")
+    assert res.status_code == 404
+
+
+def test_progress_hides_non_public_project_from_other_user(db_session, client, user, problem):
+    """A logged-in stranger cannot read, refresh or re-verify someone's row."""
+    project = make_project(
+        db_session, user, problem,
+        progress_json=cached_progress(1),
+        progress_updated_at=datetime.now(timezone.utc),
+    )
+    viewer = User(github_id=7, username="viewer", github_token=None)
+    db_session.add(viewer)
+    db_session.commit()
+    app.dependency_overrides[get_optional_user] = lambda: viewer
+    app.dependency_overrides[get_current_user] = lambda: viewer
+
+    with respx.mock(assert_all_called=False):
+        res = client.get(
+            f"/api/projects/{project.id}/progress", params={"refresh": "true"}
+        )
+
+    assert res.status_code == 404
+    db_session.refresh(project)
+    assert project.progress_json["commit_count"] == 4
+
+
+def test_progress_owner_can_read_non_public_project(db_session, client, user, problem):
+    project = make_project(
+        db_session, user, problem,
+        progress_json=cached_progress(1),
+        progress_updated_at=datetime.now(timezone.utc),
+    )
+    res = client.get(f"/api/projects/{project.id}/progress")
+    assert res.status_code == 200
+    assert res.json()["commit_count"] == 4
+
+
 def test_progress_serves_fresh_cache_without_github(db_session, client, user, problem, anon):
     project = make_project(
         db_session, user, problem,
+        verification_status="verified",
         progress_json=cached_progress(1),
         progress_updated_at=datetime.now(timezone.utc),
     )
@@ -411,7 +457,7 @@ def test_progress_serves_fresh_cache_without_github(db_session, client, user, pr
     assert data["commit_count"] == 4
 
 
-def test_progress_refreshes_when_cache_expired(db_session, client, user, problem, anon):
+def test_progress_refreshes_when_cache_expired(db_session, client, user, problem):
     project = make_project(
         db_session, user, problem,
         progress_json=cached_progress(1),
@@ -428,7 +474,7 @@ def test_progress_refreshes_when_cache_expired(db_session, client, user, problem
     assert data["has_readme"] is True
 
 
-def test_progress_refresh_param_forces_fetch(db_session, client, user, problem, anon):
+def test_progress_refresh_param_forces_fetch(db_session, client, user, problem):
     project = make_project(
         db_session, user, problem,
         progress_json=cached_progress(1),
@@ -477,7 +523,7 @@ def test_progress_refresh_judges_ownership_by_submitter_not_viewer(
     assert project.ownership_basis == "owner"
 
 
-def test_progress_github_failure_returns_cached(db_session, client, user, problem, anon):
+def test_progress_github_failure_returns_cached(db_session, client, user, problem):
     project = make_project(
         db_session, user, problem,
         progress_json=cached_progress(1),
@@ -494,7 +540,7 @@ def test_progress_github_failure_returns_cached(db_session, client, user, proble
     assert data["status"] == "active"
 
 
-def test_progress_no_cache_github_failure_502(db_session, client, user, problem, anon):
+def test_progress_no_cache_github_failure_502(db_session, client, user, problem):
     project = make_project(db_session, user, problem)
     with respx.mock(assert_all_called=False) as mock:
         mock.get("https://api.github.com/repos/octocat/triage/commits").mock(

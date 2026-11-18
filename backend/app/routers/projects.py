@@ -111,6 +111,11 @@ async def get_project_progress(
     user: OptionalUser = None,
 ):
     project = _project_or_404(db, project_id)
+    # Progress is as private as the project itself: a needs_review/rejected
+    # row must not leak its repo, commits or issues to anyone but its owner
+    # (or an admin). These checks also gate the verification side effects.
+    if not visibility.can_view_project(project, user):
+        raise HTTPException(status_code=404, detail="Project not found")
     # refresh=true forces a GitHub API call and can write back to the DB, so
     # it is quota-sensitive. Owners refresh freely; everyone else (including
     # anonymous visitors) gets a modest hourly cap, and admins a higher

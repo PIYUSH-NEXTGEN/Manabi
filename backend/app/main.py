@@ -23,10 +23,17 @@ DEFAULT_SESSION_SECRET = "change-me-long-random-string"
 def guard_deploy_secrets(settings) -> None:
     """Fail fast on obviously unsafe deploy settings (local dev keeps defaults)."""
     is_local = "localhost" in settings.BASE_URL or settings.BASE_URL.startswith("http://127.0.0.1")
-    if not is_local and settings.SESSION_SECRET == DEFAULT_SESSION_SECRET:
+    if is_local:
+        return
+    secret = (settings.SESSION_SECRET or "").strip()
+    # An empty or short key still signs cookies, and a predictable key lets
+    # anyone mint a session cookie for any account. Enforce real entropy on
+    # deploy; the local placeholder stays convenient for development.
+    if len(secret) < 32 or secret == DEFAULT_SESSION_SECRET:
         raise RuntimeError(
-            "SESSION_SECRET is still the placeholder value. Generate a long random string "
-            "(python -c \"import secrets; print(secrets.token_urlsafe(32))\") before deploying."
+            "SESSION_SECRET must be at least 32 characters of random data and not the "
+            "placeholder value. Generate one with "
+            "python -c \"import secrets; print(secrets.token_urlsafe(32))\" before deploying."
         )
 
 
@@ -72,6 +79,14 @@ def create_app() -> FastAPI:
         response = await call_next(request)
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+        # This app never needs to be framed by another origin; deny it to
+        # stop clickjacking of the session-backed buttons.
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Content-Security-Policy", "frame-ancestors 'none'")
+        if request.url.path.startswith("/api/"):
+            # Authenticated JSON (me, dashboard, admin) must not sit in browser
+            # or intermediary caches where a shared machine could replay it.
+            response.headers.setdefault("Cache-Control", "no-store")
         return response
 
     from app.routers import admin, auth, chat, problems, profiles, projects, recommendations, stats
