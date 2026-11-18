@@ -387,3 +387,12 @@ def test_chat_empty_reply_gets_fallback_message(client, db_session, user, monkey
     res = client.post("/api/chat", json={"messages": [msg()]})
     assert res.status_code == 200
     assert res.json()["reply"].strip()
+
+
+def test_catalog_search_iot_synonym_is_reachable():
+    """The synonym table is keyed by lower-case tokens; a capitalized key never
+    matches, so "IoT" queries must still expand to sensor/device vocabulary."""
+    from app.services.catalog_search import _keywords
+
+    keywords = _keywords("IoT sensors")
+    assert {"iot", "sensor", "device"} <= keywords

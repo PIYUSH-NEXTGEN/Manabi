@@ -104,8 +104,8 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
             className="field mt-1 w-full"
           />
           <span className="mt-1 block text-sm text-muted">
-            Editing the description re-runs the automatic relevance check at most
-            once per day.
+            Editing the description re-runs the automatic relevance check
+            immediately.
           </span>
         </label>
         <label className="block" htmlFor={`demo-${project.id}`}>

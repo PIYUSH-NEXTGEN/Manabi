@@ -466,3 +466,51 @@ def test_pool_configures_both_features(monkeypatch):
     )
     assert is_configured("chat") is True
     assert is_configured() is True
+
+
+# --- conversation history is forwarded to real providers ---
+
+
+def test_anthropic_receives_earlier_turns(monkeypatch):
+    import json
+
+    set_provider(monkeypatch, "anthropic", ANTHROPIC_API_KEY="key")
+    captured = {}
+
+    def handler(request):
+        captured["body"] = json.loads(request.content)
+        return httpx.Response(200, json={"content": [{"type": "text", "text": "ok"}]})
+
+    with respx.mock(assert_all_called=True) as mock:
+        mock.post("https://api.anthropic.com/v1/messages").mock(side_effect=handler)
+        chat(
+            "s",
+            [
+                {"role": "user", "content": "first question about flood alerts"},
+                {"role": "assistant", "content": "here is a brief"},
+                {"role": "user", "content": "and for a weekend scope?"},
+            ],
+        )
+
+    sent = json.dumps(captured["body"])
+    assert "first question about flood alerts" in sent
+    assert "and for a weekend scope?" in sent
+
+
+def test_gemini_receives_earlier_turns(monkeypatch):
+    set_provider(monkeypatch, "gemini", GEMINI_API_KEY="k")
+    used = {}
+    _recording_gemini(monkeypatch, used)
+
+    chat(
+        "Sys",
+        [
+            {"role": "user", "content": "first question about flood alerts"},
+            {"role": "assistant", "content": "here is a brief"},
+            {"role": "user", "content": "and for a weekend scope?"},
+        ],
+    )
+
+    prompt = used["contents"][0]
+    assert "first question about flood alerts" in prompt
+    assert "and for a weekend scope?" in prompt

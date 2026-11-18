@@ -42,8 +42,7 @@ How MANABI works (answer platform questions from only these facts):
   and edit the solution summary on your dashboard: the check re-runs instantly.
 - Progress badges track commits, README state, and open issues from GitHub (cached 10
   minutes; the refresh button forces a re-pull).
-- A project earns the "Completed" tick when it has a README and 5+ commits.
-- Your dashboard lists your projects with edit, mark-complete, remove, and reopen.
+- Your dashboard lists your projects with edit and remove.
 - Recommendations score briefs against your GitHub profile (topics and languages).
 - Login uses GitHub. The chat allows 20 messages per day.
 

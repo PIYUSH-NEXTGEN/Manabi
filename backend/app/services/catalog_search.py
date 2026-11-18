@@ -36,7 +36,7 @@ _SYNONYMS: dict[str, set[str]] = {
     "translate": {"translate", "translation", "language"},
     "scanner": {"scanner", "scan", "ocr"},
     "ocr": {"ocr", "scan", "scanner"},
-    "IoT": {"iot", "sensor", "device"},
+    "iot": {"iot", "sensor", "device"},
     "sensor": {"sensor", "iot", "device"},
 }
 

@@ -166,6 +166,20 @@ def test_problem_create_rejects_oversize_fields(client, db_session, user):
     assert res.status_code == 422
 
 
+def test_problem_create_rejects_whitespace_only_required_text(client, db_session, user):
+    """Schema min_length counts spaces; a blank brief must not be published."""
+    for body in (
+        draft_card_factory(title="   "),
+        draft_card_factory(summary="  \t "),
+        draft_card_factory(who_affected="   "),
+        draft_card_factory(why_matters="   "),
+        draft_card_factory(source_name="   "),
+    ):
+        res = client.post("/api/problems", json=body)
+        assert res.status_code == 422, res.json()
+        assert res.json()["detail"]["code"] == "invalid_problem"
+
+
 def test_problem_create_accepts_boundary_sizes(client, db_session, user):
     res = client.post(
         "/api/problems",

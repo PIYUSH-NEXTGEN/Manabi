@@ -160,16 +160,6 @@ class ProjectPatch(BaseModel):
     demo_url: str | None = Field(default=None, max_length=500)
 
 
-class CompleteIn(BaseModel):
-    demo_url: str | None = Field(default=None, max_length=500)
-    reflection: str | None = Field(default=None, max_length=800)
-
-
-class CompletionChecklistItem(BaseModel):
-    item: str
-    ok: bool
-
-
 class HeatmapDay(BaseModel):
     """One day of public GitHub push activity (UTC date)."""
 

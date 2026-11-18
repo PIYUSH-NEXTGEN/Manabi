@@ -154,15 +154,11 @@ const GROUPS = [
   },
   {
     id: 'tracking',
-    title: 'Tracking and completion',
+    title: 'Tracking',
     items: [
       {
         q: 'How does progress tracking work?',
         a: 'MANABI reads commits, README state and open issues through the GitHub API and caches the result for ten minutes. You can force a refresh from the project page. Repeat refreshes are rate-limited.',
-      },
-      {
-        q: 'When can I mark a project complete?',
-        a: 'When the submission is verified, the repository has a README, and it has at least five commits. You can add a demo link and a short reflection at that point, and reopen the project later if it is still moving.',
       },
       {
         q: 'How do contributors join a project?',

@@ -69,8 +69,7 @@ export function PrivacyPage() {
             and decide whether it can be verified or needs review.
           </li>
           <li>
-            To show commits, README status and open issues, and to let a project
-            owner mark work complete.
+            To show commits, README status and open issues.
           </li>
           <li>
             To recommend briefs from the languages and topics on your profile.

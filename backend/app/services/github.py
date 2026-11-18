@@ -43,6 +43,11 @@ def _segment_is_literally_github_name(segment: str) -> bool:
     """
     if not _SEGMENT_RE.match(segment):
         return False
+    # "." and ".." match the character class but are path dot-segments: httpx
+    # normalises them against api.github.com, so the fetched repository would
+    # not be the one in the URL.
+    if segment in (".", ".."):
+        return False
     decoded = segment
     for _round in range(3):
         try:

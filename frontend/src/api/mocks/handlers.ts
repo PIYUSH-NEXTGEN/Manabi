@@ -595,43 +595,6 @@ export const handlers = [
     }
     return HttpResponse.json({ ...sampleProject, ...body, id: Number(params.id) });
   }),
-  http.post('*/api/projects/:id/complete', async ({ request, params }) => {
-    const body = (await request.json()) as {
-      demo_url?: string;
-      reflection?: string;
-    };
-    const id = Number(params.id);
-    if (id === 2) {
-      return HttpResponse.json(
-        {
-          detail: {
-            code: 'not_ready_to_complete',
-            message: 'Not ready to mark this project as completed yet.',
-            checklist: [
-              { item: 'Verified submission', ok: false },
-              { item: 'README', ok: true },
-              { item: 'At least 5 commits', ok: true },
-            ],
-          },
-        },
-        { status: 422 },
-      );
-    }
-    return HttpResponse.json({
-      ...sampleProject,
-      id,
-      completed_at: '2026-11-06T09:00:00Z',
-      demo_url: body.demo_url ?? sampleProject.demo_url,
-      reflection: body.reflection ?? sampleProject.reflection,
-    });
-  }),
-  http.post('*/api/projects/:id/reopen', ({ params }) =>
-    HttpResponse.json({
-      ...sampleProject,
-      id: Number(params.id),
-      completed_at: null,
-    }),
-  ),
   http.post('*/api/projects/:id/report', async ({ request }) => {
     const body = (await request.json()) as { reason?: string };
     const reason = typeof body.reason === 'string' ? body.reason : '';

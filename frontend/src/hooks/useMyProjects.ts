@@ -1,10 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  completeProject,
   deleteProject,
   getMyProjects,
   patchProject,
-  reopenProject,
   reportProject,
   starProblem,
   starProject,
@@ -32,6 +30,8 @@ function useInvalidateProjects() {
     void queryClient.invalidateQueries({ queryKey: ['me'] });
     void queryClient.invalidateQueries({ queryKey: ['project'] });
     void queryClient.invalidateQueries({ queryKey: ['problem'] });
+    // Board cards, their counts and the facets all live under ['problems'].
+    void queryClient.invalidateQueries({ queryKey: ['problems'] });
   };
 }
 
@@ -47,23 +47,6 @@ export function usePatchProject(projectId: number) {
   const invalidate = useInvalidateProjects();
   return useMutation({
     mutationFn: (body: ProjectPatch) => patchProject(projectId, body),
-    onSuccess: invalidate,
-  });
-}
-
-export function useCompleteProject(projectId: number) {
-  const invalidate = useInvalidateProjects();
-  return useMutation({
-    mutationFn: (body: { demo_url?: string; reflection?: string }) =>
-      completeProject(projectId, body),
-    onSuccess: invalidate,
-  });
-}
-
-export function useReopenProject(projectId: number) {
-  const invalidate = useInvalidateProjects();
-  return useMutation({
-    mutationFn: () => reopenProject(projectId),
     onSuccess: invalidate,
   });
 }

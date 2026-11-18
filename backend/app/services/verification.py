@@ -20,6 +20,7 @@ from datetime import datetime, timedelta, timezone
 from pydantic import BaseModel as _pyd_BaseModel, Field as _pyd_Field  # noqa: N812
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 
 from app.config import get_settings
 from app.models import (
@@ -419,9 +420,8 @@ OFFLINE_NOTICE = (
 )
 
 
-def _offline_reason(detail: str, *, recheck: bool) -> str:
-    suffix = " It will be re-checked automatically." if recheck else ""
-    return f"{OFFLINE_NOTICE} {detail}{suffix}"[:_REASON_LIMIT]
+def _offline_reason(detail: str) -> str:
+    return f"{OFFLINE_NOTICE} {detail} It will be re-checked automatically."[:_REASON_LIMIT]
 
 _STOP_WORDS = {
     "the", "and", "for", "with", "that", "this", "from", "into", "your", "are",
@@ -539,24 +539,26 @@ def _offline_evaluation(
     readme: str | None,
     pre_existing: bool,
 ) -> RelevanceEvaluation:
-    """Map the offline signal to a safe outcome: never verified."""
+    """Map the offline signal to a safe outcome: never verified, never rejected."""
     score, overlap, tag_hits, problem_terms = _offline_score(
         problem, summary, facts, readme
     )
     if not overlap and not tag_hits:
+        # The offline check cannot judge intent, so it never rejects on its
+        # own: an outage must not turn a possibly valid submission away.
         return RelevanceEvaluation(
-            VERIFICATION_REJECTED,
+            VERIFICATION_NEEDS_REVIEW,
             score,
             _offline_reason(
-                "The repository shows no connection to this problem's topic.",
-                recheck=False,
+                "The keyword check found no clear connection to this problem's "
+                "topic, so a human needs to look at it."
             ),
         )
     if pre_existing:
         return RelevanceEvaluation(
             VERIFICATION_NEEDS_REVIEW,
             score,
-            _offline_reason("Pre-existing repository.", recheck=True),
+            _offline_reason("Pre-existing repository."),
         )
     language_terms = _tokens(facts.language or "")
     evidence = [
@@ -586,7 +588,7 @@ def _offline_evaluation(
     return RelevanceEvaluation(
         VERIFICATION_NEEDS_REVIEW,
         score,
-        _offline_reason(detail, recheck=True),
+        _offline_reason(detail),
     )
 
 
@@ -619,7 +621,11 @@ def evaluate_relevance(
     readme: str | None,
     commit_count: int,
 ) -> RelevanceEvaluation:
-    """Decide the verification outcome. LLM failure falls back, never verifies."""
+    """Decide the verification outcome.
+
+    LLM failure falls back to the keyword check, which can neither verify nor
+    reject on its own: the worst outcome during an outage is human review.
+    """
     settings = get_settings()
     now = datetime.now(timezone.utc).replace(tzinfo=None)  # GitHub dates are naive UTC
 
@@ -737,20 +743,13 @@ async def create_submission(
         evaluate_relevance, problem, summary, facts, readme, commit_count
     )
     if evaluation.status == VERIFICATION_REJECTED:
-        offline = bool(evaluation.reason and evaluation.reason.startswith(OFFLINE_NOTICE))
-        reasons = (
-            [
-                "Our AI reviewer was unavailable, so a deterministic keyword check compared the problem's text with your repository's name, topics, description, and README.",
-                "The check found no shared topic or technology between this problem and the repository.",
-                "Name the problem's topic and technologies in the repo description and README, then submit again.",
-            ]
-            if offline
-            else [
-                "The AI compared the problem with the README, the repo description, and your description and found them unrelated.",
-                "Your description is optional but helps: say explicitly what the repo does and how it solves the problem.",
-                "Grow the README too: it is the main thing the AI reads to judge relevance.",
-            ]
-        )
+        # Only the LLM can reject a submission; an offline fallback always
+        # defers to review, so this branch is AI-attributed.
+        reasons = [
+            "The AI compared the problem with the README, the repo description, and your description and found them unrelated.",
+            "Your description is optional but helps: say explicitly what the repo does and how it solves the problem.",
+            "Grow the README too: it is the main thing the AI reads to judge relevance.",
+        ]
         raise SubmissionError(
             422,
             "not_relevant",
@@ -782,7 +781,9 @@ async def create_submission(
     db.add(project)
     try:
         db.commit()
-    except Exception:
+    except IntegrityError:
+        # Only a uniqueness violation is a duplicate submission; any other
+        # database failure must surface as an error, not as a misleading 409.
         db.rollback()
         raise SubmissionError(409, "already_submitted", "You already linked this repository to this problem.")
     db.refresh(project)

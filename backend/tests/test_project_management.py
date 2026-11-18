@@ -1,7 +1,4 @@
-"""Project management surface (§7): owner-only DELETE / PATCH / complete /
-reopen and their guards."""
-
-from datetime import datetime, timezone
+"""Project management surface (§7): owner-only DELETE / PATCH and their guards."""
 
 import pytest
 import respx
@@ -16,8 +13,6 @@ from app.db import Base, get_db
 from app.deps import get_current_user, get_optional_user
 from app.main import app
 from app.models import Problem, Project, ProjectReport, User
-
-NOW = datetime.now(timezone.utc)
 
 
 @pytest.fixture(autouse=True)
@@ -110,24 +105,6 @@ def make_project(db_session, user, problem, **overrides) -> Project:
     db_session.add(project)
     db_session.commit()
     return project
-
-
-def mock_repo_progress(commits=1, readme_status=200):
-    commits_list = [
-        {"sha": f"s{i}", "commit": {"committer": {"date": "2026-11-01T00:00:00Z"}, "message": "work"}}
-        for i in range(commits)
-    ]
-    ctx = respx.mock(assert_all_called=False)
-    ctx.get("https://api.github.com/repos/octocat/triage/commits").mock(
-        return_value=HTTPResponse(200, json=commits_list)
-    )
-    ctx.get("https://api.github.com/repos/octocat/triage/readme").mock(
-        return_value=HTTPResponse(readme_status, json={})
-    )
-    ctx.get("https://api.github.com/repos/octocat/triage/issues").mock(
-        return_value=HTTPResponse(200, json=[])
-    )
-    return ctx
 
 
 REPO_PAYLOAD = {
@@ -264,76 +241,6 @@ def test_patch_other_project_404(db_session, client, user, other):
         f"/api/projects/{project.id}",
         json={"solution_summary": "Flood alert triage pipeline, now with faster deduplication cadence."},
     )
-    assert res.status_code == 404
-
-
-# --- complete / reopen ---
-
-
-def test_complete_requires_checklist(db_session, client, user):
-    problem = make_problem(db_session)
-    # needs_review => checklist item 1 fails even with README + commits
-    project = make_project(db_session, user, problem, verification_status="needs_review")
-    with mock_repo_progress(commits=6):
-        res = client.post(
-            f"/api/projects/{project.id}/complete",
-            json={"demo_url": "https://example.com/demo", "reflection": "Learned rate limiting."},
-        )
-        assert res.status_code == 422
-        data = res.json()
-        assert data["detail"]["code"] == "not_ready_to_complete"
-        items = {item["item"]: item["ok"] for item in data["detail"]["checklist"]}
-        assert items["Verified submission"] is False
-        assert items["README"] is True
-        assert items["At least 5 commits"] is True
-
-
-def test_complete_success_sets_completed_at(db_session, client, user):
-    problem = make_problem(db_session)
-    project = make_project(db_session, user, problem)
-    with mock_repo_progress(commits=8):
-        res = client.post(
-            f"/api/projects/{project.id}/complete",
-            json={"demo_url": "https://example.com/demo", "reflection": "Learned a lot."},
-        )
-    assert res.status_code == 200
-    data = res.json()
-    assert data["completed_at"] is not None
-    assert db_session.get(Project, project.id).completed_at is not None
-
-
-def test_complete_github_down_503(db_session, client, user):
-    problem = make_problem(db_session)
-    project = make_project(db_session, user, problem)
-    with respx.mock(assert_all_called=False) as mock:
-        mock.get("https://api.github.com/repos/octocat/triage/commits").mock(
-            return_value=HTTPResponse(403, json={})
-        )
-        res = client.post(f"/api/projects/{project.id}/complete", json={"demo_url": "https://example.com/d"})
-    assert res.status_code == 503
-    assert res.json()["detail"]["code"] == "github_unavailable"
-
-
-def test_complete_other_project_404(db_session, client, user, other):
-    problem = make_problem(db_session)
-    project = make_project(db_session, other, problem)
-    res = client.post(f"/api/projects/{project.id}/complete", json={"demo_url": "https://example.com/d"})
-    assert res.status_code == 404
-
-
-def test_reopen_clears_completed_at(db_session, client, user):
-    problem = make_problem(db_session)
-    project = make_project(db_session, user, problem, completed_at=datetime.now(timezone.utc))
-    res = client.post(f"/api/projects/{project.id}/reopen")
-    assert res.status_code == 200
-    assert res.json()["completed_at"] is None
-    assert db_session.get(Project, project.id).completed_at is None
-
-
-def test_reopen_other_project_404(db_session, client, user, other):
-    problem = make_problem(db_session)
-    project = make_project(db_session, other, problem, completed_at=datetime.now(timezone.utc))
-    res = client.post(f"/api/projects/{project.id}/reopen")
     assert res.status_code == 404
 
 

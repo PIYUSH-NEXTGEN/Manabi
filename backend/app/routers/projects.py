@@ -13,11 +13,8 @@ from app.models import (
     Project,
     ProjectReport,
     ProjectStar,
-    User,
     VERIFICATION_NEEDS_REVIEW,
-    VERIFICATION_VERIFIED,
     as_utc,
-    utcnow,
 )
 from app.services import github, verification, visibility
 from app.services.presenters import project_out_safely
@@ -152,6 +149,9 @@ async def get_project_progress(
 
     project.progress_json = progress
     project.progress_updated_at = datetime.now(timezone.utc)
+    # Persist the fresh progress on its own before any verification side work:
+    # a failed re-verification must not discard a fetch that already succeeded.
+    db.commit()
 
     # §6.7: re-verification opportunities on the refresh path. Only happens
     # for logged-in viewers (this branch only runs when refresh was asked for
@@ -166,8 +166,6 @@ async def get_project_progress(
                     await verification.auto_reverify(db, project, problem, user)
         except Exception:  # noqa: BLE001 - verification must never break progress
             db.rollback()
-    else:
-        db.commit()
     return schemas.Progress.model_validate(progress)
 
 
@@ -233,75 +231,6 @@ async def edit_project(project_id: int, body: schemas.ProjectPatch, user: Curren
     return project_out_safely(project, include_private=True, viewer=user)
 
 
-async def _completion_checklist(project: Project, user: User) -> tuple[list[schemas.CompletionChecklistItem], dict | None]:
-    settings = get_settings()
-    progress = await github.get_progress(project.repo_owner, project.repo_name, user.github_token)
-    if progress is None:
-        return [], None
-    verify_ok = project.verification_status == VERIFICATION_VERIFIED
-    readme_ok = bool(progress.get("has_readme"))
-    commits = int(progress.get("commit_count") or 0)
-    commits_ok = commits >= settings.COMPLETE_MIN_COMMITS
-    checklist = [
-        schemas.CompletionChecklistItem(item="Verified submission", ok=verify_ok),
-        schemas.CompletionChecklistItem(item="README", ok=readme_ok),
-        schemas.CompletionChecklistItem(
-            item=f"At least {settings.COMPLETE_MIN_COMMITS} commits", ok=commits_ok
-        ),
-    ]
-    return checklist, progress
-
-
-@router.post("/api/projects/{project_id}/complete", response_model=schemas.ProjectOut)
-async def complete_project(project_id: int, body: schemas.CompleteIn, user: CurrentUser, db: DB):
-    project = _project_or_404(db, project_id)
-    if user.id != project.user_id:
-        raise HTTPException(status_code=404, detail="Project not found")
-
-    demo_url = verification.validate_demo_url(body.demo_url)
-    reflection = verification.clean_text(body.reflection) or None
-    if reflection and len(reflection) > 800:
-        raise HTTPException(
-            status_code=422,
-            detail={"code": "invalid_reflection", "message": "Reflection must be at most 800 characters."},
-        )
-
-    checklist, progress = await _completion_checklist(project, user)
-    if progress is None:
-        raise HTTPException(
-            status_code=503,
-            detail={"code": "github_unavailable", "message": "GitHub is not reachable right now. Try again shortly."},
-        )
-    if not all(item.ok for item in checklist):
-        raise HTTPException(
-            status_code=422,
-            detail={
-                "code": "not_ready_to_complete",
-                "message": "Not ready to mark this project as completed yet.",
-                "checklist": [item.model_dump() for item in checklist],
-            },
-        )
-    if demo_url:
-        project.demo_url = demo_url
-    if reflection:
-        project.reflection = reflection
-    project.completed_at = utcnow()
-    db.commit()
-    db.refresh(project)
-    return project_out_safely(project, include_private=True, viewer=user)
-
-
-@router.post("/api/projects/{project_id}/reopen", response_model=schemas.ProjectOut)
-def reopen_project(project_id: int, user: CurrentUser, db: DB):
-    project = _project_or_404(db, project_id)
-    if user.id != project.user_id:
-        raise HTTPException(status_code=404, detail="Project not found")
-    project.completed_at = None
-    db.commit()
-    db.refresh(project)
-    return project_out_safely(project, include_private=True, viewer=user)
-
-
 # ---------------------------------------------------------------------------
 # Reports (§8). Logged-in users, once per project, not the owner
 # ---------------------------------------------------------------------------
@@ -323,6 +252,11 @@ def report_project(project_id: int, body: schemas.ReportIn, user: CurrentUser, d
             retry, f"Too many reports this hour. Try again in {human_wait(retry)}."
         )
     reason = verification.clean_text(body.reason)[:300]
+    if not reason:
+        raise HTTPException(
+            status_code=422,
+            detail={"code": "invalid_reason", "message": "Add a short reason for this report."},
+        )
     existing = db.scalar(
         select(ProjectReport).where(
             ProjectReport.project_id == project.id, ProjectReport.reporter_user_id == user.id

@@ -104,9 +104,7 @@ export function AboutPage() {
           </li>
           <li>
             <span className="text-ink">Show your work.</span> Verified projects
-            are published on the brief&apos;s page for everyone to see. Once the
-            submission is verified and the repository has at least five commits,
-            you can mark it complete and add a demo link or a short reflection.
+            are published on the brief&apos;s page for everyone to see.
           </li>
         </ol>
       </ProseSection>

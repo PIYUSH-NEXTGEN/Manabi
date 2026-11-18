@@ -96,7 +96,15 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
           if (err.status === 409) {
             setError('You already reported this project.');
           } else if (err.status === 422) {
-            setError('You cannot report your own submission.');
+            // The backend uses 422 both for a self-report and for an invalid
+            // reason; only the former has a dedicated message.
+            setError(
+              err.code === 'cannot_report_own_project'
+                ? 'You cannot report your own submission.'
+                : err.code === 'invalid_reason'
+                  ? 'Add a short reason for this report.'
+                  : err.detail,
+            );
           } else if (err.status === 429) {
             setError(err.detail || 'Too many reports this hour. Try again later.');
           } else {
@@ -122,6 +130,7 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
         value={reason}
         onChange={(event) => setReason(event.target.value)}
         rows={2}
+        maxLength={300}
         placeholder="Reports go to a maintainer, not to the repo owner."
         className="field mt-2 w-[min(420px,100%)]"
       />

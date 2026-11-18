@@ -187,6 +187,14 @@ def test_parse_repo_url_rejects_encoded_separators():
     assert parse_repo_url("https://github.com/../boss/c") is None
 
 
+def test_parse_repo_url_rejects_dot_segments():
+    """"." and ".." are normalised by httpx against the API base URL, so the
+    fetched repository could differ from the URL the visitor submitted."""
+    assert parse_repo_url("https://github.com/../triage") is None
+    assert parse_repo_url("https://github.com/octocat/..") is None
+    assert parse_repo_url("https://github.com/./triage") is None
+
+
 def test_parse_repo_url_still_accepts_plain_names():
     assert parse_repo_url("https://github.com/octocat/triage.web") == ("octocat", "triage.web")
     assert parse_repo_url("https://github.com/octocat/triage_2.0") == ("octocat", "triage_2.0")
@@ -604,3 +612,25 @@ def test_me_projects_lists_own_only(db_session, client, user, problem, github_re
 def test_me_projects_requires_auth(client, db_session, anon):
     res = client.get("/api/me/projects")
     assert res.status_code == 401
+
+
+def test_progress_cache_persists_when_reverification_fails(
+    db_session, client, user, problem, monkeypatch
+):
+    """Verification must never discard a progress fetch that already succeeded."""
+    project = make_project(db_session, user, problem, verification_status="needs_review")
+
+    async def boom(*args, **kwargs):
+        raise RuntimeError("reverification hiccup")
+
+    monkeypatch.setattr("app.services.verification.refresh_project_state", boom)
+
+    with respx.mock(assert_all_called=False) as mock:
+        mock_progress_fetch(mock, commits=[commit("s1", NOW), commit("s2", NOW)], issues=[])
+        res = client.get(f"/api/projects/{project.id}/progress")
+
+    assert res.status_code == 200
+    db_session.refresh(project)
+    assert project.progress_json is not None
+    assert project.progress_json["commit_count"] == 2
+    assert project.progress_updated_at is not None

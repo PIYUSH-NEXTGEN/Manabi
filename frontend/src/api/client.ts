@@ -16,8 +16,7 @@ export class ApiError extends Error {
   readonly code: string | null;
   /** Seconds until the rate limit frees up, from the Retry-After header. */
   readonly retryAfterSeconds: number | null;
-  /** The raw parsed response body, for error payloads with extra fields
-   * (e.g. the completion checklist). */
+  /** The raw parsed response body, for error payloads with extra fields. */
   readonly payload?: unknown;
 
   constructor(
@@ -195,12 +194,6 @@ export type ChatProblemItem = Schemas['ChatProblemItem'];
 export type AdminSubmissionOut = Schemas['AdminSubmissionOut'];
 export type AdminSubmissionsOut = Schemas['AdminSubmissionsOut'];
 export type AdminSubmissionActionOut = Schemas['AdminSubmissionActionOut'];
-/** Checklist item inside the not_ready_to_complete error body. */
-export interface CompletionChecklistItem {
-  item: string;
-  ok: boolean;
-}
-
 export type SubmissionStatusFilter =
   | 'verified'
   | 'needs_review'
@@ -308,7 +301,6 @@ export function submitProject(
 }
 
 export type ProjectPatch = Schemas['ProjectPatch'];
-export type CompleteIn = Schemas['CompleteIn'];
 
 export function deleteProject(id: number): Promise<void> {
   return apiFetch<void>(`/api/projects/${id}`, { method: 'DELETE' });
@@ -319,17 +311,6 @@ export function patchProject(id: number, body: ProjectPatch): Promise<ProjectOut
     method: 'PATCH',
     body: JSON.stringify(body),
   });
-}
-
-export function completeProject(id: number, body: CompleteIn): Promise<ProjectOut> {
-  return apiFetch<ProjectOut>(`/api/projects/${id}/complete`, {
-    method: 'POST',
-    body: JSON.stringify(body),
-  });
-}
-
-export function reopenProject(id: number): Promise<ProjectOut> {
-  return apiFetch<ProjectOut>(`/api/projects/${id}/reopen`, { method: 'POST' });
 }
 
 export function reportProject(

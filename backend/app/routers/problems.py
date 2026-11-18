@@ -320,6 +320,22 @@ def create_problem(body: schemas.ProblemIn, user: CurrentUser, db: DB):
         raise rate_limited(
             retry, f"Too many problems created this hour. Try again in {human_wait(retry)}."
         )
+    title = body.title.strip()
+    summary = body.summary.strip()
+    if not (
+        title
+        and summary
+        and body.who_affected.strip()
+        and body.why_matters.strip()
+        and body.source_name.strip()
+    ):
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "invalid_problem",
+                "message": "Title, summary, who it affects, why it matters and the source name cannot be blank.",
+            },
+        )
     if body.source_id:
         existing = db.scalar(
             select(Problem).where(Problem.source_name == body.source_name, Problem.source_id == body.source_id)
@@ -327,15 +343,15 @@ def create_problem(body: schemas.ProblemIn, user: CurrentUser, db: DB):
         if existing is not None:
             raise HTTPException(status_code=409, detail="A problem with this source ID already exists")
     problem = Problem(
-        title=body.title.strip(),
-        summary=body.summary.strip(),
+        title=title,
+        summary=summary,
         who_affected=body.who_affected,
         why_matters=body.why_matters,
         field=body.field,
         domain=body.domain,
         difficulty=body.difficulty,
         est_hours=max(1, body.est_hours),
-        tech_tags=[t.strip().lower() for t in body.tech_tags],
+        tech_tags=[t.strip().lower() for t in body.tech_tags if t.strip()],
         # datasets arrive as validated JSON dicts (list[dict]) and are stored
         # verbatim; they also flow back out unchanged in ProblemOut.
         datasets=list(body.datasets),
@@ -344,7 +360,7 @@ def create_problem(body: schemas.ProblemIn, user: CurrentUser, db: DB):
         source_id=body.source_id,
         source_url=body.source_url,
         source_note=body.source_note,
-        original_text=body.summary.strip(),
+        original_text=summary,
         ai_fields=body.ai_fields,
         created_by=user.id,
     )

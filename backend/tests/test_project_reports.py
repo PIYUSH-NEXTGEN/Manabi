@@ -202,3 +202,13 @@ def test_report_threshold_flips_problem_to_needs_review(client, seeded, db_sessi
     project = db_session.query(Project).filter_by(id=seeded["project"].id).one()
     assert project.verification_status == "needs_review"
     assert db_session.query(ProjectReport).count() == 3
+
+
+def test_report_whitespace_only_reason_rejected(client, seeded, reporter, db_session):
+    """min_length sees the spaces; the stored reason must still be meaningful."""
+    res = client.post(
+        f"/api/projects/{seeded['project'].id}/report", json={"reason": "   \t  "}
+    )
+    assert res.status_code == 422
+    assert res.json()["detail"]["code"] == "invalid_reason"
+    assert db_session.query(ProjectReport).count() == 0

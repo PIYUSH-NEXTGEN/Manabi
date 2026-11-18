@@ -380,7 +380,8 @@ def test_llm_garbage_falls_back_needs_review(client, user, db_session, monkeypat
     assert res.json()["verification_status"] == "needs_review"
 
 
-def test_llm_garbage_zero_overlap_rejected(client, user, db_session, monkeypatch):
+def test_llm_garbage_zero_overlap_goes_to_review(client, user, db_session, monkeypatch):
+    """An unreadable AI reply plus no lexical overlap must not reject."""
     from app.services import verification as V
 
     monkeypatch.setattr(V, "llm_chat", lambda *a, **k: "not json at all")
@@ -401,8 +402,9 @@ def test_llm_garbage_zero_overlap_rejected(client, user, db_session, monkeypatch
         topics=["physics"],
     ):
         res = submit(client, problem.id, repo_url="https://github.com/octocat/quantum", summary=summary)
-    assert res.status_code == 422
-    assert res.json()["detail"]["code"] == "not_relevant"
+    assert res.status_code == 201
+    assert res.json()["verification_status"] == "needs_review"
+    assert res.json()["relevance_offline"] is True
 
 
 def test_llm_all_keys_exhausted_uses_offline_check(client, user, db_session, monkeypatch):
@@ -507,8 +509,8 @@ def test_no_api_keys_uses_offline_check(client, user, db_session, monkeypatch):
     assert "offline keyword system" in res.json()["relevance_reason"]
 
 
-def test_llm_all_keys_exhausted_rejects_unrelated_repo(client, user, db_session, monkeypatch):
-    """The offline check can still reject a clearly unrelated submission."""
+def test_llm_all_keys_exhausted_defers_unrelated_repo_to_review(client, user, db_session, monkeypatch):
+    """A quota outage must degrade to human review, even with zero overlap."""
     from app.services import verification as V
     from app.services.llm import LLMQuotaExhausted
 
@@ -538,13 +540,12 @@ def test_llm_all_keys_exhausted_rejects_unrelated_repo(client, user, db_session,
             repo_url="https://github.com/octocat/quantum",
             summary=summary,
         )
-    assert res.status_code == 422
-    assert res.json()["detail"]["code"] == "not_relevant"
-    assert V.OFFLINE_NOTICE in res.json()["detail"]["message"]
-    reasons = " ".join(res.json()["detail"]["reasons"])
-    assert "keyword check" in reasons
-    assert "The AI compared" not in reasons
-    assert db_session.query(Project).count() == 0
+    assert res.status_code == 201
+    data = res.json()
+    assert data["verification_status"] == "needs_review"
+    assert data["relevance_offline"] is True
+    assert V.OFFLINE_NOTICE in data["relevance_reason"]
+    assert db_session.query(Project).count() == 1
 
 
 def test_too_few_commits_rejected_no_row(client, user, db_session):
@@ -598,6 +599,36 @@ def test_offline_check_never_verifies_even_on_full_overlap(db_session):
     )
     assert result.status == V.VERIFICATION_NEEDS_REVIEW
     assert result.score is not None and result.score > 0
+    assert "offline keyword system" in result.reason
+
+
+def test_offline_check_never_rejects_without_any_overlap(db_session):
+    from app.services import verification as V
+
+    problem = make_problem(
+        db_session,
+        title="Analyze wildlife poaching patterns",
+        summary="Study illegal animal hunting",
+        field="biology",
+        domain="wildlife",
+        tech_tags=["gis"],
+    )
+    facts = V.RepoFacts.from_repo(
+        repo_payload(
+            name="quantum",
+            description="quantum simulator toolkit",
+            topics=["physics"],
+            language="Python",
+        )
+    )
+    result = V._offline_evaluation(
+        problem,
+        "Atoms spin choreography visualiser with stereo rendering.",
+        facts,
+        "Stereo rendering and orbit animations.",
+        pre_existing=False,
+    )
+    assert result.status == V.VERIFICATION_NEEDS_REVIEW
     assert "offline keyword system" in result.reason
 
 

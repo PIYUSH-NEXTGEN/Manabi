@@ -814,100 +814,6 @@
         }
       }
     },
-    "/api/projects/{project_id}/complete": {
-      "post": {
-        "tags": [
-          "projects"
-        ],
-        "summary": "Complete Project",
-        "operationId": "complete_project_api_projects__project_id__complete_post",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Project Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CompleteIn"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProjectOut"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/projects/{project_id}/reopen": {
-      "post": {
-        "tags": [
-          "projects"
-        ],
-        "summary": "Reopen Project",
-        "operationId": "reopen_project_api_projects__project_id__reopen_post",
-        "parameters": [
-          {
-            "name": "project_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "title": "Project Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProjectOut"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/projects/{project_id}/report": {
       "post": {
         "tags": [
@@ -1892,36 +1798,6 @@
           "difficulty"
         ],
         "title": "ChatProblemItem"
-      },
-      "CompleteIn": {
-        "properties": {
-          "demo_url": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 500
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Demo Url"
-          },
-          "reflection": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 800
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Reflection"
-          }
-        },
-        "type": "object",
-        "title": "CompleteIn"
       },
       "Facet": {
         "properties": {

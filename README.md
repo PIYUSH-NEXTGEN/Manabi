@@ -18,9 +18,7 @@ fill in web and AI/ML briefs.
   LLM relevance check)
 - Progress tracking from the GitHub API: commits, README state, open issues,
   cached for 10 minutes with a manual refresh
-- Verified projects can earn the "Completed" tick (README plus 5 commits,
-  re-checked against GitHub at mark-complete time)
-- Dashboard that lists your projects with edit/complete/remove/reopen actions;
+- Dashboard that lists your projects with edit/remove actions;
   unverified work stays in the needs-review state and is hidden from the
   curated counts until an admin or the verification system clears it
 - Viewer reports on published projects; 3 reports flip a project back to

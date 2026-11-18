@@ -79,6 +79,31 @@ def is_configured(purpose: str = "evaluation") -> bool:
     return False
 
 
+def _conversation_turns(messages: list[dict]) -> list[dict]:
+    """Keep only usable user/assistant turns, preserving their order."""
+    turns = []
+    for message in messages or []:
+        role = message.get("role")
+        content = message.get("content")
+        if role in ("user", "assistant") and isinstance(content, str) and content:
+            turns.append({"role": role, "content": content})
+    return turns
+
+
+def _conversation_text(turns: list[dict]) -> str:
+    """Flatten a multi-turn conversation into one provider prompt.
+
+    The providers see the earlier user and assistant turns as labelled text, so
+    a follow-up question can refer to what was already discussed. Single-turn
+    calls keep the exact prompt shape they always had.
+    """
+    lines = []
+    for turn in turns:
+        speaker = "User" if turn["role"] == "user" else "Assistant"
+        lines.append(f"{speaker}: {turn['content']}")
+    return "\n\n".join(lines)
+
+
 def chat(
     system: str,
     messages: list[dict],
@@ -94,20 +119,24 @@ def chat(
     if not is_configured(purpose):
         raise LLMConfigError("AI is not configured yet")
     provider = provider_name()
-    last_user = [m.get("content", "") for m in messages if m.get("role") == "user"]
-    last_user_text = last_user[-1] if last_user else ""
+    turns = _conversation_turns(messages)
+    user_turns = [turn["content"] for turn in turns if turn["role"] == "user"]
+    last_user_text = user_turns[-1] if user_turns else ""
     if provider == "mock":
         return f"MOCK-CHAT-REPLY: saw: {last_user_text[:200]}".strip()
+    # Earlier turns are part of the prompt only for real conversations; a lone
+    # message (relevance grading) is passed through exactly as before.
+    provider_input = _conversation_text(turns) if len(turns) > 1 else last_user_text
     if provider == "gemini":
         return _call_gemini(
             system,
-            last_user_text,
+            provider_input,
             model=model,
             max_tokens=max_tokens,
             chat_purpose=purpose == "chat",
         ).strip()
     if provider == "anthropic":
-        return _call_anthropic(system, last_user_text, model=model, max_tokens=max_tokens).strip()
+        return _call_anthropic(system, provider_input, model=model, max_tokens=max_tokens).strip()
     raise LLMConfigError(f"Unknown LLM_PROVIDER: {provider}")
 
 
