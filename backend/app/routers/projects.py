@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, HTTPException, Query, Request
 
 from sqlalchemy import func, select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app import schemas
 from app.config import get_settings
@@ -185,7 +185,14 @@ async def get_project_progress(
 @router.get("/api/me/projects", response_model=list[schemas.ProjectOut])
 def my_projects(user: CurrentUser, db: DB):
     rows = db.scalars(
-        select(Project).options(joinedload(Project.problem)).where(Project.user_id == user.id).order_by(Project.created_at.desc())
+        select(Project)
+        .options(
+            joinedload(Project.problem),
+            joinedload(Project.user),
+            selectinload(Project.stars),
+        )
+        .where(Project.user_id == user.id)
+        .order_by(Project.created_at.desc())
     ).all()
     # The owner sees every status of their own rows, with the private fields.
     return [project_out_safely(p, include_private=True, viewer=user) for p in rows]

@@ -3,7 +3,7 @@ from typing import Literal
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import BigInteger, Text, case, cast, func, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import aliased, joinedload
+from sqlalchemy.orm import aliased, joinedload, selectinload
 
 from app import schemas
 from app.deps import DB, CurrentUser, OptionalUser
@@ -274,7 +274,13 @@ def facets(
 def get_problem(problem_id: int, db: DB, user: OptionalUser):
     problem = db.scalar(
         select(Problem)
-        .options(joinedload(Problem.projects).joinedload(Project.user))
+        .options(
+            selectinload(Problem.stars),
+            joinedload(Problem.projects).options(
+                joinedload(Project.user),
+                selectinload(Project.stars),
+            ),
+        )
         .where(Problem.id == problem_id, Problem.status == STATUS_PUBLISHED)
     )
     if problem is None:

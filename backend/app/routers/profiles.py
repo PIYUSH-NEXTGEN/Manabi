@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload, selectinload
 
 from app import schemas
 from app.deps import DB, CurrentUser, public_user
@@ -19,6 +20,11 @@ def public_profile(username: str, db: DB):
     rows = db.scalars(
         select(Project)
         .join(Problem, Project.problem_id == Problem.id)
+        .options(
+            joinedload(Project.user),
+            joinedload(Project.problem),
+            selectinload(Project.stars),
+        )
         .where(Project.user_id == user.id, Problem.status == STATUS_PUBLISHED)
         .order_by(Project.id.desc())
     ).all()

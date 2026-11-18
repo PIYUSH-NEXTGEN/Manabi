@@ -4,7 +4,7 @@ import pytest
 import respx
 from fastapi.testclient import TestClient
 from httpx import Response as HTTPResponse
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -658,6 +658,61 @@ def test_me_projects_lists_own_only(db_session, client, user, problem, github_re
 def test_me_projects_requires_auth(client, db_session, anon):
     res = client.get("/api/me/projects")
     assert res.status_code == 401
+
+
+def test_public_profile_query_count_does_not_scale_with_rows(db_session, client, user, problem):
+    for i in range(8):
+        make_project(
+            db_session,
+            user,
+            problem,
+            repo_name=f"profile{i}",
+            repo_url=f"https://github.com/octocat/profile{i}",
+            verification_status="verified",
+        )
+    db_session.expire_all()
+    statements: list[str] = []
+
+    def count_statement(conn, cursor, statement, parameters, context, executemany):
+        statements.append(statement)
+
+    event.listen(db_session.get_bind(), "before_cursor_execute", count_statement)
+    try:
+        res = client.get(f"/api/u/{user.username}")
+    finally:
+        event.remove(db_session.get_bind(), "before_cursor_execute", count_statement)
+
+    assert res.status_code == 200
+    assert len(res.json()["projects"]) == 8
+    assert len(statements) <= 4, statements
+
+
+def test_me_projects_query_count_does_not_scale_with_rows(db_session, client, user, problem):
+    """Presenter data must be eager-loaded: one query per row was the old
+    behavior and made a dashboard of 20 projects cost 67 statements."""
+    for i in range(8):
+        make_project(
+            db_session,
+            user,
+            problem,
+            repo_name=f"repo{i}",
+            repo_url=f"https://github.com/octocat/repo{i}",
+        )
+    db_session.expire_all()
+    statements: list[str] = []
+
+    def count_statement(conn, cursor, statement, parameters, context, executemany):
+        statements.append(statement)
+
+    event.listen(db_session.get_bind(), "before_cursor_execute", count_statement)
+    try:
+        res = client.get("/api/me/projects")
+    finally:
+        event.remove(db_session.get_bind(), "before_cursor_execute", count_statement)
+
+    assert res.status_code == 200
+    assert len(res.json()) == 8
+    assert len(statements) <= 4, statements
 
 
 def test_progress_cache_persists_when_reverification_fails(
