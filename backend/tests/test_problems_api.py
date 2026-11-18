@@ -257,6 +257,41 @@ def test_detail_contains_original_text_projects_owner(client, seed):
     assert project["progress"] is None
 
 
+def test_detail_degrades_invalid_json_sections(db_session, client):
+    """Hand-edited/curated JSON must hide its section, not 500 the detail."""
+    problem = Problem(
+        title="Broken JSON brief",
+        summary="Summary",
+        who_affected="People",
+        why_matters="Matters",
+        field="aiml",
+        domain="healthcare",
+        difficulty="beginner",
+        est_hours=5,
+        tech_tags=["python"],
+        datasets=[],
+        approaches=[],
+        source_name="Source",
+        source_id="BROKEN-JSON",
+        original_text="verbatim",
+        build_guide=[{"title": 5}],
+        team_plan={"roles": "not-a-list"},
+        pitch_guide={"beats": "not-a-list"},
+        resume_kit={"scope_levels": "not-a-list"},
+    )
+    db_session.add(problem)
+    db_session.commit()
+
+    res = client.get(f"/api/problems/{problem.id}")
+
+    assert res.status_code == 200
+    data = res.json()
+    assert data["build_guide"] is None
+    assert data["team_plan"] is None
+    assert data["pitch_guide"] is None
+    assert data["resume_kit"] is None
+
+
 def test_detail_404(client, db_session):
     res = client.get("/api/problems/9999")
     assert res.status_code == 404

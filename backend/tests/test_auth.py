@@ -156,6 +156,62 @@ def test_callback_with_bad_state_rejected(client, db_session, mock_github):
     assert client.get("/api/auth/me").status_code == 401
 
 
+def test_login_and_callback_are_503_when_github_is_not_configured(client, monkeypatch):
+    monkeypatch.setenv("GITHUB_CLIENT_ID", "")
+    monkeypatch.setenv("GITHUB_CLIENT_SECRET", "")
+    config.get_settings.cache_clear()
+
+    login = client.get("/api/auth/github/login", follow_redirects=False)
+    callback = client.get(
+        "/api/auth/github/callback", params={"code": "abc", "state": "x"}, follow_redirects=False
+    )
+
+    assert login.status_code == 503
+    assert callback.status_code == 503
+    assert login.json()["detail"] == "GitHub login is not configured yet"
+
+
+def test_login_is_rate_limited_per_ip(client, db_session, mock_github, monkeypatch):
+    from app.routers.auth import LOGIN_LIMITER
+
+    monkeypatch.setenv("AUTH_LOGIN_RATE_LIMIT_PER_HOUR", "1")
+    config.get_settings.cache_clear()
+    LOGIN_LIMITER.reset(db_session)
+    try:
+        first = client.get("/api/auth/github/login", follow_redirects=False)
+        second = client.get("/api/auth/github/login", follow_redirects=False)
+    finally:
+        LOGIN_LIMITER.reset(db_session)
+
+    assert first.status_code == 302
+    assert second.status_code == 429
+    assert second.json()["detail"]["code"] == "rate_limited"
+    assert int(second.headers["Retry-After"]) > 0
+
+
+def test_callback_rejects_profile_without_github_id(client, monkeypatch):
+    from app.routers import auth as auth_module
+
+    class EmptyProfileResponse:
+        def json(self):
+            return {"login": "octocat"}
+
+    class FakeOAuthClient:
+        async def authorize_access_token(self, request):
+            return {"access_token": "token"}
+
+        async def get(self, path, token=None):
+            return EmptyProfileResponse()
+
+    monkeypatch.setattr(auth_module, "get_github_client", lambda: FakeOAuthClient())
+    res = client.get(
+        "/api/auth/github/callback", params={"code": "abc", "state": "x"}, follow_redirects=False
+    )
+
+    assert res.status_code == 502
+    assert res.json()["detail"] == "GitHub did not return a user profile"
+
+
 def test_routes_documented_in_openapi():
     paths = app.openapi()["paths"]
     assert "/api/auth/github/login" in paths

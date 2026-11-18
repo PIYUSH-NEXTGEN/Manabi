@@ -37,6 +37,15 @@ jobs:
       - name: Install frontend deps
         run: npm ci
         working-directory: frontend
-      - name: Typecheck + unit tests
+      - name: Typecheck + production build
         run: npm run build
+        working-directory: frontend
+      - name: Unit tests
+        run: npm test
+        working-directory: frontend
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - name: E2E smoke test
+        run: npm run e2e
         working-directory: frontend

@@ -22,13 +22,16 @@ test('home hero, board, and problem detail render with zero console errors', asy
   await expect(
     page.getByRole('heading', { name: 'Projects', level: 1 }),
   ).toBeVisible();
-  const firstCard = page.locator('a[href="/problems/1"]');
+  // Seed IDs and titles are data, not contract: use whatever card the board
+  // actually renders first, then verify the navigation reaches its detail.
+  const firstCard = page.locator('main a[href^="/problems/"]').first();
   await expect(firstCard).toBeVisible();
+  const href = await firstCard.getAttribute('href');
+  expect(href).toMatch(/^\/problems\/\d+$/);
 
   await firstCard.click();
-  await expect(
-    page.getByRole('heading', { name: 'Crop disease triage for small farms' }),
-  ).toBeVisible();
+  await expect(page).toHaveURL(new RegExp(`${href}$`));
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 
   const unexpectedErrors = consoleErrors.filter(
     (error) => error.includes('401') === false,

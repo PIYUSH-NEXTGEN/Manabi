@@ -12,7 +12,9 @@ from app.db import Base, get_db
 from app.deps import get_current_user, get_optional_user
 from app.main import app
 from app.models import Problem, Project, User
+from app.services import github, verification
 from app.services.github import parse_repo_url
+from app.services.verification import RelevanceEvaluation
 
 NOW = datetime.now(timezone.utc)
 USER_ID = 42
@@ -548,6 +550,178 @@ def test_progress_no_cache_github_failure_502(db_session, client, user, problem)
         )
         res = client.get(f"/api/projects/{project.id}/progress")
     assert res.status_code == 502
+
+
+# --- re-verification state transitions ---
+
+
+def project_for_reverify(db_session, user, problem, **overrides):
+    return make_project(
+        db_session,
+        user,
+        problem,
+        verification_status="verified",
+        ownership_basis="owner",
+        repo_github_id=999,
+        **overrides,
+    )
+
+
+@pytest.mark.anyio
+async def test_refresh_marks_missing_repo_for_review(db_session, user, problem, monkeypatch):
+    project = project_for_reverify(db_session, user, problem)
+
+    async def gone(*args, **kwargs):
+        raise github.GitHubError(404, "Not found on GitHub")
+
+    monkeypatch.setattr(verification.github, "get_repo", gone)
+    await verification.refresh_project_state(db_session, project, user)
+    db_session.refresh(project)
+
+    assert project.verification_status == "needs_review"
+    assert project.relevance_reason == "Repository no longer found or is no longer public"
+
+
+@pytest.mark.anyio
+async def test_refresh_detects_renamed_repo_and_updates_identity(db_session, user, problem, monkeypatch):
+    project = project_for_reverify(db_session, user, problem)
+    moved = dict(
+        REPO_PAYLOAD,
+        id=1000,
+        full_name="newowner/newrepo",
+        name="newrepo",
+        owner={"login": "newowner", "id": 7, "type": "User"},
+    )
+
+    async def moved_repo(*args, **kwargs):
+        return moved
+
+    async def still_owner(*args, **kwargs):
+        return "owner"
+
+    monkeypatch.setattr(verification.github, "get_repo", moved_repo)
+    monkeypatch.setattr(verification, "check_ownership", still_owner)
+    await verification.refresh_project_state(db_session, project, user)
+    db_session.refresh(project)
+
+    assert project.repo_owner == "newowner"
+    assert project.repo_name == "newrepo"
+    assert project.repo_url == "https://github.com/newowner/newrepo"
+    assert project.repo_github_id == 1000
+    assert project.verification_status == "needs_review"
+    assert "renamed or transferred" in (project.relevance_reason or "")
+
+
+@pytest.mark.anyio
+async def test_refresh_marks_lost_ownership_for_review(db_session, user, problem, monkeypatch):
+    project = project_for_reverify(db_session, user, problem)
+
+    async def same_repo(*args, **kwargs):
+        return REPO_PAYLOAD
+
+    async def not_owner(*args, **kwargs):
+        return None
+
+    monkeypatch.setattr(verification.github, "get_repo", same_repo)
+    monkeypatch.setattr(verification, "check_ownership", not_owner)
+    await verification.refresh_project_state(db_session, project, user)
+    db_session.refresh(project)
+
+    assert project.verification_status == "needs_review"
+    assert project.relevance_reason == "Ownership of this repository could no longer be confirmed"
+
+
+@pytest.mark.anyio
+async def test_auto_reverify_verifies_when_evidence_is_now_sufficient(
+    db_session, user, problem, monkeypatch
+):
+    project = make_project(
+        db_session,
+        user,
+        problem,
+        verification_status="needs_review",
+        relevance_checked_at=None,
+    )
+
+    async def readme(*args, **kwargs):
+        return "Flood triage with python"
+
+    async def commits(*args, **kwargs):
+        return [commit(f"s{i}", NOW) for i in range(3)]
+
+    async def repo(*args, **kwargs):
+        return REPO_PAYLOAD
+
+    monkeypatch.setattr(verification.github, "fetch_readme_text", readme)
+    monkeypatch.setattr(verification.github, "fetch_commits", commits)
+    monkeypatch.setattr(verification.github, "get_repo", repo)
+    monkeypatch.setattr(
+        verification,
+        "evaluate_relevance",
+        lambda *args, **kwargs: RelevanceEvaluation("verified", 0.9, "Clear match."),
+    )
+
+    changed = await verification.auto_reverify(db_session, project, problem, user)
+    db_session.refresh(project)
+
+    assert changed is True
+    assert project.verification_status == "verified"
+    assert project.relevance_score == 0.9
+
+
+@pytest.mark.anyio
+async def test_auto_reverify_parks_rejections_for_admin(db_session, user, problem, monkeypatch):
+    project = make_project(
+        db_session,
+        user,
+        problem,
+        verification_status="needs_review",
+        relevance_checked_at=None,
+    )
+
+    async def readme(*args, **kwargs):
+        return "unrelated text"
+
+    async def commits(*args, **kwargs):
+        return [commit(f"s{i}", NOW) for i in range(3)]
+
+    async def repo(*args, **kwargs):
+        return REPO_PAYLOAD
+
+    monkeypatch.setattr(verification.github, "fetch_readme_text", readme)
+    monkeypatch.setattr(verification.github, "fetch_commits", commits)
+    monkeypatch.setattr(verification.github, "get_repo", repo)
+    monkeypatch.setattr(
+        verification,
+        "evaluate_relevance",
+        lambda *args, **kwargs: RelevanceEvaluation("rejected", 0.1, "Unrelated."),
+    )
+
+    changed = await verification.auto_reverify(db_session, project, problem, user)
+    db_session.refresh(project)
+
+    assert changed is True
+    assert project.verification_status == "needs_review"
+    assert "Admin review required" in (project.relevance_reason or "")
+
+
+@pytest.mark.anyio
+async def test_summary_edit_with_missing_repo_returns_to_review(
+    db_session, user, problem, monkeypatch
+):
+    project = project_for_reverify(db_session, user, problem)
+
+    async def gone(*args, **kwargs):
+        raise github.GitHubError(404, "Not found on GitHub")
+
+    monkeypatch.setattr(verification.github, "get_repo", gone)
+    await verification.reverify_after_summary_edit(
+        db_session, project, problem, user, "updated summary"
+    )
+    db_session.refresh(project)
+
+    assert project.verification_status == "needs_review"
+    assert project.relevance_reason == "Repository no longer found or is no longer public"
 
 
 # --- status derivation (service level, no HTTP) ---
