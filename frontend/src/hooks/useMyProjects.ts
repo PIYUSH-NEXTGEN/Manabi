@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import {
   deleteProject,
   getMyProjects,
@@ -13,6 +13,7 @@ import {
   type ProjectPatch,
 } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
+import { useInvalidateCatalogData } from '@/lib/queryCache';
 
 export function useMyProjects() {
   const me = useMe();
@@ -24,19 +25,8 @@ export function useMyProjects() {
   });
 }
 
-function useInvalidateProjects() {
-  const queryClient = useQueryClient();
-  return () => {
-    void queryClient.invalidateQueries({ queryKey: ['me'] });
-    void queryClient.invalidateQueries({ queryKey: ['project'] });
-    void queryClient.invalidateQueries({ queryKey: ['problem'] });
-    // Board cards, their counts and the facets all live under ['problems'].
-    void queryClient.invalidateQueries({ queryKey: ['problems'] });
-  };
-}
-
 export function useDeleteProject() {
-  const invalidate = useInvalidateProjects();
+  const invalidate = useInvalidateCatalogData();
   return useMutation({
     mutationFn: (id: number) => deleteProject(id),
     onSuccess: invalidate,
@@ -44,7 +34,7 @@ export function useDeleteProject() {
 }
 
 export function usePatchProject(projectId: number) {
-  const invalidate = useInvalidateProjects();
+  const invalidate = useInvalidateCatalogData();
   return useMutation({
     mutationFn: (body: ProjectPatch) => patchProject(projectId, body),
     onSuccess: invalidate,
@@ -52,13 +42,16 @@ export function usePatchProject(projectId: number) {
 }
 
 export function useReportProject(projectId: number) {
+  const invalidate = useInvalidateCatalogData();
   return useMutation({
     mutationFn: (reason: string) => reportProject(projectId, { reason }),
+    // The third report can move the project back to human review.
+    onSuccess: invalidate,
   });
 }
 
 export function useStarProject(projectId: number) {
-  const invalidate = useInvalidateProjects();
+  const invalidate = useInvalidateCatalogData();
   return useMutation({
     mutationFn: () => starProject(projectId),
     onSuccess: invalidate,
@@ -66,7 +59,7 @@ export function useStarProject(projectId: number) {
 }
 
 export function useUnstarProject(projectId: number) {
-  const invalidate = useInvalidateProjects();
+  const invalidate = useInvalidateCatalogData();
   return useMutation({
     mutationFn: () => unstarProject(projectId),
     onSuccess: invalidate,
@@ -74,7 +67,7 @@ export function useUnstarProject(projectId: number) {
 }
 
 export function useStarProblem(problemId: number) {
-  const invalidate = useInvalidateProjects();
+  const invalidate = useInvalidateCatalogData();
   return useMutation({
     mutationFn: () => starProblem(problemId),
     onSuccess: invalidate,
@@ -82,7 +75,7 @@ export function useStarProblem(problemId: number) {
 }
 
 export function useUnstarProblem(problemId: number) {
-  const invalidate = useInvalidateProjects();
+  const invalidate = useInvalidateCatalogData();
   return useMutation({
     mutationFn: () => unstarProblem(problemId),
     onSuccess: invalidate,

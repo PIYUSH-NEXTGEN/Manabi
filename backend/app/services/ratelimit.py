@@ -45,11 +45,12 @@ class RateLimiter:
         key_filter = RateLimitHit.key == key
         in_window = RateLimitHit.created_at >= cutoff
 
-        # Opportunistic cleanup: expired rows for this key leave with it,
-        # so the table never grows without bound.
+        # Opportunistic cleanup: expired rows for the whole bucket leave with
+        # any check. Deleting only this key's rows left one-off IPs/users in
+        # the table forever, so the cleanup never actually bounded growth.
         db.execute(
             delete(RateLimitHit).where(
-                bucket_filter, key_filter, RateLimitHit.created_at < cutoff
+                bucket_filter, RateLimitHit.created_at < cutoff
             )
         )
         used = db.scalar(

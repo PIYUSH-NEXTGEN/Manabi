@@ -102,7 +102,18 @@ describe('ProjectDetailPage', () => {
   });
 
   it('pulls progress from GitHub automatically when no stored progress exists', async () => {
+    const storedProgress = {
+      status: 'active',
+      commit_count: 6,
+      last_commit_at: '2026-11-11T09:00:00Z',
+      has_readme: true,
+      recent_commits: [],
+      open_issues: [],
+    };
+    let persistedProgress: typeof storedProgress | null = null;
     server.use(
+      // The real endpoint commits progress before returning, so the project
+      // refetch triggered by the refresh sees the new value.
       http.get('*/api/projects/:id', () =>
         HttpResponse.json({
           id: 2,
@@ -113,20 +124,16 @@ describe('ProjectDetailPage', () => {
           repo_name: 'new-repo',
           open_for_contributors: false,
           owner: { username: 'fresh', avatar_url: null },
-          progress: null,
-          progress_updated_at: null,
+          progress: persistedProgress,
+          progress_updated_at: persistedProgress
+            ? '2026-11-11T09:00:00Z'
+            : null,
         }),
       ),
-      http.get('*/api/projects/2/progress', () =>
-        HttpResponse.json({
-          status: 'active',
-          commit_count: 6,
-          last_commit_at: '2026-11-11T09:00:00Z',
-          has_readme: true,
-          recent_commits: [],
-          open_issues: [],
-        }),
-      ),
+      http.get('*/api/projects/2/progress', () => {
+        persistedProgress = storedProgress;
+        return HttpResponse.json(storedProgress);
+      }),
     );
 
     renderProject('/projects/2');
@@ -174,20 +181,41 @@ describe('ProjectDetailPage', () => {
   it('refresh pulls updated progress and re-renders the stats', async () => {
     const user = userEvent.setup();
     let refreshCalls = 0;
+    const initialProgress = {
+      status: 'active',
+      commit_count: 14,
+      last_commit_at: '2026-10-16T08:00:00Z',
+      has_readme: true,
+      recent_commits: [],
+      open_issues: [],
+    };
+    let persistedProgress = initialProgress;
     server.use(
+      http.get('*/api/projects/:id', () =>
+        HttpResponse.json({
+          id: 1,
+          problem_id: 1,
+          problem_title: 'Crop disease triage for small farms',
+          repo_url: 'https://github.com/demo-farmer/crop-triage',
+          repo_owner: 'demo-farmer',
+          repo_name: 'crop-triage',
+          open_for_contributors: true,
+          owner: { username: 'demo-farmer', avatar_url: null },
+          progress: persistedProgress,
+          progress_updated_at: '2026-10-17T08:00:00Z',
+        }),
+      ),
       http.get('*/api/projects/:id/progress', ({ request }) => {
         expect(
           new URL(request.url).searchParams.get('refresh'),
         ).toBe('true');
         refreshCalls += 1;
-        return HttpResponse.json({
-          status: 'active',
+        persistedProgress = {
+          ...initialProgress,
           commit_count: 15,
           last_commit_at: '2026-10-17T08:00:00Z',
-          has_readme: true,
-          recent_commits: [],
-          open_issues: [],
-        });
+        };
+        return HttpResponse.json(persistedProgress);
       }),
     );
 

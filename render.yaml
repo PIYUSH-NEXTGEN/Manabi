@@ -1,7 +1,7 @@
 # MANABI — one-service deploy (FastAPI serves frontend/dist + /api).
 # Blueprint: https://render.com/docs/blueprint-spec
 # After "New → Blueprint", set the SECRET env vars in the dashboard
-# (GITHUB_CLIENT_SECRET, GEMINI_API_KEY, SESSION_SECRET if not auto-generated).
+# (GITHUB_CLIENT_SECRET, GEMINI_API_KEY, DATABASE_URL).
 services:
   - type: web
     name: manabi
@@ -19,8 +19,11 @@ services:
         sync: false # set to https://<your-service>.onrender.com after first deploy
       - key: SESSION_SECRET
         generateValue: true
+      # Required: a durable Postgres connection string (Neon/Supabase/Render).
+      # Do not use SQLite here: Render's filesystem is ephemeral, so every
+      # deploy/restart would erase users and submissions.
       - key: DATABASE_URL
-        value: sqlite:///./app.db
+        sync: false
       - key: LLM_PROVIDER
         value: gemini # set GEMINI_API_KEY in the Render dashboard; without it submissions fail safe to the keyword check
       - key: GITHUB_CLIENT_ID
@@ -29,9 +32,7 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
-      - key: CHAT_RATE_LIMIT_ANON_PER_HOUR
-        value: 10
-      - key: CHAT_RATE_LIMIT_USER_PER_HOUR
-        value: 30
+      - key: CHAT_RATE_LIMIT_PER_DAY
+        value: "20"
       - key: ADMIN_GITHUB_USERNAMES
         sync: false # comma-separated GitHub logins for /admin/review

@@ -1,7 +1,7 @@
 from collections.abc import Generator
 from contextlib import contextmanager
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine, make_url
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
@@ -24,6 +24,22 @@ def normalized_database_url(raw: str) -> str:
     return raw
 
 
+def _enable_sqlite_foreign_keys(engine: Engine) -> None:
+    """SQLite ignores declared foreign keys unless this pragma is enabled.
+
+    Postgres enforces them by default; local/dev SQLite should not silently
+    accept orphaned rows or skip the CASCADE on project_reports/project_stars.
+    """
+
+    @event.listens_for(engine, "connect")
+    def _set_sqlite_pragma(dbapi_connection, _connection_record):
+        cursor = dbapi_connection.cursor()
+        try:
+            cursor.execute("PRAGMA foreign_keys=ON")
+        finally:
+            cursor.close()
+
+
 def get_engine() -> Engine:
     global _engine
     if _engine is None:
@@ -36,6 +52,8 @@ def get_engine() -> Engine:
             pool_pre_ping=not database_url.startswith("sqlite"),
             pool_recycle=280 if not database_url.startswith("sqlite") else 0,
         )
+        if database_url.startswith("sqlite"):
+            _enable_sqlite_foreign_keys(_engine)
     return _engine
 
 

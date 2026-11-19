@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app.db import Base
+from app.db import Base, _enable_sqlite_foreign_keys
 from app.models import Problem, Project, User
 
 
@@ -111,6 +111,18 @@ def test_project_unique_per_problem_user_repo():
         session.commit()
     session.rollback()
     session.close()
+
+
+def test_sqlite_foreign_keys_are_enabled():
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    _enable_sqlite_foreign_keys(engine)
+    with engine.connect() as connection:
+        assert connection.exec_driver_sql("PRAGMA foreign_keys").scalar() == 1
+    engine.dispose()
 
 
 def test_project_relationships():

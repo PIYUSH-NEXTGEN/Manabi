@@ -7,6 +7,7 @@ import {
   type ApiError,
   type SubmissionStatusFilter,
 } from '@/api/client';
+import { useInvalidateCatalogData } from '@/lib/queryCache';
 
 export function useAdminSubmissions(status: SubmissionStatusFilter) {
   return useQuery<AdminSubmissionsOut, ApiError>({
@@ -18,8 +19,11 @@ export function useAdminSubmissions(status: SubmissionStatusFilter) {
 
 function useRefreshAdmin() {
   const queryClient = useQueryClient();
+  const invalidateCatalog = useInvalidateCatalogData();
   return () => {
     void queryClient.invalidateQueries({ queryKey: ['admin'] });
+    // Approval/rejection changes public visibility, counts, and stats.
+    invalidateCatalog();
   };
 }
 

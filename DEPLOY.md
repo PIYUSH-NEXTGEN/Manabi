@@ -36,6 +36,7 @@ GEMINI_API_KEY=<key>
 Notes:
 
 - `BASE_URL` also controls the OAuth callback and the session-cookie flags (`Secure` + `HttpOnly` when it starts with `https`).
+- The Render blueprint intentionally does **not** default `DATABASE_URL` to SQLite. Render's filesystem is ephemeral, so set a durable Postgres URL during blueprint setup and verify it before the first deploy. A manual `uvicorn` start with the variable entirely absent still falls back to local SQLite, which is only appropriate for development.
 - Postgres URLs from Neon/Supabase (`postgres://...`) are accepted — the engine rewrites the scheme to `postgresql://` and enables `pool_pre_ping` (serverless Postgres kills idle connections; without pre-ping the first request after idle 500s).
 - The app refuses to boot with the placeholder `SESSION_SECRET` when `BASE_URL` is not localhost — fail fast beats an impersonatable session cookie.
 - Health endpoint for uptime checks: `GET /api/health` (touches the DB, returns `{"status":"ok"}`).
