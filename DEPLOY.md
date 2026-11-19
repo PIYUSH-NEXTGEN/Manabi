@@ -54,7 +54,7 @@ python -m venv .venv
 
 - **Migrations are the source of truth for Postgres.** Run `alembic upgrade head` before
   every deploy (on Render: prepend it to the start command, e.g.
-  `.venv/bin/python -m alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT`).
+  `.venv/bin/python -m alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25`).
   As a safety net the app itself also runs `upgrade head` on startup when `DATABASE_URL` is Postgres.
 - SQLite (local dev) keeps `create_all` on startup; do not rely on that in production.
 - The catalog is populated from the seed scripts (`scripts/seed_*_web_projects.py`)
@@ -163,10 +163,10 @@ provider's backup retention, encryption, or restore time from the application.
 
 ```
 cd backend
-sh start.sh                   # installs runtime deps, then: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+sh start.sh                   # installs runtime deps, then uvicorn with a 25s shutdown grace
 ```
 
-On Render/Railway a `Procfile` is included (`web: uvicorn app.main:app --host 0.0.0.0 --port $PORT`). If your platform builds from git: extend the start command to run step 1 first, or commit `frontend/dist` from CI.
+On Render/Railway a `Procfile` is included (`web: uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25`). If your platform builds from git: extend the start command to run step 1 first, or commit `frontend/dist` from CI.
 
 ## 5. Post-deploy checks
 

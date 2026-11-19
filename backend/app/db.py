@@ -44,13 +44,26 @@ def get_engine() -> Engine:
     global _engine
     if _engine is None:
         database_url = normalized_database_url(get_settings().DATABASE_URL)
+        is_sqlite = database_url.startswith("sqlite")
         _engine = create_engine(
             database_url,
+            # Bound connection establishment and checkout waits. Without these
+            # a dead Postgres endpoint or exhausted pool can hold a worker
+            # indefinitely. SQLite local connections do not need them.
             connect_args={"check_same_thread": False}
-            if database_url.startswith("sqlite")
-            else {},
-            pool_pre_ping=not database_url.startswith("sqlite"),
-            pool_recycle=280 if not database_url.startswith("sqlite") else 0,
+            if is_sqlite
+            else {
+                "connect_timeout": 10,
+                # A pathological query must not hold an app worker forever.
+                # Migrations use their own engine, so schema upgrades are not
+                # subject to this per-request statement limit.
+                "options": "-c statement_timeout=60000",
+            },
+            pool_pre_ping=not is_sqlite,
+            pool_recycle=280 if not is_sqlite else 0,
+            pool_size=5,
+            max_overflow=5 if not is_sqlite else 10,
+            pool_timeout=10,
         )
         if database_url.startswith("sqlite"):
             _enable_sqlite_foreign_keys(_engine)

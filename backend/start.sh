@@ -6,4 +6,6 @@ cd "$(dirname "$0")"
 
 pip install --no-cache-dir -r requirements.txt
 
-exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}"
+# Give in-flight requests a bounded window to finish; without this an
+# abandoned dependency call can block a deploy forever.
+exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" --timeout-graceful-shutdown 25

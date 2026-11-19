@@ -304,9 +304,11 @@ def test_chat_daily_limit_20(client, db_session, user, monkeypatch):
         res = client.post("/api/chat", json={"messages": [msg()]})
         codes.append(res.status_code)
     assert codes[-1] == 429 and 200 in codes
-    assert "today" in client.post(
+    detail = client.post(
         "/api/chat", json={"messages": [msg()]}
     ).json()["detail"]
+    assert detail["code"] == "rate_limited"
+    assert "today" in detail["message"]
 
 
 def test_chat_too_many_messages_422(client, db_session, user):

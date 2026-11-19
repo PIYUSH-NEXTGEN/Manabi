@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { server } from '@/api/mocks/server';
 import { ApiError, apiFetch, deleteProject, getProblems, getStats } from './client';
 
@@ -45,6 +45,47 @@ describe('apiFetch', () => {
     await expect(apiFetch('/api/broken')).rejects.toMatchObject({
       status: 502,
       detail: 'Request failed with status 502',
+    });
+  });
+
+  it('normalizes a network failure into an ApiError', async () => {
+    server.use(http.get('*/api/offline', () => HttpResponse.error()));
+
+    await expect(apiFetch('/api/offline')).rejects.toMatchObject({
+      status: 0,
+      code: 'network_error',
+      detail: 'Could not reach the server. Check your connection and try again.',
+    });
+  });
+
+  it('times out a stalled request instead of waiting forever', async () => {
+    vi.stubGlobal(
+      'fetch',
+      ((_input: RequestInfo | URL, init?: RequestInit) =>
+        new Promise((_resolve, reject) => {
+          init?.signal?.addEventListener('abort', () =>
+            reject(new DOMException('Aborted', 'AbortError')),
+          );
+        })) as typeof fetch,
+    );
+
+    try {
+      await expect(
+        apiFetch('/api/slow', { timeoutMs: 5 }),
+      ).rejects.toMatchObject({ status: 0, code: 'timeout' });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('rejects an unreadable successful body safely', async () => {
+    server.use(
+      http.get('*/api/unreadable', () => new HttpResponse('not json', { status: 200 })),
+    );
+
+    await expect(apiFetch('/api/unreadable')).rejects.toMatchObject({
+      status: 200,
+      code: 'invalid_response',
     });
   });
 

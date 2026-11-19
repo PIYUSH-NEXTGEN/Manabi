@@ -33,6 +33,14 @@ def get_client() -> httpx.AsyncClient:
     return _shared_client
 
 
+async def close_client() -> None:
+    """Release the shared connection pool during application shutdown."""
+    global _shared_client
+    client, _shared_client = _shared_client, None
+    if client is not None:
+        await client.aclose()
+
+
 def _segment_is_literally_github_name(segment: str) -> bool:
     """True when the path segment is exactly what GitHub would name it.
 

@@ -40,6 +40,13 @@ interface ErrorBody {
   detail?: unknown;
 }
 
+/** Normal requests get 20s; LLM/GitHub-backed writes explicitly allow longer. */
+const DEFAULT_TIMEOUT_MS = 20_000;
+
+interface ApiFetchOptions extends RequestInit {
+  timeoutMs?: number;
+}
+
 /** FastAPI can return the error detail as a plain string or as
  * {"code": ..., "message": ...}. Handle both. */
 function parseErrorBody(body: ErrorBody): { detail: string; code: string | null } | null {
@@ -60,17 +67,60 @@ function parseErrorBody(body: ErrorBody): { detail: string; code: string | null 
   return null;
 }
 
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers = new Headers(init?.headers);
-  if (init?.body && !headers.has('Content-Type')) {
+export async function apiFetch<T>(
+  path: string,
+  options: ApiFetchOptions = {},
+): Promise<T> {
+  const {
+    timeoutMs = DEFAULT_TIMEOUT_MS,
+    signal: externalSignal,
+    ...init
+  } = options;
+  const headers = new Headers(init.headers);
+  if (init.body && !headers.has('Content-Type')) {
     headers.set('Content-Type', 'application/json');
   }
 
-  const response = await fetch(path, {
-    ...init,
-    credentials: 'include',
-    headers,
-  });
+  const controller = new AbortController();
+  let timedOut = false;
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+  const abortFromCaller = () => controller.abort();
+  if (externalSignal) {
+    if (externalSignal.aborted) controller.abort();
+    else externalSignal.addEventListener('abort', abortFromCaller);
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      ...init,
+      credentials: 'include',
+      headers,
+      signal: controller.signal,
+    });
+  } catch {
+    if (timedOut) {
+      throw new ApiError(
+        0,
+        'The server took too long to respond. Try again.',
+        'timeout',
+      );
+    }
+    if (externalSignal?.aborted) {
+      throw new ApiError(0, 'The request was cancelled.', 'aborted');
+    }
+    throw new ApiError(
+      0,
+      'Could not reach the server. Check your connection and try again.',
+      'network_error',
+    );
+  } finally {
+    clearTimeout(timer);
+    externalSignal?.removeEventListener('abort', abortFromCaller);
+  }
 
   if (!response.ok) {
     let detail = `Request failed with status ${response.status}`;
@@ -98,7 +148,15 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   if (response.status === 204) {
     return undefined as T;
   }
-  return (await response.json()) as T;
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new ApiError(
+      response.status,
+      'The server returned an unreadable response. Try again.',
+      'invalid_response',
+    );
+  }
 }
 
 export interface ProblemsQuery {
@@ -177,6 +235,7 @@ export function postChat(body: ChatIn): Promise<ChatOut> {
   return apiFetch<ChatOut>('/api/chat', {
     method: 'POST',
     body: JSON.stringify(body),
+    timeoutMs: 75_000,
   });
 }
 
@@ -250,6 +309,7 @@ export function getProjectProgress(
 ): Promise<Progress> {
   return apiFetch<Progress>(
     `/api/projects/${id}/progress${refresh ? '?refresh=true' : ''}`,
+    { timeoutMs: 75_000 },
   );
 }
 
@@ -297,6 +357,7 @@ export function submitProject(
   return apiFetch<ProjectOut>(`/api/problems/${problemId}/projects`, {
     method: 'POST',
     body: JSON.stringify(body),
+    timeoutMs: 60_000,
   });
 }
 
@@ -310,6 +371,7 @@ export function patchProject(id: number, body: ProjectPatch): Promise<ProjectOut
   return apiFetch<ProjectOut>(`/api/projects/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(body),
+    timeoutMs: 75_000,
   });
 }
 

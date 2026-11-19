@@ -10,7 +10,7 @@ from app.models import STATUS_PUBLISHED, Problem, Project
 from app.services.catalog_search import search_catalog
 from app.services.llm import LLMConfigError, LLMQuotaExhausted, LLMResponseError
 from app.services.llm import chat as llm_chat
-from app.services.ratelimit import CHAT_DAILY_LIMITER, human_wait
+from app.services.ratelimit import CHAT_DAILY_LIMITER, human_wait, rate_limited
 
 router = APIRouter(tags=["chat"])
 logger = logging.getLogger(__name__)
@@ -233,10 +233,10 @@ def chat(body: schemas.ChatIn, db: DB, user: CurrentUser):
     # keying the limit on the session user (not the raw IP) is fair to people
     # who share one campus/office address. Each account gets its own bucket.
     if (retry := CHAT_DAILY_LIMITER.check(db, f"user:{user.id}")) is not None:
-        raise HTTPException(
-            status_code=429,
-            detail=f"You have used your {CHAT_DAILY_LIMITER.limit} messages for today. Try again in {human_wait(retry)}.",
-            headers={"Retry-After": str(retry)},
+        raise rate_limited(
+            retry,
+            f"You have used your {CHAT_DAILY_LIMITER.limit} messages for today. "
+            f"Try again in {human_wait(retry)}.",
         )
     try:
         problem_id = body.page_context.problem_id if body.page_context else None

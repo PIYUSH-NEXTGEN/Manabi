@@ -9,6 +9,7 @@ import '@fontsource/jetbrains-mono/400.css';
 import '@fontsource/jetbrains-mono/700.css';
 import './index.css';
 import { App } from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 async function prepare(): Promise<void> {
   if (import.meta.env.VITE_USE_MOCKS === 'true') {
@@ -21,11 +22,23 @@ const rootElement = document.getElementById('root');
 if (!rootElement) {
   throw new Error('Root element #root not found');
 }
+const root = rootElement;
 
-void prepare().then(() => {
-  createRoot(rootElement).render(
+async function start(): Promise<void> {
+  try {
+    await prepare();
+  } catch (error) {
+    // Mock-worker startup is development-only; a failure must not blank the
+    // whole app. The real API will still be used if it is reachable.
+    console.error('App preparation failed; rendering without mocks', error);
+  }
+  createRoot(root).render(
     <StrictMode>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </StrictMode>,
   );
-});
+}
+
+void start();

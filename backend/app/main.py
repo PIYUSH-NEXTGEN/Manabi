@@ -1,14 +1,22 @@
+import logging
+import uuid
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy import text
+from sqlalchemy.exc import OperationalError, TimeoutError as SATimeoutError
 
 from app.config import get_settings
 from app.db import get_engine
+
+logger = logging.getLogger(__name__)
+
+INTERNAL_ERROR_MESSAGE = "Something went wrong on our side. Try again."
+DATABASE_UNAVAILABLE_MESSAGE = "The service is temporarily unavailable. Try again shortly."
 
 
 def frontend_dist() -> Path | None:
@@ -51,14 +59,82 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         from app.migrations import upgrade_to_head
 
         upgrade_to_head()
-    yield
-    get_engine().dispose()
+    try:
+        yield
+    finally:
+        # Release pooled HTTP connections and DB sockets after uvicorn stops
+        # accepting requests, so a redeploy never abandons them.
+        from app.services import github
+
+        await github.close_client()
+        get_engine().dispose()
+
+
+def _request_id(request: Request) -> str:
+    """Trust a bounded caller-supplied id, otherwise mint one for correlation."""
+    raw = request.headers.get("X-Request-ID") if hasattr(request, "headers") else None
+    if isinstance(raw, str):
+        candidate = raw.strip()
+        if (
+            candidate
+            and len(candidate) <= 64
+            and all(char.isalnum() or char in "-_." for char in candidate)
+        ):
+            return candidate
+    return uuid.uuid4().hex
+
+
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """One safe JSON 500 for unexpected API failures; details stay in logs."""
+    request_id = _request_id(request)
+    logger.error(
+        "Unhandled error request_id=%s method=%s path=%s",
+        request_id,
+        getattr(request, "method", "?"),
+        request.url.path,
+        exc_info=(type(exc), exc, exc.__traceback__),
+    )
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": {"code": "internal_error", "message": INTERNAL_ERROR_MESSAGE}
+        },
+        headers={"X-Request-ID": request_id},
+    )
+
+
+async def database_unavailable_handler(
+    request: Request, exc: OperationalError | SATimeoutError
+) -> JSONResponse:
+    """A dependency outage is not an application bug: report 503, not 500."""
+    request_id = _request_id(request)
+    logger.error(
+        "Database unavailable request_id=%s method=%s path=%s",
+        request_id,
+        getattr(request, "method", "?"),
+        request.url.path,
+        exc_info=(type(exc), exc, exc.__traceback__),
+    )
+    return JSONResponse(
+        status_code=503,
+        content={
+            "detail": {
+                "code": "database_unavailable",
+                "message": DATABASE_UNAVAILABLE_MESSAGE,
+            }
+        },
+        headers={"X-Request-ID": request_id},
+    )
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
     guard_deploy_secrets(settings)
     app = FastAPI(title="MANABI API", lifespan=lifespan)
+    # Specific dependency/timeout handlers win over the generic Exception one.
+    app.add_exception_handler(OperationalError, database_unavailable_handler)
+    app.add_exception_handler(SATimeoutError, database_unavailable_handler)
+    app.add_exception_handler(Exception, unhandled_exception_handler)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["http://localhost:5173"] if "localhost" in settings.BASE_URL else [],
@@ -75,8 +151,11 @@ def create_app() -> FastAPI:
 
     @app.middleware("http")
     async def basic_security_headers(request: Request, call_next):
+        request_id = _request_id(request)
+        request.state.request_id = request_id
         # Platform TLS/load balancer owns HSTS; these are process-level and free.
         response = await call_next(request)
+        response.headers.setdefault("X-Request-ID", request_id)
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
         response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
         # This app never needs to be framed by another origin; deny it to
