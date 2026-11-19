@@ -739,6 +739,71 @@ def test_status_derivation():
 
 
 @pytest.mark.anyio
+async def test_get_repo_rejects_malformed_200_payloads():
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get("https://api.github.com/repos/u/r").mock(
+            return_value=HTTPResponse(200, json=["not", "a", "repo"])
+        )
+        with pytest.raises(github.GitHubError) as exc:
+            await github.get_repo("u", "r")
+    assert exc.value.status == 502
+
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get("https://api.github.com/repos/u/r").mock(
+            return_value=HTTPResponse(200, content=b"not json")
+        )
+        with pytest.raises(github.GitHubError) as exc:
+            await github.get_repo("u", "r")
+    assert exc.value.status == 502
+
+
+@pytest.mark.anyio
+async def test_get_progress_rejects_malformed_commits_and_ignores_bad_issues():
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get("https://api.github.com/repos/u/r/commits").mock(
+            return_value=HTTPResponse(200, json={"not": "a list"})
+        )
+        mock.get("https://api.github.com/repos/u/r/readme").mock(return_value=HTTPResponse(200, json={}))
+        mock.get("https://api.github.com/repos/u/r/issues").mock(return_value=HTTPResponse(200, json=[]))
+        assert await github.get_progress("u", "r", None) is None
+
+    commits = [commit("s1", NOW), commit("s2", NOW)]
+    issues = [None, "bad", {"number": 1, "title": "ok", "labels": [None, {"name": "help wanted"}]}]
+    with respx.mock(assert_all_called=False) as mock:
+        mock.get("https://api.github.com/repos/u/r/commits").mock(
+            return_value=HTTPResponse(200, json=commits)
+        )
+        mock.get("https://api.github.com/repos/u/r/readme").mock(return_value=HTTPResponse(404, json={}))
+        mock.get("https://api.github.com/repos/u/r/issues").mock(
+            return_value=HTTPResponse(200, json=issues)
+        )
+        progress = await github.get_progress("u", "r", None)
+    assert progress is not None
+    assert [i["number"] for i in progress["open_issues"]] == [1]
+
+
+def test_repo_facts_tolerates_malformed_optional_fields():
+    facts = verification.RepoFacts.from_repo(
+        {
+            "id": "999",
+            "name": "r",
+            "full_name": "u/r",
+            "owner": "u",
+            "size": "big",
+            "topics": "python",
+            "permissions": ["push"],
+            "description": None,
+        }
+    )
+    assert facts.github_id == 999
+    assert facts.owner_login == ""
+    assert facts.size_kb == 0
+    assert facts.topics == []
+    assert facts.permissions == {}
+    assert facts.description == ""
+
+
+@pytest.mark.anyio
 async def test_get_progress_builds_shape_and_filters_issues(db_session):
     commits = [
         commit("s1", NOW, "first commit"),

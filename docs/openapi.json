@@ -2145,7 +2145,7 @@
           },
           "source_name": {
             "type": "string",
-            "maxLength": 300,
+            "maxLength": 255,
             "minLength": 1,
             "title": "Source Name"
           },
@@ -2486,7 +2486,7 @@
           },
           "source_name": {
             "type": "string",
-            "maxLength": 300,
+            "maxLength": 255,
             "minLength": 1,
             "title": "Source Name"
           },
@@ -2663,7 +2663,7 @@
           },
           "source_name": {
             "type": "string",
-            "maxLength": 300,
+            "maxLength": 255,
             "minLength": 1,
             "title": "Source Name"
           },

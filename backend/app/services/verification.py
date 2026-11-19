@@ -85,22 +85,40 @@ class RepoFacts:
 
     @classmethod
     def from_repo(cls, repo: dict) -> "RepoFacts":
-        owner = repo.get("owner") or {}
+        """Parse the fields we use, tolerating malformed optional values.
+
+        A 200 response from GitHub can still contain fields of the wrong type
+        (or omit them); this must not raise an unhandled AttributeError or
+        ValueError in the submission path.
+        """
+        owner = repo.get("owner") if isinstance(repo.get("owner"), dict) else {}
+
+        def _int(value) -> int:
+            try:
+                return int(value) if value is not None else 0
+            except (TypeError, ValueError):
+                return 0
+
+        def _str(value) -> str:
+            return value if isinstance(value, str) else ""
+
+        topics = repo.get("topics")
+        permissions = repo.get("permissions")
         return cls(
-            github_id=int(repo.get("id") or 0),
-            owner_login=str(owner.get("login") or repo.get("owner", "")),
+            github_id=_int(repo.get("id")),
+            owner_login=_str(owner.get("login")),
             owner_id=owner.get("id") if isinstance(owner.get("id"), int) else None,
-            owner_type=str(owner.get("type") or ""),
-            name=str(repo.get("name") or ""),
-            full_name=str(repo.get("full_name") or ""),
+            owner_type=_str(owner.get("type")),
+            name=_str(repo.get("name")),
+            full_name=_str(repo.get("full_name")),
             fork=bool(repo.get("fork")),
             archived=bool(repo.get("archived")),
             disabled=bool(repo.get("disabled")),
-            size_kb=int(repo.get("size") or 0),
-            description=str(repo.get("description") or ""),
-            topics=[str(t) for t in (repo.get("topics") or [])],
+            size_kb=_int(repo.get("size")),
+            description=_str(repo.get("description")),
+            topics=[str(t) for t in topics] if isinstance(topics, list) else [],
             language=repo.get("language") if isinstance(repo.get("language"), str) else None,
-            permissions=repo.get("permissions") or {},
+            permissions=permissions if isinstance(permissions, dict) else {},
             created_at=github.repo_created_at(repo),
         )
 
@@ -943,9 +961,14 @@ async def reverify_after_summary_edit(db, project: Project, problem: Problem, us
     db.commit()
 
 
-def needs_review_state(db, project: Project, reason: str) -> None:
-    """Flip a row to needs_review with a recorded reason (used by reports)."""
+def needs_review_state(db, project: Project, reason: str) -> bool:
+    """Flip a row to needs_review with a recorded reason (used by reports).
+
+    Mutates the session only; the caller commits the report and the state
+    transition in one transaction. Returns whether the row changed.
+    """
     if project.verification_status == VERIFICATION_VERIFIED or project.verification_status == VERIFICATION_NEEDS_REVIEW:
         project.verification_status = VERIFICATION_NEEDS_REVIEW
         project.relevance_reason = reason[:_REASON_LIMIT]
-        db.commit()
+        return True
+    return False

@@ -122,6 +122,25 @@ def test_unstar_is_idempotent(client, seeded, starer):
     assert client.delete(f"/api/projects/{project_id}/star").status_code == 204
 
 
+def test_concurrent_star_unique_violation_returns_409(client, seeded, starer, db_session, monkeypatch):
+    """Both requests pass the pre-check; the unique constraint decides the loser."""
+    project_id = seeded["project"].id
+    original_scalar = db_session.scalar
+
+    def hide_existing_star(statement, *args, **kwargs):
+        sql = str(statement)
+        if "FROM project_stars" in sql and "count(" not in sql:
+            return None
+        return original_scalar(statement, *args, **kwargs)
+
+    monkeypatch.setattr(db_session, "scalar", hide_existing_star)
+    assert client.post(f"/api/projects/{project_id}/star").status_code == 201
+    second = client.post(f"/api/projects/{project_id}/star")
+    assert second.status_code == 409
+    assert second.json()["detail"]["code"] == "already_starred"
+    assert db_session.query(ProjectStar).count() == 1
+
+
 def test_starring_requires_login(client, seeded):
     project_id = seeded["project"].id
     response = client.post(f"/api/projects/{project_id}/star")

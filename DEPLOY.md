@@ -108,6 +108,57 @@ created by `create_all`): take a copy, `alembic stamp 0003_advanced_projects`,
 then `alembic upgrade head` on the copy. Only after the copy checks out, repeat
 on the real `app.db`.
 
+## 3c. Destructive migrations 0015 and 0016 (backup required)
+
+Revisions `0015_remove_data_science_field` and `0016_remove_upcoming_fields`
+**permanently delete rows**: all `problems` for the retired fields, then their
+`problem_stars`, submitted `projects`, and those projects' stars and reports.
+The affected fields are data-science, app-dev, cyber-security, devops-cloud
+and blockchain. Downgrade is intentionally a no-op — the deleted rows cannot
+be reconstructed by Alembic.
+
+Before running either revision on a database that may still contain those
+fields:
+
+1. **Take a verified backup** and store it off the database host:
+   `pg_dump -Fc -f manabi-pre-0015.dump $DATABASE_URL`
+2. Record the counts you expect to remove so the deploy can be checked:
+   ```
+   psql $DATABASE_URL -c "SELECT field, COUNT(*) FROM problems GROUP BY field ORDER BY field;"
+   ```
+3. Restore the dump into an isolated database and run `alembic upgrade head`
+   there first. Confirm the kept `web-dev`/`aiml` rows and their projects
+   survive.
+4. Only then run the production deploy. Verify the retired fields have zero
+   rows and that the row counts for the kept fields match the pre-deploy
+   counts minus the expected deletions.
+
+If a deletion was accidental, stop writes and restore the pre-migration dump
+into a new database, then point the app at it. Do not attempt to reverse the
+migration.
+
+### Restore verification
+
+A backup is not evidence of recovery until it has been restored. For every
+release that moves the schema, restore the latest dump into a disposable
+database and check:
+
+```
+createdb manabi_restore_check
+pg_restore --clean --if-exists -d manabi_restore_check manabi-latest.dump
+DATABASE_URL=postgresql://.../manabi_restore_check alembic upgrade head
+psql manabi_restore_check -c "SELECT COUNT(*) FROM users;"
+psql manabi_restore_check -c "SELECT COUNT(*) FROM problems;"
+psql manabi_restore_check -c "SELECT COUNT(*) FROM projects;"
+psql manabi_restore_check -c "SELECT COUNT(*) FROM project_reports;"
+```
+
+Open `/api/health` and `/api/stats` against the restored copy. The project has
+no documented RPO/RTO targets; define them with the operator (the current
+deployment relies on the hosting provider's Postgres backup schedule, which
+must be checked in the provider dashboard). This repository cannot verify the
+provider's backup retention, encryption, or restore time from the application.
+
 ## 4. Start the service
 
 ```
@@ -125,7 +176,7 @@ On Render/Railway a `Procfile` is included (`web: uvicorn app.main:app --host 0.
 4. `curl -I https://<domain>/assets/<asset from dist>` → `200` + correct `content-type`
 5. `curl https://<domain>/api/problems/<known id>` → 200; the response must not
    contain crawler fields (`content_hash`, `crawl_source_key`, `source_status`, …)
-6. `alembic current` → `0006_problem_goal (head)`; log in with GitHub in the browser → redirected home, username in the nav
+6. `alembic current` → `head`; log in with GitHub in the browser → redirected home, username in the nav
 7. Chat dock → ask → reply links point at real catalog problems
 
 ## Rate limits (env-tunable)

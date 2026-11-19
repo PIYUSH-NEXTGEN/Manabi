@@ -212,6 +212,62 @@ def test_callback_rejects_profile_without_github_id(client, monkeypatch):
     assert res.json()["detail"] == "GitHub did not return a user profile"
 
 
+def _callback_with_profile(client, monkeypatch, profile):
+    from app.routers import auth as auth_module
+
+    class ProfileResponse:
+        def json(self):
+            return profile
+
+    class FakeOAuthClient:
+        async def authorize_access_token(self, request):
+            return {"access_token": "token"}
+
+        async def get(self, path, token=None):
+            return ProfileResponse()
+
+    monkeypatch.setattr(auth_module, "get_github_client", lambda: FakeOAuthClient())
+    return client.get(
+        "/api/auth/github/callback", params={"code": "abc", "state": "x"}, follow_redirects=False
+    )
+
+
+@pytest.mark.parametrize(
+    "profile",
+    [
+        [],
+        {"login": "octocat"},
+        {"id": "987654", "login": "octocat"},
+        {"id": True, "login": "octocat"},
+        {"id": -1, "login": "octocat"},
+    ],
+)
+def test_callback_rejects_malformed_profiles(client, db_session, monkeypatch, profile):
+    res = _callback_with_profile(client, monkeypatch, profile)
+    assert res.status_code == 502
+    assert res.json()["detail"] == "GitHub did not return a user profile"
+    assert db_session.query(User).count() == 0
+
+
+def test_callback_sanitizes_profile_strings(client, db_session, monkeypatch):
+    res = _callback_with_profile(
+        client,
+        monkeypatch,
+        {
+            "id": 123456,
+            "login": "  " + "x" * 300,
+            "name": 7,
+            "avatar_url": {"not": "a url"},
+        },
+    )
+    assert res.status_code == 302
+    user = db_session.query(User).filter(User.github_id == 123456).one()
+    assert len(user.username) == 255
+    assert user.username == "x" * 255
+    assert user.name is None
+    assert user.avatar_url is None
+
+
 def test_routes_documented_in_openapi():
     paths = app.openapi()["paths"]
     assert "/api/auth/github/login" in paths

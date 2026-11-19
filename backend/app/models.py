@@ -1,6 +1,6 @@
 from datetime import date, datetime, timezone
 
-from sqlalchemy import JSON, Boolean, Date, DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint, text
+from sqlalchemy import CheckConstraint, JSON, Boolean, Date, DateTime, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db import Base
@@ -62,7 +62,23 @@ class User(Base):
 
 class Problem(Base):
     __tablename__ = "problems"
-    __table_args__ = (UniqueConstraint("source_name", "source_id", name="uq_problem_source"),)
+    __table_args__ = (
+        UniqueConstraint("source_name", "source_id", name="uq_problem_source"),
+        # Review/goal values are enforced below the application too: seed
+        # scripts, admin actions and future workers all write this table.
+        CheckConstraint(
+            "status IN ('published', 'pending_review', 'rejected', 'removed')",
+            name="ck_problems_status",
+        ),
+        CheckConstraint(
+            "goal IS NULL OR goal IN ('resume', 'hackathon', 'learning')",
+            name="ck_problems_goal",
+        ),
+        CheckConstraint(
+            "est_hours >= 1 AND est_hours <= 1000",
+            name="ck_problems_est_hours",
+        ),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
@@ -122,6 +138,14 @@ class Project(Base):
     __tablename__ = "projects"
     __table_args__ = (
         UniqueConstraint("problem_id", "user_id", "repo_owner", "repo_name", name="uq_project_repo"),
+        CheckConstraint(
+            "verification_status IN ('verified', 'needs_review', 'rejected')",
+            name="ck_projects_verification_status",
+        ),
+        CheckConstraint(
+            "ownership_basis IS NULL OR ownership_basis IN ('owner', 'push_access', 'contributor')",
+            name="ck_projects_ownership_basis",
+        ),
         # One GitHub repo (immutable id) may be submitted by a user at most once
         # across everything; null repo_github_id (legacy rows) is exempt.
         Index(

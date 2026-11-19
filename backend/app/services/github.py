@@ -93,7 +93,10 @@ async def _fetch_json(path: str, token: str | None, params: dict | None = None):
     except httpx.HTTPError:
         raise GitHubError(502, "Could not reach GitHub")
     if response.status_code == 200:
-        return response.json()
+        try:
+            return response.json()
+        except ValueError:
+            raise GitHubError(502, "GitHub returned an invalid response")
     if response.status_code == 404:
         raise GitHubError(404, "Not found on GitHub")
     if response.status_code == 403:
@@ -104,6 +107,8 @@ async def _fetch_json(path: str, token: str | None, params: dict | None = None):
 async def get_repo(owner: str, name: str, token: str | None = None) -> dict:
     """Public repo lookup. Raises 404-style GitHubError for missing or private repos."""
     data = await _fetch_json(f"/repos/{owner}/{name}", token)
+    if not isinstance(data, dict):
+        raise GitHubError(502, "GitHub returned an invalid repository response")
     if data.get("private"):
         raise GitHubError(404, "Repository not found or not public")
     return data
@@ -133,6 +138,8 @@ async def fetch_readme_text(owner: str, name: str, token: str | None = None, max
     try:
         data = await _fetch_json(f"/repos/{owner}/{name}/readme", token)
     except (httpx.HTTPError, GitHubError):
+        return None
+    if not isinstance(data, dict):
         return None
     content = data.get("content")
     if not content or not isinstance(content, str):
@@ -183,7 +190,10 @@ def _status_for(commit_count: int, last_commit_at: datetime | None) -> str:
 
 
 async def fetch_commits(owner: str, name: str, token: str | None) -> list[dict]:
-    return await _fetch_json(f"/repos/{owner}/{name}/commits", token, params={"per_page": 100})
+    data = await _fetch_json(f"/repos/{owner}/{name}/commits", token, params={"per_page": 100})
+    if not isinstance(data, list) or any(not isinstance(item, dict) for item in data):
+        raise GitHubError(502, "GitHub returned an invalid commits response")
+    return data
 
 
 async def _fetch_readme(owner: str, name: str, token: str | None) -> bool:
@@ -208,16 +218,28 @@ async def get_progress(owner: str, name: str, token: str | None = None) -> dict 
         return None
     if isinstance(commits, Exception):
         return None
-    dates = [d for c in commits for d in [_commit_date(c.get("commit", {}).get("committer", {}).get("date", ""))] if d]
+    dates = [
+        d
+        for commit in commits
+        if isinstance(commit.get("commit"), dict)
+        and isinstance(commit["commit"].get("committer"), dict)
+        for d in [
+            _commit_date(str(commit["commit"]["committer"].get("date", "")))
+        ]
+        if d
+    ]
     last_commit_at = max(dates) if dates else None
 
     recent = []
     for commit in commits[:5]:
-        date = _commit_date(commit.get("commit", {}).get("committer", {}).get("date", ""))
+        details = commit.get("commit") if isinstance(commit.get("commit"), dict) else {}
+        committer = details.get("committer") if isinstance(details.get("committer"), dict) else {}
+        date = _commit_date(str(committer.get("date", "")))
+        message = details.get("message")
         recent.append(
             {
-                "sha": commit.get("sha"),
-                "message": (commit.get("commit", {}).get("message") or "")[:200],
+                "sha": commit.get("sha") if isinstance(commit.get("sha"), str) else None,
+                "message": message[:200] if isinstance(message, str) else "",
                 "date": date.isoformat() if date else None,
             }
         )
@@ -227,9 +249,14 @@ async def get_progress(owner: str, name: str, token: str | None = None) -> dict 
         priority = []
         rest = []
         for issue in issues:
-            if "pull_request" in issue:
+            if not isinstance(issue, dict) or "pull_request" in issue:
                 continue
-            labels = {label.get("name", "") for label in issue.get("labels", [])}
+            raw_labels = issue.get("labels")
+            labels = {
+                label.get("name", "")
+                for label in raw_labels
+                if isinstance(label, dict) and isinstance(label.get("name"), str)
+            } if isinstance(raw_labels, list) else set()
             entry = {
                 "number": issue.get("number"),
                 "title": issue.get("title"),
@@ -260,8 +287,17 @@ async def get_user_signals(token: str | None) -> dict | None:
         return None
     if not isinstance(repos, list):
         return None
-    languages = Counter(repo.get("language") for repo in repos if repo.get("language"))
-    sample = repos[:SIGNAL_TOPIC_SAMPLE]
+    repos = [repo for repo in repos if isinstance(repo, dict)]
+    languages = Counter(
+        repo["language"] for repo in repos if isinstance(repo.get("language"), str)
+    )
+    sample = [
+        repo
+        for repo in repos[:SIGNAL_TOPIC_SAMPLE]
+        if isinstance(repo.get("owner"), dict)
+        and isinstance(repo["owner"].get("login"), str)
+        and isinstance(repo.get("name"), str)
+    ]
     topic_lists = await asyncio.gather(
         *[_fetch_repo_topics(repo["owner"]["login"], repo["name"], token) for repo in sample],
         return_exceptions=True,
@@ -278,7 +314,8 @@ async def _fetch_repo_topics(owner: str, name: str, token: str | None) -> list[s
         data = await _fetch_json(f"/repos/{owner}/{name}/topics", token)
     except (httpx.HTTPError, GitHubError):
         return []
-    return [str(item) for item in data.get("names", [])]
+    names = data.get("names") if isinstance(data, dict) else None
+    return [str(item) for item in names] if isinstance(names, list) else []
 
 
 HEATMAP_DAYS = 91
@@ -310,10 +347,10 @@ async def fetch_contribution_histogram(username: str, token: str | None) -> list
     daily: Counter[str] = Counter()
     for events in pages:
         for event in events:
-            if event.get("type") != "PushEvent":
+            if not isinstance(event, dict) or event.get("type") != "PushEvent":
                 continue
             created = event.get("created_at")
-            if not created:
+            if not isinstance(created, str) or not created:
                 continue
             try:
                 at = datetime.fromisoformat(created.replace("Z", "+00:00"))

@@ -9,6 +9,7 @@ from app.db import Base, get_db
 from app.deps import get_current_user
 from app.main import app
 from app.models import Problem, Project, ProjectReport, User
+from app.services import verification
 
 
 @pytest.fixture(autouse=True)
@@ -128,6 +129,62 @@ def test_report_duplicate_returns_409(client, seeded, reporter):
     )
     assert res.status_code == 409
     assert res.json()["detail"]["code"] == "already_reported"
+
+
+def test_concurrent_report_unique_violation_returns_409(client, seeded, reporter, db_session, monkeypatch):
+    """Both requests pass the duplicate pre-check; the DB constraint wins."""
+    project_id = seeded["project"].id
+    original_scalar = db_session.scalar
+
+    def hide_existing_report(statement, *args, **kwargs):
+        sql = str(statement)
+        if "FROM project_reports" in sql and "count(" not in sql:
+            return None
+        return original_scalar(statement, *args, **kwargs)
+
+    monkeypatch.setattr(db_session, "scalar", hide_existing_report)
+    assert client.post(f"/api/projects/{project_id}/report", json={"reason": "first"}).status_code == 201
+    second = client.post(f"/api/projects/{project_id}/report", json={"reason": "second"})
+    assert second.status_code == 409
+    assert second.json()["detail"]["code"] == "already_reported"
+    assert db_session.query(ProjectReport).count() == 1
+
+
+def test_report_threshold_failure_leaves_no_partial_report(client, seeded, db_session, monkeypatch):
+    """A failure while flipping the project must not commit the new report alone."""
+    others = [
+        User(github_id=41 + i, username=f"other{i}", name=f"O{i}", avatar_url=None)
+        for i in range(2)
+    ]
+    db_session.add_all(others)
+    db_session.commit()
+    for user in others:
+        db_session.add(
+            ProjectReport(
+                project_id=seeded["project"].id,
+                reporter_user_id=user.id,
+                reason="existing report",
+            )
+        )
+    db_session.commit()
+
+    reporter = seeded["reporter"]
+    app.dependency_overrides[get_current_user] = lambda: reporter
+
+    def fail_transition(*args, **kwargs):
+        raise RuntimeError("simulated review-state failure")
+
+    monkeypatch.setattr(verification, "needs_review_state", fail_transition)
+    with pytest.raises(RuntimeError, match="simulated review-state failure"):
+        client.post(
+            f"/api/projects/{seeded['project'].id}/report",
+            json={"reason": "the third report"},
+        )
+
+    db_session.rollback()
+    assert db_session.query(ProjectReport).count() == 2
+    project = db_session.query(Project).filter_by(id=seeded["project"].id).one()
+    assert project.verification_status == "verified"
 
 
 def test_report_rate_limited_after_quota(client, seeded, reporter, db_session):

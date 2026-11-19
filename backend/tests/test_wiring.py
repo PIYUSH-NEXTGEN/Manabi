@@ -164,6 +164,9 @@ def test_problem_create_rejects_oversize_fields(client, db_session, user):
     assert res.status_code == 422
     res = client.post("/api/problems", json=draft_card_factory(tech_tags=["x" * 41]))
     assert res.status_code == 422
+    # source_name maps to String(255): reject instead of letting Postgres 500.
+    res = client.post("/api/problems", json=draft_card_factory(source_name="x" * 256))
+    assert res.status_code == 422
 
 
 def test_problem_create_rejects_whitespace_only_required_text(client, db_session, user):

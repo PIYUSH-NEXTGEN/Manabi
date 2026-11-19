@@ -408,7 +408,16 @@ def star_problem(problem_id: int, user: CurrentUser, db: DB):
             detail={"code": "already_starred", "message": "You already starred this problem."},
         )
     db.add(ProblemStar(problem_id=problem.id, user_id=user.id))
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # The unique constraint arbitrates concurrent double-stars; return the
+        # same 409 as a sequential duplicate, never a raw 500.
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "already_starred", "message": "You already starred this problem."},
+        )
     return {"ok": True, "star_count": _problem_star_count(db, problem.id)}
 
 

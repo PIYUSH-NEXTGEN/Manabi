@@ -241,6 +241,62 @@ def test_upgrade_is_idempotent(sqlite_url):
     upgrade_to_head(sqlite_url)  # second run must not create duplicates
 
 
+def test_0017_downgrade_removes_constraints(sqlite_url):
+    cfg = alembic_config(sqlite_url)
+    command.upgrade(cfg, "head")
+    command.downgrade(cfg, "0016_remove_upcoming_fields")
+    engine = create_engine(sqlite_url)
+    with engine.begin() as conn:
+        assert conn.scalar(text("SELECT COUNT(*) FROM problems")) == 0
+        conn.execute(text("""INSERT INTO problems
+            (title, summary, who_affected, why_matters, field, domain, difficulty,
+             est_hours, tech_tags, datasets, approaches, source_name, original_text,
+             ai_fields, status, origin, created_at)
+            VALUES ('t','s','w','y','aiml','other','beginner', 0, '[]', '[]', '[]',
+                    'src','v','[]','legacy-status','manual','2026-01-01 00:00:00')"""))
+        conn.execute(text("DELETE FROM problems"))
+    engine.dispose()
+    command.upgrade(cfg, "head")
+    engine = create_engine(sqlite_url)
+    with engine.connect() as conn:
+        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0017_integrity_constraints"
+    engine.dispose()
+
+
+def test_0017_adds_integrity_constraints_and_rejects_invalid_values(sqlite_url):
+    cfg = alembic_config(sqlite_url)
+    _seed_baseline_rows(cfg, sqlite_url)
+    command.upgrade(cfg, "head")
+    engine = create_engine(sqlite_url)
+    with engine.begin() as conn:
+        with pytest.raises(Exception):
+            conn.execute(text("UPDATE problems SET status = 'not-a-status'"))
+        with pytest.raises(Exception):
+            conn.execute(text("UPDATE problems SET est_hours = 0"))
+        with pytest.raises(Exception):
+            conn.execute(text("UPDATE projects SET verification_status = 'maybe'"))
+    engine.dispose()
+
+
+def test_0017_refuses_incompatible_rows_without_changing_them(sqlite_url):
+    cfg = alembic_config(sqlite_url)
+    _seed_baseline_rows(cfg, sqlite_url)
+    command.upgrade(cfg, "0016_remove_upcoming_fields")
+    engine = create_engine(sqlite_url)
+    with engine.begin() as conn:
+        conn.execute(text("UPDATE problems SET status = 'legacy-status'"))
+    engine.dispose()
+
+    with pytest.raises(RuntimeError, match="incompatible"):
+        command.upgrade(cfg, "head")
+
+    engine = create_engine(sqlite_url)
+    with engine.connect() as conn:
+        assert conn.scalar(text("SELECT status FROM problems LIMIT 1")) == "legacy-status"
+        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0016_remove_upcoming_fields"
+    engine.dispose()
+
+
 def test_upgrade_to_head_keeps_problem_rows_visible(sqlite_url):
     cfg = alembic_config(sqlite_url)
     _seed_baseline_rows(cfg, sqlite_url)

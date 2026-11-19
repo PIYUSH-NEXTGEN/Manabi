@@ -110,10 +110,20 @@ async def main(apply: bool, limit: int | None) -> None:
     finally:
         db.close()
 
-    with open(REPORT_PATH, "w", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        writer.writerow(["project_id", "user_id", "token", "old_status", "new_status", "reason", "action"])
-        writer.writerows(results)
+    # Write beside the destination and replace atomically: an interrupted run
+    # must never leave a truncated report that looks complete.
+    tmp_path = f"{REPORT_PATH}.tmp"
+    try:
+        with open(tmp_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["project_id", "user_id", "token", "old_status", "new_status", "reason", "action"])
+            writer.writerows(results)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, REPORT_PATH)
+    finally:
+        if os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
     mode = "APPLIED" if apply else "DRY RUN"
     print(f"{mode}: {len(results)} projects, report: {REPORT_PATH}")
@@ -126,4 +136,6 @@ if __name__ == "__main__":
     parser.add_argument("--apply", action="store_true", help="write changes (default is dry run)")
     parser.add_argument("--limit", type=int, default=None, help="max projects to process")
     args = parser.parse_args()
+    if args.limit is not None and args.limit < 0:
+        parser.error("--limit must be zero or greater")
     asyncio.run(main(args.apply, args.limit))

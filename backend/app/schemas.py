@@ -13,6 +13,7 @@ GoalEnum = Literal["resume", "hackathon", "learning"]
 
 
 MAX_TITLE = 300
+MAX_SOURCE_NAME = 255  # matches problems.source_name's String(255)
 MAX_SUMMARY = 8000
 MAX_SHORT = 2000
 MAX_TAG = 40
@@ -117,7 +118,7 @@ class ProblemCard(BaseModel):
     tech_tags: list[_problem_tag_item] = Field(max_length=25)
     datasets: list[dict] = Field(max_length=15)
     approaches: list[Annotated[str, Field(min_length=1, max_length=800)]] = Field(max_length=8)
-    source_name: str = Field(min_length=1, max_length=MAX_TITLE)
+    source_name: str = Field(min_length=1, max_length=MAX_SOURCE_NAME)
     source_id: str | None = Field(default=None, max_length=100)
     source_url: str | None = Field(default=None, max_length=MAX_DATASET_URL)
     source_note: str | None = Field(default=None, max_length=MAX_TITLE)

@@ -1,7 +1,9 @@
+import logging
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, HTTPException, Query, Request
 
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload, selectinload
 
 from app import schemas
@@ -22,6 +24,7 @@ from app.services.ratelimit import ADMIN_LIMITER, RateLimiter, human_wait, rate_
 from app.services.verification import SubmissionError
 
 router = APIRouter(tags=["projects"])
+logger = logging.getLogger(__name__)
 
 CACHE_TTL = timedelta(minutes=10)
 
@@ -173,6 +176,7 @@ async def get_project_progress(
                 if problem is not None:
                     await verification.auto_reverify(db, project, problem, user)
         except Exception:  # noqa: BLE001 - verification must never break progress
+            logger.exception("verification side work failed during progress refresh (project_id=%s)", project.id)
             db.rollback()
     return schemas.Progress.model_validate(progress)
 
@@ -241,6 +245,7 @@ async def edit_project(project_id: int, body: schemas.ProjectPatch, user: Curren
         db.rollback()
         raise _error(err)
     except Exception:  # noqa: BLE001 - verification must never break the PATCH
+        logger.exception("verification side work failed after project edit (project_id=%s)", project.id)
         db.rollback()
     db.refresh(project)
     return project_out_safely(project, include_private=True, viewer=user)
@@ -281,11 +286,29 @@ def report_project(project_id: int, body: schemas.ReportIn, user: CurrentUser, d
         )
     report = ProjectReport(project_id=project.id, reporter_user_id=user.id, reason=reason)
     db.add(report)
-    db.commit()
-    count = db.scalar(select(func.count(ProjectReport.id)).where(ProjectReport.project_id == project.id)) or 0
-    settings = get_settings()
-    if count >= settings.REPORTS_BEFORE_REVIEW:
-        verification.needs_review_state(db, project, "Reported by users")
+    try:
+        # Flush the unique (project, reporter) insert before counting: a
+        # concurrent duplicate must not add a row, and the count + review
+        # transition then commit together with the report itself.
+        db.flush()
+        count = (
+            db.scalar(
+                select(func.count(ProjectReport.id)).where(
+                    ProjectReport.project_id == project.id
+                )
+            )
+            or 0
+        )
+        settings = get_settings()
+        if count >= settings.REPORTS_BEFORE_REVIEW:
+            verification.needs_review_state(db, project, "Reported by users")
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "already_reported", "message": "You already reported this project."},
+        )
     return {"ok": True, "report_count": int(count)}
 
 
@@ -317,7 +340,17 @@ def star_project(project_id: int, user: CurrentUser, db: DB):
             status_code=409, detail={"code": "already_starred", "message": "You already starred this project."}
         )
     db.add(ProjectStar(project_id=project.id, user_id=user.id))
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Two concurrent requests can both pass the existence pre-check; the
+        # unique constraint is the real arbiter, and the loser gets the same
+        # 409 as a sequential duplicate instead of a 500.
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "already_starred", "message": "You already starred this project."},
+        )
     return {"ok": True, "star_count": _star_count(db, project.id)}
 
 
