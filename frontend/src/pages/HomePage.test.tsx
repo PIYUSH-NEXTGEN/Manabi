@@ -55,6 +55,27 @@ describe('HomePage', () => {
     10000,
   );
 
+  it(
+    'pauses the brief carousel while keyboard focus is inside it',
+    async () => {
+      renderWithProviders(<HomePage />, { route: '/' });
+
+      const showcase = await screen.findByRole('figure');
+      const counter = await within(showcase).findByText(/\d\d \/ 03/);
+      const before = counter.textContent;
+      const indicator = within(showcase).getAllByRole('button', {
+        name: /Show brief/,
+      })[0];
+      indicator.focus();
+      expect(indicator).toHaveFocus();
+
+      await new Promise((resolve) => window.setTimeout(resolve, 3400));
+
+      expect(within(showcase).getByText(/\d\d \/ 03/).textContent).toBe(before);
+    },
+    10000,
+  );
+
   it('shows the submission rules without the animated console', async () => {
     renderWithProviders(<HomePage />, { route: '/' });
 

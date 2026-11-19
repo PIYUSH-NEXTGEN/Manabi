@@ -116,7 +116,7 @@ function FieldLabel({ label, meta }: { label: string; meta?: string }) {
         {label}
       </span>
       {meta ? (
-        <span className="font-mono text-label font-bold uppercase tabular-nums tracking-[0.14em] text-muted/80">
+        <span className="font-mono text-label font-bold uppercase tabular-nums tracking-[0.14em] text-muted">
           {meta}
         </span>
       ) : null}
@@ -172,7 +172,7 @@ function GateRow({
       <span
         className={cx(
           'ml-auto hidden font-mono text-label uppercase tracking-[0.12em] transition-colors duration-300 sm:inline',
-          state === 'pass' ? 'text-ink-soft' : 'text-muted/60',
+          state === 'pass' ? 'text-ink-soft' : 'text-muted',
         )}
       >
         <motion.span

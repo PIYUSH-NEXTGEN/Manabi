@@ -140,6 +140,12 @@ function BriefCarousel() {
       className="relative mx-auto w-full max-w-[560px]"
       onMouseEnter={() => setHeld(true)}
       onMouseLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setHeld(false);
+        }
+      }}
     >
       <div
         aria-hidden
@@ -278,7 +284,7 @@ function BriefCarousel() {
                       onClick={() => setIndex(itemIndex)}
                       aria-label={`Show brief ${pad(itemIndex + 1)}: ${item.title}`}
                       aria-pressed={isActive}
-                      className="group/tick relative flex-1 pt-1.5"
+                      className="group/tick relative flex-1 py-2.5"
                     >
                       <span
                         className={cx(
@@ -288,12 +294,12 @@ function BriefCarousel() {
                       />
                       {isActive ? (
                         paused || reduced ? (
-                          <span className="absolute inset-x-0 top-1.5 h-1 rounded-full bg-ink" />
+                          <span className="absolute inset-x-0 top-2.5 h-1 rounded-full bg-ink" />
                         ) : (
                           <motion.span
                             key={item.id}
                             aria-hidden
-                            className="absolute left-0 top-1.5 h-1 rounded-full bg-ink"
+                            className="absolute left-0 top-2.5 h-1 rounded-full bg-ink"
                             initial={{ width: '0%' }}
                             animate={{ width: '100%' }}
                             transition={{ duration: CYCLE_MS / 1000, ease: 'linear' }}

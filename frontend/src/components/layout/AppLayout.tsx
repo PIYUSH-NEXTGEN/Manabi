@@ -26,7 +26,7 @@ export function AppLayout() {
           Skip to content
         </a>
         <Nav overlay={overlayNav} />
-        <div className="flex-1" id="content">
+        <div className="flex-1 outline-none" id="content" tabIndex={-1}>
           <Outlet />
         </div>
         <div className="relative">

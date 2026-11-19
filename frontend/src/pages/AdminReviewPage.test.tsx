@@ -81,6 +81,53 @@ describe('AdminReviewPage', () => {
     await waitFor(() => expect(approved).toBe(true));
   });
 
+  it('sends only one moderation action when approve is clicked twice', async () => {
+    let calls = 0;
+    let release!: (response: Response) => void;
+    const gate = new Promise<Response>((resolve) => {
+      release = resolve;
+    });
+    server.use(
+      http.get('*/api/auth/me', () => HttpResponse.json(ADMIN)),
+      http.get('*/api/admin/submissions', () =>
+        HttpResponse.json({ items: [PENDING_SUBMISSION], total: 1 }),
+      ),
+      http.post('*/api/admin/submissions/42/approve', async () => {
+        calls += 1;
+        await gate;
+        return HttpResponse.json({
+          ok: true,
+          project_id: 42,
+          verification_status: 'verified',
+        });
+      }),
+    );
+
+    renderPage();
+
+    const approve = await screen.findByRole('button', { name: 'Approve' });
+    fireEvent.click(approve);
+    fireEvent.click(approve);
+
+    await waitFor(() => expect(calls).toBe(1));
+    expect(
+      screen.getByRole('button', { name: 'Approving…' }),
+    ).toBeDisabled();
+
+    release(
+      HttpResponse.json({
+        ok: true,
+        project_id: 42,
+        verification_status: 'verified',
+      }),
+    );
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('button', { name: 'Approving…' }),
+      ).not.toBeInTheDocument(),
+    );
+  });
+
   it('rejects from the needs_review queue', async () => {
     let rejected = false;
     server.use(
@@ -120,8 +167,14 @@ describe('AdminReviewPage', () => {
 
     renderPage();
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Rejected' }));
+    const needsReview = await screen.findByRole('button', { name: 'Needs review' });
+    const rejectedFilter = screen.getByRole('button', { name: 'Rejected' });
+    expect(needsReview).toHaveAttribute('aria-pressed', 'true');
+    expect(rejectedFilter).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(rejectedFilter);
     await waitFor(() => expect(askedForRejected).toBe(true));
+    expect(rejectedFilter).toHaveAttribute('aria-pressed', 'true');
     expect(await screen.findByText(/Nothing in this queue/i)).toBeInTheDocument();
   });
 

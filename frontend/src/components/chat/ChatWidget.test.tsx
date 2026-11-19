@@ -57,16 +57,43 @@ describe('ChatWidget', () => {
     const user = userEvent.setup();
     renderWithProviders(<ChatWidget />);
 
+    const trigger = screen.getByRole('button', { name: 'Open the MANABI chat' });
     expect(screen.queryByLabelText('MANABI chat')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Open the MANABI chat' }));
+    await user.click(trigger);
     expect(screen.getByLabelText('MANABI chat')).toBeInTheDocument();
     expect(
       screen.getByText(/only ever points at real problems already in the index/i),
     ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText(/What do you want to build/i)).toHaveFocus(),
+    );
 
     await user.click(screen.getByRole('button', { name: 'Close the chat' }));
     expect(screen.queryByLabelText('MANABI chat')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Open the MANABI chat' }),
+      ).toHaveFocus(),
+    );
+  });
+
+  it('closes on Escape and restores focus to the dock', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<ChatWidget />);
+
+    const trigger = screen.getByRole('button', { name: 'Open the MANABI chat' });
+    await user.click(trigger);
+    expect(screen.getByRole('button', { name: 'Close the chat' })).toBeInTheDocument();
+
+    await user.keyboard('{Escape}');
+
+    expect(screen.queryByLabelText('MANABI chat')).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.getByRole('button', { name: 'Open the MANABI chat' }),
+      ).toHaveFocus(),
+    );
   });
 
   it('opens from the project board AI guide button', async () => {

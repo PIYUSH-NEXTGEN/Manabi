@@ -48,13 +48,15 @@ describe('SubmitProjectPanel', () => {
     );
     renderPanel();
 
-    await screen.findByLabelText(REPO_LABEL);
-    await user.type(screen.getByLabelText(REPO_LABEL), 'https://gitlab.com/owner/name');
+    const repoInput = await screen.findByLabelText(REPO_LABEL);
+    await user.type(repoInput, 'https://gitlab.com/owner/name');
     await user.click(screen.getByRole('button', { name: 'Submit project' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Use a GitHub repo URL like https://github.com/owner/name',
     );
+    expect(repoInput).toHaveAttribute('aria-invalid', 'true');
+    expect(repoInput).toHaveAttribute('aria-describedby');
     await waitFor(() => expect(networkCalled).toBe(false));
   });
 
@@ -72,12 +74,15 @@ describe('SubmitProjectPanel', () => {
 
     await screen.findByLabelText(REPO_LABEL);
     await user.type(screen.getByLabelText(REPO_LABEL), 'https://github.com/owner/name');
-    await user.type(screen.getByLabelText(/Deployed link/i), 'not-a-url');
+    const demoInput = screen.getByLabelText(/Deployed link/i);
+    await user.type(demoInput, 'not-a-url');
     await user.click(screen.getByRole('button', { name: 'Submit project' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'The deployed link must start with http:// or https://',
     );
+    expect(demoInput).toHaveAttribute('aria-invalid', 'true');
+    expect(demoInput).toHaveAttribute('aria-describedby');
     await waitFor(() => expect(networkCalled).toBe(false));
   });
 

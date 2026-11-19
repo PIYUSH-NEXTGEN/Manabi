@@ -1033,6 +1033,7 @@ body {
     scroll-behavior: auto;
   }
 
+  body,
   .press,
   .field {
     transition: none;

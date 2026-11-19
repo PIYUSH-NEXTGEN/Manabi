@@ -209,7 +209,7 @@ export function ProblemBoardPage() {
         </section>
 
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-muted">
+          <p className="text-sm text-muted" role="status">
             {board.data ? `${total} projects in the index` : 'Counting…'}
           </p>
           {hasFilters ? (
@@ -230,7 +230,7 @@ export function ProblemBoardPage() {
         ) : null}
 
         {board.isError && !board.isPlaceholderData && !board.data ? (
-          <section className="mt-6 border-y border-line py-6">
+          <section role="alert" className="mt-6 border-y border-line py-6">
             <p className="max-w-2xl text-body leading-relaxed text-ink-soft">
               The board could not be loaded. That is almost certainly a backend
               or network problem and it will not fix itself by refreshing
@@ -249,7 +249,7 @@ export function ProblemBoardPage() {
         {board.data &&
         problems.length === 0 &&
         (!goal ? hasFilters : true) ? (
-          <section className="mt-6 border-y border-line py-6">
+          <section role="status" className="mt-6 border-y border-line py-6">
             {goal ? (
               <p className="text-body leading-relaxed text-ink-soft">
                 No projects in this track yet. New briefs land here as soon as

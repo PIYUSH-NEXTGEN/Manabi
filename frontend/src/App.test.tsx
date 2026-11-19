@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { server } from '@/api/mocks/server';
@@ -43,6 +43,15 @@ describe('Route table (no dead links)', () => {
         { timeout: 15000 },
       ),
     ).toBeInTheDocument();
+  }, 20000);
+
+  it('sets a route-specific document title', async () => {
+    window.history.pushState({}, '', '/about');
+
+    render(<App />);
+
+    await screen.findByRole('heading', { name: 'About MANABI', level: 1 }, { timeout: 15000 });
+    await waitFor(() => expect(document.title).toBe('About · MANABI'));
   }, 20000);
 
   it('/problems renders the board', async () => {

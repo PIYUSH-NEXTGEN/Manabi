@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button, Skeleton, Tag, useToast } from '@/design/primitives';
 import {
@@ -33,6 +33,11 @@ export function AdminReviewPage() {
   const submissions = useAdminSubmissions(statusFilter);
   const approve = useApproveSubmission();
   const reject = useRejectSubmission();
+  const [pendingAction, setPendingAction] = useState<{
+    id: number;
+    kind: 'approve' | 'reject';
+  } | null>(null);
+  const pendingRef = useRef(false);
 
   if (me.isPending) {
     return (
@@ -56,24 +61,40 @@ export function AdminReviewPage() {
     );
   }
 
+  function beginAction(id: number, kind: 'approve' | 'reject') {
+    if (pendingRef.current) return false;
+    pendingRef.current = true;
+    setPendingAction({ id, kind });
+    return true;
+  }
+
+  function finishAction() {
+    pendingRef.current = false;
+    setPendingAction(null);
+  }
+
   function runApprove(id: number) {
+    if (!beginAction(id, 'approve')) return;
     approve.mutate(
       { id },
       {
         onSuccess: () => toast('Submission verified.'),
         onError: (error) =>
           toast(error instanceof ApiError ? error.detail : error.message, 'error'),
+        onSettled: finishAction,
       },
     );
   }
 
   function runReject(id: number) {
+    if (!beginAction(id, 'reject')) return;
     reject.mutate(
       { id },
       {
         onSuccess: () => toast('Submission rejected.'),
         onError: (error) =>
           toast(error instanceof ApiError ? error.detail : error.message, 'error'),
+        onSettled: finishAction,
       },
     );
   }
@@ -94,6 +115,7 @@ export function AdminReviewPage() {
           <button
             key={filter.key}
             type="button"
+            aria-pressed={statusFilter === filter.key}
             onClick={() => setStatusFilter(filter.key)}
             className={cx(
               buttonClass,
@@ -184,16 +206,29 @@ export function AdminReviewPage() {
                 ) : null}
 
                 {statusFilter === 'needs_review' ? (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Button onClick={() => runApprove(submission.id)}>
-                      Approve
+                  <div
+                    className="mt-4 flex flex-wrap gap-2"
+                    aria-busy={pendingAction?.id === submission.id}
+                  >
+                    <Button
+                      onClick={() => runApprove(submission.id)}
+                      disabled={pendingAction != null}
+                    >
+                      {pendingAction?.id === submission.id &&
+                      pendingAction.kind === 'approve'
+                        ? 'Approving…'
+                        : 'Approve'}
                     </Button>
                     <Button
                       variant="secondary"
                       className="text-danger hover:border-danger/40 hover:text-danger"
                       onClick={() => runReject(submission.id)}
+                      disabled={pendingAction != null}
                     >
-                      Reject
+                      {pendingAction?.id === submission.id &&
+                      pendingAction.kind === 'reject'
+                        ? 'Rejecting…'
+                        : 'Reject'}
                     </Button>
                   </div>
                 ) : null}

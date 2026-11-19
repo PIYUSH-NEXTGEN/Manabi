@@ -124,7 +124,7 @@ export function BuildInPublic() {
                   <h3 className="font-mono text-label font-bold uppercase tracking-[0.16em] text-ink/70">
                     What you need to submit
                   </h3>
-                  <span className="font-mono text-label font-bold uppercase tracking-[0.14em] text-ink/40">
+                  <span className="font-mono text-label font-bold uppercase tracking-[0.14em] text-ink/60">
                     4 requirements
                   </span>
                 </div>
@@ -162,7 +162,7 @@ export function BuildInPublic() {
                   <h3 className="font-mono text-label font-bold uppercase tracking-[0.16em] text-ink/70">
                     What happens next
                   </h3>
-                  <span className="font-mono text-label font-bold uppercase tracking-[0.14em] text-ink/40">
+                  <span className="font-mono text-label font-bold uppercase tracking-[0.14em] text-ink/60">
                     Same for everyone
                   </span>
                 </div>

@@ -85,7 +85,8 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
   const [summary, setSummary] = useState('');
   const [demoUrl, setDemoUrl] = useState('');
   const [openForContributors, setOpenForContributors] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [repoError, setRepoError] = useState<string | null>(null);
+  const [demoError, setDemoError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitRetryAfter, setSubmitRetryAfter] = useState<number | null>(null);
   const [submitReasons, setSubmitReasons] = useState<string[]>([]);
@@ -137,6 +138,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
 
   function handleRepoUrlChange(event: ChangeEvent<HTMLInputElement>) {
     setRepoUrl(event.target.value);
+    if (repoError) setRepoError(null);
   }
 
   function handleSummaryChange(event: ChangeEvent<HTMLTextAreaElement>) {
@@ -145,27 +147,29 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
 
   function handleDemoUrlChange(event: ChangeEvent<HTMLInputElement>) {
     setDemoUrl(event.target.value);
+    if (demoError) setDemoError(null);
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitError(null);
     setSubmitReasons([]);
+    setRepoError(null);
+    setDemoError(null);
 
     const normalized = stripGitSuffix(
       repoUrl.trim().replace(/\/+$/, ''),
     );
     if (!GITHUB_REPO_URL_PATTERN.test(normalized)) {
-      setValidationError(invalidReason);
+      setRepoError(invalidReason);
       return;
     }
     const demo = demoUrl.trim();
     if (demo && !/^https?:\/\/\S+$/i.test(demo)) {
-      setValidationError('The deployed link must start with http:// or https://');
+      setDemoError('The deployed link must start with http:// or https://');
       return;
     }
 
-    setValidationError(null);
     setSubmitError(null);
     setSubmitRetryAfter(null);
     submit.mutate(
@@ -181,6 +185,8 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           setRepoUrl('');
           setSummary('');
           setDemoUrl('');
+          setRepoError(null);
+          setDemoError(null);
           setOpenForContributors(false);
           toast('Submission received.');
         },
@@ -237,9 +243,11 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
         <Input
           label="GitHub repo URL"
           type="url"
+          required
           placeholder="https://github.com/owner/name"
           value={repoUrl}
           onChange={handleRepoUrlChange}
+          error={repoError ?? undefined}
         />
         <label
           htmlFor="solution-summary"
@@ -249,7 +257,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           <span
             className={cx(
               'normal-case tracking-normal',
-              summary.trim().length > SOLUTION_SUMMARY_MAX ? 'text-danger' : 'text-ink/40',
+              summary.trim().length > SOLUTION_SUMMARY_MAX ? 'text-danger' : 'text-muted',
             )}
           >
             {summary.trim().length}/{SOLUTION_SUMMARY_MAX}
@@ -269,6 +277,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           placeholder="https://your-project.example.com"
           value={demoUrl}
           onChange={handleDemoUrlChange}
+          error={demoError ?? undefined}
         />
         <label className="flex items-center gap-2 text-body">
           <input
@@ -279,14 +288,6 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           />
           Open for contributors
         </label>
-        {validationError ? (
-          <p
-            role="alert"
-            className="font-mono text-label font-bold uppercase tracking-widest text-danger"
-          >
-            {validationError}
-          </p>
-        ) : null}
         {submitError ? (
           <div
             role="alert"

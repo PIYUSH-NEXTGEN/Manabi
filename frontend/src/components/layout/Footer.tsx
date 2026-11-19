@@ -69,7 +69,7 @@ export function Footer() {
         className="pointer-events-none absolute -right-24 bottom-0 size-[22rem] rounded-full bg-lime/20 blur-3xl dark:bg-lime/5"
       />
 
-      <div className="relative mx-auto w-full max-w-[1280px] px-4 pb-6 pt-10 sm:px-6 sm:pt-14">
+      <div className="relative mx-auto w-full max-w-[1280px] px-4 pb-24 pt-10 sm:px-6 sm:pt-14">
         <motion.div
           variants={reveal}
           initial="hidden"
@@ -205,7 +205,7 @@ export function Footer() {
                 Real problems · public builds · open source
               </p>
 
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 font-mono text-label font-bold uppercase tracking-[0.14em] text-muted">
                 <Link to="/privacy" className="transition-colors hover:text-ink">
                   Privacy
                 </Link>

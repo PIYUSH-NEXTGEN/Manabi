@@ -132,10 +132,16 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
         rows={2}
         maxLength={300}
         placeholder="Reports go to a maintainer, not to the repo owner."
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? 'report-reason-error' : undefined}
         className="field mt-2 w-[min(420px,100%)]"
       />
       {error ? (
-        <p role="alert" className="mt-2 font-mono text-label font-bold uppercase tracking-widest text-danger">
+        <p
+          id="report-reason-error"
+          role="alert"
+          className="mt-2 font-mono text-label font-bold uppercase tracking-widest text-danger"
+        >
           {error}
         </p>
       ) : null}

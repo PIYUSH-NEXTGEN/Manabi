@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MotionConfig } from 'motion/react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { RequireAuth } from '@/components/auth/RequireAuth';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
@@ -33,9 +33,11 @@ const SponsorsPage = lazy(() =>
 const HomePage = lazy(() =>
   import('@/pages/HomePage').then((m) => ({ default: m.HomePage })),
 );
-const KitPage = lazy(() =>
-  import('@/pages/KitPage').then((m) => ({ default: m.KitPage })),
-);
+// The design-system page contains demo controls and is not part of the
+// product. It stays available in development and tests only.
+const KitPage = import.meta.env.DEV
+  ? lazy(() => import('@/pages/KitPage').then((m) => ({ default: m.KitPage })))
+  : null;
 const DashboardPage = lazy(() =>
   import('@/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })),
 );
@@ -58,7 +60,7 @@ const PAGE_PRELOADS = [
   () => import('@/pages/PrivacyPage'),
   () => import('@/pages/TermsPage'),
   () => import('@/pages/NotFoundPage'),
-  () => import('@/pages/KitPage'),
+  ...(import.meta.env.DEV ? [() => import('@/pages/KitPage')] : []),
 ];
 
 const NotFoundPage = lazy(() =>
@@ -113,6 +115,39 @@ const queryClient = new QueryClient({
   },
 });
 
+const PAGE_TITLES: Record<string, string> = {
+  '/': 'MANABI — Pick a project. Ship it. Prove it.',
+  '/problems': 'Projects · MANABI',
+  '/me': 'Dashboard · MANABI',
+  '/admin/review': 'Submissions · MANABI',
+  '/about': 'About · MANABI',
+  '/faq': 'FAQ · MANABI',
+  '/contribute': 'Contribute · MANABI',
+  '/contact': 'Contact · MANABI',
+  '/sponsors': 'Sponsors · MANABI',
+  '/privacy': 'Privacy · MANABI',
+  '/terms': 'Terms · MANABI',
+};
+
+function pageTitle(pathname: string): string {
+  if (import.meta.env.DEV && pathname === '/_kit') return 'Design kit · MANABI';
+  const title = PAGE_TITLES[pathname];
+  if (title) return title;
+  if (/^\/problems\/\d+$/.test(pathname)) return 'Project brief · MANABI';
+  if (/^\/projects\/\d+$/.test(pathname)) return 'Project · MANABI';
+  return 'Page not found · MANABI';
+}
+
+function RouteTitle() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    document.title = pageTitle(pathname);
+  }, [pathname]);
+
+  return null;
+}
+
 function RouteFallback() {
   return (
     <div className="mx-auto w-full max-w-[1140px] animate-pulse space-y-4 px-5 py-16 sm:px-6" aria-hidden>
@@ -135,12 +170,15 @@ export function App() {
       <MotionConfig reducedMotion="user">
         <ToastProvider>
           <BrowserRouter>
+            <RouteTitle />
             <ScrollToTop />
             <Suspense fallback={<RouteFallback />}>
               <Routes>
                 <Route element={<AppLayout />}>
                   <Route path="/" element={<HomePage />} />
-                  <Route path="/_kit" element={<KitPage />} />
+                  {KitPage ? (
+                    <Route path="/_kit" element={<KitPage />} />
+                  ) : null}
 
                   <Route path="/problems" element={<ProblemBoardPage />} />
                   <Route path="/problems/:id" element={<ProblemDetailPage />} />

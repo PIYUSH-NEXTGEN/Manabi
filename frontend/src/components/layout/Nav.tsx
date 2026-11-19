@@ -50,7 +50,7 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
         <div className="flex items-center gap-2 md:gap-4">
           <Link
             to="/"
-            className="press flex w-fit items-center rounded-full py-1 pl-1 pr-2 transition-opacity hover:opacity-80"
+            className="press flex w-fit items-center rounded-full py-1.5 pl-1 pr-2 transition-opacity hover:opacity-80"
           >
             <span className="font-brand text-[0.9375rem] uppercase leading-none tracking-[-0.01em] text-ink">
               MANABI
@@ -123,15 +123,20 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
         </div>
       </nav>
 
-      <ul className="mx-auto mt-2 flex w-fit items-center gap-1 rounded-full border border-ink/15 bg-paper/85 p-1 shadow-soft backdrop-blur-xl min-[500px]:hidden">
-        {NAV_LINKS.map((link) => (
-          <li key={link.to}>
-            <NavLink to={link.to} className={navLinkClasses}>
-              {link.label}
-            </NavLink>
-          </li>
-        ))}
-      </ul>
+      <nav
+        aria-label="Mobile"
+        className="mx-auto mt-2 w-fit rounded-full border border-ink/15 bg-paper/85 p-1 shadow-soft backdrop-blur-xl min-[500px]:hidden"
+      >
+        <ul className="flex items-center gap-1">
+          {NAV_LINKS.map((link) => (
+            <li key={link.to}>
+              <NavLink to={link.to} className={navLinkClasses}>
+                {link.label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </nav>
     </header>
   );
 }

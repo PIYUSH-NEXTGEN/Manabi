@@ -92,6 +92,9 @@ export function ChatWidget() {
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const wasOpen = useRef(false);
 
   useEffect(() => {
     function handleOpen() {
@@ -107,6 +110,32 @@ export function ChatWidget() {
     node.style.height = 'auto';
     node.style.height = `${Math.min(node.scrollHeight, 112)}px`;
   }, [draft]);
+
+  useEffect(() => {
+    if (open) {
+      wasOpen.current = true;
+      const timer = window.setTimeout(() => {
+        (textareaRef.current ?? closeRef.current)?.focus();
+      }, 0);
+      return () => window.clearTimeout(timer);
+    }
+    if (wasOpen.current) {
+      wasOpen.current = false;
+      triggerRef.current?.focus();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        setOpen(false);
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
 
   const chat = useMutation<ChatOut, Error, ChatMessage[]>({
     mutationFn: (history) =>
@@ -192,6 +221,7 @@ export function ChatWidget() {
   if (!open) {
     return (
       <motion.button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Open the MANABI chat"
@@ -204,7 +234,7 @@ export function ChatWidget() {
           <MessageSquare aria-hidden size={16} strokeWidth={2.2} />
         </span>
         <span className="pr-1 text-[0.875rem] font-semibold tracking-[-0.01em]">
-          Ask Ai
+          Ask AI
         </span>
       </motion.button>
     );
@@ -240,6 +270,7 @@ export function ChatWidget() {
             </p>
           </div>
           <button
+            ref={closeRef}
             type="button"
             onClick={() => setOpen(false)}
             aria-label="Close the chat"

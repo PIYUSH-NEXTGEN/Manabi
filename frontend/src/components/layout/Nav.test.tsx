@@ -28,6 +28,9 @@ describe('Nav', () => {
     expect(
       screen.getByRole('link', { name: 'MANABI' }),
     ).toHaveAttribute('href', '/');
+    expect(
+      screen.getByRole('navigation', { name: 'Mobile' }),
+    ).toContainElement(screen.getAllByRole('link', { name: 'Projects' })[1]);
     expect(screen.getAllByRole('link', { name: 'Projects' })[0]).toHaveAttribute(
       'href',
       '/problems',
