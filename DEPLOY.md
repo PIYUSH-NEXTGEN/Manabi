@@ -141,7 +141,7 @@ Platform/build variables:
 |---|---|---|---|
 | `PORT` | Platform | No | Uvicorn bind port. Render supplies it. |
 | `PYTHON_VERSION` | Render | No | `3.12.7`. |
-| `NODE_VERSION` | Render | No | `22.13.0`; keep in sync with `.node-version`. |
+| `NODE_VERSION` | Cloudflare Pages | No | `22.13.0`; keep in sync with `.node-version`. Render never builds the frontend, so it needs no Node pin. |
 | `FORWARDED_ALLOW_IPS` | Proxied hosts | No | Uvicorn trusted proxy CIDRs. Defaults to loopback only; see section 6. Behind Cloudflare, requests reach Render from Cloudflare egress IPs (or the Pages proxy), so per-IP limits may bucket together until this is set to the real proxy range. |
 | `VITE_USE_MOCKS` | Build | No | Must be `false` in production. |
 | `VITE_API_BASE_URL` | Build | No | Backend origin for a split deploy, e.g. `https://manabi.onrender.com`. Empty keeps relative `/api/...` calls. |

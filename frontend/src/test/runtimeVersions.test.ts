@@ -9,7 +9,7 @@ function readRepoFile(relativePath: string): string {
 }
 
 describe('runtime version metadata', () => {
-  it('keeps the pinned Node version consistent across local, CI, and Render', () => {
+  it('keeps the pinned Node version consistent across local and CI', () => {
     const nodeVersion = readRepoFile('.node-version').trim();
     const packageJson = JSON.parse(readRepoFile('frontend/package.json')) as {
       engines?: { node?: string; npm?: string };
@@ -21,8 +21,15 @@ describe('runtime version metadata', () => {
     expect(readRepoFile('.github/workflows/ci.yml')).toContain(
       'node-version-file: .node-version',
     );
-    expect(readRepoFile('render.yaml')).toMatch(
-      new RegExp(`key: NODE_VERSION\\s+value: ${nodeVersion.replaceAll('.', '\\.')}`),
-    );
+  });
+
+  it('deploys Render as a Python-only service that does not build the frontend', () => {
+    const renderYaml = readRepoFile('render.yaml');
+
+    // Cloudflare Pages builds the frontend, so Render must not pin or install
+    // Node for a bundle it never produces.
+    expect(renderYaml).toMatch(/runtime: python/);
+    expect(renderYaml).not.toContain('NODE_VERSION');
+    expect(renderYaml).not.toContain('npm');
   });
 });
