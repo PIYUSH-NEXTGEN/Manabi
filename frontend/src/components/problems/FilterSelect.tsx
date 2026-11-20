@@ -51,7 +51,6 @@ export function FilterSelect({
             disabled={option.disabled}
           >
             {labelFor ? labelFor(option.value) : option.value}
-            {option.count != null ? ` (${option.count})` : ''}
             {option.hint ? ` (${option.hint})` : ''}
           </option>
         ))}

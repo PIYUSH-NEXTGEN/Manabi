@@ -184,7 +184,7 @@ describe('ProblemBoardPage', () => {
       screen.getByRole('option', { name: 'Blockchain (coming soon)' }),
     ).toBeDisabled();
     expect(
-      await screen.findByRole('option', { name: 'AI / ML (3)' }),
+      await screen.findByRole('option', { name: 'AI / ML' }),
     ).not.toBeDisabled();
   });
 
@@ -196,14 +196,11 @@ describe('ProblemBoardPage', () => {
     await screen.findAllByRole('heading', { level: 3 });
 
     expect(
-      await screen.findByRole('option', { name: 'advanced (1)' }),
+      await screen.findByRole('option', { name: 'advanced' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('option', { name: 'beginner (0)' }),
+      screen.getByRole('option', { name: 'beginner' }),
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole('option', { name: 'beginner (2)' }),
-    ).not.toBeInTheDocument();
   });
 
   it('clear filters resets the board', async () => {
