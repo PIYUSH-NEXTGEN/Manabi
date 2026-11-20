@@ -1,25 +1,40 @@
 # Running MANABI in production
 
-MANABI is **one web service**: FastAPI serves the built React app from
-`frontend/dist` at `/` (with SPA fallback) and every API route under `/api`.
+MANABI deploys as **two services plus a database**:
+
+- the React app as a static build on **Cloudflare Pages**;
+- the FastAPI API on **Render**, with every route under `/api`;
+- **Supabase** Postgres for durable data.
+
+The API is API-only: it does not serve `frontend/dist`. The browser reaches it
+through `VITE_API_BASE_URL` (compiled into the bundle at build time), while the
+backend's `FRONTEND_URL` drives CORS and the post-login redirect. The same code
+still works as a single-service deploy when frontend and API share an origin
+(leave `VITE_API_BASE_URL` and `FRONTEND_URL` empty).
+
 There are no background workers, queues, or scheduled jobs to deploy. GitHub
 and the LLM providers are called synchronously from request/verification code.
 
 ```text
 Browser
-  -> Render edge TLS / load balancer
-  -> one uvicorn process (FastAPI)
-       -> frontend/dist (static SPA)
-       -> /api/... (FastAPI routers)
-       -> managed Postgres (production)
-       -> GitHub API / Gemini or Anthropic (optional features)
+  -> Cloudflare Pages (TLS + static React build, SPA fallback via _redirects)
+  -> /api/... cross-origin fetch (credentials: include)
+       -> Render edge TLS / load balancer
+       -> one uvicorn process (FastAPI, API only)
+            -> Supabase Postgres (pooled connection, TLS required)
+            -> GitHub API / Gemini or Anthropic (optional features)
 ```
 
 ## 0. Requirements
 
 - Python 3.12.7 (what `render.yaml` pins; CI targets the 3.12 line). Python
   3.11 is not covered by CI.
-- Node 22.13.0 and npm 10+ to build the frontend (Render pins `.node-version`).
+- Node 22.13.0 and npm 10+ to build the frontend (Cloudflare Pages reads
+  `package.json` engines; `.node-version` pins the same version locally).
+- A Cloudflare Pages project whose build root is `frontend/`.
+- A Supabase project with its **Supavisor session-pooler** connection string
+  (IPv4). The direct `db.<ref>.supabase.co` host is IPv6-only and Render's
+  egress is generally IPv4, so use the pooler URL.
 - A durable Postgres database. SQLite is for local development and tests only.
 - A generated session secret:
   `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
@@ -32,29 +47,45 @@ Browser
 
 ## 1. Build
 
-From the repository root:
+### 1.1 Frontend on Cloudflare Pages
+
+Create a Pages project connected to this repository and set:
+
+| Setting | Value |
+|---|---|
+| Build command | `npm ci && npm run build` |
+| Build output directory | `dist` |
+| Root directory | `frontend` |
+| `VITE_API_BASE_URL` | `https://<your-service>.onrender.com` (no trailing slash) |
+| `VITE_USE_MOCKS` | `false` |
+
+The build outputs `frontend/dist`. `frontend/public/_redirects` is copied into
+the output and gives client-side routes (`/problems/12`, `/admin/review`) an
+`index.html` fallback, which Pages does not guarantee on its own.
+
+The frontend has no secrets. `VITE_*` values are compiled into the public
+bundle, so never put a key in one.
+
+The equivalent local build is:
 
 ```sh
-sh build.sh
-```
-
-This installs the pinned backend runtime dependencies and runs `npm ci` plus
-the frontend production build. The build **fails** if npm is unavailable or
-`frontend/dist/index.html` is missing; it must not silently produce an
-API-only deployment.
-
-The equivalent manual build is:
-
-```sh
-python -m pip install -r backend/requirements.txt
 cd frontend
 npm ci
-npm run build          # output: frontend/dist/
+VITE_API_BASE_URL=https://<your-service>.onrender.com npm run build
 ```
 
-`frontend/dist` is generated and ignored by Git. Build it from tracked source
-on every deploy. The frontend has no secrets: all API calls use relative
-`/api/...` URLs. `VITE_USE_MOCKS` must be `false` in production.
+### 1.2 Backend on Render
+
+`render.yaml` installs only the pinned backend runtime dependencies:
+
+```sh
+python -m pip install --upgrade "pip==26.3"
+python -m pip install --no-cache-dir -r backend/requirements.txt
+```
+
+The repository-root `build.sh` still installs the backend deps and builds
+`frontend/dist`; it is for single-service deploys and local verification, not
+for the split Render service.
 
 ## 2. Environment variables
 
@@ -66,7 +97,9 @@ local development and is ignored.
 | `APP_ENV` | Production | No | `development`, `test`, or `production`. Render sets `production`; startup then rejects localhost, HTTP, and SQLite. |
 | `DATABASE_URL` | Production | **Yes** | Managed Postgres connection string. Local default is `sqlite:///./app.db`. |
 | `SESSION_SECRET` | Production | **Yes** | Session-cookie signing key, at least 32 random characters. The placeholder is rejected outside localhost. |
-| `BASE_URL` | Production | No | Public HTTPS origin, e.g. `https://manabi.example.com`. Drives the OAuth callback and cookie flags. No trailing slash required. |
+| `BASE_URL` | Production | No | Public HTTPS origin **of the API**, e.g. `https://manabi.onrender.com`. Drives the GitHub OAuth callback and cookie flags. No trailing slash required. |
+| `FRONTEND_URL` | Split deploy | No | Public HTTPS origin of the browser app, e.g. `https://manabi.pages.dev`. Used for the post-login redirect and always allowed by CORS. Empty keeps same-origin behavior. Production rejects a non-HTTPS value. |
+| `CORS_ALLOW_ORIGINS` | Optional | No | Comma-separated extra origins allowed to call the API with cookies. `FRONTEND_URL` is added automatically; the default is `http://localhost:5173`. |
 | `GITHUB_CLIENT_ID` | Optional | No | GitHub OAuth app client id. Login is disabled when empty. |
 | `GITHUB_CLIENT_SECRET` | Optional | **Yes** | GitHub OAuth app secret. |
 | `LLM_PROVIDER` | Optional | No | `gemini`, `anthropic`, or `mock`; default `mock`. |
@@ -109,8 +142,9 @@ Platform/build variables:
 | `PORT` | Platform | No | Uvicorn bind port. Render supplies it. |
 | `PYTHON_VERSION` | Render | No | `3.12.7`. |
 | `NODE_VERSION` | Render | No | `22.13.0`; keep in sync with `.node-version`. |
-| `FORWARDED_ALLOW_IPS` | Proxied hosts | No | Uvicorn trusted proxy CIDRs. Defaults to loopback only; see section 6. |
+| `FORWARDED_ALLOW_IPS` | Proxied hosts | No | Uvicorn trusted proxy CIDRs. Defaults to loopback only; see section 6. Behind Cloudflare, requests reach Render from Cloudflare egress IPs (or the Pages proxy), so per-IP limits may bucket together until this is set to the real proxy range. |
 | `VITE_USE_MOCKS` | Build | No | Must be `false` in production. |
+| `VITE_API_BASE_URL` | Build | No | Backend origin for a split deploy, e.g. `https://manabi.onrender.com`. Empty keeps relative `/api/...` calls. |
 | `VITE_CONTACT_EMAIL` | Build | No | Public contact address. |
 | `VITE_GITHUB_ISSUES_URL` | Build | No | Public issue-tracker URL. |
 | `VITE_MASCOT_RIVE_SRC` | Build | No | Public Rive asset path; empty uses the PNG fallback. |
@@ -124,6 +158,7 @@ When `APP_ENV=production`, the app refuses to start if:
 
 - `BASE_URL` is not a public `https://` origin;
 - `BASE_URL` points at localhost/loopback;
+- `FRONTEND_URL` is set but is not an `https://` origin;
 - `DATABASE_URL` is SQLite;
 - `SESSION_SECRET` is the placeholder or shorter than 32 characters.
 
@@ -156,6 +191,22 @@ cd backend
 python -m alembic current
 python -m alembic upgrade head
 ```
+
+### Seed the catalog
+
+A fresh Supabase database has the schema but no problems, and nothing seeds it
+at startup. Run each curated pack once against the deployed database:
+
+```sh
+cd backend
+DATABASE_URL='postgresql://...supabase.com:5432/postgres?sslmode=require' \
+  python -m app.seed.seed_webdev_projects
+# repeat for seed_webdev_hackathon_projects, seed_webdev_learning_projects,
+# seed_aiml_projects, seed_aiml_hackathon_projects, seed_aiml_learning_projects
+```
+
+The seed runner skips rows whose `source_id` already exists, so re-running is
+safe. Skip this step and the site serves an empty catalog.
 
 ### Destructive history and backups
 
@@ -236,11 +287,20 @@ because Alembic and `.env` resolution use the backend working directory.
 
 - Render terminates TLS at its edge. `BASE_URL` must still be the public HTTPS
   origin; the app does not infer it from proxy headers.
-- `SESSION_SECRET` signs an HttpOnly, SameSite=Lax session cookie. Secure is on
-  whenever the origin is HTTPS or `APP_ENV=production`.
+- `SESSION_SECRET` signs an HttpOnly session cookie. In production it is
+  `SameSite=None; Secure`, which is required for a Cloudflare Pages frontend to
+  send it to Render; outside production it stays `SameSite=Lax`.
 - HSTS is sent on HTTPS responses. It deliberately omits `includeSubDomains`.
-- Production CORS allows no cross-origin callers; the app is same-origin. Local
-  development allows `http://localhost:5173` for the Vite server.
+- CORS allows exactly the origins in `CORS_ALLOW_ORIGINS` plus `FRONTEND_URL`,
+  with credentials enabled. Nothing else can call the API with cookies. Local
+  development defaults to `http://localhost:5173` for the Vite server.
+- **Third-party cookie caveat:** `*.pages.dev` and `*.onrender.com` are
+  different sites, so browsers with third-party cookie blocking (Safari/ITP,
+  Chrome incognito) can drop the session cookie. For reliable login, put both
+  services on one registrable domain, e.g. `app.example.com` (Pages) and
+  `api.example.com` (Render), and set `FRONTEND_URL`/`BASE_URL` accordingly.
+  The custom domains are cross-origin but same-site, so the cookie is
+  first-party.
 - No `TrustedHostMiddleware` is configured. The app does not build absolute
   links from the Host header, but host-header validation is an open hardening
   item.
@@ -269,18 +329,24 @@ Render's health check alone is not proof that the API can serve data.
 
 ## 8. Post-deploy checks
 
-1. `curl https://<domain>/api/health/live` → `{"status":"ok"}`.
-2. `curl https://<domain>/api/health/ready` → `{"status":"ok"}`.
-3. `curl https://<domain>/api/stats` → real counts.
-4. `curl -H 'Accept: text/html' https://<domain>/problems` → SPA HTML with
+`<api>` is the Render origin, `<app>` is the Cloudflare Pages origin.
+
+1. `curl https://<api>/api/health/live` → `{"status":"ok"}`.
+2. `curl https://<api>/api/health/ready` → `{"status":"ok"}`.
+3. `curl https://<api>/api/stats` → real counts (after seeding).
+4. `curl -H 'Accept: text/html' https://<app>/problems` → SPA HTML with
    `<title>MANABI</title>`.
-5. `curl -I https://<domain>/assets/<asset from dist>` → `200`, correct
-   `content-type`, immutable cache header.
-6. `curl -I https://<domain>/` → confirm `Strict-Transport-Security`.
-7. `alembic current` → `0017_integrity_constraints (head)`.
-8. Log in with GitHub, submit a test project, and exercise the admin review
-   path if those features are enabled.
-9. Confirm a missing asset returns JSON 404 rather than SPA HTML.
+5. `curl -I https://<app>/assets/<asset from dist>` → `200` and the correct
+   `content-type`.
+6. `curl -I https://<api>/api/health/live` → confirm
+   `Strict-Transport-Security`.
+7. `curl -i https://<api>/api/stats -H 'Origin: https://<app>'` → response
+   carries `access-control-allow-origin: https://<app>`.
+8. `alembic current` → `0017_integrity_constraints (head)`.
+9. Open the app, log in with GitHub, submit a test project, and exercise the
+   admin review path if those features are enabled. Check DevTools → Network
+   that `/api/auth/me` returns 200 after login (a 401 there means the session
+   cookie was not sent).
 
 ## 9. Logging, diagnostics, and monitoring
 
@@ -321,8 +387,9 @@ Application rollback:
 
 1. In Render, redeploy the previous known-good commit.
 2. Restore the matching environment variables and `BASE_URL`.
-3. Rebuild the frontend from that commit; the frontend and backend ship
-   together, so do not mix a new `dist` with an old backend.
+3. Rebuild the frontend from that commit in Cloudflare Pages. The API and
+   frontend are versioned together; re-deploy the matching Pages commit so a
+   new bundle does not call an older API contract.
 4. Run the readiness and post-deploy checks again.
 
 Database rollback:
@@ -345,7 +412,8 @@ Configuration rollback:
 
 Failed deploy handling:
 
-- A failed build cannot deploy because `sh build.sh` exits non-zero.
+- A failed build cannot deploy because the Render install step or the
+  Cloudflare Pages build exits non-zero.
 - A failed startup fails the guard or uvicorn; Render keeps the previous live
   instance.
 - A passing liveness check does not prove Postgres readiness; check
@@ -380,7 +448,12 @@ Failed deploy handling:
 - The app auto-migrates at Postgres startup and has no cross-instance migration
   lock. Use one instance during schema-changing deploys.
 - Proxy IP ranges and the resulting per-IP login limit require verification on
-  the live platform.
+  the live platform. With a Pages → Render split, Cloudflare (or the Pages
+  proxy) is the immediate client of Render, so `FORWARDED_ALLOW_IPS` must match
+  the actual proxy range or per-IP login limits share one bucket.
+- Cross-site sessions depend on third-party cookies when the frontend and API
+  are on different registrable domains (`*.pages.dev` + `*.onrender.com`). Use
+  custom subdomains of one domain for reliable login.
 - No formal RPO/RTO, metrics, tracing, or alerting are defined in the
   repository; structured logs exist, but retention and paging stay with the
   hosting platform.

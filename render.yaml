@@ -1,13 +1,15 @@
-# MANABI — one-service deploy (FastAPI serves frontend/dist + /api).
+# MANABI — API-only deploy (Cloudflare Pages serves the frontend).
 # Blueprint: https://render.com/docs/blueprint-spec
-# After "New → Blueprint", set BASE_URL and the secret env vars in the
-# dashboard (DATABASE_URL, GITHUB_CLIENT_SECRET, GEMINI_API_KEY).
+# After "New → Blueprint", set BASE_URL, FRONTEND_URL, and the secret env vars
+# in the dashboard (DATABASE_URL, GITHUB_CLIENT_SECRET, GEMINI_API_KEY).
 services:
   - type: web
     name: manabi
     runtime: python
     plan: free
-    buildCommand: sh build.sh
+    # Frontend is built and served by Cloudflare Pages, so Render only needs
+    # the backend runtime deps (the old build.sh also built frontend/dist).
+    buildCommand: python -m pip install --upgrade "pip==26.3" && python -m pip install --no-cache-dir -r backend/requirements.txt
     startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25 --no-access-log
     healthCheckPath: /api/health/live
     envVars:
@@ -15,14 +17,16 @@ services:
         value: production
       - key: PYTHON_VERSION
         value: 3.12.7
-      - key: NODE_VERSION
-        value: 22.13.0
       # Trust only Render's private proxy network, never "*". Verify the
       # platform's actual range before relying on per-IP login limits.
       - key: FORWARDED_ALLOW_IPS
         value: "10.0.0.0/8,127.0.0.1,::1"
       - key: BASE_URL
         sync: false # set to https://<your-service>.onrender.com after first deploy
+      - key: FRONTEND_URL
+        sync: false # set to your Cloudflare Pages origin, e.g. https://manabi.pages.dev
+      - key: CORS_ALLOW_ORIGINS
+        sync: false # optional extra origins; FRONTEND_URL is always allowed
       - key: SESSION_SECRET
         generateValue: true
       # Required: a durable Postgres connection string (Neon/Supabase/Render).

@@ -2,8 +2,9 @@
 
 MANABI is a catalog of real problems worth building. Students pick a brief,
 link their GitHub repo, and the site tracks their progress from public repo
-activity. A chat assistant helps you choose, and everything runs on a single
-FastAPI service that also serves the built frontend.
+activity. A chat assistant helps you choose. It deploys as a static React
+frontend (Cloudflare Pages) and a FastAPI API (Render) over managed Postgres
+(Supabase).
 
 Problem briefs are curated manually, via seed scripts and the app itself; the
 catalog needs no external brief source. Automated crawling was evaluated early
@@ -35,9 +36,11 @@ seed files fill in web and AI/ML briefs.
 
 ## How it fits together
 
-**One service:** FastAPI serves the built React app from `frontend/dist` at
-`/` (with SPA fallback) and keeps every API route under `/api`. No nginx is
-needed; put your platform's TLS or load balancer in front of uvicorn. SQLite
+**Two services:** the React app is a static build served by Cloudflare Pages,
+and FastAPI serves every API route under `/api` (it does not serve
+`frontend/dist`). The frontend finds the API through `VITE_API_BASE_URL`; the
+backend allows that origin and redirects there after login via `FRONTEND_URL`.
+SQLite
 is the local default, managed Postgres (Neon/Supabase) is the production path,
 and provider URLs are normalized to the installed psycopg2 driver with
 `pool_pre_ping` enabled automatically. Health checks: `/api/health/live` is
@@ -320,10 +323,10 @@ Full runbook with migrations, backup steps, and the verification checklist:
 [DEPLOY.md](DEPLOY.md). Summary:
 
 ```sh
-sh build.sh                                # backend deps + frontend/dist
-# set APP_ENV=production plus DATABASE_URL, SESSION_SECRET, BASE_URL,
-# GITHUB_CLIENT_ID/SECRET, and LLM keys on the host; never in git
-cd backend && sh start.sh                  # uvicorn app.main:app --host 0.0.0.0 --port $PORT
+# Frontend: Cloudflare Pages, root frontend/, build: npm ci && npm run build
+# Backend:  Render blueprint (render.yaml), API only
+# Set APP_ENV=production plus DATABASE_URL, SESSION_SECRET, BASE_URL,
+# FRONTEND_URL, GITHUB_CLIENT_ID/SECRET, and LLM keys on the host; never in git.
 ```
 
 A `Procfile` and a one-click Render blueprint (`render.yaml`) are included.

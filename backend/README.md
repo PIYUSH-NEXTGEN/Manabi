@@ -27,8 +27,9 @@ On Windows PowerShell, use `python -m venv .venv`,
 `.\.venv\Scripts\python.exe`, and `Copy-Item` instead of `.venv/bin/python`
 and `cp`.
 
-On start the app serves `frontend/dist` incl. SPA fallback if the frontend is built;
-otherwise it is API-only. All API routes live under `/api`.
+The backend is API-only: all routes live under `/api`, and the frontend is
+built and served separately (Cloudflare Pages, or `frontend/dist` on any static
+host). On Postgres, startup runs `alembic upgrade head` first.
 
 ## Tests
 

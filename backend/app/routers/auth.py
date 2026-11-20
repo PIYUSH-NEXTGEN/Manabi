@@ -182,7 +182,10 @@ async def github_callback(request: Request, db: DB):
         user.id,
         extra={"event": "login_succeeded", "user_id": user.id},
     )
-    response = RedirectResponse("/", status_code=302)
+    # Split deploys (e.g. Cloudflare Pages frontend, Render API) must send the
+    # browser back to the app origin; "/" on the API host has no SPA.
+    redirect_to = get_settings().FRONTEND_URL or "/"
+    response = RedirectResponse(redirect_to, status_code=302)
     return response
 
 

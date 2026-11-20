@@ -48,6 +48,14 @@ def guard_deploy_secrets(settings) -> None:
                 "APP_ENV=production requires a durable non-SQLite DATABASE_URL. "
                 "Set the managed Postgres connection string before starting the service."
             )
+        frontend_url = (getattr(settings, "FRONTEND_URL", "") or "").strip().rstrip("/")
+        if frontend_url:
+            parsed_frontend = urlsplit(frontend_url)
+            if parsed_frontend.scheme != "https" or not parsed_frontend.netloc:
+                raise RuntimeError(
+                    "APP_ENV=production requires FRONTEND_URL to be a public https:// "
+                    "origin when it is set. Leave it empty for a single-service deploy."
+                )
 
     if is_local:
         return
@@ -292,9 +300,18 @@ def create_app() -> FastAPI:
     app.add_exception_handler(OperationalError, database_unavailable_handler)
     app.add_exception_handler(SATimeoutError, database_unavailable_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)
+    # The split-deploy frontend origin is always allowed; CORS_ALLOW_ORIGINS
+    # stays available for additional custom domains.
+    allowed_origins: list[str] = []
+    for origin in (
+        settings.CORS_ALLOW_ORIGINS.split(",") + [settings.FRONTEND_URL]
+    ):
+        origin = origin.strip()
+        if origin and origin not in allowed_origins:
+            allowed_origins.append(origin)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[o.strip() for o in settings.CORS_ALLOW_ORIGINS.split(",") if o.strip()],
+        allow_origins=allowed_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

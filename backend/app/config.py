@@ -6,6 +6,19 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def _clean_origin(value: str, field: str) -> str:
+    """Normalize an origin setting and reject anything that is not one."""
+    value = (value or "").strip().rstrip("/")
+    parsed = urlsplit(value)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise ValueError(f"{field} must be an absolute http(s) URL")
+    if parsed.path:
+        raise ValueError(f"{field} must be an origin without a path")
+    if parsed.query or parsed.fragment:
+        raise ValueError(f"{field} must not include a query string or fragment")
+    return value
+
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -15,6 +28,11 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./app.db"
     SESSION_SECRET: str = "change-me-long-random-string"
     BASE_URL: str = "http://localhost:5173"
+    # Public origin of the browser app when it is deployed separately (for
+    # example Cloudflare Pages + Render). OAuth callbacks still use BASE_URL,
+    # so this only decides where users land after logging in and which origin
+    # CORS accepts. Empty keeps the single-service default (redirect to "/").
+    FRONTEND_URL: str = ""
     GITHUB_CLIENT_ID: str = ""
     GITHUB_CLIENT_SECRET: str = ""
     LLM_PROVIDER: str = "mock"
@@ -122,15 +140,14 @@ class Settings(BaseSettings):
     @classmethod
     def _validate_base_url(cls, value: str) -> str:
         """Keep OAuth redirects and cookie flags on one absolute origin."""
-        value = value.strip().rstrip("/")
-        parsed = urlsplit(value)
-        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
-            raise ValueError("BASE_URL must be an absolute http(s) URL")
-        if parsed.path:
-            raise ValueError("BASE_URL must be an origin without a path")
-        if parsed.query or parsed.fragment:
-            raise ValueError("BASE_URL must not include a query string or fragment")
-        return value
+        return _clean_origin(value, "BASE_URL")
+
+    @field_validator("FRONTEND_URL")
+    @classmethod
+    def _validate_frontend_url(cls, value: str) -> str:
+        """Optional separate browser origin, empty keeps same-origin mode."""
+        value = (value or "").strip()
+        return _clean_origin(value, "FRONTEND_URL") if value else ""
 
 
 @lru_cache
