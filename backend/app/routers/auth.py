@@ -46,7 +46,8 @@ def setup_oauth(app) -> None:
         SessionMiddleware,
         secret_key=settings.SESSION_SECRET,
         same_site="lax",
-        https_only=settings.BASE_URL.startswith("https"),
+        https_only=settings.APP_ENV == "production"
+        or settings.BASE_URL.startswith("https://"),
     )
 
 

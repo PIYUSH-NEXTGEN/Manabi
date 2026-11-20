@@ -1,149 +1,190 @@
 # Running MANABI in production
 
-MANABI is **one service**: FastAPI serves the built React app from `frontend/dist` at `/` (with SPA fallback) and keeps every API route under `/api`. No nginx needed; put your platform's TLS/LB in front of uvicorn.
+MANABI is **one web service**: FastAPI serves the built React app from
+`frontend/dist` at `/` (with SPA fallback) and every API route under `/api`.
+There are no background workers, queues, or scheduled jobs to deploy. GitHub
+and the LLM providers are called synchronously from request/verification code.
 
-## 0. What you need
-
-- Python 3.11 or 3.12 and Node 22.13+ (Node is only needed to build the frontend)
-- A generated session secret: `python -c "import secrets; print(secrets.token_urlsafe(32))"`
-- A GitHub OAuth app with callback `https://<your-domain>/api/auth/github/callback` (a separate OAuth app from the local one)
-- Optionally a Gemini API key (`LLM_PROVIDER=gemini`) — without it, AI endpoints return a calm `503 {"detail": "AI is not configured yet"}` and everything else works
-
-## 1. Build the frontend
-
+```text
+Browser
+  -> Render edge TLS / load balancer
+  -> one uvicorn process (FastAPI)
+       -> frontend/dist (static SPA)
+       -> /api/... (FastAPI routers)
+       -> managed Postgres (production)
+       -> GitHub API / Gemini or Anthropic (optional features)
 ```
+
+## 0. Requirements
+
+- Python 3.11 or 3.12 (Render pins 3.12.7).
+- Node 22.13+ and npm 10+ to build the frontend (Render pins `.node-version`).
+- A durable Postgres database. SQLite is for local development and tests only.
+- A generated session secret:
+  `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
+- A GitHub OAuth app whose callback is
+  `https://<your-domain>/api/auth/github/callback` if login is enabled.
+- Optionally a Gemini or Anthropic key. Without one, AI endpoints return
+  `503 {"detail": "AI is not configured yet"}` and the rest of the app works.
+
+## 1. Build
+
+From the repository root:
+
+```sh
+sh build.sh
+```
+
+This installs the pinned backend runtime dependencies and runs `npm ci` plus
+the frontend production build. The build **fails** if npm is unavailable or
+`frontend/dist/index.html` is missing; it must not silently produce an
+API-only deployment.
+
+The equivalent manual build is:
+
+```sh
+python -m pip install -r backend/requirements.txt
 cd frontend
 npm ci
 npm run build          # output: frontend/dist/
 ```
 
-The frontend has zero secrets: all calls are relative `/api/...`. `VITE_USE_MOCKS` must stay `false` for production (it is by default); MSW only activates when it is `true` (that mode exists for the Playwright smoke test).
+`frontend/dist` is generated and ignored by Git. Build it from tracked source
+on every deploy. The frontend has no secrets: all API calls use relative
+`/api/...` URLs. `VITE_USE_MOCKS` must be `false` in production.
 
-## 2. Environment variables (set on the server — never in git)
+## 2. Environment variables
 
-`backend/.env` or platform env vars:
+Set these in the platform dashboard, never in Git. `backend/.env` is only for
+local development and is ignored.
 
-```
-DATABASE_URL=<sqlite:///./app.db  — or your Neon/Supabase string>
-SESSION_SECRET=<generated above>
-BASE_URL=https://<your-domain>
-GITHUB_CLIENT_ID=<deployed OAuth app id>
-GITHUB_CLIENT_SECRET=<secret>
-LLM_PROVIDER=gemini            # or mock to start
-GEMINI_API_KEY=<key>
-```
+| Variable | Required | Sensitive | Purpose / default |
+|---|---|---|---|
+| `APP_ENV` | Production | No | `development`, `test`, or `production`. Render sets `production`; startup then rejects localhost, HTTP, and SQLite. |
+| `DATABASE_URL` | Production | **Yes** | Managed Postgres connection string. Local default is `sqlite:///./app.db`. |
+| `SESSION_SECRET` | Production | **Yes** | Session-cookie signing key, at least 32 random characters. The placeholder is rejected outside localhost. |
+| `BASE_URL` | Production | No | Public HTTPS origin, e.g. `https://manabi.example.com`. Drives the OAuth callback and cookie flags. No trailing slash required. |
+| `GITHUB_CLIENT_ID` | Optional | No | GitHub OAuth app client id. Login is disabled when empty. |
+| `GITHUB_CLIENT_SECRET` | Optional | **Yes** | GitHub OAuth app secret. |
+| `LLM_PROVIDER` | Optional | No | `gemini`, `anthropic`, or `mock`; default `mock`. |
+| `GEMINI_API_KEY` | Optional | **Yes** | Shared Gemini key. |
+| `GEMINI_MODEL` | Optional | No | Gemini model override. |
+| `GEMINI_API_KEYS_EVAL` | Optional | **Yes** | Ordered evaluation key pool, comma-separated. |
+| `GEMINI_API_KEYS_CHAT` | Optional | **Yes** | Ordered chat key pool, comma-separated. |
+| `GEMINI_API_KEY_CHAT` | Optional | **Yes** | Separate Gemini project key for chat. |
+| `GEMINI_MODEL_CHAT` | Optional | No | Chat model override. |
+| `ANTHROPIC_API_KEY` | Optional | **Yes** | Anthropic key when `LLM_PROVIDER=anthropic`. |
+| `LLM_MODEL_FAST` | Optional | No | Fast-model override. |
+| `CHAT_RATE_LIMIT_PER_DAY` | Optional | No | Chat messages per account per rolling 24h; default `20`. |
+| `SUBMIT_RATE_LIMIT_PER_HOUR` | Optional | No | Submit attempts per account per hour; default `10`. |
+| `AUTH_LOGIN_RATE_LIMIT_PER_HOUR` | Optional | No | Login attempts per client IP per hour; default `20`. |
+| `STAR_RATE_LIMIT_PER_HOUR` | Optional | No | Star toggles per account per hour; default `60`. |
+| `ADMIN_RATE_LIMIT_PER_HOUR` | Optional | No | Shared admin sanity cap; default `100`. |
+| `PROGRESS_REFRESH_RATE_LIMIT_PER_HOUR` | Optional | No | Forced progress refreshes; default `10`. |
+| `PROBLEM_CREATE_PER_HOUR` | Optional | No | Problem publishing per user per hour; default `5`. |
+| `REPORT_RATE_LIMIT_PER_HOUR` | Optional | No | Project reports per user per hour; default `5`. |
+| `ADMIN_GITHUB_USERNAMES` | Optional | No | Comma-separated GitHub logins allowed into `/admin/review`. |
+| `RELEVANCE_VERIFY_MIN` | Optional | No | Auto-verify score threshold; default `0.70`. |
+| `RELEVANCE_REJECT_BELOW` | Optional | No | Hard-reject score threshold; default `0.35`. |
+| `CONTRIBUTOR_MIN_COMMITS` | Optional | No | Contributor ownership minimum; default `3`. |
+| `MAX_ACTIVE_PROJECTS_PER_USER` | Optional | No | Active-project cap; default `10`. |
+| `MAX_SUBMISSIONS_PER_DAY` | Optional | No | Rolling submission cap; default `5`. |
+| `PREEXISTING_REPO_DAYS` | Optional | No | Older-repo scrutiny threshold; default `180`. |
+| `ALLOW_FORK_SUBMISSIONS` | Optional | No | Allow fork submissions; default `false`. |
+| `AUTO_REVERIFY_MIN_INTERVAL_HOURS` | Optional | No | Automatic re-check interval; default `24`. |
+| `REPORTS_BEFORE_REVIEW` | Optional | No | Reports needed to trigger review; default `3`. |
 
-Notes:
+Platform/build variables:
 
-- `BASE_URL` also controls the OAuth callback and the session-cookie flags (`Secure` + `HttpOnly` when it starts with `https`).
-- The Render blueprint intentionally does **not** default `DATABASE_URL` to SQLite. Render's filesystem is ephemeral, so set a durable Postgres URL during blueprint setup and verify it before the first deploy. A manual `uvicorn` start with the variable entirely absent still falls back to local SQLite, which is only appropriate for development.
-- Postgres URLs from Neon/Supabase (`postgres://...`) are accepted — the engine rewrites the scheme to `postgresql://` and enables `pool_pre_ping` (serverless Postgres kills idle connections; without pre-ping the first request after idle 500s).
-- The app refuses to boot with the placeholder `SESSION_SECRET` when `BASE_URL` is not localhost — fail fast beats an impersonatable session cookie.
-- Health endpoint for uptime checks: `GET /api/health` (touches the DB, returns `{"status":"ok"}`).
+| Variable | Required | Sensitive | Purpose |
+|---|---|---|---|
+| `PORT` | Platform | No | Uvicorn bind port. Render supplies it. |
+| `PYTHON_VERSION` | Render | No | `3.12.7`. |
+| `NODE_VERSION` | Render | No | `22.13.0`; keep in sync with `.node-version`. |
+| `FORWARDED_ALLOW_IPS` | Proxied hosts | No | Uvicorn trusted proxy CIDRs. Defaults to loopback only; see section 6. |
+| `VITE_USE_MOCKS` | Build | No | Must be `false` in production. |
+| `VITE_CONTACT_EMAIL` | Build | No | Public contact address. |
+| `VITE_GITHUB_ISSUES_URL` | Build | No | Public issue-tracker URL. |
+| `VITE_MASCOT_RIVE_SRC` | Build | No | Public Rive asset path; empty uses the PNG fallback. |
 
-## 3. Migrations + seed data
+`VITE_*` values are compiled into the public bundle. Never put a secret in one.
 
-Run these ONCE locally (or from a GitHub Action), pointed at the production database (`DATABASE_URL`):
+## 3. Production configuration guard
 
-```
+When `APP_ENV=production`, the app refuses to start if:
+
+- `BASE_URL` is not a public `https://` origin;
+- `BASE_URL` points at localhost/loopback;
+- `DATABASE_URL` is SQLite;
+- `SESSION_SECRET` is the placeholder or shorter than 32 characters.
+
+These checks run before uvicorn accepts traffic. A failed deploy is preferable
+to a production service with insecure cookies or an ephemeral database. The
+defaults remain convenient for local development when `APP_ENV` is unset.
+
+`BASE_URL` must be the final public origin. OAuth callbacks are built from it,
+and `https://` enables Secure session cookies and HSTS (`max-age=31536000`).
+
+## 4. Database migrations
+
+Alembic is the source of truth for Postgres. Current head is
+`0017_integrity_constraints`. CI runs a migration smoke check on both SQLite
+and a disposable Postgres service; that is a schema check, not a restore or
+production migration.
+
+- SQLite local development keeps `create_all` convenience.
+- On Postgres startup the app runs `alembic upgrade head` before serving.
+- The startup path has no cross-instance migration lock. Run a single web
+  instance during a schema-changing deploy, or run migrations as a separate
+  release step before scaling out. Do not start multiple migrating instances
+  concurrently.
+- Run migrations against a restored copy first whenever rows may be affected.
+
+Manual command:
+
+```sh
 cd backend
-python -m venv .venv
-.venv/bin/pip install -r requirements.txt          # + requirements-dev.txt for tests only
-.venv/bin/python -m alembic upgrade head           # schema; idempotent
+python -m alembic current
+python -m alembic upgrade head
 ```
 
-- **Migrations are the source of truth for Postgres.** Run `alembic upgrade head` before
-  every deploy (on Render: prepend it to the start command, e.g.
-  `.venv/bin/python -m alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25`).
-  As a safety net the app itself also runs `upgrade head` on startup when `DATABASE_URL` is Postgres.
-- SQLite (local dev) keeps `create_all` on startup; do not rely on that in production.
-- The catalog is populated from the seed scripts (`scripts/seed_*_web_projects.py`)
-  and manual curation in the app; production data is curated offline.
+### Destructive history and backups
 
-## 3b. The 0004_cleanup migration (required before running this deploy)
+- `0004_cleanup` drops removed ops/crawler tables and columns.
+- `0015_remove_data_science_field` and `0016_remove_upcoming_fields`
+  permanently delete retired problem fields and their related projects,
+  stars, and reports. Downgrade is intentionally a no-op.
+- `0017_integrity_constraints` validates existing rows before adding checks;
+  it raises and changes nothing when data is incompatible.
 
-Revision `0004_cleanup` **drops** every table of the removed ops features
-(webhooks, api-contracts, tenant-security, incidents, file-ingestion, analytics,
-accessibility, inventory, offline-sync, workflows — 36 tables) plus the crawler
-bookkeeping tables (`crawl_runs`, `crawl_items`) and 8 crawler-only columns on
-`problems`. Core data (`users`, `problems`, `projects`) is never touched, and the
-migration is defensive: it inspects the schema first and skips anything already
-absent, so it also succeeds on a database where earlier revisions never ran.
+Before any deploy that may cross these revisions:
 
-Before deploying:
+1. Take and verify a full backup off the database host.
+2. Record the affected row counts.
+3. Restore the backup into a disposable database and run `alembic upgrade head`
+   there first.
+4. Only then deploy, and verify the kept-field counts and integrity checks.
 
-1. **Take a full database backup** (`pg_dump -Fc -f manabi-pre-0004.dump $DATABASE_URL`).
-   `0004.downgrade` recreates the dropped schema *empty* — dropped rows are only
-   recoverable from this backup.
-2. **If the dropped tables hold rows you care about**, export them from the backup
-   before deploying (they will not survive otherwise).
-3. Run the deploy, then verify:
-   - `alembic current` → `0004_cleanup (head)`
-   - the dropped tables are gone and `users` / `problems` / `projects` row counts
-     match the pre-deploy counts.
+A database rollback is **restore from backup**, not `alembic downgrade`.
+Application rollback does not reverse data deletions.
 
-### If `alembic upgrade head` fails with "table ... already exists"
+### Legacy "table already exists" state
 
-That means the database was created by `create_all` (tables exist physically)
-while `alembic_version` lags behind. Re-running the failing revision from scratch
-cannot work; instead **stamp the version to the revision matching the physical
-state, then upgrade forward**:
+If a database was created by `create_all` while `alembic_version` lags, do not
+blindly stamp it. Inspect the physical schema and stamp only the revision that
+matches it, on a copy first:
 
-```
-# If the DB already contains e.g. webhook_endpoints / crawl_runs
-# (i.e. the physical schema matches 0003's output), stamp 0003 first:
+```sh
 alembic stamp 0003_advanced_projects
-alembic upgrade head          # now only 0004_cleanup runs, and it is defensive
-alembic current               # expect: 0004_cleanup (head)
+alembic upgrade head
+alembic current
 ```
 
-Only stamp when you have verified `alembic current` lags behind but the tables
-of that revision really exist. If `alembic current` is already `0003_advanced_projects`
-or the DB is genuinely empty, a plain `alembic upgrade head` just works.
-If the version lags for a **partially** created schema (some of a revision's
-tables exist, some don't), reconcile manually from a copy first — do not stamp.
-
-The local dev SQLite DB has this exact shape (version `0002_crawler`, tables
-created by `create_all`): take a copy, `alembic stamp 0003_advanced_projects`,
-then `alembic upgrade head` on the copy. Only after the copy checks out, repeat
-on the real `app.db`.
-
-## 3c. Destructive migrations 0015 and 0016 (backup required)
-
-Revisions `0015_remove_data_science_field` and `0016_remove_upcoming_fields`
-**permanently delete rows**: all `problems` for the retired fields, then their
-`problem_stars`, submitted `projects`, and those projects' stars and reports.
-The affected fields are data-science, app-dev, cyber-security, devops-cloud
-and blockchain. Downgrade is intentionally a no-op — the deleted rows cannot
-be reconstructed by Alembic.
-
-Before running either revision on a database that may still contain those
-fields:
-
-1. **Take a verified backup** and store it off the database host:
-   `pg_dump -Fc -f manabi-pre-0015.dump $DATABASE_URL`
-2. Record the counts you expect to remove so the deploy can be checked:
-   ```
-   psql $DATABASE_URL -c "SELECT field, COUNT(*) FROM problems GROUP BY field ORDER BY field;"
-   ```
-3. Restore the dump into an isolated database and run `alembic upgrade head`
-   there first. Confirm the kept `web-dev`/`aiml` rows and their projects
-   survive.
-4. Only then run the production deploy. Verify the retired fields have zero
-   rows and that the row counts for the kept fields match the pre-deploy
-   counts minus the expected deletions.
-
-If a deletion was accidental, stop writes and restore the pre-migration dump
-into a new database, then point the app at it. Do not attempt to reverse the
-migration.
+If only part of a revision's schema exists, reconcile manually from a copy.
 
 ### Restore verification
 
-A backup is not evidence of recovery until it has been restored. For every
-release that moves the schema, restore the latest dump into a disposable
-database and check:
-
-```
+```sh
 createdb manabi_restore_check
 pg_restore --clean --if-exists -d manabi_restore_check manabi-latest.dump
 DATABASE_URL=postgresql://.../manabi_restore_check alembic upgrade head
@@ -153,122 +194,165 @@ psql manabi_restore_check -c "SELECT COUNT(*) FROM projects;"
 psql manabi_restore_check -c "SELECT COUNT(*) FROM project_reports;"
 ```
 
-Open `/api/health` and `/api/stats` against the restored copy. The project has
-no documented RPO/RTO targets; define them with the operator (the current
-deployment relies on the hosting provider's Postgres backup schedule, which
-must be checked in the provider dashboard). This repository cannot verify the
-provider's backup retention, encryption, or restore time from the application.
+Then check `/api/health/ready` and `/api/stats` against the restored copy. The
+repository does not define an RPO/RTO; confirm the provider's backup schedule,
+retention, encryption, and restore time in the provider dashboard.
 
-## 4. Start the service
+## 5. Start the service
 
+Render uses the start command in `render.yaml`:
+
+```sh
+cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25
 ```
-cd backend
-sh start.sh                   # installs runtime deps, then uvicorn with a 25s shutdown grace
+
+On a VM or a Procfile-based host:
+
+```sh
+sh backend/start.sh
 ```
 
-On Render/Railway a `Procfile` is included (`web: uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25`). If your platform builds from git: extend the start command to run step 1 first, or commit `frontend/dist` from CI.
+`backend/start.sh` installs the pinned runtime dependencies and then `exec`s
+uvicorn, so shutdown signals reach the server. The repository's root
+`Procfile` uses this script. The ignored `backend/Procfile` is a leftover
+duplicate; do not use it.
 
-## 5. Post-deploy checks
+The app must run from `backend/` (or have that directory on `PYTHONPATH`)
+because Alembic and `.env` resolution use the backend working directory.
 
-1. `curl https://<domain>/api/health` → `{"status":"ok"}`
-2. `curl https://<domain>/api/stats` → real counts (non-zero problems/sources)
-3. `curl https://<domain>/problems` → the SPA HTML with `<title>MANABI</title>`
-4. `curl -I https://<domain>/assets/<asset from dist>` → `200` + correct `content-type`
-5. `curl https://<domain>/api/problems/<known id>` → 200; the response must not
-   contain crawler fields (`content_hash`, `crawl_source_key`, `source_status`, …)
-6. `alembic current` → `head`; log in with GitHub in the browser → redirected home, username in the nav
-7. Chat dock → ask → reply links point at real catalog problems
+## 6. HTTPS, proxies, CORS, and cookies
 
-## Rate limits (env-tunable)
+- Render terminates TLS at its edge. `BASE_URL` must still be the public HTTPS
+  origin; the app does not infer it from proxy headers.
+- `SESSION_SECRET` signs an HttpOnly, SameSite=Lax session cookie. Secure is on
+  whenever the origin is HTTPS or `APP_ENV=production`.
+- HSTS is sent on HTTPS responses. It deliberately omits `includeSubDomains`.
+- Production CORS allows no cross-origin callers; the app is same-origin. Local
+  development allows `http://localhost:5173` for the Vite server.
+- No `TrustedHostMiddleware` is configured. The app does not build absolute
+  links from the Host header, but host-header validation is an open hardening
+  item.
+- There is no full Content-Security-Policy beyond `frame-ancestors 'none'`.
+  Adding one requires auditing the Rive, font, image, and inline-style surface.
 
-Chat: `CHAT_RATE_LIMIT_PER_DAY=20` messages per account per rolling 24 h
-(login-only, anonymous visitors are rejected). Submits:
-`SUBMIT_RATE_LIMIT_PER_HOUR=10` attempts per account per hour. Stars:
-`STAR_RATE_LIMIT_PER_HOUR=60`. Login: `AUTH_LOGIN_RATE_LIMIT_PER_HOUR=20` per
-IP per hour. Progress refresh: `PROGRESS_REFRESH_RATE_LIMIT_PER_HOUR=10`
-(owners exempt). Problem create: `PROBLEM_CREATE_PER_HOUR=5`. Reports:
-`REPORT_RATE_LIMIT_PER_HOUR=5`. Admins additionally share a sanity cap,
-`ADMIN_RATE_LIMIT_PER_HOUR=100`. Limits are stored in the database
-(`rate_limit_hits`), so they survive restarts and hold with multiple workers.
-Every 429 carries a `Retry-After` header plus a message that names the wait;
-the frontend renders it as a live countdown.
+**Proxy IP requirement:** Uvicorn only trusts `X-Forwarded-For` from
+`FORWARDED_ALLOW_IPS`, which defaults to loopback. Behind a platform proxy,
+set it to the platform's private proxy CIDR (Render's blueprint uses
+`10.0.0.0/8,127.0.0.1,::1`). Never use `*`: a client can spoof the leftmost
+address. The exact Render proxy range could not be verified from this
+repository; confirm it against the live platform before relying on per-IP login
+limits. If proxy trust is wrong, login attempts can share one bucket.
 
-## 6. The submission-verification system (0005) — production checklist
+## 7. Health checks
 
-Revision `0005_project_verification` adds columns on `projects`
-(`verification_status` default `needs_review`), a partial unique index
-`uq_project_repo_github_id_user_id` and the `project_reports` table. It is
-additive and safe: `0005.downgrade` only removes what it added.
+| Endpoint | Purpose | DB required |
+|---|---|---|
+| `GET /api/health/live` | Process liveness; used by Render's HTTP health check | No |
+| `GET /api/health` | Backward-compatible readiness check | Yes |
+| `GET /api/health/ready` | Explicit readiness check | Yes |
 
-1. **Backup**: `pg_dump -Fc -f manabi-pre-0005.dump $DATABASE_URL`.
-2. **Check the stamp on a copy first**: the production DB must be at
-   `0004_cleanup` before `upgrade head` (the app auto-runs `upgrade head` on
-   Postgres at startup, so a lagging stamp usually never happens here — verify
-   with `alembic current` on a restored copy).
-3. **Deploy** and confirm `alembic current` → `0005_project_verification (head)`.
-4. **Run the one-time re-verification dry run** (backfilled rows get
-   `relevance_checked_at = NULL`; this populates real relevance evidence):
+A database outage makes readiness fail but liveness stay green, avoiding a
+restart loop that cannot repair the database. Monitor readiness separately;
+Render's health check alone is not proof that the API can serve data.
 
-   ```
-   cd backend
-   python scripts/reverify_projects.py            # dry run — no writes, CSV report
-   # review backend/scripts/reverify_report.csv, then:
-   python scripts/reverify_projects.py --apply    # or --limit 20 to go in batches
-   ```
+## 8. Post-deploy checks
 
-   The script needs working `LLM_PROVIDER` config (it re-runs the relevance
-   check) and uses each owner's stored GitHub token when present. It is
-   **fail safe**: LLM or GitHub failure downgrades to `needs_review`, never to
-   `verified`, and it never inflates counts by force — statuses only move to
-   `verified` when the model itself confirms relevance (§6.4). Tokens are
-   never printed or written to the CSV.
-5. **Smoke test** the money path: submit a repo you own against any problem
-   (expect 201 + `needs_review` from the mock LLM or a real score with
-   Gemini), then approve it at `/admin/review`, then confirm the problem page
-   shows the verified-only counts.
+1. `curl https://<domain>/api/health/live` → `{"status":"ok"}`.
+2. `curl https://<domain>/api/health/ready` → `{"status":"ok"}`.
+3. `curl https://<domain>/api/stats` → real counts.
+4. `curl -H 'Accept: text/html' https://<domain>/problems` → SPA HTML with
+   `<title>MANABI</title>`.
+5. `curl -I https://<domain>/assets/<asset from dist>` → `200`, correct
+   `content-type`, immutable cache header.
+6. `curl -I https://<domain>/` → confirm `Strict-Transport-Security`.
+7. `alembic current` → `0017_integrity_constraints (head)`.
+8. Log in with GitHub, submit a test project, and exercise the admin review
+   path if those features are enabled.
+9. Confirm a missing asset returns JSON 404 rather than SPA HTML.
 
-### Verification rules at a glance (details in backend/app/services/verification.py)
+## 9. Logging, diagnostics, and monitoring
 
-- **Ownership (hard gate)**: the repo owner by GitHub numeric id (the only
-  accepted basis for a personal repo — a collaborator invite is not
-  ownership), push/admin permission from the authenticated repo payload for
-  organization-owned repos, or ≥ `CONTRIBUTOR_MIN_COMMITS` (3) entries under
-  your own id in `/contributors`. Username string matches are never trusted.
-- **Anti-abuse**: `MAX_SUBMISSIONS_PER_DAY` (5 rolling 24h),
-  `MAX_ACTIVE_PROJECTS_PER_USER` (10 non-rejected rows), one repo per user per
-  problem, one GitHub repo id per problem across everyone (legacy rows with a
-  NULL `repo_github_id` are exempt until re-verified), forks rejected unless
-  `ALLOW_FORK_SUBMISSIONS=true`, archived/disabled repos rejected.
-- **Relevance**: Gemini judges a `<problem>` block against a `<repository>`
-  block (README excerpt ≤ 4000 chars) and the submitter's summary — all
-  untrusted data is delimited and the prompt tells the model to ignore
-  instructions inside it. Score ≥ `RELEVANCE_VERIFY_MIN` (0.70) → `verified`;
-  ≥ `RELEVANCE_REJECT_BELOW` (0.35) → `needs_review`; below → hard 422. LLM
-  outages fall back to a keyword heuristic that can only reach
-  `needs_review`, never `verified`. Repos older than
-  `PREEXISTING_REPO_DAYS` (180) also need ≥ 0.85 to auto-verify.
-- **Re-verification paths**: progress refresh / project detail can flip a row
-  to `needs_review` (repo gone, renamed — tracked by the immutable GitHub id —
-  or ownership lost); a `needs_review` row auto-re-checks once per
-  `AUTO_REVERIFY_MIN_INTERVAL_HOURS` (24) when the repo gains a README + 3
-  commits; editing the solution summary always re-runs the check on demand.
-- **Human review**: admins run the submissions queue at `/admin/review`
-  (approve → `verified`, reject → `rejected`). Reports: any viewer may report
-  a verified project once; ≥ `REPORTS_BEFORE_REVIEW` (3) reports flips the row
-  back to `needs_review` for an admin.
-- **Limitation (known)**: contributor detection matches by GitHub **account
-  id**; if your commit emails are not linked to that account, your commits do
-  not appear in `/contributors` and contributor-based ownership fails even
-  though you contributed. Fix upstream (add the email to your GitHub account)
-  or submit with push access. This is a GitHub limitation, not a MANABI bug;
-  it is documented in the final report.
+- Uvicorn access logs and the platform's HTTP logs provide the request trail.
+- Application exceptions are logged server-side with stack traces and a
+  request id; public responses use a generic error message.
+- Error responses do not include request bodies, tokens, database URLs, or
+  provider keys.
+- `/api/health*` exposes only a status string.
+- There are no debug endpoints, metrics endpoints, or bundled APM/tracing.
+  Add provider monitoring for availability, latency, 5xx rate, and database
+  health. Log retention and alerting are platform responsibilities.
+- The API docs (`/docs`, `/openapi.json`) are public schema documentation, not
+  an operator console.
 
-### Token storage note (report-only, deliberately not implemented)
+## 10. Rollback and release procedure
 
-`users.github_token` (OAuth access token) is stored **in plaintext**,
-`String(255)`, inside the database. Pre-existing behaviour — this change set
-did not touch it — but the risk is documented: a database dump or SQLi leaks
-every user's GitHub token. Recommended hardening (not in this PR): encrypt at
-rest with an env-held key (`SESSION_SECRET` or a dedicated `GITHUB_TOKEN_KEY`)
-using Fernet/AES, decrypt only in the GitHub service layer, and rotate the
-defunct fallback collection. Ask before implementing.
+Releases are identified by the Git commit Render deploys. Render retains the
+previous deploy and its logs; the repository has no separate artifact registry.
+
+Application rollback:
+
+1. In Render, redeploy the previous known-good commit.
+2. Restore the matching environment variables and `BASE_URL`.
+3. Rebuild the frontend from that commit; the frontend and backend ship
+   together, so do not mix a new `dist` with an old backend.
+4. Run the readiness and post-deploy checks again.
+
+Database rollback:
+
+- Alembic downgrade is not a data-recovery plan. `0015` and `0016` deleted rows
+  and their downgrade is a no-op.
+- For data loss or a bad destructive migration, stop writes, restore the last
+  verified backup into a new database, point `DATABASE_URL` at it, and verify
+  with `alembic current`, `/api/health/ready`, and row counts.
+- The application schema must match the code version. If rolling back across a
+  schema-changing release, restore a backup from before that release or keep a
+  backward-compatible schema.
+
+Configuration rollback:
+
+- Revert dashboard environment variables and redeploy; do not rely on an old
+  process retaining them.
+- Rotating `SESSION_SECRET` invalidates existing sessions. That is expected on
+  a suspected compromise, not a routine rollback.
+
+Failed deploy handling:
+
+- A failed build cannot deploy because `sh build.sh` exits non-zero.
+- A failed startup fails the guard or uvicorn; Render keeps the previous live
+  instance.
+- A passing liveness check does not prove Postgres readiness; check
+  `/api/health/ready` before declaring success.
+
+## 11. Submission verification rules
+
+- **Ownership:** verified by GitHub numeric id (personal owner), push/admin
+  permission from the repo payload (organization), or
+  `CONTRIBUTOR_MIN_COMMITS` entries in `/contributors`. Username matches are
+  never trusted.
+- **Anti-abuse:** rolling daily submission cap, active-project cap, one repo per
+  user per problem, one GitHub repo id per problem, fork rejection unless
+  enabled, and archived/disabled repo rejection.
+- **Relevance:** delimited problem/repo text goes to the LLM. Score at or above
+  `RELEVANCE_VERIFY_MIN` verifies; at or above `RELEVANCE_REJECT_BELOW` goes to
+  human review; below it is rejected. LLM outages fall back to a keyword check
+  that can only reach `needs_review`. Repos older than `PREEXISTING_REPO_DAYS`
+  need a higher score to auto-verify.
+- **Human review:** admins use `/admin/review`; three reports flip a verified
+  project back to review.
+- **Known limitation:** contributor detection matches GitHub account ids. Commit
+  emails not linked to the account do not count as contributions.
+
+## 12. Known limitations
+
+- `users.github_token` is stored in plaintext in the database. A database dump
+  or SQL injection could expose GitHub tokens. Encryption is a separate,
+  deliberately unimplemented hardening project.
+- LLM prompts contain untrusted brief/README text. Delimiting and instructions
+  reduce prompt-injection risk but do not eliminate it.
+- The app auto-migrates at Postgres startup and has no cross-instance migration
+  lock. Use one instance during schema-changing deploys.
+- Proxy IP ranges and the resulting per-IP login limit require verification on
+  the live platform.
+- No formal RPO/RTO, structured logs, metrics, tracing, or alerting are defined
+  in the repository.
+- Browser support is not formally pinned; Playwright covers Chromium only.

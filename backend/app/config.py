@@ -1,11 +1,17 @@
 from functools import lru_cache
+from typing import Literal
+from urllib.parse import urlsplit
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    # Production requires an explicit environment so the deploy guard can reject
+    # localhost origins and SQLite before the service accepts traffic.
+    APP_ENV: Literal["development", "test", "production"] = "development"
     DATABASE_URL: str = "sqlite:///./app.db"
     SESSION_SECRET: str = "change-me-long-random-string"
     BASE_URL: str = "http://localhost:5173"
@@ -85,6 +91,20 @@ class Settings(BaseSettings):
     ALLOW_FORK_SUBMISSIONS: bool = False
     AUTO_REVERIFY_MIN_INTERVAL_HOURS: int = 24
     REPORTS_BEFORE_REVIEW: int = 3
+
+    @field_validator("BASE_URL")
+    @classmethod
+    def _validate_base_url(cls, value: str) -> str:
+        """Keep OAuth redirects and cookie flags on one absolute origin."""
+        value = value.strip().rstrip("/")
+        parsed = urlsplit(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise ValueError("BASE_URL must be an absolute http(s) URL")
+        if parsed.path:
+            raise ValueError("BASE_URL must be an origin without a path")
+        if parsed.query or parsed.fragment:
+            raise ValueError("BASE_URL must not include a query string or fragment")
+        return value
 
 
 @lru_cache

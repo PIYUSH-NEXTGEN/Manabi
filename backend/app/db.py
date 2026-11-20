@@ -17,10 +17,18 @@ _SessionLocal = None
 
 
 def normalized_database_url(raw: str) -> str:
-    """Accept libpq-style 'postgres://' URLs (Neon/Supabase/shears copy-paste). SQLAlchemy 2 rejects that scheme."""
+    """Normalize provider URLs to the Postgres driver this project installs.
+
+    SQLAlchemy 2.1 resolves plain ``postgresql://`` to psycopg 3, while the
+    runtime pins psycopg2-binary. Selecting the driver explicitly keeps
+    Neon/Supabase/Render connection strings working without adding a second
+    database driver or changing the deployment contract.
+    """
     url = make_url(raw)
-    if url.drivername == "postgres":
-        return raw.replace("postgres://", "postgresql://", 1)
+    if url.drivername in {"postgres", "postgresql"}:
+        return url.set(drivername="postgresql+psycopg2").render_as_string(
+            hide_password=False
+        )
     return raw
 
 

@@ -10,9 +10,13 @@ python -m pip install --no-cache-dir -r backend/requirements.txt
 
 echo "--- frontend build ---"
 cd frontend
-if command -v npm >/dev/null 2>&1; then
-  npm ci
-  npm run build
-else
-  echo "npm not found — skipping frontend build (API-only mode)."
+if ! command -v npm >/dev/null 2>&1; then
+  echo "ERROR: npm is required to build the frontend." >&2
+  exit 1
+fi
+npm ci
+npm run build
+if [ ! -f dist/index.html ]; then
+  echo "ERROR: frontend build produced no dist/index.html." >&2
+  exit 1
 fi

@@ -79,10 +79,12 @@ def test_database_outage_maps_to_503_through_the_app(monkeypatch):
     with TestClient(main.app) as client:
         monkeypatch.setattr(main, "get_engine", down)
         try:
+            live = client.get("/api/health/live")
             response = client.get("/api/health")
         finally:
             monkeypatch.setattr(main, "get_engine", original)
 
+    assert live.status_code == 200
     assert response.status_code == 503
     assert response.json()["detail"]["code"] == "database_unavailable"
     assert response.headers["x-request-id"]

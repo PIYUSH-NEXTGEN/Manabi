@@ -32,6 +32,43 @@ jobs:
         env:
           LLM_PROVIDER: mock
 
+  postgres-migrations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: manabi
+          POSTGRES_PASSWORD: manabi-ci-only
+          POSTGRES_DB: manabi_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U manabi -d manabi_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+      - name: Upgrade pip
+        run: python -m pip install --upgrade "pip==26.3"
+      - name: Install backend deps
+        run: pip install -r backend/requirements.txt
+      - name: Alembic upgrade on Postgres
+        run: |
+          python -m alembic upgrade head
+          python -m alembic current | tee /tmp/current
+          grep -q "(head)" /tmp/current
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://manabi:manabi-ci-only@localhost:5432/manabi_ci
+
   frontend:
     runs-on: ubuntu-latest
     steps:

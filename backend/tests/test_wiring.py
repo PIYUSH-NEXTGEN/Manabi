@@ -359,6 +359,8 @@ REMOVED_TABLE_NAMES = {
 
 CORE_API_ROUTES = (
     "/api/health",
+    "/api/health/live",
+    "/api/health/ready",
     "/api/problems",
     "/api/problems/facets",
     "/api/problems/{problem_id}",

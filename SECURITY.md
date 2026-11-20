@@ -49,9 +49,9 @@ We accept this risk because the model output is used for relevance checks and ch
 
 ### OAuth and session cookies
 
-Sessions are signed and, on a real HTTPS origin, set with Secure and HttpOnly flags. The app refuses to boot with the placeholder session secret when `BASE_URL` is not localhost. That fail-fast check is intentional: a predictable secret is worse than a crash.
+Sessions are signed and set with HttpOnly and SameSite=Lax; Secure is enabled on HTTPS (and always when `APP_ENV=production`). With `APP_ENV=production`, startup also rejects localhost/HTTP origins, the placeholder/short session secret, and SQLite. That fail-fast check is intentional: a predictable secret or an ephemeral production database is worse than a crashed deploy.
 
-If you deploy with a real domain, use a real `BASE_URL` and a real `SESSION_SECRET`. Do not skip that step and hope the platform TLS layer is enough.
+If you deploy with a real domain, use `APP_ENV=production`, a real public HTTPS `BASE_URL`, a durable Postgres `DATABASE_URL`, and a real `SESSION_SECRET`. Do not skip that step and hope the platform TLS layer is enough. Behind a proxy, configure `FORWARDED_ALLOW_IPS` to the proxy's private CIDR rather than `*`; otherwise per-IP login limits can collapse into one shared bucket.
 
 ### Rate limits are real, not cosmetic
 

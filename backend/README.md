@@ -43,8 +43,9 @@ against Postgres it runs `alembic upgrade head` itself, so prod never silently d
 .venv\Scripts\python -m alembic revision -m "..."    # create a new revision (hand-edit it)
 ```
 
-- `DATABASE_URL` is read from `backend/.env` / env (same value the app uses; `postgres://`
-  is rewritten to `postgresql://` automatically).
+- `DATABASE_URL` is read from `backend/.env` / env. Plain `postgres://` and
+  `postgresql://` URLs are normalized to the installed `postgresql+psycopg2`
+  driver automatically.
 - Run `upgrade head` before starting the app against a fresh Postgres (Neon/Supabase) —
   see `../DEPLOY.md`.
 
@@ -52,6 +53,7 @@ against Postgres it runs `alembic upgrade head` itself, so prod never silently d
 
 | Variable | Purpose |
 |---|---|
+| `APP_ENV` | `development` (default), `test`, or `production`; production enforces HTTPS, public `BASE_URL`, and non-SQLite `DATABASE_URL` |
 | `DATABASE_URL` | SQLite (`sqlite:///./app.db`) or Postgres |
 | `SESSION_SECRET` | Session cookie signing key — set a long random string |
 | `BASE_URL` | Used for OAuth callback routing (localhost or deployed domain) |
@@ -74,7 +76,8 @@ Without an LLM key the AI endpoints return `503 {"detail": "AI is not configured
 
 ## API surface
 
-- `GET /api/health` — liveness + DB check
+- `GET /api/health/live` — process liveness only
+- `GET /api/health` / `GET /api/health/ready` — readiness + DB check
 - **Problems:** `GET /api/problems` (filters `q/field/domain/difficulty/tech/source/sort/limit/offset`), `GET /api/problems/facets`, `GET /api/problems/{id}`, `POST /api/problems` (auth)
 - **GitHub OAuth:** `GET /api/auth/github/login`, `GET /api/auth/github/callback`, `GET /api/me`, `POST /api/auth/logout` (logout is POST)
 - **Projects:** `POST /api/problems/{id}/projects` (auth), `GET /api/projects/{id}`, `GET /api/projects/{id}/progress?refresh=`, `GET /api/me/projects` (auth)

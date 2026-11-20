@@ -37,9 +37,10 @@ fill in web and AI/ML briefs.
 `/` (with SPA fallback) and keeps every API route under `/api`. No nginx is
 needed; put your platform's TLS or load balancer in front of uvicorn. SQLite
 is the local default, managed Postgres (Neon/Supabase) is the production path,
-and the `postgres://` scheme is rewritten with `pool_pre_ping` enabled
-automatically. Health check: `GET /api/health` returns `{"status":"ok"}` after
-touching the database.
+and provider URLs are normalized to the installed psycopg2 driver with
+`pool_pre_ping` enabled automatically. Health checks: `/api/health/live` is
+process liveness, while `/api/health` and `/api/health/ready` also touch the
+database.
 
 The OpenAPI contract lives at `docs/openapi.json` (regenerate frontend types
 with `npm run gen:api` in `frontend/`).
@@ -191,9 +192,10 @@ people touch:
 
 | Variable | Default | Purpose |
 |---|---|---|
+| `APP_ENV` | `development` | Set `production` on a deployed host; startup then rejects localhost, HTTP, and SQLite |
 | `DATABASE_URL` | `sqlite:///./app.db` | SQLite locally; managed Postgres in prod |
 | `SESSION_SECRET` | placeholder | Long random string; the app refuses to boot non-local with the placeholder |
-| `BASE_URL` | `http://localhost:5173` | Public origin; drives the OAuth callback and cookie Secure/HttpOnly flags |
+| `BASE_URL` | `http://localhost:5173` | Public origin; drives the OAuth callback and cookie Secure flag |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | empty | GitHub OAuth app for login |
 | `LLM_PROVIDER` | `mock` | `gemini`, `anthropic`, or `mock` |
 | `GEMINI_API_KEY` / `GEMINI_MODEL` / `ANTHROPIC_API_KEY` / `LLM_MODEL_FAST` | empty | Provider keys and optional model overrides |
@@ -239,11 +241,11 @@ backend.
 
 ## CI
 
-`.github/workflows/ci.yml` runs on every push and pull request: an Alembic
-migration smoke check and the backend suite (Python 3.12, mock LLM, in-memory
-SQLite), plus the frontend `npm run build` (typecheck + bundle), Vitest, and
-the Playwright smoke test on Chromium. The frontend job reads the pinned Node
-version from `.node-version`.
+`.github/workflows/ci.yml` runs on every push and pull request: SQLite and
+Postgres Alembic migration smoke checks, the backend suite (Python 3.12, mock
+LLM, in-memory SQLite), plus the frontend `npm run build` (typecheck + bundle),
+Vitest, and the Playwright smoke test on Chromium. The frontend job reads the
+pinned Node version from `.node-version`.
 
 ## Deploy
 
@@ -251,16 +253,16 @@ Full runbook with migrations, backup steps, and the verification checklist:
 [DEPLOY.md](DEPLOY.md). Summary:
 
 ```sh
-cd frontend && npm ci && npm run build     # -> frontend/dist/
-# set env vars on the host (DATABASE_URL, SESSION_SECRET, BASE_URL,
-# GITHUB_CLIENT_ID/SECRET, LLM keys); never in git
-cd ../backend && sh start.sh               # uvicorn app.main:app --host 0.0.0.0 --port $PORT
+sh build.sh                                # backend deps + frontend/dist
+# set APP_ENV=production plus DATABASE_URL, SESSION_SECRET, BASE_URL,
+# GITHUB_CLIENT_ID/SECRET, and LLM keys on the host; never in git
+cd backend && sh start.sh                  # uvicorn app.main:app --host 0.0.0.0 --port $PORT
 ```
 
 A `Procfile` and a one-click Render blueprint (`render.yaml`) are included.
 Postgres deployments run `alembic upgrade head` automatically at startup; the
-runbook covers the manual path and the one-time cleanup and re-verification
-scripts.
+runbook covers production guards, backups, rollback, health checks, proxy
+trust, and the one-time cleanup and re-verification scripts.
 
 ## Docs
 

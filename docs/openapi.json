@@ -5,10 +5,11 @@
     "version": "0.1.0"
   },
   "paths": {
-    "/api/health": {
+    "/api/health/live": {
       "get": {
-        "summary": "Health",
-        "operationId": "health_api_health_get",
+        "summary": "Liveness",
+        "description": "Process liveness only: never restart-loop on a database outage.",
+        "operationId": "liveness_api_health_live_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -19,7 +20,53 @@
                     "type": "string"
                   },
                   "type": "object",
-                  "title": "Response Health Api Health Get"
+                  "title": "Response Liveness Api Health Live Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health/ready": {
+      "get": {
+        "summary": "Readiness",
+        "description": "Readiness: the service cannot serve its main API without the DB.",
+        "operationId": "readiness_api_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Readiness Api Health Ready Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/health": {
+      "get": {
+        "summary": "Readiness",
+        "description": "Readiness: the service cannot serve its main API without the DB.",
+        "operationId": "readiness_api_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Readiness Api Health Get"
                 }
               }
             }

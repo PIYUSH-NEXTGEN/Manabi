@@ -3,6 +3,7 @@ import uuid
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from pathlib import Path
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -28,11 +29,34 @@ def frontend_dist() -> Path | None:
 DEFAULT_SESSION_SECRET = "change-me-long-random-string"
 
 
+def _is_local_base_url(base_url: str) -> bool:
+    host = (urlsplit(base_url).hostname or "").lower()
+    return host in {"localhost", "127.0.0.1", "::1"}
+
+
 def guard_deploy_secrets(settings) -> None:
-    """Fail fast on obviously unsafe deploy settings (local dev keeps defaults)."""
-    is_local = "localhost" in settings.BASE_URL or settings.BASE_URL.startswith("http://127.0.0.1")
+    """Fail fast on unsafe deploy settings (local dev keeps its defaults)."""
+    app_env = getattr(settings, "APP_ENV", "development")
+    base_url = (settings.BASE_URL or "").strip().rstrip("/")
+    is_local = _is_local_base_url(base_url)
+
+    if app_env == "production":
+        parsed = urlsplit(base_url)
+        if parsed.scheme != "https" or not parsed.netloc or is_local:
+            raise RuntimeError(
+                "APP_ENV=production requires BASE_URL to be a public https:// origin. "
+                "Set BASE_URL to the deployed domain before starting the service."
+            )
+        database_url = str(getattr(settings, "DATABASE_URL", "")).strip().lower()
+        if database_url.startswith("sqlite"):
+            raise RuntimeError(
+                "APP_ENV=production requires a durable non-SQLite DATABASE_URL. "
+                "Set the managed Postgres connection string before starting the service."
+            )
+
     if is_local:
         return
+
     secret = (settings.SESSION_SECRET or "").strip()
     # An empty or short key still signs cookies, and a predictable key lets
     # anyone mint a session cookie for any account. Enforce real entropy on
@@ -143,8 +167,15 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    @app.get("/api/health/live")
+    def liveness() -> dict[str, str]:
+        """Process liveness only: never restart-loop on a database outage."""
+        return {"status": "ok"}
+
     @app.get("/api/health")
-    def health() -> dict[str, str]:
+    @app.get("/api/health/ready")
+    def readiness() -> dict[str, str]:
+        """Readiness: the service cannot serve its main API without the DB."""
         with get_engine().connect() as conn:
             conn.execute(text("SELECT 1"))
         return {"status": "ok"}
@@ -153,7 +184,6 @@ def create_app() -> FastAPI:
     async def basic_security_headers(request: Request, call_next):
         request_id = _request_id(request)
         request.state.request_id = request_id
-        # Platform TLS/load balancer owns HSTS; these are process-level and free.
         response = await call_next(request)
         response.headers.setdefault("X-Request-ID", request_id)
         response.headers.setdefault("X-Content-Type-Options", "nosniff")
@@ -162,6 +192,12 @@ def create_app() -> FastAPI:
         # stop clickjacking of the session-backed buttons.
         response.headers.setdefault("X-Frame-Options", "DENY")
         response.headers.setdefault("Content-Security-Policy", "frame-ancestors 'none'")
+        if settings.BASE_URL.startswith("https://"):
+            # Render terminates TLS at its edge; HSTS still belongs on the
+            # response so browsers refuse a later plain-HTTP downgrade.
+            response.headers.setdefault(
+                "Strict-Transport-Security", "max-age=31536000"
+            )
         if request.url.path.startswith("/api/"):
             # Authenticated JSON (me, dashboard, admin) must not sit in browser
             # or intermediary caches where a shared machine could replay it.

@@ -1,7 +1,7 @@
 # MANABI — one-service deploy (FastAPI serves frontend/dist + /api).
 # Blueprint: https://render.com/docs/blueprint-spec
-# After "New → Blueprint", set the SECRET env vars in the dashboard
-# (GITHUB_CLIENT_SECRET, GEMINI_API_KEY, DATABASE_URL).
+# After "New → Blueprint", set BASE_URL and the secret env vars in the
+# dashboard (DATABASE_URL, GITHUB_CLIENT_SECRET, GEMINI_API_KEY).
 services:
   - type: web
     name: manabi
@@ -9,12 +9,18 @@ services:
     plan: free
     buildCommand: sh build.sh
     startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25
-    healthCheckPath: /api/health
+    healthCheckPath: /api/health/live
     envVars:
+      - key: APP_ENV
+        value: production
       - key: PYTHON_VERSION
         value: 3.12.7
       - key: NODE_VERSION
         value: 22.13.0
+      # Trust only Render's private proxy network, never "*". Verify the
+      # platform's actual range before relying on per-IP login limits.
+      - key: FORWARDED_ALLOW_IPS
+        value: "10.0.0.0/8,127.0.0.1,::1"
       - key: BASE_URL
         sync: false # set to https://<your-service>.onrender.com after first deploy
       - key: SESSION_SECRET
