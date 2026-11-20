@@ -1,3 +1,4 @@
+import logging
 import sys
 from logging.config import fileConfig
 from pathlib import Path
@@ -14,8 +15,13 @@ from app.models import Base  # noqa: E402
 # Alembic Config object; alembic.ini values are available here.
 config = context.config
 
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+# The app calls upgrade_to_head() during startup, after configure_logging()
+# installed the single JSON/text handler. fileConfig would replace that handler
+# and disable every existing logger (it defaults to disable_existing_loggers),
+# silently dropping application logs for the rest of the process. Only adopt
+# alembic.ini's console config when nothing else configured logging (CLI use).
+if config.config_file_name is not None and not logging.getLogger().handlers:
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 target_metadata = Base.metadata
 

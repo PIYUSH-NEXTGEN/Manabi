@@ -10,6 +10,9 @@ import '@fontsource/jetbrains-mono/700.css';
 import './index.css';
 import { App } from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { installGlobalErrorReporting } from './lib/errorReporting';
+
+installGlobalErrorReporting();
 
 async function prepare(): Promise<void> {
   if (import.meta.env.VITE_USE_MOCKS === 'true') {

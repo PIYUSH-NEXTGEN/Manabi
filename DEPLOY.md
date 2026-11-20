@@ -83,6 +83,11 @@ local development and is ignored.
 | `PROGRESS_REFRESH_RATE_LIMIT_PER_HOUR` | Optional | No | Forced progress refreshes; default `10`. |
 | `PROBLEM_CREATE_PER_HOUR` | Optional | No | Problem publishing per user per hour; default `5`. |
 | `REPORT_RATE_LIMIT_PER_HOUR` | Optional | No | Project reports per user per hour; default `5`. |
+| `CLIENT_ERROR_RATE_LIMIT_PER_HOUR` | Optional | No | Browser error reports per client IP per hour; default `60`. |
+| `LOG_LEVEL` | Optional | No | `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`; default `INFO`. |
+| `LOG_FORMAT` | Optional | No | `json` or `text`; defaults to JSON in production and text in development/test. |
+| `SLOW_REQUEST_MS` | Optional | No | Requests at or above this duration log a `slow_request` warning; default `2000`. |
+| `APP_VERSION` | Optional | No | Release stamp attached to every log line. Falls back to `RENDER_GIT_COMMIT`, then `dev`. |
 | `ADMIN_GITHUB_USERNAMES` | Optional | No | Comma-separated GitHub logins allowed into `/admin/review`. |
 | `RELEVANCE_VERIFY_MIN` | Optional | No | Auto-verify score threshold; default `0.70`. |
 | `RELEVANCE_REJECT_BELOW` | Optional | No | Hard-reject score threshold; default `0.35`. |
@@ -106,6 +111,7 @@ Platform/build variables:
 | `VITE_CONTACT_EMAIL` | Build | No | Public contact address. |
 | `VITE_GITHUB_ISSUES_URL` | Build | No | Public issue-tracker URL. |
 | `VITE_MASCOT_RIVE_SRC` | Build | No | Public Rive asset path; empty uses the PNG fallback. |
+| `VITE_APP_VERSION` | Build | No | Release stamp attached to browser error reports. |
 
 `VITE_*` values are compiled into the public bundle. Never put a secret in one.
 
@@ -203,8 +209,11 @@ retention, encryption, and restore time in the provider dashboard.
 Render uses the start command in `render.yaml`:
 
 ```sh
-cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25
+cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25 --no-access-log
 ```
+
+`--no-access-log` disables uvicorn's plain access line because the app emits
+its own structured, request-id-aware line per API request.
 
 On a VM or a Procfile-based host:
 
@@ -272,15 +281,31 @@ Render's health check alone is not proof that the API can serve data.
 
 ## 9. Logging, diagnostics, and monitoring
 
-- Uvicorn access logs and the platform's HTTP logs provide the request trail.
-- Application exceptions are logged server-side with stack traces and a
-  request id; public responses use a generic error message.
-- Error responses do not include request bodies, tokens, database URLs, or
-  provider keys.
+The API writes one structured line per event to stdout; the platform captures
+it. Production defaults to JSON (`LOG_FORMAT=json`), development/test to compact
+text. Every line carries `timestamp`, `level`, `service`, `environment`,
+`version`, `logger`, `message`, and `request_id`.
+
+- One `request_completed` line per `/api/*` request (method, route template,
+  status, duration). Client errors such as 4xx stay `INFO`; 5xx emit
+  `request_failed` at `ERROR`, and requests over `SLOW_REQUEST_MS` add a
+  `slow_request` warning.
+- Successful health probes are not access-logged: Render polls them
+  continuously and their lines would bury real incidents. A failing or slow
+  probe is still logged.
+- Exceptions log a stack trace and `error_type` server-side, but responses keep
+  a generic message and a request id. Credentials (Bearer tokens, API keys,
+  GitHub tokens, database URLs) are redacted centrally before formatting.
+- The request id comes from `X-Request-ID` when it is short and well-formed,
+  otherwise a UUID is minted. The same value is returned in the response header
+  and included in every log line emitted while that request is being handled.
+- The frontend reports uncaught errors and React error-boundary crashes from
+  production builds to `POST /api/client-errors`. Reports are bounded, logged,
+  and rate limited per IP; nothing is persisted.
 - `/api/health*` exposes only a status string.
-- There are no debug endpoints, metrics endpoints, or bundled APM/tracing.
-  Add provider monitoring for availability, latency, 5xx rate, and database
-  health. Log retention and alerting are platform responsibilities.
+- There are no metrics, tracing, or bundled APM. Use the platform (or an
+  external monitor) for availability, latency, 5xx-rate, and database alerts on
+  `/api/health/ready`. Log retention and alerting are platform responsibilities.
 - The API docs (`/docs`, `/openapi.json`) are public schema documentation, not
   an operator console.
 
@@ -353,6 +378,7 @@ Failed deploy handling:
   lock. Use one instance during schema-changing deploys.
 - Proxy IP ranges and the resulting per-IP login limit require verification on
   the live platform.
-- No formal RPO/RTO, structured logs, metrics, tracing, or alerting are defined
-  in the repository.
+- No formal RPO/RTO, metrics, tracing, or alerting are defined in the
+  repository; structured logs exist, but retention and paging stay with the
+  hosting platform.
 - Browser support is not formally pinned; Playwright covers Chromium only.

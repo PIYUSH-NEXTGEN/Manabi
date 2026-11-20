@@ -5,6 +5,7 @@ interface ImportMetaEnv {
   readonly VITE_CONTACT_EMAIL?: string;
   readonly VITE_GITHUB_ISSUES_URL?: string;
   readonly VITE_MASCOT_RIVE_SRC?: string;
+  readonly VITE_APP_VERSION?: string;
 }
 
 interface ImportMeta {

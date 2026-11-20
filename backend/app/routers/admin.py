@@ -2,6 +2,8 @@
 their evidence, approve or reject them. Problem-review endpoints were removed
 deliberately. This queue is for project submissions only."""
 
+import logging
+
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import joinedload
@@ -12,6 +14,7 @@ from app.models import Problem, Project, ProjectReport, VERIFICATION_NEEDS_REVIE
 from app.services import verification
 
 router = APIRouter(prefix="/api/admin/submissions", tags=["admin"])
+logger = logging.getLogger(__name__)
 
 # Manual track curation (§ board "Browse by goal"). Separate router so the
 # submissions-only contract above stays untouched.
@@ -122,7 +125,7 @@ def list_submissions(
 
 
 def _review_submission(
-    db, project_id: int, status: str, note: str | None
+    db, project_id: int, status: str, note: str | None, admin_id: int
 ) -> schemas.AdminSubmissionActionOut:
     """Set an admin decision and its optional note (shared by approve/reject)."""
     project = db.get(Project, project_id)
@@ -132,6 +135,17 @@ def _review_submission(
     if note:
         project.review_note = verification.clean_text(note)[:2000]
     db.commit()
+    logger.info(
+        "Admin decision project_id=%s status=%s",
+        project.id,
+        status,
+        extra={
+            "event": "admin_decision",
+            "project_id": project.id,
+            "admin_id": admin_id,
+            "status": status,
+        },
+    )
     return schemas.AdminSubmissionActionOut(
         ok=True, project_id=project.id, verification_status=project.verification_status
     )
@@ -139,9 +153,9 @@ def _review_submission(
 
 @router.post("/{project_id}/approve", response_model=schemas.AdminSubmissionActionOut)
 def approve_submission(project_id: int, user: AdminUser, db: DB, note: str | None = None):
-    return _review_submission(db, project_id, VERIFICATION_VERIFIED, note)
+    return _review_submission(db, project_id, VERIFICATION_VERIFIED, note, user.id)
 
 
 @router.post("/{project_id}/reject", response_model=schemas.AdminSubmissionActionOut)
 def reject_submission(project_id: int, user: AdminUser, db: DB, note: str | None = None):
-    return _review_submission(db, project_id, VERIFICATION_REJECTED, note)
+    return _review_submission(db, project_id, VERIFICATION_REJECTED, note, user.id)

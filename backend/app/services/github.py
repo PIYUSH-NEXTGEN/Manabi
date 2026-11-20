@@ -1,11 +1,14 @@
 import asyncio
 import base64
+import logging
 import re
 from datetime import datetime, timedelta, timezone
 from urllib.parse import unquote, urlparse
 from collections import Counter
 
 import httpx
+
+logger = logging.getLogger(__name__)
 
 API_BASE = "https://api.github.com"
 STATUS_WINDOW_DAYS = 7
@@ -98,17 +101,60 @@ def _headers(token: str | None) -> dict[str, str]:
 async def _fetch_json(path: str, token: str | None, params: dict | None = None):
     try:
         response = await get_client().get(path, headers=_headers(token), params=params)
-    except httpx.HTTPError:
+    except httpx.HTTPError as exc:
+        logger.warning(
+            "GitHub request failed path=%s error=%s",
+            path,
+            type(exc).__name__,
+            extra={
+                "event": "external_api_failed",
+                "operation": "github_fetch",
+                "path": path,
+                "error_type": type(exc).__name__,
+            },
+        )
         raise GitHubError(502, "Could not reach GitHub")
     if response.status_code == 200:
         try:
             return response.json()
         except ValueError:
+            logger.warning(
+                "GitHub returned unreadable JSON path=%s",
+                path,
+                extra={
+                    "event": "external_api_failed",
+                    "operation": "github_fetch",
+                    "path": path,
+                    "error_type": "ValueError",
+                },
+            )
             raise GitHubError(502, "GitHub returned an invalid response")
     if response.status_code == 404:
+        logger.debug("GitHub not found path=%s", path)
         raise GitHubError(404, "Not found on GitHub")
     if response.status_code == 403:
+        logger.warning(
+            "GitHub rate limit reached path=%s",
+            path,
+            extra={
+                "event": "external_api_rate_limited",
+                "operation": "github_fetch",
+                "path": path,
+                "status": response.status_code,
+            },
+        )
         raise GitHubError(403, "GitHub rate limit reached")
+    logger.warning(
+        "GitHub unavailable path=%s status=%s",
+        path,
+        response.status_code,
+        extra={
+            "event": "external_api_failed",
+            "operation": "github_fetch",
+            "path": path,
+            "status": response.status_code,
+        },
+    )
     raise GitHubError(502, "GitHub unavailable")
 
 
@@ -168,7 +214,18 @@ async def fetch_contributors(owner: str, name: str, token: str | None = None) ->
         response = await get_client().get(
             f"/repos/{owner}/{name}/contributors", headers=_headers(token), params={"per_page": 100}
         )
-    except httpx.HTTPError:
+    except httpx.HTTPError as exc:
+        logger.warning(
+            "GitHub contributors request failed repo=%s/%s error=%s",
+            owner,
+            name,
+            type(exc).__name__,
+            extra={
+                "event": "external_api_failed",
+                "operation": "github_contributors",
+                "error_type": type(exc).__name__,
+            },
+        )
         raise GitHubError(502, "Could not reach GitHub")
     if response.status_code in (200, 204):
         data = response.json() if response.status_code == 200 else []
@@ -176,7 +233,28 @@ async def fetch_contributors(owner: str, name: str, token: str | None = None) ->
     if response.status_code == 404:
         return []
     if response.status_code == 403:
+        logger.warning(
+            "GitHub rate limit reached repo=%s/%s",
+            owner,
+            name,
+            extra={
+                "event": "external_api_rate_limited",
+                "operation": "github_contributors",
+                "status": response.status_code,
+            },
+        )
         raise GitHubError(403, "GitHub rate limit reached")
+    logger.warning(
+        "GitHub contributors unavailable repo=%s/%s status=%s",
+        owner,
+        name,
+        response.status_code,
+        extra={
+            "event": "external_api_failed",
+            "operation": "github_contributors",
+            "status": response.status_code,
+        },
+    )
     raise GitHubError(502, "GitHub unavailable")
 
 
@@ -222,9 +300,31 @@ async def get_progress(owner: str, name: str, token: str | None = None) -> dict 
             _fetch_issues(owner, name, token),
             return_exceptions=True,
         )
-    except (httpx.HTTPError, GitHubError):
+    except (httpx.HTTPError, GitHubError) as exc:
+        logger.warning(
+            "GitHub progress fetch failed repo=%s/%s error=%s",
+            owner,
+            name,
+            type(exc).__name__,
+            extra={
+                "event": "external_api_failed",
+                "operation": "github_progress",
+                "error_type": type(exc).__name__,
+            },
+        )
         return None
     if isinstance(commits, Exception):
+        logger.warning(
+            "GitHub progress has no commit data repo=%s/%s error=%s",
+            owner,
+            name,
+            type(commits).__name__,
+            extra={
+                "event": "external_api_failed",
+                "operation": "github_progress",
+                "error_type": type(commits).__name__,
+            },
+        )
         return None
     dates = [
         d
@@ -291,9 +391,22 @@ async def get_user_signals(token: str | None) -> dict | None:
     """Top languages (by repo count) and repo topics for the authenticated user."""
     try:
         repos = await _fetch_json("/user/repos", token, params={"per_page": 100, "sort": "updated"})
-    except (httpx.HTTPError, GitHubError):
+    except (httpx.HTTPError, GitHubError) as exc:
+        logger.warning(
+            "GitHub user signals unavailable error=%s",
+            type(exc).__name__,
+            extra={
+                "event": "external_api_failed",
+                "operation": "github_user_signals",
+                "error_type": type(exc).__name__,
+            },
+        )
         return None
     if not isinstance(repos, list):
+        logger.warning(
+            "GitHub user signals had the wrong shape",
+            extra={"event": "external_api_failed", "operation": "github_user_signals"},
+        )
         return None
     repos = [repo for repo in repos if isinstance(repo, dict)]
     languages = Counter(
@@ -344,7 +457,17 @@ async def fetch_contribution_histogram(username: str, token: str | None) -> list
                 token,
                 params={"per_page": 100, "page": page},
             )
-        except (httpx.HTTPError, GitHubError):
+        except (httpx.HTTPError, GitHubError) as exc:
+            logger.warning(
+                "GitHub contribution histogram unavailable user=%s error=%s",
+                username,
+                type(exc).__name__,
+                extra={
+                    "event": "external_api_failed",
+                    "operation": "github_heatmap",
+                    "error_type": type(exc).__name__,
+                },
+            )
             return None
         if not isinstance(events, list):
             break

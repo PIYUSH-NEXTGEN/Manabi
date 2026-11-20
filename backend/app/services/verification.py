@@ -805,16 +805,39 @@ async def create_submission(
         db.rollback()
         raise SubmissionError(409, "already_submitted", "You already linked this repository to this problem.")
     db.refresh(project)
+    logger.info(
+        "Submission created project_id=%s user_id=%s status=%s",
+        project.id,
+        user.id,
+        project.verification_status,
+        extra={
+            "event": "submission_created",
+            "project_id": project.id,
+            "user_id": user.id,
+            "status": project.verification_status,
+        },
+    )
     return project
 
 
 async def _commit_count(facts: RepoFacts, token: str | None) -> int:
     try:
         commits = await github.fetch_commits(facts.owner_login, facts.name, token)
-    except Exception:  # noqa: BLE001
+    except Exception as exc:  # noqa: BLE001
         # Transient GitHub trouble must not turn into a hard rejection, so
         # fail open at the minimum: only a readable, genuinely short history
         # fails the MIN_COMMIT_COUNT gate.
+        logger.warning(
+            "Commit count unavailable repo=%s/%s error=%s",
+            facts.owner_login,
+            facts.name,
+            type(exc).__name__,
+            extra={
+                "event": "external_api_failed",
+                "operation": "github_commit_count",
+                "error_type": type(exc).__name__,
+            },
+        )
         return MIN_COMMIT_COUNT
     return len(commits) if isinstance(commits, list) else MIN_COMMIT_COUNT
 
@@ -851,8 +874,23 @@ async def refresh_project_state(db, project: Project, user: User | None) -> None
             project.verification_status = VERIFICATION_NEEDS_REVIEW
             project.relevance_reason = "Repository no longer found or is no longer public"
             db.commit()
+            logger.info(
+                "Repository disappeared during refresh project_id=%s",
+                project.id,
+                extra={"event": "repository_unavailable", "project_id": project.id},
+            )
         return
-    except Exception:
+    except Exception as exc:  # noqa: BLE001 - refresh side work must not break the caller
+        logger.warning(
+            "Repository refresh failed project_id=%s error=%s",
+            project.id,
+            type(exc).__name__,
+            extra={
+                "event": "verification_refresh_failed",
+                "project_id": project.id,
+                "error_type": type(exc).__name__,
+            },
+        )
         return
 
     facts = RepoFacts.from_repo(repo)

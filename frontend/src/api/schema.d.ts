@@ -4,6 +4,46 @@
  */
 
 export interface paths {
+    "/api/health/live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Liveness
+         * @description Process liveness only: never restart-loop on a database outage.
+         */
+        get: operations["liveness_api_health_live_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/health/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Readiness
+         * @description Readiness: the service cannot serve its main API without the DB.
+         */
+        get: operations["readiness_api_health_ready_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/health": {
         parameters: {
             query?: never;
@@ -11,8 +51,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Health */
-        get: operations["health_api_health_get"];
+        /**
+         * Readiness
+         * @description Readiness: the service cannot serve its main API without the DB.
+         */
+        get: operations["readiness_api_health_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -429,6 +472,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/client-errors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report Client Error */
+        post: operations["report_client_error_api_client_errors_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -571,6 +631,35 @@ export interface components {
              * @enum {string}
              */
             difficulty: "beginner" | "intermediate" | "advanced";
+        };
+        /**
+         * ClientErrorIn
+         * @description A bounded browser failure report. Free text is truncated server-side.
+         */
+        ClientErrorIn: {
+            /**
+             * Event
+             * @default error
+             * @enum {string}
+             */
+            event: "error" | "unhandledrejection" | "react_error_boundary";
+            /**
+             * Message
+             * @default
+             */
+            message: string;
+            /** Error Name */
+            error_name?: string | null;
+            /** Stack */
+            stack?: string | null;
+            /** Component Stack */
+            component_stack?: string | null;
+            /** Route */
+            route?: string | null;
+            /** App Version */
+            app_version?: string | null;
+            /** Backend Request Id */
+            backend_request_id?: string | null;
         };
         /** Facet */
         Facet: {
@@ -1151,7 +1240,51 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    health_api_health_get: {
+    liveness_api_health_live_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+    };
+    readiness_api_health_ready_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+    };
+    readiness_api_health_get: {
         parameters: {
             query?: never;
             header?: never;
@@ -1985,6 +2118,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HeatmapOut"];
+                };
+            };
+        };
+    };
+    report_client_error_api_client_errors_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClientErrorIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

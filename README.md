@@ -209,6 +209,9 @@ people touch:
 | `PROGRESS_REFRESH_RATE_LIMIT_PER_HOUR` | 10 | Forced progress refreshes per user per hour (owners exempt) |
 | `ADMIN_RATE_LIMIT_PER_HOUR` | 100 | Shared hourly sanity cap for admin actions |
 | `ADMIN_GITHUB_USERNAMES` | empty | Comma-separated GitHub logins allowed into `/admin/review` |
+| `CLIENT_ERROR_RATE_LIMIT_PER_HOUR` | 60 | Browser error reports per client IP per hour |
+| `LOG_LEVEL` / `LOG_FORMAT` | `INFO` / auto | Structured logs: JSON in production, text elsewhere |
+| `SLOW_REQUEST_MS` / `APP_VERSION` | 2000 / empty | Slow-request warning threshold and release stamp for log correlation |
 
 Rate limits are stored in the database (`rate_limit_hits` table), so they
 survive restarts and hold under multiple workers. Every 429 response carries a

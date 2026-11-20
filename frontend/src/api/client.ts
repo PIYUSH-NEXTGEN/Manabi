@@ -43,6 +43,15 @@ interface ErrorBody {
 /** Normal requests get 20s; LLM/GitHub-backed writes explicitly allow longer. */
 const DEFAULT_TIMEOUT_MS = 20_000;
 
+// The backend mints/echoes X-Request-ID on every response. Keeping the most
+// recent one lets a client-side error report point at the backend log line
+// for the call that preceded it.
+let lastResponseRequestId: string | null = null;
+
+export function getLastResponseRequestId(): string | null {
+  return lastResponseRequestId;
+}
+
 interface ApiFetchOptions extends RequestInit {
   timeoutMs?: number;
 }
@@ -121,6 +130,8 @@ export async function apiFetch<T>(
     clearTimeout(timer);
     externalSignal?.removeEventListener('abort', abortFromCaller);
   }
+
+  lastResponseRequestId = response.headers.get('X-Request-ID');
 
   if (!response.ok) {
     let detail = `Request failed with status ${response.status}`;

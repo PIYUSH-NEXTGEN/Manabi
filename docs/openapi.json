@@ -1418,6 +1418,40 @@
           }
         }
       }
+    },
+    "/api/client-errors": {
+      "post": {
+        "tags": [
+          "observability"
+        ],
+        "summary": "Report Client Error",
+        "operationId": "report_client_error_api_client_errors_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientErrorIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1845,6 +1879,101 @@
           "difficulty"
         ],
         "title": "ChatProblemItem"
+      },
+      "ClientErrorIn": {
+        "properties": {
+          "event": {
+            "type": "string",
+            "enum": [
+              "error",
+              "unhandledrejection",
+              "react_error_boundary"
+            ],
+            "title": "Event",
+            "default": "error"
+          },
+          "message": {
+            "type": "string",
+            "maxLength": 1000,
+            "title": "Message",
+            "default": ""
+          },
+          "error_name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Name"
+          },
+          "stack": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stack"
+          },
+          "component_stack": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Component Stack"
+          },
+          "route": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Route"
+          },
+          "app_version": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "App Version"
+          },
+          "backend_request_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Backend Request Id"
+          }
+        },
+        "type": "object",
+        "title": "ClientErrorIn",
+        "description": "A bounded browser failure report. Free text is truncated server-side."
       },
       "Facet": {
         "properties": {

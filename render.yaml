@@ -8,7 +8,7 @@ services:
     runtime: python
     plan: free
     buildCommand: sh build.sh
-    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT --timeout-graceful-shutdown 25 --no-access-log
     healthCheckPath: /api/health/live
     envVars:
       - key: APP_ENV

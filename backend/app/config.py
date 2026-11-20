@@ -81,6 +81,25 @@ class Settings(BaseSettings):
     # --- Admin ---
     ADMIN_GITHUB_USERNAMES: str = ""
 
+    # --- Observability ---
+    # INFO keeps routine traffic quiet while recording lifecycle events and
+    # dependency failures. Set DEBUG only for a targeted investigation: DEBUG
+    # can be high-volume and should not stay on in production.
+    LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
+    # Empty chooses JSON in production and text elsewhere. JSON is one object
+    # per line, which is what hosted log viewers index reliably.
+    LOG_FORMAT: Literal["", "json", "text"] = ""
+    # Requests at or above this duration get an extra WARNING line. 2s is a
+    # conservative starting point for this app's synchronous GitHub/LLM calls;
+    # tune it against observed latency rather than a guessed SLO.
+    SLOW_REQUEST_MS: int = 2000
+    # Public client-error reports are bounded, truncated, and rate limited per
+    # IP so the reporting channel cannot be used to flood logs.
+    CLIENT_ERROR_RATE_LIMIT_PER_HOUR: int = 60
+    # Optional deploy stamp for log correlation; Render also exposes the
+    # commit through RENDER_GIT_COMMIT, which is used when this is empty.
+    APP_VERSION: str = ""
+
     # --- Project submission verification ---
     RELEVANCE_VERIFY_MIN: float = 0.70
     RELEVANCE_REJECT_BELOW: float = 0.35

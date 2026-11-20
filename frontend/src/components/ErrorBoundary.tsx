@@ -1,4 +1,5 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
+import { reportClientError } from '@/lib/errorReporting';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -24,7 +25,12 @@ export class ErrorBoundary extends Component<
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // Browser logs stay available for support; users only see the fallback.
+    // In production the same error is sent to the backend so it is visible
+    // after the tab is closed.
     console.error('Unhandled UI error', error, info.componentStack);
+    reportClientError('react_error_boundary', error, {
+      component_stack: info.componentStack ?? undefined,
+    });
   }
 
   render(): ReactNode {

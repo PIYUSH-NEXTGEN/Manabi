@@ -94,6 +94,17 @@ async def submit_project(problem_id: int, body: schemas.ProjectCreate, user: Cur
             demo_url=body.demo_url,
         )
     except SubmissionError as err:
+        logger.info(
+            "Submission rejected user_id=%s code=%s",
+            user.id,
+            err.code,
+            extra={
+                "event": "submission_rejected",
+                "user_id": user.id,
+                "reason": err.code,
+                "status": err.status,
+            },
+        )
         raise _error(err)
     return project_out_safely(project, include_private=True, viewer=user)
 

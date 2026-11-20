@@ -326,6 +326,19 @@ class ProblemsListOut(BaseModel):
     total: int
 
 
+class ClientErrorIn(BaseModel):
+    """A bounded browser failure report. Free text is truncated server-side."""
+
+    event: Literal["error", "unhandledrejection", "react_error_boundary"] = "error"
+    message: str = Field(default="", max_length=1000)
+    error_name: str | None = Field(default=None, max_length=100)
+    stack: str | None = Field(default=None, max_length=4000)
+    component_stack: str | None = Field(default=None, max_length=4000)
+    route: str | None = Field(default=None, max_length=300)
+    app_version: str | None = Field(default=None, max_length=100)
+    backend_request_id: str | None = Field(default=None, max_length=64)
+
+
 class AdminGoalSetIn(BaseModel):
     goal: GoalEnum | None = None
 
