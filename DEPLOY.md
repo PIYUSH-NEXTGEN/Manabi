@@ -224,6 +224,40 @@ DATABASE_URL='postgresql://...supabase.com:5432/postgres?sslmode=require' \
 The seed runner skips rows whose `source_id` already exists, so re-running is
 safe. Skip this step and the site serves an empty catalog.
 
+### Hosted database access control
+
+`0018_public_schema_lockdown` revokes every privilege on `public` from the
+provider's `anon` and `authenticated` roles, removes the default privileges
+that would hand the same rights to future tables, and enables row level
+security (with no policies) on every public table. The API connects as the
+owning role, so it is unaffected, and the provider dashboard keeps working
+through `service_role`.
+
+The effect is that the project's public anon key can read nothing, including
+`users.github_token`. If supabase-js is ever added to the frontend, write
+explicit policies for the tables it needs; do not re-grant `anon`.
+
+### Free-plan limits
+
+- Render sleeps a service after ~15 minutes without traffic; the next request
+  waits 30-60 s. If the wait exceeds the proxy timeout the browser sees a
+  Cloudflare 524, and a reload works.
+- A Supabase free project pauses after about a week without database activity.
+  While paused the API returns 5xx until it is restored from the dashboard.
+- `.github/workflows/keepalive.yml` pings `/api/health/ready` once a day, which
+  runs `SELECT 1` and so counts as activity for both. GitHub [disables scheduled
+  workflows](https://docs.github.com/actions/managing-workflow-runs/disabling-and-enabling-a-workflow)
+  after 60 days without repository activity, so a dormant repo stops pinging.
+- Supabase free has no point-in-time recovery. Take an off-host logical dump
+  before anything that changes or deletes data:
+
+  ```sh
+  pg_dump "$DATABASE_URL" -Fc -f manabi-$(date +%F).dump
+  ```
+
+  The Supavisor session pooler (port 5432) supports `pg_dump`; the transaction
+  pooler (6543) does not.
+
 ### Destructive history and backups
 
 - `0004_cleanup` drops removed ops/crawler tables and columns.

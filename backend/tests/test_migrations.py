@@ -13,6 +13,8 @@ from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import Session
 
 from alembic import command
+from alembic.script import ScriptDirectory
+
 from app.migrations import alembic_config, upgrade_to_head
 from app.models import Base, Problem, ProblemStar, Project, ProjectReport, ProjectStar, User
 
@@ -259,7 +261,9 @@ def test_0017_downgrade_removes_constraints(sqlite_url):
     command.upgrade(cfg, "head")
     engine = create_engine(sqlite_url)
     with engine.connect() as conn:
-        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == "0017_integrity_constraints"
+        assert conn.scalar(text("SELECT version_num FROM alembic_version")) == (
+            ScriptDirectory.from_config(cfg).get_current_head()
+        )
     engine.dispose()
 
 
