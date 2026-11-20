@@ -1,5 +1,6 @@
 from collections.abc import Generator
 from contextlib import contextmanager
+from urllib.parse import unquote
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine, make_url
@@ -24,6 +25,9 @@ def normalized_database_url(raw: str) -> str:
     Neon/Supabase/Render connection strings working without adding a second
     database driver or changing the deployment contract.
     """
+    # URL-decode first so that %0A, %2F, etc. are resolved before Alembic's
+    # configparser tries to interpret % as interpolation syntax.
+    raw = unquote(raw)
     url = make_url(raw)
     if url.drivername in {"postgres", "postgresql"}:
         return url.set(drivername="postgresql+psycopg2").render_as_string(
