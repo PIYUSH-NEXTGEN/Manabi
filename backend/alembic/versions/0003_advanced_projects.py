@@ -102,7 +102,7 @@ def upgrade() -> None:
         sa.Column("spec_id", sa.Integer(), sa.ForeignKey("api_specs.id"), nullable=True),
         sa.Column("check_interval_seconds", sa.Integer(), nullable=False, server_default=sa.text("3600")),
         sa.Column("last_checked_at", sa.DateTime(), nullable=True),
-        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("created_at", sa.DateTime(), nullable=False),
     )
     op.create_table(
@@ -243,7 +243,7 @@ def upgrade() -> None:
         sa.Column("mime_type", sa.String(length=200), nullable=True),
         sa.Column("status", sa.String(length=20), nullable=False, server_default=sa.text("'pending'")),
         sa.Column("validation_errors_json", sa.JSON(), nullable=False, server_default=sa.text("'[]'")),
-        sa.Column("is_duplicate", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+        sa.Column("is_duplicate", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("duplicate_of_file_id", sa.Integer(), sa.ForeignKey("ingested_files.id"), nullable=True),
         sa.Column("processing_result_json", sa.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),
@@ -285,7 +285,7 @@ def upgrade() -> None:
         sa.Column("project_id", sa.String(length=255), nullable=False, index=True),
         sa.Column("event_retention_days", sa.Integer(), nullable=False, server_default=sa.text("90")),
         sa.Column("raw_data_retention_days", sa.Integer(), nullable=False, server_default=sa.text("30")),
-        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("created_at", sa.DateTime(), nullable=False),
     )
     op.create_table(
@@ -315,7 +315,7 @@ def upgrade() -> None:
         sa.Column("url", sa.String(length=1000), nullable=False),
         sa.Column("scan_interval_minutes", sa.Integer(), nullable=False, server_default=sa.text("1440")),
         sa.Column("wcag_level", sa.String(length=10), nullable=False, server_default=sa.text("'AA'")),
-        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("last_scan_at", sa.DateTime(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),
     )
@@ -346,7 +346,7 @@ def upgrade() -> None:
         sa.Column("remediation", sa.Text(), nullable=True),
         sa.Column("element_html", sa.Text(), nullable=True),
         sa.Column("detected_at", sa.DateTime(), nullable=False),
-        sa.Column("is_resolved", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+        sa.Column("is_resolved", sa.Boolean(), nullable=False, server_default=sa.text("false")),
     )
 
     # ── Project 8: Inventory Reservation ────────────────────────────────
@@ -356,7 +356,7 @@ def upgrade() -> None:
         sa.Column("name", sa.String(length=255), nullable=False),
         sa.Column("channel_type", sa.String(length=100), nullable=False),
         sa.Column("config_json", sa.JSON(), nullable=False, server_default=sa.text("'{}'")),
-        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("created_at", sa.DateTime(), nullable=False),
     )
     op.create_table(

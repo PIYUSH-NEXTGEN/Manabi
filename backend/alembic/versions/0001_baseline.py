@@ -74,7 +74,7 @@ def upgrade() -> None:
         sa.Column("repo_owner", sa.String(length=255), nullable=False),
         sa.Column("repo_name", sa.String(length=255), nullable=False),
         sa.Column("repo_url", sa.String(length=1000), nullable=False),
-        sa.Column("open_for_contributors", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+        sa.Column("open_for_contributors", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("progress_json", sa.JSON(), nullable=True),
         sa.Column("progress_updated_at", sa.DateTime(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),

@@ -16,8 +16,9 @@ Downgrade recreates the dropped tables (EMPTY) and columns. It does NOT
 restore the dropped DATA — rows deleted by the upgrade are gone forever; the
 only way back is the database backup taken before deploying this revision.
 
-Do not edit 0001_baseline, 0002_crawler or 0003_advanced_projects to make this
-migration work; they stay as the historical record.
+Revisions 0001-0003 stay as the historical record. Do not reshape their
+schema here; their defaults, however, must stay valid on both SQLite and
+Postgres (booleans use `true`/`false`, not `1`/`0`).
 
 Revision ID: 0004_cleanup
 Revises: 0003_advanced_projects
@@ -206,7 +207,7 @@ def downgrade() -> None:
         sa.Column("spec_id", sa.Integer(), sa.ForeignKey("api_specs.id"), nullable=True),
         sa.Column("check_interval_seconds", sa.Integer(), nullable=False, server_default=sa.text("3600")),
         sa.Column("last_checked_at", sa.DateTime(), nullable=True),
-        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("created_at", sa.DateTime(), nullable=False),
     )
     op.create_table(
@@ -347,7 +348,7 @@ def downgrade() -> None:
         sa.Column("mime_type", sa.String(length=200), nullable=True),
         sa.Column("status", sa.String(length=20), nullable=False, server_default=sa.text("'pending'")),
         sa.Column("validation_errors_json", sa.JSON(), nullable=False, server_default=sa.text("'[]'")),
-        sa.Column("is_duplicate", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+        sa.Column("is_duplicate", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("duplicate_of_file_id", sa.Integer(), sa.ForeignKey("ingested_files.id"), nullable=True),
         sa.Column("processing_result_json", sa.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),
@@ -389,7 +390,7 @@ def downgrade() -> None:
         sa.Column("project_id", sa.String(length=255), nullable=False, index=True),
         sa.Column("event_retention_days", sa.Integer(), nullable=False, server_default=sa.text("90")),
         sa.Column("raw_data_retention_days", sa.Integer(), nullable=False, server_default=sa.text("30")),
-        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("created_at", sa.DateTime(), nullable=False),
     )
     op.create_table(
@@ -419,7 +420,7 @@ def downgrade() -> None:
         sa.Column("url", sa.String(length=1000), nullable=False),
         sa.Column("scan_interval_minutes", sa.Integer(), nullable=False, server_default=sa.text("1440")),
         sa.Column("wcag_level", sa.String(length=10), nullable=False, server_default=sa.text("'AA'")),
-        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("last_scan_at", sa.DateTime(), nullable=True),
         sa.Column("created_at", sa.DateTime(), nullable=False),
     )
@@ -450,7 +451,7 @@ def downgrade() -> None:
         sa.Column("remediation", sa.Text(), nullable=True),
         sa.Column("element_html", sa.Text(), nullable=True),
         sa.Column("detected_at", sa.DateTime(), nullable=False),
-        sa.Column("is_resolved", sa.Boolean(), nullable=False, server_default=sa.text("0")),
+        sa.Column("is_resolved", sa.Boolean(), nullable=False, server_default=sa.text("false")),
     )
 
     # ── Project 8: Inventory Reservation ────────────────────────────────
@@ -460,7 +461,7 @@ def downgrade() -> None:
         sa.Column("name", sa.String(length=255), nullable=False),
         sa.Column("channel_type", sa.String(length=100), nullable=False),
         sa.Column("config_json", sa.JSON(), nullable=False, server_default=sa.text("'{}'")),
-        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("created_at", sa.DateTime(), nullable=False),
     )
     op.create_table(
