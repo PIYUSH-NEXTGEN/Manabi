@@ -1,6 +1,5 @@
 from collections.abc import Generator
 from contextlib import contextmanager
-from urllib.parse import unquote
 
 from sqlalchemy import create_engine, event
 from sqlalchemy.engine import Engine, make_url
@@ -25,12 +24,14 @@ def normalized_database_url(raw: str) -> str:
     Neon/Supabase/Render connection strings working without adding a second
     database driver or changing the deployment contract.
 
-    Crucial: URL-decode first so that %0A, %2F, etc. are resolved before
-    Alembic's configparser tries to interpret % as interpolation syntax.
+    Percent-encoded credentials are decoded and re-encoded by ``make_url``, so
+    the driver receives the real password while the returned string stays a
+    valid URL. Decoding the whole string instead would turn an encoded ``@`` in
+    the password into a delimiter and move part of it into the host.
+
+    Callers that hand this string to Alembic must escape ``%`` for
+    configparser; ``app.migrations`` does that.
     """
-    # URL-decode first so that %0A, %2F, etc. are resolved before Alembic's
-    # configparser tries to interpret % as interpolation syntax.
-    raw = unquote(raw)
     url = make_url(raw)
     if url.drivername in {"postgres", "postgresql"}:
         return url.set(drivername="postgresql+psycopg2").render_as_string(

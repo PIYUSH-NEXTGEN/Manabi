@@ -19,7 +19,11 @@ def alembic_config(database_url: str | None = None) -> Config:
     cfg = Config(str(BACKEND_DIR / "alembic.ini"))
     cfg.set_main_option("script_location", str(BACKEND_DIR / "alembic"))
     url = normalized_database_url(database_url or get_settings().DATABASE_URL)
-    cfg.set_main_option("sqlalchemy.url", url)
+    # Alembic stores this in a configparser value, where a literal % must be
+    # escaped as %%. Percent-encoded passwords (e.g. p%40ss) would otherwise
+    # raise "invalid interpolation syntax" on startup; alembic/env.py reads the
+    # unescaped value back out with get_main_option.
+    cfg.set_main_option("sqlalchemy.url", url.replace("%", "%%"))
     return cfg
 
 
