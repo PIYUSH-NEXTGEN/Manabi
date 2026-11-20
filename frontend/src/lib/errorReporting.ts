@@ -1,4 +1,4 @@
-import { getLastResponseRequestId } from '@/api/client';
+import { apiUrl, getLastResponseRequestId } from '@/api/client';
 
 export type ClientErrorEvent =
   | 'error'
@@ -20,7 +20,7 @@ interface ClientErrorPayload {
   backend_request_id?: string;
 }
 
-const ENDPOINT = '/api/client-errors';
+const ENDPOINT = apiUrl('/api/client-errors');
 const MAX_MESSAGE = 1000;
 const MAX_STACK = 4000;
 const MAX_COMPONENT_STACK = 4000;

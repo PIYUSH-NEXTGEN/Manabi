@@ -18,6 +18,7 @@ import { EASE_SNAP } from '@/design/motion';
 import { useMe } from '@/hooks/useMe';
 import {
   ApiError,
+  loginUrl,
   postChat,
   type ChatMessage,
   type ChatOut,
@@ -309,7 +310,7 @@ export function ChatWidget() {
             </p>
           </div>
           <a
-            href="/api/auth/github/login"
+            href={loginUrl()}
             className={cx(buttonClasses('primary'), 'w-full max-w-[15rem]')}
           >
             Log in with GitHub

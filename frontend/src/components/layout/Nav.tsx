@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react';
 import { Moon, Sun } from 'lucide-react';
 import { GithubMark } from '@/components/icons/GithubMark';
 import { EASE_SNAP } from '@/design/motion';
+import { loginUrl } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
 import { useTheme } from '@/lib/useTheme';
 import { cx } from '@/lib/cx';
@@ -91,7 +92,7 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
             <button
               type="button"
               onClick={() => {
-                window.location.assign('/api/auth/github/login');
+                window.location.assign(loginUrl());
               }}
               className="press inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-ink px-3 py-2.5 text-[0.8125rem] font-semibold leading-none text-paper transition-colors hover:bg-ink/90 min-[360px]:px-4"
             >

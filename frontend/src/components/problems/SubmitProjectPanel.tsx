@@ -7,7 +7,7 @@ import {
   Skeleton,
   useToast,
 } from '@/design/primitives';
-import { ApiError, type ProjectOut } from '@/api/client';
+import { ApiError, loginUrl, type ProjectOut } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
 import { useSubmitProject } from '@/hooks/useSubmitProject';
 import { GITHUB_REPO_URL_PATTERN, stripGitSuffix } from '@/lib/repoUrl';
@@ -127,7 +127,7 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
           Log in with GitHub to claim this problem and submit your repository.
         </p>
         <a
-          href="/api/auth/github/login"
+          href={loginUrl()}
           className={cx(buttonClasses('primary'), 'self-start')}
         >
           Log in with GitHub

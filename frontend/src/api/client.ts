@@ -43,6 +43,24 @@ interface ErrorBody {
 /** Normal requests get 20s; LLM/GitHub-backed writes explicitly allow longer. */
 const DEFAULT_TIMEOUT_MS = 20_000;
 
+// Same-origin deploys (a reverse proxy serving both the built app and the API)
+// keep working, but on a split deploy (Cloudflare Pages frontend, Render
+// backend) the API lives on another origin. VITE_API_BASE_URL is compiled in at
+// build time; empty keeps the relative /api/... behavior used by local dev and
+// tests.
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '');
+
+/** Absolute URL for an API path, honoring the configured backend origin. */
+export function apiUrl(path: string): string {
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return `${API_BASE}${normalized}`;
+}
+
+/** GitHub login starts a top-level navigation, so it needs the same base. */
+export function loginUrl(): string {
+  return apiUrl('/api/auth/github/login');
+}
+
 // The backend mints/echoes X-Request-ID on every response. Keeping the most
 // recent one lets a client-side error report point at the backend log line
 // for the call that preceded it.
@@ -104,7 +122,7 @@ export async function apiFetch<T>(
 
   let response: Response;
   try {
-    response = await fetch(path, {
+    response = await fetch(apiUrl(path), {
       ...init,
       credentials: 'include',
       headers,

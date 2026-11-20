@@ -17,6 +17,7 @@ import {
   asCommitSummary,
   asIssueSummary,
   ApiError,
+  loginUrl,
   projectOwnerUsername,
 } from '@/api/client';
 
@@ -41,7 +42,7 @@ function StarButton({
   if (!loggedIn) {
     return (
       <a
-        href="/api/auth/github/login"
+        href={loginUrl()}
         title="Log in to star this project"
         aria-label="Log in to star this project"
         className={cx(buttonClasses('secondary', 'px-3 py-2'), 'press')}

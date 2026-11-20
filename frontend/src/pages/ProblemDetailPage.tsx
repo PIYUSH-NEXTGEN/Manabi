@@ -14,7 +14,7 @@ import { useProblem } from "@/hooks/useProblem";
 import { useStarToggle } from "@/hooks/useStarToggle";
 import { fieldLabel } from "@/lib/fields";
 import { goalLabel } from "@/lib/goals";
-import { projectOwnerUsername } from "@/api/client";
+import { loginUrl, projectOwnerUsername } from "@/api/client";
 import type { ProblemDetail, ProblemOut } from "@/api/client";
 
 const panelHeading =
@@ -53,7 +53,7 @@ function MiniStarButton({
   if (!loggedIn) {
     return (
       <a
-        href="/api/auth/github/login"
+        href={loginUrl()}
         title="Log in to star this project"
         aria-label="Log in to star this project"
         className={miniStarButton}
@@ -108,7 +108,7 @@ function ProblemStarButton({
   if (!loggedIn) {
     return (
       <a
-        href="/api/auth/github/login"
+        href={loginUrl()}
         title="Log in to star this problem"
         aria-label="Log in to star this problem"
         className={cx(buttonClasses("secondary", "px-3 py-2"), "press")}

@@ -1,0 +1,3 @@
+# Cloudflare Pages SPA fallback. Static files are served first; unmatched
+# paths (e.g. /problems/12) return index.html so React Router can route them.
+/*    /index.html   200
