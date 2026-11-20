@@ -15,7 +15,7 @@ Company:
 Website:
 One-line tagline (60 characters or fewer):
 Contact name:
-Period (1 month or 3 months):
+Duration (in months):
 
 Thanks!`;
 
@@ -28,7 +28,7 @@ export const HERO = {
   subline:
     'Put your product in front of students and developers who are actively choosing what to build.',
   cta: 'Become a sponsor',
-  note: 'MANABI is early-stage. Founding sponsor price: ₹799/month, locked for your first three months.',
+  note: 'MANABI is early-stage. Founding sponsor price: ₹799/month.',
 };
 
 export const AUDIENCE = {
@@ -66,10 +66,10 @@ export const OFFER = {
   bullets: [
     'Your logo, name and one-line tagline in the home-page sponsor strip',
     'A shoutout on our LinkedIn, X and Discord community',
+    'Suggest your own project - it will be featured on the MANABI projects page',
     'Clicking the block opens your website in a new tab',
     'Labelled “Sponsor”, never presented as a recommendation',
-    'Five slots, placed in the order sponsors are confirmed',
-    'Founding sponsor price: ₹799/month, locked for your first three months',
+    'Priority support and a direct line to the MANABI team',
   ],
   cta: 'Email us about sponsorship',
   previewCaption: 'Preview of the home-page sponsor strip',
@@ -91,7 +91,7 @@ export const HOW_IT_WORKS = {
   steps: [
     {
       title: 'Email us.',
-      body: 'Tell us your company, website, tagline and whether you want one or three months.',
+      body: 'Tell us your company, website, tagline and how many months you want.',
     },
     {
       title: 'We confirm.',
@@ -118,7 +118,7 @@ export const FAQ = {
       id: 'duration',
       question: 'How long does a sponsorship last?',
       answer:
-        'Placements run for one or three months, agreed before we invoice. Nothing renews automatically, so when the period ends your placement is removed unless you book another.',
+        'You pay ₹799 per month. Choose how many months you want - one, two, three or more. Nothing renews automatically, so when your period ends the placement is removed unless you book again.',
     },
     {
       id: 'preview',
@@ -142,7 +142,7 @@ export const FAQ = {
       id: 'stop',
       question: 'What if we want to stop?',
       answer:
-        'One-month placements simply end. If you booked three months and want to stop early, tell us before the next month starts. We remove the placement at the end of the current month and refund any full unused months. Part months are not refunded. If you cancel before your placement goes live, you get a full refund.',
+        'Your placement runs for the months you paid for and then ends. Tell us before your next month starts if you want to stop or change the duration. We remove the placement at the end of your paid period. If you cancel before your placement goes live, you get a full refund.',
     },
     {
       id: 'slots',
