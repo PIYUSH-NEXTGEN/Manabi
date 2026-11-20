@@ -3,12 +3,11 @@ import time
 import uuid
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from pathlib import Path
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 from sqlalchemy.exc import OperationalError, TimeoutError as SATimeoutError
 
@@ -20,12 +19,6 @@ logger = logging.getLogger(__name__)
 
 INTERNAL_ERROR_MESSAGE = "Something went wrong on our side. Try again."
 DATABASE_UNAVAILABLE_MESSAGE = "The service is temporarily unavailable. Try again shortly."
-
-
-def frontend_dist() -> Path | None:
-    """Serve frontend/dist when it exists (built frontend, step B11)."""
-    dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
-    return dist if (dist / "index.html").is_file() else None
 
 
 DEFAULT_SESSION_SECRET = "change-me-long-random-string"
@@ -301,7 +294,7 @@ def create_app() -> FastAPI:
     app.add_exception_handler(Exception, unhandled_exception_handler)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:5173"] if "localhost" in settings.BASE_URL else [],
+        allow_origins=[o.strip() for o in settings.CORS_ALLOW_ORIGINS.split(",") if o.strip()],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -363,38 +356,7 @@ def create_app() -> FastAPI:
     app.include_router(profiles.router)
     app.include_router(client_errors.router)
 
-    @app.get("/{full_path:path}", include_in_schema=False)
-    def spa(request: Request, full_path: str):
-        dist = frontend_dist()
-        if dist is None:
-            raise HTTPException(status_code=404, detail="Not found")
-        return _spa_response(dist, full_path, request.headers.get("accept", ""))
-
     return app
-
-
-def _spa_response(dist: Path, full_path: str, accept: str) -> FileResponse:
-    """Serve an existing file; browser navigations fall back to index.html. Escape attempts → 404."""
-    if full_path.startswith("api/") or full_path == "api":
-        raise HTTPException(status_code=404, detail="Not found")
-    try:
-        root = dist.resolve()
-        candidate = (dist / full_path).resolve()
-    except OSError:
-        # Windows raises for UNC/network paths and other unrepresentable
-        # names instead of returning a path. Treat it as an escape.
-        raise HTTPException(status_code=404, detail="Not found")
-    if not candidate.is_relative_to(root):
-        raise HTTPException(status_code=404, detail="Not found")
-    if full_path and candidate.is_file():
-        if full_path.startswith("assets/"):
-            # Vite content-hashes these names: safe to cache forever.
-            return FileResponse(candidate, headers={"Cache-Control": "public, max-age=31536000, immutable"})
-        return FileResponse(candidate)
-    # A missing asset (stale cache, broken deploy) must 404, never come back as HTML.
-    if full_path and "text/html" not in accept:
-        raise HTTPException(status_code=404, detail="Not found")
-    return FileResponse(dist / "index.html", headers={"Cache-Control": "no-cache"})
 
 
 app = create_app()

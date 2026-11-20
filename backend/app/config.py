@@ -81,6 +81,13 @@ class Settings(BaseSettings):
     # --- Admin ---
     ADMIN_GITHUB_USERNAMES: str = ""
 
+    # --- CORS ---
+    # Comma-separated list of origins allowed to call the API with cookies.
+    # Local dev defaults to the Vite dev server. In production on Render, set
+    # this to your Cloudflare Pages frontend URL, e.g.
+    # https://manabi.pages.dev or https://your-custom-domain.com
+    CORS_ALLOW_ORIGINS: str = "http://localhost:5173"
+
     # --- Observability ---
     # INFO keeps routine traffic quiet while recording lifecycle events and
     # dependency failures. Set DEBUG only for a targeted investigation: DEBUG

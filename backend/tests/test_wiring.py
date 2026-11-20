@@ -95,40 +95,6 @@ def test_profile_empty_counts(client, db_session):
     assert data["projects"] == []
 
 
-# ---------------- static / SPA (B11) ----------------
-
-@pytest.fixture
-def fake_dist(tmp_path, monkeypatch):
-    dist = tmp_path / "dist"
-    (dist / "assets").mkdir(parents=True)
-    (dist / "index.html").write_text("<html>MANABI-SPA</html>")
-    (dist / "favicon.svg").write_text("<svg/>")
-    (dist / "assets" / "app.js").write_text("console.log(1)")
-    monkeypatch.setattr("app.main.frontend_dist", lambda: dist)
-    return dist
-
-
-def test_spa_serves_index_for_unknown_paths(client, fake_dist):
-    res = client.get("/problems/17", headers={"accept": "text/html"})
-    assert res.status_code == 200
-    assert "MANABI-SPA" in res.text
-    res = client.get("/", headers={"accept": "text/html"})
-    assert res.status_code == 200 and "MANABI-SPA" in res.text
-
-
-def test_spa_serves_existing_files(client, fake_dist):
-    res = client.get("/favicon.svg")
-    assert res.status_code == 200 and "<svg/>" in res.text
-    res = client.get("/assets/app.js")
-    assert res.status_code == 200 and "console.log" in res.text
-
-
-def test_api_404_stays_json_not_spa(client, fake_dist):
-    res = client.get("/api/nonexistent-route")
-    assert res.status_code == 404
-    assert res.json()["detail"] == "Not found"
-
-
 # ---------------- security/perf fixes ----------------
 
 def draft_card_factory(**overrides):
@@ -282,51 +248,8 @@ def test_problem_create_admins_still_have_sanity_cap(client, db_session, user, m
         config.get_settings.cache_clear()
         ADMIN_LIMITER.reset(db_session)
 
-@pytest.fixture
-def _escape_probe_dist(tmp_path, monkeypatch):
-    """A clean, isolated dist tree for the path-escape probes.
-
-    Use a dedicated sub-folder of tmp_path rather than relying on the
-    generic 'dist' fixture so this test cannot be affected by another
-    test's tmp_path teardown or by a shared mutable distribution tree.
-    """
-    dist = tmp_path / "spa_escape_probe" / "dist"
-    (dist / "assets").mkdir(parents=True)
-    (dist / "index.html").write_text("<html>MANABI-SPA</html>")
-    (dist / "favicon.svg").write_text("<svg/>")
-    (dist / "assets" / "app.js").write_text("console.log(1)")
-    monkeypatch.setattr("app.main.frontend_dist", lambda: dist)
-    return dist
 
 
-def test_spa_blocks_path_escape(_escape_probe_dist):
-    import os
-
-    from fastapi import HTTPException
-
-    from app.main import _spa_response
-
-    # Genuine traversal escapes on every platform -> must 404.
-    for evil in ["../secret.txt", "assets/../../etc/passwd", "//evil.com/share/x"]:
-        with pytest.raises(HTTPException) as exc:
-            _spa_response(_escape_probe_dist, evil, "text/html")
-        assert exc.value.status_code == 404, evil
-
-    # Backslash traversal: on Windows "\" is a path separator, so this escapes
-    # dist and must 404. On POSIX a backslash is an ordinary filename byte, so
-    # the candidate resolves to a literal "..\\secret.txt" file *inside* dist
-    # (not an escape) and the SPA correctly falls back to index.html instead
-    # of a 404.
-    evil_bs = "..\\secret.txt"
-    if os.name == "nt":
-        with pytest.raises(HTTPException) as exc:
-            _spa_response(_escape_probe_dist, evil_bs, "text/html")
-        assert exc.value.status_code == 404, evil_bs
-    else:
-        resp = _spa_response(_escape_probe_dist, evil_bs, "text/html")
-        assert resp.status_code in (200, None)  # literal filename inside dist -> index fallback
-
-    assert _spa_response(_escape_probe_dist, "index.html", "text/html").status_code in (200, None)  # own file ok (starlette returns response)
 
 
 # ---------------- regression: removed advanced/ops feature surface ----------------

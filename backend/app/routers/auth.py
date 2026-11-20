@@ -45,10 +45,12 @@ oauth = OAuth()
 
 def setup_oauth(app) -> None:
     settings = get_settings()
+    # SameSite=None is required for cross-origin cookies (Cloudflare frontend
+    # calling Render backend). Secure=True is mandatory with SameSite=None.
     app.add_middleware(
         SessionMiddleware,
         secret_key=settings.SESSION_SECRET,
-        same_site="lax",
+        same_site="none" if settings.APP_ENV == "production" else "lax",
         https_only=settings.APP_ENV == "production"
         or settings.BASE_URL.startswith("https://"),
     )
