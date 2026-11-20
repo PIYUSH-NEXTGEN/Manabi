@@ -18,19 +18,31 @@ If you are touching both sides, read the relevant section of `DEPLOY.md` first s
 
 ## Getting started
 
-To work on the backend:
+Backend on Windows PowerShell:
+
+```powershell
+cd backend
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
+# Edit .env for OAuth or a real LLM; mock mode works without keys.
+.\.venv\Scripts\python.exe -m alembic upgrade head
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --port 8000
+```
+
+Backend on macOS/Linux:
 
 ```sh
 cd backend
-python -m venv .venv
-.venv/Scripts/pip install -r requirements.txt
-copy .env.example .env
-# edit .env with real values if you want the full stack; mock mode is fine for a lot of work
-.venv/Scripts/python -m alembic upgrade head
-.venv/Scripts/python -m uvicorn app.main:app --port 8000
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+cp .env.example .env
+# Edit .env for OAuth or a real LLM; mock mode works without keys.
+.venv/bin/python -m alembic upgrade head
+.venv/bin/python -m uvicorn app.main:app --port 8000
 ```
 
-To work on the frontend:
+Frontend, in a second terminal:
 
 ```sh
 cd frontend
@@ -38,7 +50,7 @@ npm ci
 npm run dev
 ```
 
-The frontend proxy sends `/api` calls to the backend on `localhost:8000`, so you usually do not need to wire anything else for local work.
+The frontend proxy sends `/api` calls to the backend on `localhost:8000`, so you usually do not need to wire anything else for local work. Python 3.12 and Node 22.13.0 are the verified versions; see `README.md` for the supported matrix.
 
 ## What counts as a good change
 
@@ -50,6 +62,7 @@ A good change usually does one of these:
 - Cleans up something that has drifted out of date, like this README
 
 A change is less useful when it:
+
 - Rewrites a flow just because a different pattern exists somewhere else
 - Adds a feature nobody asked for
 - Touches the project model or the submission rules without a reason that is easy to explain in the PR
@@ -66,31 +79,61 @@ If you are touching login, sessions, or any route behind auth, make sure the tes
 
 The app supports `gemini`, `anthropic`, and `mock` providers. The mock provider is the default for offline dev and tests. If you add or change anything that touches the LLM path, make sure the tests still run without real provider keys.
 
-The API returns `503` with a plain message when AI is not configured. That is intentional. Do not treat that as something to hide away.
+`POST /api/chat` returns `503` with a plain message when AI is not configured.
+That is intentional; do not hide it. Submission verification is different: with
+no LLM it falls back to an offline keyword check that can only reach
+`needs_review`.
 
 ## Tests
 
 Run the backend tests with:
 
 ```sh
-cd backend && .venv/Scripts/python -m pytest -q
+cd backend
+.venv/bin/python -m pytest -q
 ```
 
-The backend tests force the LLM provider to mock, so they do not need real keys.
+On Windows, use `.venv\Scripts\python.exe` instead. Backend tests default to
+`LLM_PROVIDER=mock`; they never call a real provider or GitHub. A few tests
+override the provider to exercise failure paths and still stub the network.
 
-Run the frontend tests with:
+Run the frontend checks with:
 
 ```sh
-cd frontend && npm run test
+cd frontend
+npm run typecheck
+npm test
+npm run build
 ```
 
 There is also a Playwright smoke path if you want browser coverage:
 
 ```sh
-cd frontend && npm run e2e
+cd frontend
+npx playwright install chromium   # first run only
+npm run e2e
 ```
 
-Before you open a PR, run at least the test suite for the side you changed. If you changed both sides, run both.
+Before you open a PR, run at least the checks for the side you changed. If you
+changed both sides, run both. There is no separate backend linter/formatter
+configuration; match the surrounding style. `npm run typecheck` is the
+frontend's static check.
+
+### If you change the API or database
+
+- API route or schema changes: from `backend/`, run
+  `.venv/bin/python scripts/export_openapi.py`, then from `frontend/`, run
+  `npm run gen:api`. Commit both `docs/openapi.json` and
+  `frontend/src/api/schema.d.ts`.
+- Model changes: create an Alembic migration (`alembic revision -m "..."`),
+  hand-edit it, and run `alembic upgrade head`. Do not edit migrations that
+  have already shipped.
+- CI runs the backend suite, SQLite and Postgres migration checks, the frontend
+  build/typecheck, Vitest, and the Playwright smoke test on every push and pull
+  request. Watch the CI result before asking for review.
+
+No branch naming or commit-message convention is enforced. Keep commits focused
+and explain any deploy, migration, or configuration impact in the PR.
 
 ## Submitting a change
 

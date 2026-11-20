@@ -1,34 +1,43 @@
 # MANABI backend
 
-FastAPI backend for MANABI: a catalog of real-world problems (from hackathon sources),
+FastAPI backend for MANABI: a catalog of curated real-world problems,
 GitHub-linked student projects, a catalog chatbot, and personalized recommendations.
 
 ## Quick start
 
-```
+macOS/Linux:
+
+```sh
 cd backend
-python -m venv .venv                    # Windows:  .venv\Scripts\python
-.venv\Scripts\pip install -r requirements.txt
-copy .env.example .env                  # then edit (session secret, GitHub OAuth, LLM key)
-.venv\Scripts\python -m alembic upgrade head
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+cp .env.example .env                  # edit only for OAuth or a real LLM; mock works without keys
+.venv/bin/python -m alembic upgrade head
 # Optional: populate briefs from curated seed packs (no network/LLM):
-.venv\Scripts\python -m app.seed.seed_webdev_projects
-.venv\Scripts\python -m app.seed.seed_aiml_projects
-.venv\Scripts\python -m app.seed.seed_aiml_hackathon_projects
-.venv\Scripts\python -m app.seed.seed_aiml_learning_projects
-.venv\Scripts\python -m uvicorn app.main:app --port 8000
+.venv/bin/python -m app.seed.seed_webdev_projects
+.venv/bin/python -m app.seed.seed_webdev_hackathon_projects
+.venv/bin/python -m app.seed.seed_webdev_learning_projects
+.venv/bin/python -m app.seed.seed_aiml_projects
+.venv/bin/python -m app.seed.seed_aiml_hackathon_projects
+.venv/bin/python -m app.seed.seed_aiml_learning_projects
+.venv/bin/python -m uvicorn app.main:app --port 8000
 ```
+
+On Windows PowerShell, use `python -m venv .venv`,
+`.\.venv\Scripts\python.exe`, and `Copy-Item` instead of `.venv/bin/python`
+and `cp`.
 
 On start the app serves `frontend/dist` incl. SPA fallback if the frontend is built;
 otherwise it is API-only. All API routes live under `/api`.
 
 ## Tests
 
-```
-.venv\Scripts\python -m pytest -q
+```sh
+.venv/bin/python -m pytest -q
 ```
 
-Tests always run with `LLM_PROVIDER=mock` — they never call a real LLM or real GitHub.
+Tests default to `LLM_PROVIDER=mock` and never call a real provider or GitHub.
+A few failure-path tests override the provider and still stub the network.
 External services are mocked with `respx`; SQLite in-memory via dependency overrides.
 
 ## Migrations (Alembic)
@@ -37,11 +46,13 @@ Schema changes ship as Alembic migrations (`alembic/versions/`); they work on bo
 (dev) and Postgres (prod). On startup, the app runs `create_all` **only** for SQLite;
 against Postgres it runs `alembic upgrade head` itself, so prod never silently diverges.
 
+```sh
+.venv/bin/python -m alembic upgrade head          # migrate to latest
+.venv/bin/python -m alembic history              # list revisions
+.venv/bin/python -m alembic revision -m "..."    # create a new revision (hand-edit it)
 ```
-.venv\Scripts\python -m alembic upgrade head          # migrate to latest
-.venv\Scripts\python -m alembic history              # list revisions
-.venv\Scripts\python -m alembic revision -m "..."    # create a new revision (hand-edit it)
-```
+
+On Windows, use `.\.venv\Scripts\python.exe` instead.
 
 - `DATABASE_URL` is read from `backend/.env` / env. Plain `postgres://` and
   `postgresql://` URLs are normalized to the installed `postgresql+psycopg2`
@@ -58,43 +69,53 @@ against Postgres it runs `alembic upgrade head` itself, so prod never silently d
 | `SESSION_SECRET` | Session cookie signing key — set a long random string |
 | `BASE_URL` | Used for OAuth callback routing (localhost or deployed domain) |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app for login |
-| `LLM_PROVIDER` | `gemini` | `anthropic` | `mock` |
+| `LLM_PROVIDER` | `gemini`, `anthropic`, or `mock` |
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | Gemini (default model in code: `gemini-3.8-flash`) |
+| `GEMINI_API_KEYS_EVAL`, `GEMINI_API_KEYS_CHAT` | Optional ordered, comma-separated key pools; exhausted keys rotate out until quota resets |
 | `GEMINI_API_KEY_CHAT`, `GEMINI_MODEL_CHAT` | Optional second Gemini project for the chat (default model: `gemini-3.5-flash-lite`); empty falls back to the shared key |
 | `ANTHROPIC_API_KEY`, `LLM_MODEL_FAST` | Optional Anthropic provider |
 | `CHAT_RATE_LIMIT_PER_DAY` | Chat messages per account per rolling 24 h (login-only; anonymous users are rejected) |
 | `ADMIN_GITHUB_USERNAMES` | Comma separated GitHub logins allowed into the `/admin/review` page |
+| `LOG_LEVEL`, `LOG_FORMAT`, `SLOW_REQUEST_MS`, `APP_VERSION` | Structured logging controls; see `../DEPLOY.md` |
+
+The full list with defaults and comments is `backend/.env.example`; the
+production table is in `../DEPLOY.md`.
 
 The remaining rate limits (submit attempts 10/h, stars 60/h, login 20/h per IP,
-progress refresh 10/h, problem create 5/h, reports 5/h, admin sanity cap
-100/h) default in `app/config.py` and are documented with comments in
-`.env.example`. Every 429 carries a `Retry-After` header, and its message
+progress refresh 10/h, problem create 5/h, reports 5/h, client errors 60/h per
+IP, admin sanity cap 100/h) default in `app/config.py` and are documented with
+comments in `.env.example`. Every 429 carries a `Retry-After` header, and its message
 names the wait ("Try again in about 37 minutes"). Limits live in the
 `rate_limit_hits` DB table, so they survive restarts and multi-worker deploys.
 
-Without an LLM key the AI endpoints return `503 {"detail": "AI is not configured yet"}`.
+Without an LLM key, `POST /api/chat` returns `503 {"detail": "AI is not
+configured yet"}`. Submission verification falls back to an offline keyword
+check that can only reach `needs_review`; it never auto-verifies or rejects on
+an LLM outage.
 
 ## API surface
 
 - `GET /api/health/live` — process liveness only
 - `GET /api/health` / `GET /api/health/ready` — readiness + DB check
-- **Problems:** `GET /api/problems` (filters `q/field/domain/difficulty/tech/source/sort/limit/offset`), `GET /api/problems/facets`, `GET /api/problems/{id}`, `POST /api/problems` (auth)
-- **GitHub OAuth:** `GET /api/auth/github/login`, `GET /api/auth/github/callback`, `GET /api/me`, `POST /api/auth/logout` (logout is POST)
-- **Projects:** `POST /api/problems/{id}/projects` (auth), `GET /api/projects/{id}`, `GET /api/projects/{id}/progress?refresh=`, `GET /api/me/projects` (auth)
-- **Chat:** `POST /api/chat` (login-only; [P<id>] references resolved against the DB, fake ids stripped)
+- **Problems:** `GET /api/problems` (filters `q/field/domain/difficulty/goal/tech/source/sort/seed/distinct/limit/offset`), `GET /api/problems/facets`, `GET /api/problems/{id}`, `POST /api/problems` (auth), `POST`/`DELETE /api/problems/{id}/star` (auth)
+- **GitHub OAuth:** `GET /api/auth/github/login`, `GET /api/auth/github/callback`, `GET /api/auth/me`, `POST /api/auth/logout`
+- **Projects:** `POST /api/problems/{id}/projects` (auth), `GET /api/projects/{id}`, `GET /api/projects/{id}/progress?refresh=`, `PATCH`/`DELETE /api/projects/{id}` (owner/admin), `GET /api/me/projects` (auth), `POST /api/projects/{id}/report` (auth), `POST`/`DELETE /api/projects/{id}/star` (auth)
+- **Chat:** `POST /api/chat` (login-only; `[P<id>]` references resolved against the DB, unknown ids stripped)
 - **Recommendations:** `GET /api/recommendations` (auth; GitHub signals cached 10 min)
+- **Profiles:** `GET /api/u/{username}` (public), `GET /api/me/github-heatmap` (auth)
 - **Stats:** `GET /api/stats`
-- **Stretch:** `GET /api/u/{username}` — public profile
+- **Admin:** `GET /api/admin/submissions`, `POST /api/admin/submissions/{id}/approve|reject`, `POST /api/admin/problems/{id}/goal` (admin)
+- **Observability:** `POST /api/client-errors` (public, rate limited; logs only)
 
-Full machine-readable contract: `docs/openapi.json` (regenerate with
-`python scripts/export_openapi.py`).
+Full machine-readable contract: `docs/openapi.json` (regenerate from `backend/`
+with `.venv/bin/python scripts/export_openapi.py`).
 
 ## Security notes
 
-- GitHub tokens, `SESSION_SECRET`, and API keys live server-side only; nothing auth
-  -related is ever returned by an API.
-- The DB is open to pattern-injection style data — such text is wrapped as data in
-  LLM prompts with explicit instructions to ignore embedded instructions.
-- Known post-hackathon hardening TODOs: DNS-TOCTOU (resolve-time pinning).
-  Rate limiting is already DB-backed (`rate_limit_hits`), durable across
-  restarts and workers.
+- GitHub tokens, `SESSION_SECRET`, and API keys live server-side only; nothing
+  auth-related is ever returned by an API.
+- Problem text, repo README excerpts, and user summaries are wrapped as data in
+  LLM prompts with instructions to ignore embedded instructions. That reduces
+  prompt-injection risk but does not eliminate it.
+- Rate limiting is DB-backed (`rate_limit_hits`), so limits survive restarts
+  and multi-worker deploys. See `../SECURITY.md` for accepted risks.

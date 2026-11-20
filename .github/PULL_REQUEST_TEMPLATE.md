@@ -28,6 +28,8 @@ Note any docs that need an update in the same PR. The usual suspects are README.
 
 - [ ] The change is scoped to one reasonable goal
 - [ ] Backend and/or frontend tests cover the changed behavior
+- [ ] I ran the relevant test, typecheck, and build commands for the side I changed
+- [ ] If the API changed, I regenerated `docs/openapi.json` and the frontend types
 - [ ] I did not introduce public tests that touch other people's accounts or data
 - [ ] I checked for doc drift if the behavior changed
 - [ ] I removed any leftover debug logging or commented-out code I added while testing

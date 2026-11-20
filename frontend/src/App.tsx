@@ -43,8 +43,7 @@ const DashboardPage = lazy(() =>
 );
 // After first paint the app preloads every route chunk while the browser is
 // idle. Without this, switching pages waits on a network round trip for a
-// 1-26 kB chunk and shows the RouteFallback skeleton. The "delay" felt when
-// opening a project or switching pages (docs/PERF_2026-11-09.md, FIN-6).
+// 1-26 kB chunk and shows the RouteFallback skeleton before the page appears.
 const PAGE_PRELOADS = [
   () => import('@/pages/HomePage'),
   () => import('@/pages/ProblemBoardPage'),

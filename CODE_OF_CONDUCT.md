@@ -29,7 +29,7 @@ This applies in issues, pull requests, discussions, chat, and any other project 
 
 ## Reporting
 
-If something happens that should not have, please report it. You can do that through the project's issue tracker when the matter is not sensitive, or through a private channel when it is.
+If something happens that should not have, please report it. You can do that through the project's issue tracker when the matter is not sensitive. For a sensitive report, use the private channel described in [`SECURITY.md`](SECURITY.md) rather than posting details publicly.
 
 A good report has enough detail to understand what happened and when, without dragging other people through it. If you are reporting on someone else's behalf, say so.
 

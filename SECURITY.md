@@ -10,15 +10,34 @@ Out of scope for this doc: the security of GitHub itself, the LLM providers we c
 
 ## How to report
 
-If you find something that looks like a real vulnerability, please open a private report rather than a public issue. A short message describing what you did, what you expected, and what actually happened is enough to start.
+If you find something that looks like a real vulnerability, report it privately
+rather than opening a public issue.
+
+1. Use GitHub's private vulnerability reporting: open the repository's
+   **Security** tab and choose **Report a vulnerability**. The same form is at
+   <https://github.com/PIYUSH-NEXTGEN/Manabi/security/advisories/new> when
+   private reporting is enabled for the repository.
+2. If that form is unavailable, open a minimal public issue asking the
+   maintainer for a private channel. Do not include exploit steps, secrets,
+   tokens, or other people's data in that issue.
+
+A short message describing what you did, what you expected, and what actually
+happened is enough to start.
 
 Good reports include:
+
 - The endpoint or page you touched
 - The request you sent, if it is an API action
 - Whether the issue needs an authenticated account or a specific role
 - Whether it affects data that belongs to other users
 
 Please do not test against other people's accounts or submissions. If you need a test account, use your own.
+
+## Supported versions
+
+There are no versioned releases or long-lived support branches. Report against
+the current deployed revision and include the commit or deployment date when
+you can.
 
 ## What we fix first
 
@@ -70,8 +89,11 @@ If you are unsure whether something counts, report it anyway. We would rather ge
 
 We look at reports as they come in. For a real issue, we confirm it, decide on a fix or a documented acceptance, and then close the loop. If the report is useful, we will say so. If we need more detail, we will ask.
 
-This is a small project, so there is no SLA and no bounty program. A clear, honest report is reward enough.
+We aim to agree on disclosure timing after a fix is available or the risk is
+accepted. This is a small project, so there is no SLA and no bounty program. A
+clear, honest report is reward enough.
 
 ## Security contacts
 
-Use the project's issue tracker for non-sensitive questions. For anything you would rather not post publicly, contact the maintainer directly and we will figure out a private channel from there.
+Use the project's issue tracker for non-sensitive questions. For anything you
+would rather not post publicly, use the private reporting path above.

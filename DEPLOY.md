@@ -17,15 +17,18 @@ Browser
 
 ## 0. Requirements
 
-- Python 3.11 or 3.12 (Render pins 3.12.7).
-- Node 22.13+ and npm 10+ to build the frontend (Render pins `.node-version`).
+- Python 3.12.7 (what `render.yaml` pins; CI targets the 3.12 line). Python
+  3.11 is not covered by CI.
+- Node 22.13.0 and npm 10+ to build the frontend (Render pins `.node-version`).
 - A durable Postgres database. SQLite is for local development and tests only.
 - A generated session secret:
   `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
 - A GitHub OAuth app whose callback is
   `https://<your-domain>/api/auth/github/callback` if login is enabled.
-- Optionally a Gemini or Anthropic key. Without one, AI endpoints return
-  `503 {"detail": "AI is not configured yet"}` and the rest of the app works.
+- Optionally a Gemini or Anthropic key. Without one, `POST /api/chat` returns
+  `503 {"detail": "AI is not configured yet"}`. Submission verification falls
+  back to an offline keyword check that can only reach `needs_review`; it never
+  auto-verifies or rejects on an LLM outage. The rest of the app works.
 
 ## 1. Build
 

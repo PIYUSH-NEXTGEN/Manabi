@@ -137,7 +137,7 @@ def list_problems(
 
     # One aggregate over the same popularity subquery serves ordering AND the
     # card counts on the page; a separate full-table counts query per request
-    # was removed (quantified in docs/PERF_2026-11-09.md, FIN-2).
+    # would repeat the same work.
     counts_sub = (
         select(
             Project.problem_id,
@@ -179,8 +179,8 @@ def list_problems(
         ).subquery()
         problem = aliased(Problem, ranked)
         # Distinct count of group values comes from the plain filtered set:
-        # it does not need the window/join machinery of the ranked subquery,
-        # and the old form re-ran it per request (docs/PERF_2026-11-09.md, FIN-3).
+        # it does not need the window/join machinery of the ranked subquery.
+        # Recomputing it inside the ranked query would repeat that work per row.
         base_col = Problem.field if distinct == "field" else Problem.domain
         distinct_base = select(base_col).where(Problem.status == STATUS_PUBLISHED)
         distinct_base = apply_problem_filters(distinct_base, q, field, domain, difficulty, tech, source, goal)
