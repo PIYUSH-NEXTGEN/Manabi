@@ -14,7 +14,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.12.7
       - key: NODE_VERSION
-        value: 20.18.1
+        value: 22.13.0
       - key: BASE_URL
         sync: false # set to https://<your-service>.onrender.com after first deploy
       - key: SESSION_SECRET

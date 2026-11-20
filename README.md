@@ -79,11 +79,11 @@ in `backend/app/services/verification.py`.
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Backend | FastAPI, SQLAlchemy 2, Alembic | Python 3.11+ (Render image pins 3.12) |
+| Backend | FastAPI, SQLAlchemy 2, Alembic | Python 3.11-3.12 (Render pins 3.12) |
 | Database | SQLite locally, Postgres in prod | migrations are the source of truth in prod |
 | Auth | GitHub OAuth via Authlib + itsdangerous sessions | tokens stored server-side |
 | AI | Gemini or Anthropic, `mock` provider by default | keys optional; chat degrades to 503 without them |
-| Frontend | Vite, React 18, TypeScript, Tailwind CSS 4 | React Query for data, motion & Radix for UI |
+| Frontend | Vite, React 18, TypeScript, Tailwind CSS 4 | Node 22.13+; React Query for data, motion & Radix for UI |
 | Tests | pytest + respx, Vitest + Testing Library + MSW, Playwright | LLM forced to mock in backend tests |
 | Deploy | Render blueprint (`render.yaml`), plain uvicorn | single service, no separate web tier |
 
@@ -118,9 +118,7 @@ MANABI/
 │   ├── e2e/               # Playwright smoke test
 │   └── dist/              # build output, never committed, built on deploy
 ├── docs/
-│   ├── openapi.json       # machine-readable API contract
-│   ├── TESTING_2026-11-09.md
-│   └── PERF_2026-11-09.md
+│   └── openapi.json       # machine-readable API contract
 └── DEPLOY.md              # full production runbook (read this to deploy)
 ```
 
@@ -141,10 +139,34 @@ npm ci
 npm run dev                                       # http://localhost:5173 (proxies /api -> :8000)
 ```
 
-Python 3.11+ and Node 20 (see `.node-version`: 20.18.1) are the only
-requirements. The backend `copy` command is Windows style; use `cp` on
-macOS/Linux. Mock LLM mode works out of the box, so you can develop most of
-the app without any provider key.
+### Runtime requirements
+
+- Python 3.11 or 3.12. CI and `render.yaml` pin Python 3.12.
+- Node 22.13+ and npm 10+. CI and `render.yaml` pin the version in
+  `.node-version` (22.13.0); install with `npm ci`.
+- SQLite locally and in tests; production uses Postgres via `DATABASE_URL`.
+- No external service is required in the default mock mode. GitHub OAuth and
+  Gemini/Anthropic are optional.
+
+The backend `copy` command is Windows style; use `cp` on macOS/Linux. Mock LLM
+mode works out of the box, so you can develop most of the app without any
+provider key.
+
+### Supported platforms and limitations
+
+- Linux is the CI and deployment target. Windows is the current development
+  platform. Both were exercised during the compatibility audit; this is not a
+  claim that every distribution or Windows release has been tested.
+- macOS is not covered by CI and was not verified; treat it as unsupported
+  until it is added to the test matrix.
+- Python versions newer than 3.12 and Node 20 or older are not part of the
+  verified matrix. Node 22.13.0 is the pinned LTS baseline.
+- No Dockerfile or container deployment configuration is provided.
+- Browser support is not formally pinned. Use a current evergreen browser;
+  the automated Playwright smoke test covers Chromium only, and legacy
+  browsers are unsupported.
+- Production requires Postgres, but the repository does not pin a Postgres
+  major version. Use the version provided by the deployment platform.
 
 ## Seed data and demos
 
@@ -219,10 +241,9 @@ backend.
 
 `.github/workflows/ci.yml` runs on every push and pull request: an Alembic
 migration smoke check and the backend suite (Python 3.12, mock LLM, in-memory
-SQLite), plus the frontend `npm run build` (typecheck + bundle). The Vitest
-and Playwright suites currently run locally only; see
-`docs/TESTING_2026-11-09.md` section F for why wiring them into CI is the
-next recommended step.
+SQLite), plus the frontend `npm run build` (typecheck + bundle), Vitest, and
+the Playwright smoke test on Chromium. The frontend job reads the pinned Node
+version from `.node-version`.
 
 ## Deploy
 

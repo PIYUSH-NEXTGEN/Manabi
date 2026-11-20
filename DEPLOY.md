@@ -4,7 +4,7 @@ MANABI is **one service**: FastAPI serves the built React app from `frontend/dis
 
 ## 0. What you need
 
-- Python 3.11+ and Node 20+ (Node is only needed to build the frontend)
+- Python 3.11 or 3.12 and Node 22.13+ (Node is only needed to build the frontend)
 - A generated session secret: `python -c "import secrets; print(secrets.token_urlsafe(32))"`
 - A GitHub OAuth app with callback `https://<your-domain>/api/auth/github/callback` (a separate OAuth app from the local one)
 - Optionally a Gemini API key (`LLM_PROVIDER=gemini`) — without it, AI endpoints return a calm `503 {"detail": "AI is not configured yet"}` and everything else works
