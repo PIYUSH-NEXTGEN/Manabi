@@ -6,11 +6,15 @@ MANABI deploys as **two services plus a database**:
 - the FastAPI API on **Render**, with every route under `/api`;
 - **Supabase** Postgres for durable data.
 
-The API is API-only: it does not serve `frontend/dist`. The browser reaches it
-through `VITE_API_BASE_URL` (compiled into the bundle at build time), while the
-backend's `FRONTEND_URL` drives CORS and the post-login redirect. The same code
-still works as a single-service deploy when frontend and API share an origin
-(leave `VITE_API_BASE_URL` and `FRONTEND_URL` empty).
+The API is API-only: it does not serve `frontend/dist`. The default deployment
+keeps one browser origin: a Cloudflare Pages Function proxies `/api/*` to
+Render, so the session cookie is first-party and login works. The backend's
+`BASE_URL` and `FRONTEND_URL` then point at the Pages origin.
+
+A direct cross-origin setup also works (`VITE_API_BASE_URL` set to the Render
+origin), but the cookie becomes third-party; login is only dependable when both
+hosts share a registrable domain. The same code still works as a single-service
+deploy when frontend and API share an origin.
 
 There are no background workers, queues, or scheduled jobs to deploy. GitHub
 and the LLM providers are called synchronously from request/verification code.
@@ -56,12 +60,24 @@ Create a Pages project connected to this repository and set:
 | Build command | `npm ci && npm run build` |
 | Build output directory | `dist` |
 | Root directory | `frontend` |
-| `VITE_API_BASE_URL` | `https://<your-service>.onrender.com` (no trailing slash) |
+| `VITE_API_BASE_URL` | Empty. API calls stay relative and go through the proxy below. |
 | `VITE_USE_MOCKS` | `false` |
+| `API_ORIGIN` | `https://<your-service>.onrender.com` (no trailing slash) |
+
+`frontend/functions/api/[[path]].ts` is a Pages Function that forwards every
+`/api/*` request to `API_ORIGIN`. The site and the API therefore share the
+`*.pages.dev` origin, so the session cookie is first-party and login works.
+Point the API's `BASE_URL` at this Pages origin to match (see section 2).
+
+If you prefer the direct cross-origin setup (no Function, `VITE_API_BASE_URL`
+set to the Render origin), expect the session cookie to be treated as a
+third-party cookie: browsing works, but login usually fails unless both hosts
+share a registrable domain (for example `app.example.com` and `api.example.com`).
 
 The build outputs `frontend/dist`. `frontend/public/_redirects` is copied into
 the output and gives client-side routes (`/problems/12`, `/admin/review`) an
-`index.html` fallback, which Pages does not guarantee on its own.
+`index.html` fallback, which Pages does not guarantee on its own. Functions
+run before that fallback, so `/api/*` is never captured by it.
 
 The frontend has no secrets. `VITE_*` values are compiled into the public
 bundle, so never put a key in one.
@@ -71,7 +87,7 @@ The equivalent local build is:
 ```sh
 cd frontend
 npm ci
-VITE_API_BASE_URL=https://<your-service>.onrender.com npm run build
+npm run build
 ```
 
 ### 1.2 Backend on Render
@@ -97,7 +113,7 @@ local development and is ignored.
 | `APP_ENV` | Production | No | `development`, `test`, or `production`. Render sets `production`; startup then rejects localhost, HTTP, and SQLite. |
 | `DATABASE_URL` | Production | **Yes** | Managed Postgres connection string. Local default is `sqlite:///./app.db`. |
 | `SESSION_SECRET` | Production | **Yes** | Session-cookie signing key, at least 32 random characters. The placeholder is rejected outside localhost. |
-| `BASE_URL` | Production | No | Public HTTPS origin **of the API**, e.g. `https://manabi.onrender.com`. Drives the GitHub OAuth callback and cookie flags. No trailing slash required. |
+| `BASE_URL` | Production | No | Public HTTPS origin the browser uses to reach the API. With the Pages proxy this is the Pages origin (`https://manabi.pages.dev`), so the OAuth callback goes back through the proxy; with a direct cross-origin setup it is the API origin (`https://manabi.onrender.com`). Drives the GitHub OAuth callback and cookie flags, and must match the OAuth app's callback URL. No trailing slash. |
 | `FRONTEND_URL` | Split deploy | No | Public HTTPS origin of the browser app, e.g. `https://manabi.pages.dev`. Used for the post-login redirect and always allowed by CORS. Empty keeps same-origin behavior. Production rejects a non-HTTPS value. |
 | `CORS_ALLOW_ORIGINS` | Optional | No | Comma-separated extra origins allowed to call the API with cookies. `FRONTEND_URL` is added automatically; the default is `http://localhost:5173`. |
 | `GITHUB_CLIENT_ID` | Optional | No | GitHub OAuth app client id. Login is disabled when empty. |
