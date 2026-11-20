@@ -24,6 +24,9 @@ def normalized_database_url(raw: str) -> str:
     runtime pins psycopg2-binary. Selecting the driver explicitly keeps
     Neon/Supabase/Render connection strings working without adding a second
     database driver or changing the deployment contract.
+
+    Crucial: URL-decode first so that %0A, %2F, etc. are resolved before
+    Alembic's configparser tries to interpret % as interpolation syntax.
     """
     # URL-decode first so that %0A, %2F, etc. are resolved before Alembic's
     # configparser tries to interpret % as interpolation syntax.
@@ -33,7 +36,9 @@ def normalized_database_url(raw: str) -> str:
         return url.set(drivername="postgresql+psycopg2").render_as_string(
             hide_password=False
         )
-    return raw
+    # If drivername already has +psycopg2 or similar, still decode any
+    # remaining percent-encoded characters in the string.
+    return url.render_as_string(hide_password=False)
 
 
 def _enable_sqlite_foreign_keys(engine: Engine) -> None:
