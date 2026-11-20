@@ -32,6 +32,10 @@ const PERKS: { id: string; content: ReactNode }[] = [
     id: 'price',
     content: `Founding sponsor price: ${SPONSOR_PRICE}/month`,
   },
+  {
+    id: 'project',
+    content: 'Suggest your own project - it will be featured on the MANABI projects page',
+  },
 ];
 
 // Sponsors appear in slot order. Add one here and its tile shows the sponsor's
