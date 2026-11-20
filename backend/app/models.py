@@ -98,7 +98,9 @@ class Problem(Base):
     source_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     original_text: Mapped[str] = mapped_column(Text, nullable=False)
     ai_fields: Mapped[list] = mapped_column(JSON, default=list, nullable=False)
-    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_by: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id"), nullable=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
 
     # Review lifecycle: public read paths only ever surface published rows;
@@ -160,7 +162,7 @@ class Project(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     problem_id: Mapped[int] = mapped_column(ForeignKey("problems.id"), nullable=False)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     repo_owner: Mapped[str] = mapped_column(String(255), nullable=False)
     repo_name: Mapped[str] = mapped_column(String(255), nullable=False)
     repo_url: Mapped[str] = mapped_column(String(1000), nullable=False)
@@ -203,7 +205,9 @@ class ProjectReport(Base):
     project_id: Mapped[int] = mapped_column(
         ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True
     )
-    reporter_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    reporter_user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"), nullable=False, index=True
+    )
     reason: Mapped[str] = mapped_column(String(300), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
 
