@@ -1,9 +1,9 @@
-"""Seed the 31 Web Dev learning briefs from webdev_projects.md.
+"""Seed the 36 Web Dev learning briefs from webdev_projects.md.
 
 Twenty-four learning projects already exist as resume or hackathon briefs. This
 pack reuses their curated summaries, approaches and build guides, removes the
 track-specific kits, and adds learning concepts plus the documented difficulty.
-The other seven projects are defined in ``webdev_learning_details``.
+The other twelve projects are defined in ``webdev_learning_details``.
 """
 
 from copy import deepcopy
@@ -51,6 +51,11 @@ PROJECT_NUMBERS = [
     34,
     35,
     36,
+    37,
+    38,
+    39,
+    40,
+    41,
 ]
 
 _RESUME_BY_TITLE = {problem["title"]: problem for problem in RESUME_PROBLEMS}

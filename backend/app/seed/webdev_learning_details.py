@@ -1,8 +1,8 @@
 """Learning-only briefs and concepts for the Web Dev learning pack.
 
 Most learning projects already exist as resume or hackathon briefs. This module
-adds the seven projects that only appear on the learning track, then records the
-concepts every learning brief should teach.
+adds the twelve projects that only appear on the learning track, then records
+the concepts every learning brief should teach.
 """
 
 LEARNING_ONLY = {
@@ -713,6 +713,528 @@ LEARNING_ONLY = {
             },
         ],
     ),
+    37: dict(
+        title="Typing Racer with a Ghost of Your Best Run",
+        summary=(
+            "A typing test that shows words per minute and accuracy while you type, "
+            "then saves your best run to localStorage. On the next attempt a ghost "
+            "cursor replays that best run at the same speed, so you race your own "
+            "previous self instead of a random score.\n\n"
+            "The interesting part is the record and replay. Store each keystroke with a "
+            "timestamp, then replay the timestamps on a timer to move the ghost. Keep "
+            "the cursor and the text in the same coordinate space so they line up on "
+            "any screen size, and draw a small chart of speed over the run."
+        ),
+        who_affected=(
+            "People learning to type faster and beginners who want a low-pressure way to "
+            "practise typing code."
+        ),
+        why_matters=(
+            "A single speed number says little about where you slow down. Racing a "
+            "recorded run shows the exact moment you fell behind, and beating your own "
+            "ghost is a clear, fair measure of progress."
+        ),
+        field="web-dev",
+        domain="education",
+        difficulty="beginner",
+        est_hours=10,
+        tech_tags=["typescript", "react", "canvas", "localstorage", "vitest"],
+        datasets=[
+            {
+                "name": "Public-domain books from Project Gutenberg",
+                "url": "https://www.gutenberg.org/",
+            },
+            {"name": "Code snippets from your own projects", "url": None},
+        ],
+        approaches=[
+            "Record every keystroke with a timestamp and the state of the text at that moment.",
+            "Replay a saved run with a timer that reads the recorded gaps instead of the original clock.",
+            "Keep the text renderer and the cursor on the same grid so the ghost lines up at every width.",
+            "Chart words per minute over the run so a slow stretch is visible, not just the final score.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated web development learning project.",
+        original_text=(
+            "Build a typing test that shows words per minute and accuracy, saves your "
+            "best run, and replays it as a ghost cursor you race against. Stretch goal: "
+            "use any code snippet as practice text."
+        ),
+        ai_fields=[
+            "field",
+            "domain",
+            "difficulty",
+            "est_hours",
+            "who_affected",
+            "why_matters",
+            "tech_tags",
+        ],
+        build_guide=[
+            {
+                "title": "Type a sentence and count it",
+                "summary": "Get one clean measurement working before adding the ghost.",
+                "steps": [
+                    "Render a fixed prompt and highlight the character the user should type next.",
+                    "Count correct and incorrect keystrokes and ignore modifier keys.",
+                    "Compute words per minute from correct characters and elapsed seconds.",
+                    "End the run on the last character and show speed plus accuracy.",
+                ],
+            },
+            {
+                "title": "Record a run as data",
+                "summary": "A run is a list of timed events, so save it that way.",
+                "steps": [
+                    "Store each keystroke as position, expected character, actual character and time.",
+                    "Start the timer on the first keystroke, not on page load.",
+                    "Save the best run by words per minute keyed to the prompt text.",
+                    "Handle a wrong character by marking it and letting the user backspace.",
+                ],
+            },
+            {
+                "title": "Replay the ghost",
+                "summary": "The ghost is the same recording played back on a timer.",
+                "steps": [
+                    "Write a replay function that advances through saved timestamps against the clock.",
+                    "Move the ghost cursor to the recorded position for the current time.",
+                    "Compare positions to show who is ahead and by how many characters.",
+                    "Stop the ghost when the recording ends and keep it visible at the finish.",
+                ],
+            },
+            {
+                "title": "Draw the speed chart",
+                "summary": "A small chart shows where the run went well or badly.",
+                "steps": [
+                    "Bucket the run into five-second windows and compute speed per window.",
+                    "Draw the bars or line on a canvas with a labelled axis.",
+                    "Mark mistakes as dots on the same timeline.",
+                    "Show the previous best line so the current run has something to compare against.",
+                ],
+            },
+            {
+                "title": "Test, adapt and extend",
+                "summary": "Timing logic breaks quietly, so check it with fake clocks.",
+                "steps": [
+                    "Test the words per minute and accuracy functions with hand-worked examples.",
+                    "Test replay with a fake timer so the test does not wait in real time.",
+                    "Check the layout at a narrow width and with a long prompt.",
+                    "Load a code snippet from your own repo as the practice text.",
+                ],
+            },
+        ],
+    ),
+    38: dict(
+        title="Live Sky Window",
+        summary=(
+            "Pick a city and the page background becomes the sky right now: sunrise "
+            "colours near dawn, plain blue at midday, stars and a moon at night. Show "
+            "the current weather in a small panel and the moon phase as a drawn shape.\n\n"
+            "Most of the work is time and state. Ask for the city, load coordinates and "
+            "weather from an API, work out sunrise and sunset for that place, then pick "
+            "the gradient from the sun's height. Handle loading, a wrong city name and a "
+            "failed request without leaving the page blank."
+        ),
+        who_affected=(
+            "People who want a calm, informative start page and anyone learning to work "
+            "with time zones and weather APIs."
+        ),
+        why_matters=(
+            "Weather and daylight are the most familiar data there is, and they are hard "
+            "to fake: time zones, sunrise times and API limits all force you to handle "
+            "real edge cases."
+        ),
+        field="web-dev",
+        domain="climate",
+        difficulty="beginner",
+        est_hours=12,
+        tech_tags=["typescript", "react", "open-meteo", "suncalc", "css"],
+        datasets=[
+            {"name": "Open-Meteo weather API", "url": "https://open-meteo.com/"},
+            {
+                "name": "SunCalc sun and moon positions",
+                "url": "https://github.com/mourner/suncalc",
+            },
+        ],
+        approaches=[
+            "Use the city geocoding endpoint to turn a name into coordinates, then fetch weather for those coordinates.",
+            "Compute sun and moon positions locally from coordinates and time instead of asking the API.",
+            "Choose the background gradient from the sun's height above the horizon, with distinct dawn, day, dusk and night bands.",
+            "Show loading, empty and error states in the same panel so the page never looks broken.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated web development learning project.",
+        original_text=(
+            "Pick a city and show the real sky right now as the page background: sunrise "
+            "colours, daytime blue, night stars, the moon phase and current weather. Use "
+            "Open-Meteo for weather and SunCalc for sun and moon positions."
+        ),
+        ai_fields=[
+            "field",
+            "domain",
+            "difficulty",
+            "est_hours",
+            "who_affected",
+            "why_matters",
+            "tech_tags",
+        ],
+        build_guide=[
+            {
+                "title": "City to coordinates",
+                "summary": "Everything else depends on a latitude and longitude.",
+                "steps": [
+                    "Add a search box and call the geocoding endpoint with the typed name.",
+                    "Show a short list of matches so the user picks the right city.",
+                    "Store the chosen city, coordinates and time zone in local state.",
+                    "Show a clear message when nothing matches the search.",
+                ],
+            },
+            {
+                "title": "Fetch and cache the weather",
+                "summary": "One request per city, with honest loading and error states.",
+                "steps": [
+                    "Request current temperature, cloud cover and weather code for the coordinates.",
+                    "Show a skeleton while the request runs and a retry button when it fails.",
+                    "Cache the result with a timestamp so a reload does not hit the API again.",
+                    "Map the weather code to a short label and an icon.",
+                ],
+            },
+            {
+                "title": "Work out the sun and moon",
+                "summary": "Sunrise, sunset and the moon phase are local maths.",
+                "steps": [
+                    "Compute sunrise, sunset and the sun's height for the current time.",
+                    "Compute moon illumination and phase angle for the same moment.",
+                    "Format times in the city's own time zone, not the browser's.",
+                    "Test with a fixed date and a known city and compare against a published table.",
+                ],
+            },
+            {
+                "title": "Paint the sky",
+                "summary": "The gradient comes from the sun, not from a random palette.",
+                "steps": [
+                    "Define colour stops for night, dawn, day and dusk.",
+                    "Blend between stops using the sun's height so the change is smooth.",
+                    "Add stars at night with a fixed seeded pattern and dim them in daylight.",
+                    "Draw the moon as a shape with the correct phase and keep text readable over every gradient.",
+                ],
+            },
+            {
+                "title": "Polish and respect the API",
+                "summary": "Small details decide whether the page feels alive.",
+                "steps": [
+                    "Refresh the sky every few minutes and on tab focus.",
+                    "Respect API usage terms and show the data source in a footer note.",
+                    "Respect a reduced-motion setting for any animation.",
+                    "Animate the sun across the day as a stretch goal.",
+                ],
+            },
+        ],
+    ),
+    39: dict(
+        title="Identicon Avatar Generator",
+        summary=(
+            "Turn any username into a square pixel avatar with a vertical line of "
+            "symmetry, the way GitHub creates its default pictures. Hash the name, use "
+            "the hash to fill one half of the grid, then mirror it. The same name always "
+            "gives the same picture, on any browser.\n\n"
+            "The learning is in the hashing and the drawing. Use the Web Crypto API to "
+            "get a stable digest, turn bytes into a fixed-size grid, and draw it with "
+            "SVG or canvas. Add a download button so the avatar can be used elsewhere."
+        ),
+        who_affected=(
+            "Developers who need placeholder avatars and anyone curious about how "
+            "deterministic images are made."
+        ),
+        why_matters=(
+            "Many products need an image per user before anyone uploads a photo. A "
+            "deterministic avatar avoids storage and looks intentional."
+        ),
+        field="web-dev",
+        domain="developer-tools",
+        difficulty="beginner",
+        est_hours=8,
+        tech_tags=["typescript", "react", "web-crypto", "canvas", "svg"],
+        datasets=[{"name": "Any list of usernames", "url": None}],
+        approaches=[
+            "Hash the trimmed, lowercased name with SHA-256 and treat the bytes as the pattern source.",
+            "Fill only the left half of a grid and mirror it, so the result is symmetric by construction.",
+            "Draw the grid once with SVG rectangles or canvas squares and keep the size configurable.",
+            "Export the drawing as a PNG or SVG file without sending anything to a server.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated web development learning project.",
+        original_text=(
+            "Turn any username into a unique symmetric pixel avatar, the way GitHub's "
+            "default avatars work. The same name always gives the same picture. Add "
+            "colour palettes and a downloadable PNG or SVG."
+        ),
+        ai_fields=[
+            "field",
+            "domain",
+            "difficulty",
+            "est_hours",
+            "who_affected",
+            "why_matters",
+            "tech_tags",
+        ],
+        build_guide=[
+            {
+                "title": "Hash the name",
+                "summary": "A stable hash is the whole trick.",
+                "steps": [
+                    "Normalise the input by trimming spaces and lowercasing it.",
+                    "Compute a SHA-256 digest with the Web Crypto API and keep the bytes.",
+                    "Write a small helper that reads a bit or a byte from the digest by index.",
+                    "Confirm the same name gives the same digest across browsers.",
+                ],
+            },
+            {
+                "title": "Pick the pattern",
+                "summary": "Mirroring half a grid keeps the avatar readable at small sizes.",
+                "steps": [
+                    "Choose a grid size such as five columns and five rows.",
+                    "Fill the left half from hash bits and mirror the columns.",
+                    "Add a margin rule so the shape does not touch the edge.",
+                    "Check a few names to make sure the results look different from each other.",
+                ],
+            },
+            {
+                "title": "Draw it",
+                "summary": "SVG is easier to download, canvas is easier to animate.",
+                "steps": [
+                    "Draw filled squares for set bits and leave the rest transparent.",
+                    "Pick the foreground and background colours from the same hash.",
+                    "Keep the drawing in one component that takes a name and a size.",
+                    "Render at 16, 64 and 256 pixels and check the shape stays readable.",
+                ],
+            },
+            {
+                "title": "Export the file",
+                "summary": "A download button turns a demo into something usable.",
+                "steps": [
+                    "Serialise the SVG or read the canvas pixels into a blob.",
+                    "Trigger a download with a filename based on the username.",
+                    "Test that the downloaded file opens as an image.",
+                    "Show the code snippet used elsewhere, such as an image tag with a data URL.",
+                ],
+            },
+            {
+                "title": "Handle the awkward cases",
+                "summary": "Empty and unusual names should not break the page.",
+                "steps": [
+                    "Decide what an empty name shows and test it.",
+                    "Test very long names and names with emoji or spaces.",
+                    "Check that nothing is sent to a server and note that in the page copy.",
+                    "Add a palette choice as a stretch goal and keep the default stable.",
+                ],
+            },
+        ],
+    ),
+    40: dict(
+        title="Color-Blindness Simulator",
+        summary=(
+            "Upload an image or paste a small palette, then see the same colours through "
+            "the eyes of people with deuteranopia, protanopia, tritanopia and monochrome "
+            "vision. The page shows the original beside the simulation and reports the "
+            "colour difference between them.\n\n"
+            "The work is pixel maths. Read the image into a canvas, apply a colour matrix "
+            "to every pixel, and draw the result back. Add a checker that says whether two "
+            "chosen colours look the same under each simulation, and be honest in the copy "
+            "that these are approximations."
+        ),
+        who_affected=(
+            "Designers and developers checking their palettes, plus anyone who wants to "
+            "see how a chart or screenshot reads with colour-vision deficiency."
+        ),
+        why_matters=(
+            "Around one in twelve men sees colours differently. A quick check while a "
+            "palette is still a draft is far cheaper than fixing an unreadable chart later."
+        ),
+        field="web-dev",
+        domain="social-impact",
+        difficulty="beginner",
+        est_hours=10,
+        tech_tags=["typescript", "canvas", "web-crypto", "accessibility", "vitest"],
+        datasets=[
+            {
+                "name": "Colour-vision simulation matrices",
+                "url": "https://www.inf.ufrgs.br/~oliveira/pubs_files/CVD_Simulation/CVD_Simulation.html",
+            },
+            {"name": "Your own screenshots and palettes", "url": None},
+        ],
+        approaches=[
+            "Draw the uploaded image to a canvas at its natural size and read the pixels once.",
+            "Multiply the pixel values by a matrix per type of colour blindness, then clamp and write back.",
+            "Show original and simulated versions side by side so the change is easy to judge.",
+            "State clearly that simulations are approximations and link to the source of the matrices.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated web development learning project.",
+        original_text=(
+            "Upload an image or a colour palette and see how it looks to people with "
+            "different types of colour-blindness. Add a checker that says whether two "
+            "colours will be confusable, and make clear that simulations are approximations."
+        ),
+        ai_fields=[
+            "field",
+            "domain",
+            "difficulty",
+            "est_hours",
+            "who_affected",
+            "why_matters",
+            "tech_tags",
+        ],
+        build_guide=[
+            {
+                "title": "Get pixels into a canvas",
+                "summary": "One clear path from file to pixel array.",
+                "steps": [
+                    "Accept an image from a file picker and reject files that are not images.",
+                    "Draw the image to a canvas at a size that keeps the page responsive.",
+                    "Read the pixel data with getImageData and keep one copy as the source.",
+                    "Show the original so the user can confirm the upload worked.",
+                ],
+            },
+            {
+                "title": "Apply a colour matrix",
+                "summary": "The simulation is a fixed matrix applied to red, green and blue.",
+                "steps": [
+                    "Write a function that takes pixel data and a 3x3 matrix and returns new data.",
+                    "Keep the original data untouched and write the result to a second canvas.",
+                    "Clamp values to 0 to 255 after the multiplication.",
+                    "Test one known colour through each matrix and check the output by hand.",
+                ],
+            },
+            {
+                "title": "Switch between types",
+                "summary": "The interface should make comparison quick.",
+                "steps": [
+                    "Add a control for the simulation type and redraw on change.",
+                    "Label each option in plain words instead of only Latin names.",
+                    "Keep the layout stable when switching so nothing jumps.",
+                    "Add a side-by-side view of original and simulation.",
+                ],
+            },
+            {
+                "title": "Check a palette",
+                "summary": "Two colours can look different and still be confusable.",
+                "steps": [
+                    "Let the user enter two colours as swatches or hex values.",
+                    "Run both through each simulation and measure the distance between the results.",
+                    "Flag a pair when the difference falls under a stated threshold.",
+                    "Explain the threshold and warn that it is a guide, not a pass or fail test.",
+                ],
+            },
+            {
+                "title": "Keep it honest and local",
+                "summary": "The page should not overclaim, and the image should stay on the device.",
+                "steps": [
+                    "Add copy that the simulation is an approximation, not a medical test.",
+                    "Keep all processing in the browser and say so.",
+                    "Handle very large images by downscaling before reading pixels.",
+                    "Test the page with keyboard only and with an image that has fine detail.",
+                ],
+            },
+        ],
+    ),
+    41: dict(
+        title="ASCII Art Camera",
+        summary=(
+            "Open the webcam and turn the video into live text art: each block of pixels "
+            "becomes a character chosen by its brightness. Add a download button to save "
+            "the current frame as an image, and a character-set switch so the art changes "
+            "look.\n\n"
+            "The learning is the render loop. Read the frame, downscale it to a grid, map "
+            "brightness to a character, and draw only as often as the screen needs. Nothing "
+            "leaves the browser, and the page says so."
+        ),
+        who_affected=(
+            "Beginners who want a first camera project and anyone curious about how much "
+            "of a picture survives when you keep only brightness."
+        ),
+        why_matters=(
+            "It is a small, fun way to learn camera permissions, frame timing and the cost "
+            "of touching every pixel too often."
+        ),
+        field="web-dev",
+        domain="computer-vision",
+        difficulty="beginner",
+        est_hours=12,
+        tech_tags=["typescript", "canvas", "mediastream", "requestanimationframe", "css"],
+        datasets=[{"name": "Your own webcam feed", "url": None}],
+        approaches=[
+            "Ask for the camera with getUserMedia, stop all tracks when the page unmounts and handle a refused permission.",
+            "Draw the video to a small offscreen canvas so the pixel count stays cheap.",
+            "Map average brightness per cell to an ordered character list and draw the text into a pre block or canvas.",
+            "Use requestAnimationFrame with a frame cap so the loop does not run faster than needed.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated web development learning project.",
+        original_text=(
+            "Turn your webcam feed into live ASCII art, with brightness mapped to "
+            "characters. Add a button to download a frame as an image. Everything should "
+            "stay on the device, and the camera needs permission and HTTPS."
+        ),
+        ai_fields=[
+            "field",
+            "domain",
+            "difficulty",
+            "est_hours",
+            "who_affected",
+            "why_matters",
+            "tech_tags",
+        ],
+        build_guide=[
+            {
+                "title": "Open the camera",
+                "summary": "Permission and cleanup are part of the feature.",
+                "steps": [
+                    "Request video only, with a clear button instead of asking on page load.",
+                    "Show a readable message when permission is refused or no camera exists.",
+                    "Attach the stream to a hidden video element and wait for metadata.",
+                    "Stop every track when the user turns the camera off or navigates away.",
+                ],
+            },
+            {
+                "title": "Build the render loop",
+                "summary": "Decide the frame rate before drawing anything.",
+                "steps": [
+                    "Write a loop with requestAnimationFrame that skips frames to a set target rate.",
+                    "Copy the current video frame into a small offscreen canvas.",
+                    "Read the pixel data once per frame and keep the array for mapping.",
+                    "Pause the loop when the tab is hidden and resume on return.",
+                ],
+            },
+            {
+                "title": "Map brightness to characters",
+                "summary": "Each cell becomes one character, so cell size is a design choice.",
+                "steps": [
+                    "Split the frame into a grid and average the brightness of each cell.",
+                    "Order a character set from dark to light and pick an index from the brightness.",
+                    "Draw the characters with a monospace font and line height that matches cell size.",
+                    "Try a few character sets and pick two that look clearly different.",
+                ],
+            },
+            {
+                "title": "Add export and looks",
+                "summary": "A saved frame makes the project easy to share.",
+                "steps": [
+                    "Draw the current frame to a canvas with the chosen background and text colour.",
+                    "Export it as a PNG through a blob download.",
+                    "Add a colour mode that uses the cell's average colour instead of one ink colour.",
+                    "Add a simple dark theme for a different look.",
+                ],
+            },
+            {
+                "title": "Check performance and privacy",
+                "summary": "Text art is easy to make slow and easy to make leaky.",
+                "steps": [
+                    "Measure frame time and reduce the grid size if it drops below the target.",
+                    "Cap the grid size on large screens so the character count stays sane.",
+                    "Confirm nothing is uploaded and state it on the page.",
+                    "Test on a laptop with the camera off, denied and unplugged.",
+                ],
+            },
+        ],
+    ),
 }
 
 
@@ -934,6 +1456,41 @@ LEARNING_CONCEPTS = {
         "Watching files and reloading the browser.",
         "Keeping builds fast as content grows.",
     ],
+    37: [
+        "Recording keystrokes with timestamps and replaying them on a timer.",
+        "Measuring words per minute and accuracy from raw events.",
+        "Saving and loading a personal best from localStorage.",
+        "Keeping a cursor and text grid aligned at different widths.",
+        "Charting progress over time instead of only a final score.",
+    ],
+    38: [
+        "Turning a place name into coordinates with a geocoding API.",
+        "Handling loading, empty and failed requests in the same panel.",
+        "Computing sunrise, sunset and the moon phase from coordinates and time.",
+        "Showing times in the chosen city's time zone.",
+        "Driving a CSS gradient from live data instead of a fixed palette.",
+    ],
+    39: [
+        "Hashing with the Web Crypto API and getting a stable digest.",
+        "Turning hash bytes into a fixed-size pixel grid.",
+        "Building symmetry by mirroring half the pattern.",
+        "Drawing the same idea with SVG and with canvas.",
+        "Exporting a generated image as a downloadable file.",
+    ],
+    40: [
+        "Reading and writing pixels through a canvas.",
+        "Applying a colour matrix to red, green and blue values.",
+        "Comparing colours with a distance measure instead of by eye.",
+        "Explaining why simulation is an approximation.",
+        "Treating accessibility checks as part of normal design work.",
+    ],
+    41: [
+        "Requesting camera access and stopping tracks when done.",
+        "Running a render loop with requestAnimationFrame.",
+        "Mapping brightness to characters in a fixed grid.",
+        "Timing frames and capping the work per second.",
+        "Keeping camera data on the device and saying so.",
+    ],
 }
 
 
@@ -969,6 +1526,11 @@ DIFFICULTIES = {
     34: "advanced",
     35: "intermediate",
     36: "beginner",
+    37: "beginner",
+    38: "beginner",
+    39: "beginner",
+    40: "beginner",
+    41: "beginner",
 }
 
 
@@ -1004,4 +1566,9 @@ TITLES = {
     34: "Build Your Own React",
     35: "Build Your Own Git",
     36: "Build Your Own Static Site Generator with Live Reload",
+    37: "Typing Racer with a Ghost of Your Best Run",
+    38: "Live Sky Window",
+    39: "Identicon Avatar Generator",
+    40: "Color-Blindness Simulator",
+    41: "ASCII Art Camera",
 }

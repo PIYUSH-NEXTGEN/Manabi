@@ -14,12 +14,12 @@ from app.seed.seed_webdev_learning_projects import PROBLEMS
 
 
 def test_webdev_learning_pack_matches_schema():
-    assert len(PROBLEMS) == 31
-    assert len({p["source_id"] for p in PROBLEMS}) == 31
-    assert len({p["title"] for p in PROBLEMS}) == 31
-    assert len({p["summary"] for p in PROBLEMS}) == 31
+    assert len(PROBLEMS) == 36
+    assert len({p["source_id"] for p in PROBLEMS}) == 36
+    assert len({p["title"] for p in PROBLEMS}) == 36
+    assert len({p["summary"] for p in PROBLEMS}) == 36
     assert Counter(p["difficulty"] for p in PROBLEMS) == {
-        "beginner": 5,
+        "beginner": 10,
         "intermediate": 19,
         "advanced": 7,
     }
@@ -56,7 +56,7 @@ def test_seed_inserts_then_updates_without_duplicates(monkeypatch):
     session = factory()
     try:
         count = session.scalar(select(func.count(Problem.id)))
-        assert count == 31
+        assert count == 36
         rows = session.scalars(select(Problem)).all()
         assert all(row.goal == "learning" for row in rows)
         assert all(len(row.learning_concepts) >= 4 for row in rows)
