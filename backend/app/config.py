@@ -121,6 +121,14 @@ class Settings(BaseSettings):
     # Public client-error reports are bounded, truncated, and rate limited per
     # IP so the reporting channel cannot be used to flood logs.
     CLIENT_ERROR_RATE_LIMIT_PER_HOUR: int = 60
+    # Anonymous presence heartbeat: a browser pings once a minute, and a
+    # visitor counts as online while last_seen is inside this window.
+    PRESENCE_ONLINE_WINDOW_SECONDS: int = 300
+    # Per-visitor cap: two updates a minute leaves room for focus refetches.
+    PRESENCE_RATE_LIMIT_PER_HOUR: int = 120
+    # Per-IP cap is deliberately generous: a campus or office NAT can hold many
+    # legitimate visitors, while a scripted flood still stops early.
+    PRESENCE_IP_RATE_LIMIT_PER_HOUR: int = 3000
     # Optional deploy stamp for log correlation; Render also exposes the
     # commit through RENDER_GIT_COMMIT, which is used when this is empty.
     APP_VERSION: str = ""

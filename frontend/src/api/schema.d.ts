@@ -151,6 +151,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/visitors/heartbeat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Heartbeat */
+        post: operations["heartbeat_api_visitors_heartbeat_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/problems/{problem_id}/projects": {
         parameters: {
             query?: never;
@@ -691,6 +708,14 @@ export interface components {
             detail?: components["schemas"]["ValidationError"][];
         };
         /**
+         * HeartbeatIn
+         * @description Anonymous browser id from localStorage: random, bounded, no PII.
+         */
+        HeartbeatIn: {
+            /** Visitor Id */
+            visitor_id: string;
+        };
+        /**
          * HeatmapDay
          * @description One day of public GitHub push activity (UTC date).
          */
@@ -753,6 +778,13 @@ export interface components {
             beats?: components["schemas"]["PitchBeat"][];
             /** Judge Questions */
             judge_questions?: components["schemas"]["JudgeQuestion"][];
+        };
+        /** PresenceOut */
+        PresenceOut: {
+            /** Online */
+            online: number;
+            /** Total */
+            total: number;
         };
         /** ProblemDetail */
         ProblemDetail: {
@@ -1522,6 +1554,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StatsOut"];
+                };
+            };
+        };
+    };
+    heartbeat_api_visitors_heartbeat_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HeartbeatIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresenceOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

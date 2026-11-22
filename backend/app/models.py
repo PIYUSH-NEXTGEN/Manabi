@@ -260,3 +260,23 @@ class RateLimitHit(Base):
     bucket: Mapped[str] = mapped_column(String(64), nullable=False)
     key: Mapped[str] = mapped_column(String(191), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+
+
+class Visitor(Base):
+    """One anonymous browser/device seen by the presence heartbeat.
+
+    visitor_id is a random id minted in the browser and kept in localStorage;
+    no IP, cookie or account identifier is stored here. A row is the all-time
+    unique visitor, while last_seen decides whether it counts as online.
+    """
+
+    __tablename__ = "visitors"
+
+    visitor_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    first_seen: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
+    last_seen: Mapped[datetime] = mapped_column(
+        DateTime, default=utcnow, nullable=False, index=True
+    )
+    user_id: Mapped[int | None] = mapped_column(
+        ForeignKey("users.id", ondelete="SET NULL"), nullable=True
+    )

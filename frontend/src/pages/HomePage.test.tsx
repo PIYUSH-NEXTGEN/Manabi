@@ -17,6 +17,10 @@ describe('HomePage', () => {
       await screen.findByText(/briefs curated/i),
     ).toBeInTheDocument();
     expect(await screen.findByText(/5 real projects/i)).toBeInTheDocument();
+    expect(await screen.findByText(/1 online now/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/12 visitors all-time/i),
+    ).toBeInTheDocument();
 
     expect(
       screen.getByRole('link', { name: 'Browse all projects' }),

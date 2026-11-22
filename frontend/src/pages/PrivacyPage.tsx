@@ -55,6 +55,15 @@ export function PrivacyPage() {
             silently. Expired rows are removed.
           </li>
           <li>
+            <strong className="font-medium text-ink">
+              Anonymous presence id.
+            </strong>{' '}
+            A random id kept in your browser&apos;s local storage and used only
+            to count how many people are online and how many unique browsers
+            have visited. It is not linked to your account unless you log in,
+            and we do not store your IP address for this.
+          </li>
+          <li>
             <strong className="font-medium text-ink">Chat.</strong> Messages are
             used to produce a reply and are not stored in the database.
           </li>
@@ -142,9 +151,12 @@ export function PrivacyPage() {
         </p>
         <p>
           Review notes may be kept where they are needed to explain a moderation
-          decision. Rate-limit rows expire with their window. MANABI is a
-          prototype, so data may also be reset during development. Do not store
-          anything here that you cannot afford to lose.
+          decision. Rate-limit rows expire with their window. Presence rows keep
+          the random browser id and the last time it was seen so the all-time
+          count stays accurate; they contain no IP address or account link
+          unless you logged in. MANABI is a prototype, so data may also be reset
+          during development. Do not store anything here that you cannot afford
+          to lose.
         </p>
       </ProseSection>
 

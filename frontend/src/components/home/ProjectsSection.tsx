@@ -8,6 +8,7 @@ import { cx } from '@/lib/cx';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import { useProblems } from '@/hooks/useProblems';
 import { useStats } from '@/hooks/useStats';
+import { usePresence } from '@/hooks/usePresence';
 import { openChatWidget } from '@/components/chat/ChatWidget';
 import {
   FIELD_LABELS,
@@ -100,6 +101,32 @@ function StatValue({ value }: { value?: number }) {
     return <span aria-hidden>–</span>;
   }
   return <CountUp value={value} />;
+}
+
+function PresenceLine() {
+  const presence = usePresence();
+  const online = presence.data?.online;
+  const total = presence.data?.total;
+
+  return (
+    <p
+      aria-live="polite"
+      className="flex flex-wrap items-center gap-x-5 gap-y-1.5 font-mono text-label font-bold uppercase tracking-[0.12em] text-muted sm:justify-end"
+    >
+      <span className="inline-flex items-center gap-2">
+        <span aria-hidden className="relative flex size-2">
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-lime opacity-60 motion-reduce:hidden" />
+          <span className="relative inline-flex size-2 rounded-full bg-lime" />
+        </span>
+        {online == null ? 'Checking who is here' : `${online} online now`}
+      </span>
+      <span>
+        {total == null
+          ? 'Visitors all-time'
+          : `${total.toLocaleString()} visitors all-time`}
+      </span>
+    </p>
+  );
 }
 
 function BriefCarousel() {
@@ -355,20 +382,23 @@ export function ProjectsSection() {
 
       <div className="relative mx-auto w-full max-w-[1280px] px-5 sm:px-6 lg:px-8">
         <div className="border-b border-line pb-8">
-          <div className="max-w-3xl">
-            <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
-              <span className="text-ink">02</span> / The project board
-            </p>
-            <h2 className="mt-3 text-balance font-display text-display leading-[1.03] tracking-[-0.03em] text-ink">
-              Find a project worth{' '}
-              <span className="relative isolate inline-block whitespace-nowrap">
-                <span
-                  aria-hidden
-                  className="absolute inset-x-0 bottom-1 -z-10 h-3 rounded-full bg-lime/80"
-                />
-                proving.
-              </span>
-            </h2>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-3xl">
+              <p className="font-mono text-label font-bold uppercase tracking-[0.18em] text-muted">
+                <span className="text-ink">02</span> / The project board
+              </p>
+              <h2 className="mt-3 text-balance font-display text-display leading-[1.03] tracking-[-0.03em] text-ink">
+                Find a project worth{' '}
+                <span className="relative isolate inline-block whitespace-nowrap">
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-0 bottom-1 -z-10 h-3 rounded-full bg-lime/80"
+                  />
+                  proving.
+                </span>
+              </h2>
+            </div>
+            <PresenceLine />
           </div>
         </div>
 

@@ -6,11 +6,15 @@ import { Footer } from './Footer';
 import { ChatWidget } from '@/components/chat/ChatWidget';
 import { Mascot } from '@/components/mascot';
 import { clearDiscoverSeeds } from '@/lib/discoverSeed';
+import { usePresence } from '@/hooks/usePresence';
 
 export function AppLayout() {
   const { pathname } = useLocation();
   // The homepage hero runs edge to edge behind the navigation.
   const overlayNav = pathname === '/';
+  // Keep the presence heartbeat running on every page so the online and
+  // all-time visitor counters describe the whole site, not just the home page.
+  usePresence();
 
   useEffect(() => {
     if (!pathname.startsWith('/problems')) clearDiscoverSeeds();

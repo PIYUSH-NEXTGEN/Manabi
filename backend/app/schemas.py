@@ -321,6 +321,19 @@ class StatsOut(BaseModel):
     projects: int
 
 
+class HeartbeatIn(BaseModel):
+    """Anonymous browser id from localStorage: random, bounded, no PII."""
+
+    visitor_id: str = Field(
+        min_length=16, max_length=64, pattern=r"^[A-Za-z0-9_-]+$"
+    )
+
+
+class PresenceOut(BaseModel):
+    online: int
+    total: int
+
+
 class ProblemsListOut(BaseModel):
     items: list[ProblemOut]
     total: int

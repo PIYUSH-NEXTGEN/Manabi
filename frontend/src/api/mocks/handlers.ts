@@ -331,6 +331,9 @@ export const handlers = [
   ),
   http.post('*/api/auth/logout', () => HttpResponse.json({})),
   http.get('*/api/stats', () => HttpResponse.json(stats)),
+  http.post('*/api/visitors/heartbeat', () =>
+    HttpResponse.json({ online: 1, total: 12 }),
+  ),
   http.get('*/api/problems/facets', ({ request }) => {
     const url = new URL(request.url);
     const q = url.searchParams.get('q');

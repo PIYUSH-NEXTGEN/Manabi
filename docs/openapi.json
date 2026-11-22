@@ -607,6 +607,47 @@
         }
       }
     },
+    "/api/visitors/heartbeat": {
+      "post": {
+        "tags": [
+          "presence"
+        ],
+        "summary": "Heartbeat",
+        "operationId": "heartbeat_api_visitors_heartbeat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HeartbeatIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PresenceOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/problems/{problem_id}/projects": {
       "post": {
         "tags": [
@@ -2074,6 +2115,23 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "HeartbeatIn": {
+        "properties": {
+          "visitor_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 16,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Visitor Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "visitor_id"
+        ],
+        "title": "HeartbeatIn",
+        "description": "Anonymous browser id from localStorage: random, bounded, no PII."
+      },
       "HeatmapDay": {
         "properties": {
           "date": {
@@ -2210,6 +2268,24 @@
         },
         "type": "object",
         "title": "PitchGuide"
+      },
+      "PresenceOut": {
+        "properties": {
+          "online": {
+            "type": "integer",
+            "title": "Online"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "type": "object",
+        "required": [
+          "online",
+          "total"
+        ],
+        "title": "PresenceOut"
       },
       "ProblemDetail": {
         "properties": {
