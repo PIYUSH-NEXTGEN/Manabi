@@ -22,23 +22,25 @@ function applyTheme(theme: Theme) {
 }
 
 export function useTheme() {
-  const [theme, setTheme] = useState<Theme>(readTheme);
+  const [theme, setThemeState] = useState<Theme>(readTheme);
 
   useEffect(() => {
     applyTheme(theme);
   }, [theme]);
 
-  const toggleTheme = useCallback(() => {
-    setTheme((current) => {
-      const next: Theme = current === 'dark' ? 'light' : 'dark';
-      try {
-        window.localStorage.setItem(STORAGE_KEY, next);
-      } catch {
-        // Persisting is best-effort; the session still switches.
-      }
-      return next;
-    });
+  const setTheme = useCallback((next: Theme) => {
+    applyTheme(next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // Persisting is best-effort; the session still switches.
+    }
+    setThemeState(next);
   }, []);
 
-  return { theme, toggleTheme };
+  const toggleTheme = useCallback(() => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  }, [setTheme, theme]);
+
+  return { theme, setTheme, toggleTheme };
 }

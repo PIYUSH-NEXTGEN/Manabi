@@ -80,6 +80,18 @@ body {
     color 320ms var(--ease-snap);
 }
 
+/*
+ * While the rain wipe commits, the page must take the new theme instantly
+ * under the overlay. Colour transitions would otherwise reveal a half-faded
+ * page for a frame once the overlay is removed.
+ */
+html.theme-wipe-committing,
+html.theme-wipe-committing *,
+html.theme-wipe-committing *::before,
+html.theme-wipe-committing *::after {
+  transition: none !important;
+}
+
 body {
   font-size: var(--text-body);
   line-height: 1.65;

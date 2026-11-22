@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { Moon, Sun } from 'lucide-react';
@@ -5,6 +6,7 @@ import { GithubMark } from '@/components/icons/GithubMark';
 import { EASE_SNAP } from '@/design/motion';
 import { loginUrl } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
+import { playRainWipe } from '@/lib/rainThemeWipe';
 import { useTheme } from '@/lib/useTheme';
 import { cx } from '@/lib/cx';
 
@@ -31,9 +33,28 @@ function ThemeIcon({ dark }: { dark: boolean }) {
 
 export function Nav({ overlay = false }: { overlay?: boolean }) {
   const me = useMe();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+  const themeButtonRef = useRef<HTMLButtonElement>(null);
+  const wiping = useRef(false);
   const themeLabel =
     theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme';
+
+  const switchTheme = () => {
+    if (wiping.current) return;
+    const next = theme === 'dark' ? 'light' : 'dark';
+    const rect = themeButtonRef.current?.getBoundingClientRect();
+    wiping.current = true;
+    playRainWipe({
+      to: next,
+      origin: rect
+        ? { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 }
+        : undefined,
+      onCommit: () => setTheme(next),
+      onDone: () => {
+        wiping.current = false;
+      },
+    });
+  };
 
   return (
     <header
@@ -102,8 +123,9 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
           )}
 
           <button
+            ref={themeButtonRef}
             type="button"
-            onClick={toggleTheme}
+            onClick={switchTheme}
             aria-label={themeLabel}
             title={themeLabel}
             className="press group relative grid size-10 shrink-0 place-items-center overflow-hidden rounded-full border border-line bg-paper text-ink transition-colors hover:bg-tint"
