@@ -12,16 +12,19 @@ import {
   type ProjectOut,
   type ProjectPatch,
 } from '@/api/client';
-import { useMe } from '@/hooks/useMe';
 import { useInvalidateCatalogData } from '@/lib/queryCache';
 
-export function useMyProjects() {
-  const me = useMe();
+/**
+ * The dashboard list is keyed without the user id so `RequireAuth` can start
+ * the fetch while it is still resolving the session, instead of waiting for
+ * `/api/auth/me` and then starting a second round trip.
+ */
+export const MY_PROJECTS_QUERY_KEY = ['me', 'projects'] as const;
 
+export function useMyProjects() {
   return useQuery<ProjectOut[], ApiError>({
-    queryKey: ['me', 'projects', me.data?.id ?? 'anon'],
+    queryKey: MY_PROJECTS_QUERY_KEY,
     queryFn: getMyProjects,
-    enabled: Boolean(me.data),
   });
 }
 

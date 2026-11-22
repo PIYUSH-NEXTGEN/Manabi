@@ -788,14 +788,12 @@ export interface components {
         };
         /** ProblemDetail */
         ProblemDetail: {
+            /** Id */
+            id: number;
             /** Title */
             title: string;
             /** Summary */
             summary: string;
-            /** Who Affected */
-            who_affected: string;
-            /** Why Matters */
-            why_matters: string;
             /**
              * Field
              * @enum {string}
@@ -815,22 +813,8 @@ export interface components {
             est_hours: number;
             /** Tech Tags */
             tech_tags: string[];
-            /** Datasets */
-            datasets: {
-                [key: string]: unknown;
-            }[];
-            /** Approaches */
-            approaches: string[];
             /** Source Name */
             source_name: string;
-            /** Source Id */
-            source_id?: string | null;
-            /** Source Url */
-            source_url?: string | null;
-            /** Source Note */
-            source_note?: string | null;
-            /** Id */
-            id: number;
             /** Project Count */
             project_count: number;
             /**
@@ -838,15 +822,6 @@ export interface components {
              * @default 0
              */
             completed_count: number;
-            /** Ai Fields */
-            ai_fields: string[];
-            /**
-             * Origin
-             * @default manual
-             */
-            origin: string;
-            /** Source Year */
-            source_year?: number | null;
             /**
              * Star Count
              * @default 0
@@ -857,19 +832,50 @@ export interface components {
              * @default false
              */
             starred_by_me: boolean;
+            /** Goal */
+            goal?: ("resume" | "hackathon" | "learning") | null;
+            /** Who Affected */
+            who_affected: string;
+            /** Why Matters */
+            why_matters: string;
+            /** Ai Fields */
+            ai_fields: string[];
+            /**
+             * Origin
+             * @default manual
+             */
+            origin: string;
+            /** Source Year */
+            source_year?: number | null;
             /** Edition */
             edition?: string | null;
             /** Organisation */
             organisation?: string | null;
             /** Deadline */
             deadline?: string | null;
-            /** Goal */
-            goal?: ("resume" | "hackathon" | "learning") | null;
+            /** Source Id */
+            source_id?: string | null;
+            /** Source Url */
+            source_url?: string | null;
+            /** Source Note */
+            source_note?: string | null;
             /**
              * Learning Concepts
              * @default []
              */
             learning_concepts: string[];
+            /**
+             * Datasets
+             * @default []
+             */
+            datasets: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Approaches
+             * @default []
+             */
+            approaches: string[];
             /** Build Guide */
             build_guide?: components["schemas"]["BuildGuidePhase"][] | null;
             team_plan?: components["schemas"]["TeamPlan"] | null;
@@ -939,16 +945,17 @@ export interface components {
              */
             ai_fields: string[];
         };
-        /** ProblemOut */
+        /**
+         * ProblemOut
+         * @description Full brief, including the sections only the detail page renders.
+         */
         ProblemOut: {
+            /** Id */
+            id: number;
             /** Title */
             title: string;
             /** Summary */
             summary: string;
-            /** Who Affected */
-            who_affected: string;
-            /** Why Matters */
-            why_matters: string;
             /**
              * Field
              * @enum {string}
@@ -968,22 +975,8 @@ export interface components {
             est_hours: number;
             /** Tech Tags */
             tech_tags: string[];
-            /** Datasets */
-            datasets: {
-                [key: string]: unknown;
-            }[];
-            /** Approaches */
-            approaches: string[];
             /** Source Name */
             source_name: string;
-            /** Source Id */
-            source_id?: string | null;
-            /** Source Url */
-            source_url?: string | null;
-            /** Source Note */
-            source_note?: string | null;
-            /** Id */
-            id: number;
             /** Project Count */
             project_count: number;
             /**
@@ -991,15 +984,6 @@ export interface components {
              * @default 0
              */
             completed_count: number;
-            /** Ai Fields */
-            ai_fields: string[];
-            /**
-             * Origin
-             * @default manual
-             */
-            origin: string;
-            /** Source Year */
-            source_year?: number | null;
             /**
              * Star Count
              * @default 0
@@ -1010,29 +994,116 @@ export interface components {
              * @default false
              */
             starred_by_me: boolean;
+            /** Goal */
+            goal?: ("resume" | "hackathon" | "learning") | null;
+            /** Who Affected */
+            who_affected: string;
+            /** Why Matters */
+            why_matters: string;
+            /** Ai Fields */
+            ai_fields: string[];
+            /**
+             * Origin
+             * @default manual
+             */
+            origin: string;
+            /** Source Year */
+            source_year?: number | null;
             /** Edition */
             edition?: string | null;
             /** Organisation */
             organisation?: string | null;
             /** Deadline */
             deadline?: string | null;
-            /** Goal */
-            goal?: ("resume" | "hackathon" | "learning") | null;
+            /** Source Id */
+            source_id?: string | null;
+            /** Source Url */
+            source_url?: string | null;
+            /** Source Note */
+            source_note?: string | null;
             /**
              * Learning Concepts
              * @default []
              */
             learning_concepts: string[];
+            /**
+             * Datasets
+             * @default []
+             */
+            datasets: {
+                [key: string]: unknown;
+            }[];
+            /**
+             * Approaches
+             * @default []
+             */
+            approaches: string[];
             /** Build Guide */
             build_guide?: components["schemas"]["BuildGuidePhase"][] | null;
             team_plan?: components["schemas"]["TeamPlan"] | null;
             pitch_guide?: components["schemas"]["PitchGuide"] | null;
             resume_kit?: components["schemas"]["ResumeKit"] | null;
         };
+        /**
+         * ProblemSummary
+         * @description Card-sized projection for list endpoints.
+         *
+         *     The board and the home carousel only render these fields; the curated
+         *     build guide, datasets and pitch/resume material belong to the detail
+         *     response. Shipping them per card made a 24-item list 116 KB.
+         */
+        ProblemSummary: {
+            /** Id */
+            id: number;
+            /** Title */
+            title: string;
+            /** Summary */
+            summary: string;
+            /**
+             * Field
+             * @enum {string}
+             */
+            field: "web-dev" | "aiml";
+            /**
+             * Domain
+             * @enum {string}
+             */
+            domain: "healthcare" | "education" | "agriculture" | "fintech" | "climate" | "governance" | "transport" | "disaster-management" | "industry" | "social-impact" | "developer-tools" | "cybersecurity" | "computer-vision" | "iot-embedded" | "distributed-systems" | "ml" | "devops-cloud" | "nlp-llm" | "cloud" | "blockchain" | "web3" | "databases" | "systems" | "other";
+            /**
+             * Difficulty
+             * @enum {string}
+             */
+            difficulty: "beginner" | "intermediate" | "advanced";
+            /** Est Hours */
+            est_hours: number;
+            /** Tech Tags */
+            tech_tags: string[];
+            /** Source Name */
+            source_name: string;
+            /** Project Count */
+            project_count: number;
+            /**
+             * Completed Count
+             * @default 0
+             */
+            completed_count: number;
+            /**
+             * Star Count
+             * @default 0
+             */
+            star_count: number;
+            /**
+             * Starred By Me
+             * @default false
+             */
+            starred_by_me: boolean;
+            /** Goal */
+            goal?: ("resume" | "hackathon" | "learning") | null;
+        };
         /** ProblemsListOut */
         ProblemsListOut: {
             /** Items */
-            items: components["schemas"]["ProblemOut"][];
+            items: components["schemas"]["ProblemSummary"][];
             /** Total */
             total: number;
         };

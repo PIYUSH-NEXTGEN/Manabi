@@ -184,8 +184,26 @@ function RemoveProjectDialog({ project }: { project: ProjectOut }) {
   );
 }
 
+/** Mirrors the backend's progress cache TTL: a fresher copy is already in the
+ * list payload, so asking GitHub again would only add a round trip. */
+const PROGRESS_TTL_MS = 10 * 60 * 1000;
+
+function progressIsStale(updatedAt: string | null) {
+  if (!updatedAt) return true;
+  // The API stores UTC; a timestamp without a zone is UTC, not local time.
+  const iso = /([zZ]|[+-]\d{2}:?\d{2})$/.test(updatedAt) ? updatedAt : `${updatedAt}Z`;
+  const stamp = Date.parse(iso);
+  return !Number.isFinite(stamp) || Date.now() - stamp > PROGRESS_TTL_MS;
+}
+
 function MyProjectRow({ project }: { project: ProjectOut }) {
-  const progress = useProjectProgress(project.id);
+  // `my_projects` already returns the cached GitHub progress, so the badge can
+  // paint immediately. Only a stale or missing copy triggers a background
+  // refresh, and the row never waits on it.
+  const progress = useProjectProgress(project.id, {
+    enabled: progressIsStale(project.progress_updated_at),
+  });
+  const shown = progress.data ?? project.progress;
   const statusTag = STATUS_TAGS[project.verification_status] ?? null;
 
   return (
@@ -208,10 +226,12 @@ function MyProjectRow({ project }: { project: ProjectOut }) {
               {statusTag.label}
             </span>
           ) : null}
-          {progress.isLoading ? (
+          {shown ? (
+            <ProjectProgressBadge progress={shown} />
+          ) : progress.isLoading ? (
             <span className="text-sm text-muted">Checking GitHub…</span>
           ) : (
-            <ProjectProgressBadge progress={progress.data ?? null} />
+            <ProjectProgressBadge progress={null} />
           )}
         </div>
       </div>

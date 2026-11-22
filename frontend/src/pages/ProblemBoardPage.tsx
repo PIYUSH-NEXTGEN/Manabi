@@ -278,8 +278,10 @@ export function ProblemBoardPage() {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  duration: 0.32,
-                  delay: Math.min(index * 0.035, 0.28),
+                  // A short stagger suggests the grid filling in without making
+                  // the last card wait a third of a second after the data.
+                  duration: 0.26,
+                  delay: Math.min(index * 0.02, 0.1),
                   ease: EASE_SNAP,
                 }}
                 className="h-full min-w-0"

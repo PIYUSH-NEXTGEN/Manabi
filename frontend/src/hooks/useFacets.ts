@@ -5,5 +5,6 @@ export function useFacets(filters: FacetsQuery = {}) {
   return useQuery<FacetsOut, ApiError>({
     queryKey: ['problems', 'facets', filters],
     queryFn: () => getFacets(filters),
+    staleTime: 5 * 60_000,
   });
 }

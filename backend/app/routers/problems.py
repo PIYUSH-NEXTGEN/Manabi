@@ -1,6 +1,6 @@
 from typing import Literal
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Response
 from sqlalchemy import BigInteger, Text, case, cast, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import aliased, joinedload, selectinload
@@ -14,7 +14,20 @@ from app.models import (
     Project,
     VERIFICATION_VERIFIED,
 )
-from app.services.presenters import problem_to_out, project_to_out
+from app.services.presenters import (
+    problem_to_out,
+    problem_to_summary,
+    project_to_out,
+)
+from app.services.public_cache import (
+    AGGREGATE_CACHE_CONTROL,
+    AGGREGATE_TTL_SECONDS,
+    FACETS_KEY_PREFIX,
+    LIST_CACHE_CONTROL,
+    LIST_KEY_PREFIX,
+    LIST_TTL_SECONDS,
+    PUBLIC_CACHE,
+)
 from app.services.ratelimit import ADMIN_LIMITER, RateLimiter, human_wait, rate_limited
 from app.services.visibility import can_view_project, is_admin, is_owner_or_admin
 
@@ -96,14 +109,14 @@ def _viewer_starred_ids(db, viewer, problem_ids: list[int]) -> set[int]:
     )
 
 
-def _problem_items(db, viewer, rows) -> list[schemas.ProblemOut]:
+def _problem_items(db, viewer, rows) -> list[schemas.ProblemSummary]:
     """Build card payloads for (Problem, project_count, completed_count) rows
     with batched star lookups, shared by the list and distinct branches."""
     ids = [problem.id for problem, _, _ in rows]
     star_counts = _star_counts_by_problem(db, ids)
     starred = _viewer_starred_ids(db, viewer, ids)
     return [
-        problem_to_out(
+        problem_to_summary(
             problem,
             int(project_count or 0),
             int(completed_count or 0),
@@ -114,10 +127,28 @@ def _problem_items(db, viewer, rows) -> list[schemas.ProblemOut]:
     ]
 
 
+def _cached_list_response(
+    response: Response,
+    viewer,
+    cache_key: tuple,
+    payload: schemas.ProblemsListOut,
+) -> schemas.ProblemsListOut:
+    """Cache and mark anonymous list responses only.
+
+    A logged-in response carries starred_by_me, so it must stay per-viewer
+    (the middleware keeps Cache-Control: no-store for it).
+    """
+    if viewer is None:
+        PUBLIC_CACHE.set(cache_key, payload, LIST_TTL_SECONDS)
+        response.headers["Cache-Control"] = LIST_CACHE_CONTROL
+    return payload
+
+
 @router.get("", response_model=schemas.ProblemsListOut)
 def list_problems(
     db: DB,
     user: OptionalUser,
+    response: Response,
     q: str | None = None,
     field: schemas.FieldEnum | None = None,
     domain: schemas.DomainEnum | None = None,
@@ -131,6 +162,27 @@ def list_problems(
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ):
+    cache_key = (
+        LIST_KEY_PREFIX,
+        q,
+        field,
+        domain,
+        difficulty,
+        goal,
+        tuple(tech),
+        source,
+        sort,
+        seed,
+        distinct,
+        limit,
+        offset,
+    )
+    if user is None:
+        cached = PUBLIC_CACHE.get(cache_key)
+        if cached is not None:
+            response.headers["Cache-Control"] = LIST_CACHE_CONTROL
+            return cached
+
     query = apply_problem_filters(
         select(Problem).where(Problem.status == STATUS_PUBLISHED), q, field, domain, difficulty, tech, source, goal
     )
@@ -196,7 +248,12 @@ def list_problems(
             .limit(limit)
             .offset(offset)
         ).all()
-        return schemas.ProblemsListOut(items=_problem_items(db, user, rows), total=total)
+        return _cached_list_response(
+            response,
+            user,
+            cache_key,
+            schemas.ProblemsListOut(items=_problem_items(db, user, rows), total=total),
+        )
 
     total = (
         db.scalar(
@@ -205,17 +262,30 @@ def list_problems(
         or 0
     )  # popularity/completed columns are carried but ignored by count(*)
     rows = db.execute(query.limit(limit).offset(offset)).all()
-    return schemas.ProblemsListOut(items=_problem_items(db, user, rows), total=total)
+    return _cached_list_response(
+        response,
+        user,
+        cache_key,
+        schemas.ProblemsListOut(items=_problem_items(db, user, rows), total=total),
+    )
 
 
 @router.get("/facets", response_model=schemas.FacetsOut, response_model_exclude_none=True)
 def facets(
     db: DB,
+    response: Response,
     q: str | None = None,
     field: schemas.FieldEnum | None = None,
     source: str | None = None,
     goal: schemas.GoalEnum | None = None,
 ):
+    # Facet counts are viewer-independent, so every caller shares one entry.
+    cache_key = (FACETS_KEY_PREFIX, q, field, source, goal)
+    cached = PUBLIC_CACHE.get(cache_key)
+    if cached is not None:
+        response.headers["Cache-Control"] = AGGREGATE_CACHE_CONTROL
+        return cached
+
     goal_query = select(Problem.goal, func.count(Problem.id)).where(
         Problem.status == STATUS_PUBLISHED
     )
@@ -254,7 +324,7 @@ def facets(
         .where(Problem.status == STATUS_PUBLISHED)
         .group_by(Problem.source_name)
     ).all()
-    return schemas.FacetsOut(
+    payload = schemas.FacetsOut(
         fields=[schemas.Facet(value=v, count=c) for v, c in _counts_by_column(db, Problem.field)],
         domains=[schemas.Facet(value=v, count=c) for v, c in _counts_by_column(db, Problem.domain)],
         difficulties=[schemas.Facet(value=v, count=c) for v, c in difficulty_counts],
@@ -268,6 +338,9 @@ def facets(
             for name, count, updated in source_rows
         ],
     )
+    PUBLIC_CACHE.set(cache_key, payload, AGGREGATE_TTL_SECONDS)
+    response.headers["Cache-Control"] = AGGREGATE_CACHE_CONTROL
+    return payload
 
 
 @router.get("/{problem_id}", response_model=schemas.ProblemDetail)

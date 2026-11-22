@@ -149,6 +149,22 @@ def test_star_flag_is_per_viewer(client, seeded, starer, db_session):
     assert detail["starred_by_me"] is False
 
 
+def test_logged_in_list_bypasses_the_public_cache(client, seeded):
+    """The anonymous payload is shareable; a signed-in viewer must still get
+    their own stars and a non-cacheable response."""
+    logout()
+    public = client.get("/api/problems")
+    assert public.headers["Cache-Control"].startswith("public")
+
+    login_as(seeded["starer"])
+    assert client.post(f"/api/problems/{seeded['problem'].id}/star").status_code == 201
+
+    private = client.get("/api/problems")
+    assert private.headers["Cache-Control"] == "no-store"
+    row = [p for p in private.json()["items"] if p["id"] == seeded["problem"].id][0]
+    assert row["starred_by_me"] is True
+
+
 def test_board_list_carries_star_counts(client, seeded, starer, db_session):
     client.post(f"/api/problems/{seeded['problem'].id}/star")
     db_session.expire_all()

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { ArrowRight, ArrowUpRight } from 'lucide-react';
-import type { ProblemOut } from '@/api/client';
+import type { ProblemSummary } from '@/api/client';
 import { EASE_SNAP } from '@/design/motion';
 import { cx } from '@/lib/cx';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
@@ -41,7 +41,7 @@ function shuffle<T>(items: T[], seed: number): T[] {
   return pool;
 }
 
-function nextShowcase(items: ProblemOut[], count: number): ProblemOut[] {
+function nextShowcase(items: ProblemSummary[], count: number): ProblemSummary[] {
   if (items.length <= count) return items;
   const shuffled = shuffle(items, Math.floor(Math.random() * 2 ** 32));
   let cursor = 0;
@@ -65,7 +65,7 @@ function nextShowcase(items: ProblemOut[], count: number): ProblemOut[] {
   return picked;
 }
 
-const DIFFICULTY_FILL: Record<ProblemOut['difficulty'], number> = {
+const DIFFICULTY_FILL: Record<ProblemSummary['difficulty'], number> = {
   beginner: 1,
   intermediate: 2,
   advanced: 3,
@@ -75,7 +75,7 @@ function pad(value: number) {
   return String(value).padStart(2, '0');
 }
 
-function DifficultyMeter({ level }: { level: ProblemOut['difficulty'] }) {
+function DifficultyMeter({ level }: { level: ProblemSummary['difficulty'] }) {
   return (
     <span className="flex shrink-0 items-center gap-2">
       <span aria-hidden className="flex gap-1">
@@ -135,7 +135,7 @@ function BriefCarousel() {
     limit: SHOWCASE_POOL,
   });
   const reduced = usePrefersReducedMotion();
-  const [items, setItems] = useState<ProblemOut[]>([]);
+  const [items, setItems] = useState<ProblemSummary[]>([]);
   const [index, setIndex] = useState(0);
   const [held, setHeld] = useState(false);
   const [manualPause, setManualPause] = useState(false);

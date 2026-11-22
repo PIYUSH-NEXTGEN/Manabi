@@ -124,22 +124,49 @@ class ProblemCard(BaseModel):
     source_note: str | None = Field(default=None, max_length=MAX_TITLE)
 
 
-class ProblemOut(ProblemCard):
+class ProblemSummary(BaseModel):
+    """Card-sized projection for list endpoints.
+
+    The board and the home carousel only render these fields; the curated
+    build guide, datasets and pitch/resume material belong to the detail
+    response. Shipping them per card made a 24-item list 116 KB.
+    """
+
     id: int
+    title: str
+    summary: str
+    field: FieldEnum
+    domain: DomainEnum
+    difficulty: Difficulty
+    est_hours: int
+    tech_tags: list[_problem_tag_item]
+    source_name: str
     project_count: int
     completed_count: int = 0
-    ai_fields: list[str]
-    origin: str = "manual"
-    source_year: int | None = None
     # stars: total count is public; starred_by_me needs a logged-in viewer
     # (False for anonymous requests)
     star_count: int = 0
     starred_by_me: bool = False
+    goal: GoalEnum | None = None
+
+
+class ProblemOut(ProblemSummary):
+    """Full brief, including the sections only the detail page renders."""
+
+    who_affected: str
+    why_matters: str
+    ai_fields: list[str]
+    origin: str = "manual"
+    source_year: int | None = None
     edition: str | None = None
     organisation: str | None = None
     deadline: date | None = None
-    goal: GoalEnum | None = None
+    source_id: str | None = None
+    source_url: str | None = None
+    source_note: str | None = None
     learning_concepts: list[str] = []
+    datasets: list[dict] = []
+    approaches: list[str] = []
     build_guide: list[BuildGuidePhase] | None = None
     team_plan: TeamPlan | None = None
     pitch_guide: PitchGuide | None = None
@@ -335,7 +362,7 @@ class PresenceOut(BaseModel):
 
 
 class ProblemsListOut(BaseModel):
-    items: list[ProblemOut]
+    items: list[ProblemSummary]
     total: int
 
 

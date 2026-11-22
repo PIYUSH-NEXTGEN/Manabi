@@ -35,6 +35,37 @@ def _build_guide(problem: Problem) -> list[schemas.BuildGuidePhase] | None:
     return phases
 
 
+def problem_to_summary(
+    problem: Problem,
+    project_count: int,
+    completed_count: int = 0,
+    star_count: int = 0,
+    starred_by_me: bool = False,
+) -> schemas.ProblemSummary:
+    """The card projection used by list endpoints.
+
+    Deliberately skips the curated JSON sections (build_guide, team_plan,
+    pitch_guide, resume_kit, datasets, approaches): validating them per row was
+    most of the list endpoint's CPU, and cards never render them.
+    """
+    return schemas.ProblemSummary(
+        id=problem.id,
+        title=problem.title,
+        summary=problem.summary,
+        field=problem.field,
+        domain=problem.domain,
+        difficulty=problem.difficulty,
+        est_hours=problem.est_hours,
+        tech_tags=problem.tech_tags,
+        source_name=problem.source_name,
+        project_count=project_count,
+        completed_count=completed_count,
+        star_count=star_count,
+        starred_by_me=starred_by_me,
+        goal=problem.goal,
+    )
+
+
 def problem_to_out(
     problem: Problem,
     project_count: int,

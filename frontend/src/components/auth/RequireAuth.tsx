@@ -1,12 +1,27 @@
 import { useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { Skeleton, useToast } from '@/design/primitives';
+import { getMyProjects } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
+import { MY_PROJECTS_QUERY_KEY } from '@/hooks/useMyProjects';
 
 export function RequireAuth({ children }: { children: ReactNode }) {
   const me = useMe();
   const navigate = useNavigate();
   const toast = useToast();
+  const queryClient = useQueryClient();
+
+  // Start the dashboard list while the session request is still in flight. The
+  // two calls then overlap instead of queuing, and a logged-out visitor just
+  // gets the unavoidable 401 a moment before being redirected.
+  useEffect(() => {
+    if (!me.isPending) return;
+    void queryClient.prefetchQuery({
+      queryKey: MY_PROJECTS_QUERY_KEY,
+      queryFn: getMyProjects,
+    });
+  }, [me.isPending, queryClient]);
 
   useEffect(() => {
     if (!me.isPending && !me.data) {

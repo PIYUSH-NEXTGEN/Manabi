@@ -4,10 +4,10 @@ import { ArrowUpRight, GitBranch, Star } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import { fieldLabel } from '@/lib/fields';
 import { goalLabel } from '@/lib/goals';
-import type { ProblemOut } from '@/api/client';
+import type { ProblemSummary } from '@/api/client';
 
 interface ProblemCardProps {
-  problem: ProblemOut;
+  problem: ProblemSummary;
   className?: string;
 }
 

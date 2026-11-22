@@ -179,7 +179,15 @@ def test_response_carries_request_id_and_security_headers(client):
     assert response.headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
     assert response.headers["X-Frame-Options"] == "DENY"
     assert response.headers["Content-Security-Policy"] == "frame-ancestors 'none'"
-    assert response.headers["Cache-Control"] == "no-store"
+    # The anonymous public board is deliberately shareable: it carries no
+    # per-viewer data and the edge cache serves it.
+    assert response.headers["Cache-Control"].startswith("public")
+
+
+def test_private_api_stays_no_store(client):
+    for path in ("/api/auth/me", "/api/me/projects"):
+        response = client.get(path)
+        assert response.headers["Cache-Control"] == "no-store", path
 
 
 def test_invalid_request_id_is_minted(client):

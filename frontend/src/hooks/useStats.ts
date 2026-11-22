@@ -5,5 +5,7 @@ export function useStats() {
   return useQuery<StatsOut, ApiError>({
     queryKey: ['stats'],
     queryFn: getStats,
+    // Counters change slowly and the server caches them for a minute anyway.
+    staleTime: 5 * 60_000,
   });
 }

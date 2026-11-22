@@ -2289,29 +2289,17 @@
       },
       "ProblemDetail": {
         "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
           "title": {
             "type": "string",
-            "maxLength": 300,
-            "minLength": 1,
             "title": "Title"
           },
           "summary": {
             "type": "string",
-            "maxLength": 8000,
-            "minLength": 1,
             "title": "Summary"
-          },
-          "who_affected": {
-            "type": "string",
-            "maxLength": 2000,
-            "minLength": 1,
-            "title": "Who Affected"
-          },
-          "why_matters": {
-            "type": "string",
-            "maxLength": 2000,
-            "minLength": 1,
-            "title": "Why Matters"
           },
           "field": {
             "type": "string",
@@ -2362,8 +2350,6 @@
           },
           "est_hours": {
             "type": "integer",
-            "maximum": 1000.0,
-            "minimum": 1.0,
             "title": "Est Hours"
           },
           "tech_tags": {
@@ -2373,73 +2359,11 @@
               "minLength": 1
             },
             "type": "array",
-            "maxItems": 25,
             "title": "Tech Tags"
-          },
-          "datasets": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "type": "array",
-            "maxItems": 15,
-            "title": "Datasets"
-          },
-          "approaches": {
-            "items": {
-              "type": "string",
-              "maxLength": 800,
-              "minLength": 1
-            },
-            "type": "array",
-            "maxItems": 8,
-            "title": "Approaches"
           },
           "source_name": {
             "type": "string",
-            "maxLength": 255,
-            "minLength": 1,
             "title": "Source Name"
-          },
-          "source_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 100
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Id"
-          },
-          "source_url": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 500
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Url"
-          },
-          "source_note": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 300
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Note"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
           },
           "project_count": {
             "type": "integer",
@@ -2449,6 +2373,40 @@
             "type": "integer",
             "title": "Completed Count",
             "default": 0
+          },
+          "star_count": {
+            "type": "integer",
+            "title": "Star Count",
+            "default": 0
+          },
+          "starred_by_me": {
+            "type": "boolean",
+            "title": "Starred By Me",
+            "default": false
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "resume",
+                  "hackathon",
+                  "learning"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal"
+          },
+          "who_affected": {
+            "type": "string",
+            "title": "Who Affected"
+          },
+          "why_matters": {
+            "type": "string",
+            "title": "Why Matters"
           },
           "ai_fields": {
             "items": {
@@ -2472,16 +2430,6 @@
               }
             ],
             "title": "Source Year"
-          },
-          "star_count": {
-            "type": "integer",
-            "title": "Star Count",
-            "default": 0
-          },
-          "starred_by_me": {
-            "type": "boolean",
-            "title": "Starred By Me",
-            "default": false
           },
           "edition": {
             "anyOf": [
@@ -2517,21 +2465,38 @@
             ],
             "title": "Deadline"
           },
-          "goal": {
+          "source_id": {
             "anyOf": [
               {
-                "type": "string",
-                "enum": [
-                  "resume",
-                  "hackathon",
-                  "learning"
-                ]
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Goal"
+            "title": "Source Id"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "source_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Note"
           },
           "learning_concepts": {
             "items": {
@@ -2539,6 +2504,23 @@
             },
             "type": "array",
             "title": "Learning Concepts",
+            "default": []
+          },
+          "datasets": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Datasets",
+            "default": []
+          },
+          "approaches": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Approaches",
             "default": []
           },
           "build_guide": {
@@ -2608,20 +2590,18 @@
         },
         "type": "object",
         "required": [
+          "id",
           "title",
           "summary",
-          "who_affected",
-          "why_matters",
           "field",
           "domain",
           "difficulty",
           "est_hours",
           "tech_tags",
-          "datasets",
-          "approaches",
           "source_name",
-          "id",
           "project_count",
+          "who_affected",
+          "why_matters",
           "ai_fields",
           "original_text",
           "projects"
@@ -2807,29 +2787,17 @@
       },
       "ProblemOut": {
         "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
           "title": {
             "type": "string",
-            "maxLength": 300,
-            "minLength": 1,
             "title": "Title"
           },
           "summary": {
             "type": "string",
-            "maxLength": 8000,
-            "minLength": 1,
             "title": "Summary"
-          },
-          "who_affected": {
-            "type": "string",
-            "maxLength": 2000,
-            "minLength": 1,
-            "title": "Who Affected"
-          },
-          "why_matters": {
-            "type": "string",
-            "maxLength": 2000,
-            "minLength": 1,
-            "title": "Why Matters"
           },
           "field": {
             "type": "string",
@@ -2880,8 +2848,6 @@
           },
           "est_hours": {
             "type": "integer",
-            "maximum": 1000.0,
-            "minimum": 1.0,
             "title": "Est Hours"
           },
           "tech_tags": {
@@ -2891,73 +2857,11 @@
               "minLength": 1
             },
             "type": "array",
-            "maxItems": 25,
             "title": "Tech Tags"
-          },
-          "datasets": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "type": "array",
-            "maxItems": 15,
-            "title": "Datasets"
-          },
-          "approaches": {
-            "items": {
-              "type": "string",
-              "maxLength": 800,
-              "minLength": 1
-            },
-            "type": "array",
-            "maxItems": 8,
-            "title": "Approaches"
           },
           "source_name": {
             "type": "string",
-            "maxLength": 255,
-            "minLength": 1,
             "title": "Source Name"
-          },
-          "source_id": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 100
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Id"
-          },
-          "source_url": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 500
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Url"
-          },
-          "source_note": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 300
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Note"
-          },
-          "id": {
-            "type": "integer",
-            "title": "Id"
           },
           "project_count": {
             "type": "integer",
@@ -2967,6 +2871,40 @@
             "type": "integer",
             "title": "Completed Count",
             "default": 0
+          },
+          "star_count": {
+            "type": "integer",
+            "title": "Star Count",
+            "default": 0
+          },
+          "starred_by_me": {
+            "type": "boolean",
+            "title": "Starred By Me",
+            "default": false
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "resume",
+                  "hackathon",
+                  "learning"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal"
+          },
+          "who_affected": {
+            "type": "string",
+            "title": "Who Affected"
+          },
+          "why_matters": {
+            "type": "string",
+            "title": "Why Matters"
           },
           "ai_fields": {
             "items": {
@@ -2990,16 +2928,6 @@
               }
             ],
             "title": "Source Year"
-          },
-          "star_count": {
-            "type": "integer",
-            "title": "Star Count",
-            "default": 0
-          },
-          "starred_by_me": {
-            "type": "boolean",
-            "title": "Starred By Me",
-            "default": false
           },
           "edition": {
             "anyOf": [
@@ -3035,21 +2963,38 @@
             ],
             "title": "Deadline"
           },
-          "goal": {
+          "source_id": {
             "anyOf": [
               {
-                "type": "string",
-                "enum": [
-                  "resume",
-                  "hackathon",
-                  "learning"
-                ]
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Goal"
+            "title": "Source Id"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "source_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Note"
           },
           "learning_concepts": {
             "items": {
@@ -3057,6 +3002,23 @@
             },
             "type": "array",
             "title": "Learning Concepts",
+            "default": []
+          },
+          "datasets": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Datasets",
+            "default": []
+          },
+          "approaches": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Approaches",
             "default": []
           },
           "build_guide": {
@@ -3106,29 +3068,158 @@
         },
         "type": "object",
         "required": [
+          "id",
           "title",
           "summary",
-          "who_affected",
-          "why_matters",
           "field",
           "domain",
           "difficulty",
           "est_hours",
           "tech_tags",
-          "datasets",
-          "approaches",
           "source_name",
-          "id",
           "project_count",
+          "who_affected",
+          "why_matters",
           "ai_fields"
         ],
-        "title": "ProblemOut"
+        "title": "ProblemOut",
+        "description": "Full brief, including the sections only the detail page renders."
+      },
+      "ProblemSummary": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "field": {
+            "type": "string",
+            "enum": [
+              "web-dev",
+              "aiml"
+            ],
+            "title": "Field"
+          },
+          "domain": {
+            "type": "string",
+            "enum": [
+              "healthcare",
+              "education",
+              "agriculture",
+              "fintech",
+              "climate",
+              "governance",
+              "transport",
+              "disaster-management",
+              "industry",
+              "social-impact",
+              "developer-tools",
+              "cybersecurity",
+              "computer-vision",
+              "iot-embedded",
+              "distributed-systems",
+              "ml",
+              "devops-cloud",
+              "nlp-llm",
+              "cloud",
+              "blockchain",
+              "web3",
+              "databases",
+              "systems",
+              "other"
+            ],
+            "title": "Domain"
+          },
+          "difficulty": {
+            "type": "string",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "advanced"
+            ],
+            "title": "Difficulty"
+          },
+          "est_hours": {
+            "type": "integer",
+            "title": "Est Hours"
+          },
+          "tech_tags": {
+            "items": {
+              "type": "string",
+              "maxLength": 40,
+              "minLength": 1
+            },
+            "type": "array",
+            "title": "Tech Tags"
+          },
+          "source_name": {
+            "type": "string",
+            "title": "Source Name"
+          },
+          "project_count": {
+            "type": "integer",
+            "title": "Project Count"
+          },
+          "completed_count": {
+            "type": "integer",
+            "title": "Completed Count",
+            "default": 0
+          },
+          "star_count": {
+            "type": "integer",
+            "title": "Star Count",
+            "default": 0
+          },
+          "starred_by_me": {
+            "type": "boolean",
+            "title": "Starred By Me",
+            "default": false
+          },
+          "goal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "resume",
+                  "hackathon",
+                  "learning"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Goal"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "summary",
+          "field",
+          "domain",
+          "difficulty",
+          "est_hours",
+          "tech_tags",
+          "source_name",
+          "project_count"
+        ],
+        "title": "ProblemSummary",
+        "description": "Card-sized projection for list endpoints.\n\nThe board and the home carousel only render these fields; the curated\nbuild guide, datasets and pitch/resume material belong to the detail\nresponse. Shipping them per card made a 24-item list 116 KB."
       },
       "ProblemsListOut": {
         "properties": {
           "items": {
             "items": {
-              "$ref": "#/components/schemas/ProblemOut"
+              "$ref": "#/components/schemas/ProblemSummary"
             },
             "type": "array",
             "title": "Items"
