@@ -1,8 +1,8 @@
 """Learning-only AI/ML briefs, difficulties and concepts.
 
 Thirty learning projects also exist on the resume or hackathon tracks. This
-module only defines the ten learning-only projects, then records the difficulty,
-title and concepts for the full forty-project learning pack.
+module only defines the sixteen learning-only projects, then records the
+difficulty, title and concepts for the full forty-six project learning pack.
 """
 
 _AI_FIELDS = [
@@ -991,6 +991,609 @@ LEARNING_ONLY = {
             },
         ],
     ),
+    46: dict(
+        title="Matchbox Machine: Teach Tic-Tac-Toe with Beads",
+        summary=(
+            "Rebuild Donald Michie's 1961 matchbox machine in plain Python. Every board "
+            "position gets a small box that holds one bead per legal move. To play, shake "
+            "the box for the current position and take out a random bead: that bead is "
+            "your move. After the game, add beads to the boxes that produced winning moves "
+            "and remove beads from the boxes that lost. You never write down a strategy; "
+            "the bead counts become the strategy.\n\n"
+            "The first version plays badly. Play 1,000 games against a random opponent, plot "
+            "the win and draw rate every 50 games, and watch the curve climb. Then open a "
+            "few boxes and compare their beads with the moves a perfect player would make. "
+            "Where the machine still loses, you can usually spot the extra beads that keep "
+            "it on that move, which is a clearer picture of reinforcement learning than any "
+            "diagram."
+        ),
+        who_affected=(
+            "Students who want to see a machine learn from wins and losses alone, with no "
+            "maths library, no model file and no training loop beyond a few dozen lines."
+        ),
+        why_matters=(
+            "Reinforcement learning is usually taught inside a deep-learning framework, which "
+            "hides the basic idea. Here the whole learning rule is one function, and every "
+            "decision the program makes can be traced back to a bead count you can read."
+        ),
+        field="aiml",
+        domain="ml",
+        difficulty="beginner",
+        est_hours=10,
+        tech_tags=["python", "matplotlib", "pytest"],
+        datasets=[
+            {
+                "name": (
+                    "None. The program learns from games it plays against itself or against "
+                    "a random player."
+                ),
+                "url": None,
+            }
+        ],
+        approaches=[
+            "Encode each board position as a short string so boxes can be stored in a dictionary.",
+            "Start against a random opponent, before adding anything clever, to keep a baseline.",
+            "Apply the bead update after every game and log the win rate as you go.",
+            "Open single boxes to explain, in words, why the machine picked one move over another.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated AI/ML learning project.",
+        original_text=(
+            "Recreate Donald Michie's 1961 matchbox machine in Python. Each board position "
+            "holds a set of beads (moves). A move is picked at random, and beads are added "
+            "after a win and removed after a loss, so the program slowly learns to play. "
+            "Plot its win rate over 1,000 games and watch it improve."
+        ),
+        ai_fields=_AI_FIELDS,
+        build_guide=[
+            {
+                "title": "Build the board and the rules",
+                "summary": "Get a correct, testable tic-tac-toe engine before any learning.",
+                "steps": [
+                    "Write the board as nine cells and a function that lists the legal moves.",
+                    "Add win detection for rows, columns and both diagonals, with a test per case.",
+                    "Add a player that always picks a legal move at random, so you have an opponent.",
+                    "Print the board in the terminal so you can follow a game by hand.",
+                ],
+            },
+            {
+                "title": "Make the boxes and hold the beads",
+                "summary": "The bead counts are the entire memory of the machine.",
+                "steps": [
+                    "Key each box by the board position plus whose turn it is.",
+                    "Start every legal move with the same number of beads, for example four.",
+                    "Write a function that draws one bead at random and updates the box.",
+                    "Save and load the box contents in a JSON file so training is not lost.",
+                ],
+            },
+            {
+                "title": "Play games and update the beads",
+                "summary": "One game should teach the machine something every time.",
+                "steps": [
+                    "Record the box and move used at each turn of a game.",
+                    "After a win, add a bead to each move on the winning path.",
+                    "After a loss, remove one bead at random from the losing path.",
+                    "Refill an empty box with the starting count so the machine never gets stuck.",
+                ],
+            },
+            {
+                "title": "Plot the learning curve",
+                "summary": "A chart over many games is the only fair claim of progress.",
+                "steps": [
+                    "Write win, draw and loss counts for every 50 games to a CSV file.",
+                    "Plot wins and draws against games played and smooth the line.",
+                    "Run the same setup against itself and compare the shape of the curve.",
+                    "Note the games it still loses and check whether those boxes look odd.",
+                ],
+            },
+            {
+                "title": "Compare with a perfect player",
+                "summary": "A machine that stops losing is the real result.",
+                "steps": [
+                    "Add a small minimax player that never loses.",
+                    "Check that the learned machine draws often instead of dropping games.",
+                    "Open five boxes and read the bead counts that shape its first move.",
+                    "Write a README that explains the update rule in plain words.",
+                ],
+            },
+        ],
+    ),
+    47: dict(
+        title="Doodle Recognizer: Guess the Sketch",
+        summary=(
+            "Draw with a mouse or a finger on a web canvas and have a model name what you "
+            "drew, using ten categories such as cat, house, bicycle, tree, pizza and "
+            "umbrella. Google's Quick, Draw! data ships thousands of finished sketches per "
+            "category as stroke lists, so you can spend your time on the model instead of on "
+            "collecting images.\n\n"
+            "Start with a simple baseline, then train something a little stronger and compare "
+            "the two. The most useful output is the confusion matrix. The model confuses a house "
+            "with a tree, or a clock with a pizza, for reasons you can see in the drawings, and "
+            "fixing one of those confusions teaches you more than adding two points of accuracy."
+        ),
+        who_affected=(
+            "Beginners who want a first image project that ends in something a friend can "
+            "open in a browser and try with their own doodle."
+        ),
+        why_matters=(
+            "Image classification is easier to learn when you can draw your own test case and "
+            "watch the model get it wrong. Training splits, class balance and error analysis "
+            "stop being abstract words once your own sketch is in the test set."
+        ),
+        field="aiml",
+        domain="computer-vision",
+        difficulty="beginner",
+        est_hours=12,
+        tech_tags=["python", "numpy", "scikit-learn", "pillow", "streamlit"],
+        datasets=[
+            {
+                "name": "Quick, Draw! dataset (Creative Commons, check the terms)",
+                "url": "https://github.com/googlecreativelab/quickdraw-dataset",
+            }
+        ],
+        approaches=[
+            "Download the simplified stroke files for ten categories only, so the data fits on a laptop.",
+            "Draw each stroke list onto a fixed-size greyscale image that any model can read.",
+            "Measure a simple baseline first, then compare one stronger model against it.",
+            "Read the confusion matrix and describe the mistakes in words, not just numbers.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated AI/ML learning project.",
+        original_text=(
+            "Draw on a web canvas and the model guesses what you drew, using 10 categories "
+            "such as cat, house and bicycle. Then find out which doodles it confuses."
+        ),
+        ai_fields=_AI_FIELDS,
+        build_guide=[
+            {
+                "title": "Pick ten categories and look at them",
+                "summary": "Choose classes you can tell apart, then check that people can too.",
+                "steps": [
+                    "Pick ten categories and note how each one is usually drawn.",
+                    "Download a few thousand sketches per category, not the whole dataset.",
+                    "Render fifty random sketches and look at them before writing any code.",
+                    "Drop a category that turns out to overlap heavily with another one.",
+                ],
+            },
+            {
+                "title": "Turn strokes into images",
+                "summary": "One clear input format keeps the model simple.",
+                "steps": [
+                    "Scale every stroke list into a 64 by 64 box without changing its shape.",
+                    "Draw the strokes as a line image and save it as a greyscale picture.",
+                    "Check a sample by eye to confirm the scaling is not clipping corners.",
+                    "Split the data into train, validation and test sets before training.",
+                ],
+            },
+            {
+                "title": "Beat a baseline",
+                "summary": "A simple model gives every later score a meaning.",
+                "steps": [
+                    "Train the simplest model you can think of and record its accuracy.",
+                    "Train one stronger model with the same split and the same categories.",
+                    "Compare accuracy and training time side by side.",
+                    "Only then start tuning, one setting at a time and with a reason.",
+                ],
+            },
+            {
+                "title": "Read the confusion matrix",
+                "summary": "The wrong answers carry the lesson.",
+                "steps": [
+                    "Print the full confusion matrix for the test set.",
+                    "Find the three most common mistakes and look at real examples of each.",
+                    "Write one sentence per mistake explaining the likely cause.",
+                    "Fix one cause, retrain, and report whether that cell improved.",
+                ],
+            },
+            {
+                "title": "Put a canvas in front of it",
+                "summary": "A live demo shows the honest failure rate.",
+                "steps": [
+                    "Add a small web page with a drawing canvas and a clear button.",
+                    "Send the drawn strokes through the same image conversion the model was trained on.",
+                    "Show the top three guesses with their confidence.",
+                    "Ask a few people to try it and note the doodles it mishandles.",
+                ],
+            },
+        ],
+    ),
+    48: dict(
+        title="Is It Legendary? A Pokemon Stats Classifier",
+        summary=(
+            "Predict whether a Pokemon is legendary from its stats and types alone. The data "
+            "comes from PokeAPI and fits in a single file, so the whole project is about the "
+            "modelling rather than the data plumbing.\n\n"
+            "Legendary Pokemon are a small share of the list, which makes this a neat first "
+            "look at imbalanced classes. A model that always answers no looks accurate and is "
+            "useless, so you have to pick a better measure and explain why. Finish by drawing "
+            "the decision tree as a picture and reading out the rules it found: a handful of "
+            "stats usually do all the work."
+        ),
+        who_affected=(
+            "Beginners who like games and want a classification project where the data is "
+            "small enough to understand row by row."
+        ),
+        why_matters=(
+            "Most real classifiers face rare positive cases: fraud, faults, disease. A toy "
+            "problem with rare legendaries makes the same trap visible in an afternoon."
+        ),
+        field="aiml",
+        domain="ml",
+        difficulty="beginner",
+        est_hours=8,
+        tech_tags=["python", "pandas", "scikit-learn", "requests", "matplotlib"],
+        datasets=[
+            {
+                "name": "PokeAPI (free, cache the responses and follow its fair-use rules)",
+                "url": "https://pokeapi.co/",
+            }
+        ],
+        approaches=[
+            "Download each Pokemon once, cache it on disk, then work offline from a CSV.",
+            "Check the class balance before choosing any measure of success.",
+            "Compare a baseline that always says no with a real classifier.",
+            "Draw the tree and translate its branches into plain sentences.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated AI/ML learning project.",
+        original_text=(
+            "Predict whether a Pokemon is legendary from its stats and types. Draw the "
+            "decision tree and read what it learned."
+        ),
+        ai_fields=_AI_FIELDS,
+        build_guide=[
+            {
+                "title": "Collect and cache the data",
+                "summary": "Small data problems still deserve a tidy pipeline.",
+                "steps": [
+                    "Fetch the Pokemon list, then each record, and save the raw JSON to disk.",
+                    "Follow the API's fair-use rules: one request at a time, with a short pause.",
+                    "Flatten the useful fields into a table and save it as a CSV.",
+                    "Re-run the script offline from the cache so later runs cost nothing.",
+                ],
+            },
+            {
+                "title": "Look at the class balance",
+                "summary": "A rare class changes which number matters.",
+                "steps": [
+                    "Count legendary and non-legendary rows and write the ratio down.",
+                    "Train a model that always answers no and record its accuracy.",
+                    "Explain in your notes why that score is not useful here.",
+                    "Choose measures such as precision, recall and F1 for a rare class.",
+                ],
+            },
+            {
+                "title": "Train and read a tree",
+                "summary": "A shallow tree is a set of rules you can argue with.",
+                "steps": [
+                    "Split the data into train and test sets and keep the split fixed.",
+                    "Train a decision tree with a small depth limit so it stays readable.",
+                    "Plot the tree and read each rule out loud in plain English.",
+                    "Check whether the rules make sense against what you know about the games.",
+                ],
+            },
+            {
+                "title": "Handle the rare class properly",
+                "summary": "Same data, different weighting, different trade-off.",
+                "steps": [
+                    "Retrain with class weights and compare precision and recall.",
+                    "Look at which legendaries the model misses most often.",
+                    "Try a second model family and say which errors you would rather have.",
+                    "Report every number on the test set only, never on the training set.",
+                ],
+            },
+            {
+                "title": "Write the findings",
+                "summary": "A short honest write-up beats a big accuracy claim.",
+                "steps": [
+                    "State the class ratio and the baseline score in the first paragraph.",
+                    "Show the tree picture and name the two or three stats that matter.",
+                    "List the Pokemon the model gets most wrong and guess why.",
+                    "Mention that stats alone cannot capture how a game actually plays.",
+                ],
+            },
+        ],
+    ),
+    49: dict(
+        title="Which Chess Player Are You? Clustering Playing Styles",
+        summary=(
+            "Group chess players by how they play rather than by how well they play. From "
+            "Lichess open games you can build simple features per player: average game length, "
+            "how often the game ends in a capture, preferred openings, early queen moves and "
+            "time per move. Run k-means on those features and see whether the clusters look "
+            "like real styles: aggressive attackers, solid grinders, endgame specialists.\n\n"
+            "The hard part is not the clustering, it is deciding whether the groups mean "
+            "anything. Use the silhouette score, rename the clusters by hand, and check whether "
+            "one cluster is only beginners. Then put your own games through the same pipeline "
+            "and see which group they land in, along with the players it sits closest to."
+        ),
+        who_affected=(
+            "Students who play chess and want a first unsupervised project with data they "
+            "already care about."
+        ),
+        why_matters=(
+            "Clustering always returns groups, even on random numbers. Learning to test whether "
+            "the groups are real is the skill that carries over to every analysis job."
+        ),
+        field="aiml",
+        domain="ml",
+        difficulty="beginner",
+        est_hours=10,
+        tech_tags=["python", "pandas", "scikit-learn", "python-chess", "matplotlib"],
+        datasets=[
+            {
+                "name": "Lichess open database (CC0, one monthly file is plenty)",
+                "url": "https://database.lichess.org/",
+            }
+        ],
+        approaches=[
+            "Use one month of games, or your own export, and keep only players with enough games.",
+            "Turn each game into per-player numbers before averaging them by player.",
+            "Scale the features and try several cluster counts instead of trusting the first answer.",
+            "Judge the result with a silhouette score and a human look at sample players.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated AI/ML learning project.",
+        original_text=(
+            "Group players into styles (aggressive, solid, endgame specialist) using stats "
+            "like game length, openings and captures per game, then see which cluster your "
+            "own games land in."
+        ),
+        ai_fields=_AI_FIELDS,
+        build_guide=[
+            {
+                "title": "Load a month of games",
+                "summary": "Big files are fine if you never load them whole.",
+                "steps": [
+                    "Download one monthly archive and read it one game at a time.",
+                    "Keep only finished games with a rating on both sides.",
+                    "Store a small clean table instead of the raw moves for every game.",
+                    "Note how many games you dropped and why.",
+                ],
+            },
+            {
+                "title": "Build features that describe style",
+                "summary": "Clustering is only as meaningful as its features.",
+                "steps": [
+                    "Compute per game: number of moves, captures, checks and game length in seconds.",
+                    "Count how often each player's opening appears in the sample.",
+                    "Average the game numbers per player, keeping players with ten games or more.",
+                    "Write one sentence per feature explaining what it should capture.",
+                ],
+            },
+            {
+                "title": "Cluster and test the result",
+                "summary": "Try more than one answer before believing any of them.",
+                "steps": [
+                    "Scale the features so a long game does not dominate everything.",
+                    "Run k-means for three to six clusters and record the silhouette score.",
+                    "Check whether one cluster is simply low-rated players.",
+                    "Plot the clusters on two features you can actually explain.",
+                ],
+            },
+            {
+                "title": "Name the styles from examples",
+                "summary": "A label only counts if you can point at players behind it.",
+                "steps": [
+                    "Print ten random players from each cluster with their averages.",
+                    "Look up two of them and see whether the label fits.",
+                    "Rename each cluster in plain words, or merge the ones that look the same.",
+                    "Show the most common opening in each cluster.",
+                ],
+            },
+            {
+                "title": "Place your own games",
+                "summary": "The personal test exposes how thin the features are.",
+                "steps": [
+                    "Export your own games and compute the same features.",
+                    "Assign yourself to a cluster and say whether the label feels right.",
+                    "Compare your distance to the cluster centre with a typical player's.",
+                    "Write down what the features cannot see, such as tactical accuracy.",
+                ],
+            },
+        ],
+    ),
+    50: dict(
+        title="Analyse Your Own Life: A Small Personal Dashboard",
+        summary=(
+            "Track four numbers for three or four weeks: sleep hours, study hours, steps and "
+            "mood from 1 to 5. Then ask the ordinary questions. Do I sleep better on days I "
+            "move more? Do late nights drag my mood down two days later? A spreadsheet and a "
+            "notebook are enough; the project is about asking carefully, not about tools.\n\n"
+            "With 28 days of data, almost every pattern can be luck. That is the lesson. Build "
+            "the charts, run a simple regression, and then state plainly how much you cannot "
+            "conclude. Keep the data on your own machine, use no names and no health records, "
+            "and say clearly what a bigger sample would need to show."
+        ),
+        who_affected=(
+            "Anyone who wants to practise data analysis but does not have a dataset they care "
+            "about yet."
+        ),
+        why_matters=(
+            "Small personal samples are where bad reasoning starts, because the first chart "
+            "always looks convincing. Practising the careful version on your own numbers is "
+            "cheaper than learning it on someone else's data later."
+        ),
+        field="aiml",
+        domain="social-impact",
+        difficulty="beginner",
+        est_hours=6,
+        tech_tags=["python", "pandas", "matplotlib", "jupyter", "scipy"],
+        datasets=[
+            {
+                "name": "Your own daily numbers, kept local and private",
+                "url": None,
+            }
+        ],
+        approaches=[
+            "Decide what to record and at what time of day, then keep the sheet boring and regular.",
+            "Plot each variable against time before computing anything between variables.",
+            "Use lagged days to test whether a change comes before or after another change.",
+            "Report uncertainty openly, with the sample size next to every claim.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated AI/ML learning project.",
+        original_text=(
+            "Track a few things for 3 to 4 weeks in a spreadsheet (sleep hours, study hours, "
+            "steps, mood from 1 to 5), then explore which patterns show up. Do you sleep better "
+            "after exercise? Do late nights lower your mood?"
+        ),
+        ai_fields=_AI_FIELDS,
+        build_guide=[
+            {
+                "title": "Choose a few things and log them",
+                "summary": "Consistency matters more than the size of the sheet.",
+                "steps": [
+                    "Pick four numbers you can record in under a minute each day.",
+                    "Fix the time of day for each entry so the numbers mean the same thing.",
+                    "Note missing days honestly instead of filling them in later.",
+                    "Keep the file local and store no names, locations or health details.",
+                ],
+            },
+            {
+                "title": "Look at each variable alone",
+                "summary": "Before pairing variables, learn each one's shape.",
+                "steps": [
+                    "Plot each variable against the day number.",
+                    "Mark obvious events such as travel, exams or illness on the timeline.",
+                    "Note the range and any days that look like entry mistakes.",
+                    "Check whether a trend exists before reading anything into a pairing.",
+                ],
+            },
+            {
+                "title": "Compare pairs and lags",
+                "summary": "Timing decides how a relationship should be read.",
+                "steps": [
+                    "Scatter one variable against another and count your points.",
+                    "Test same-day, next-day and two-day-later pairings.",
+                    "Compute a simple correlation with its confidence interval.",
+                    "List other explanations for the same pattern, such as weekends or study load.",
+                ],
+            },
+            {
+                "title": "Fit something simple and be honest",
+                "summary": "A regression on 28 points is a starting estimate, not a finding.",
+                "steps": [
+                    "Fit a straight line for one clear question and plot the line over the points.",
+                    "Report the slope with its interval, not just a single number.",
+                    "Say out loud that correlation is not causation for every claim you keep.",
+                    "Calculate how many days a stronger claim would need.",
+                ],
+            },
+            {
+                "title": "Make the dashboard useful",
+                "summary": "A small set of charts should answer the questions you actually had.",
+                "steps": [
+                    "Build one page with four small charts and the sample size on each.",
+                    "Add a short note under every chart saying what it cannot show.",
+                    "Keep the file private and add it to your ignore list before sharing anything.",
+                    "Write a closing page of what you would track next time.",
+                ],
+            },
+        ],
+    ),
+    51: dict(
+        title="Music Genre Detective: Guess the Genre from a Clip",
+        summary=(
+            "Predict a track's genre from a 30-second clip. The audio never goes into the "
+            "model directly: you turn each clip into numbers such as MFCCs, tempo and spectral "
+            "contrast, then classify the features. The Free Music Archive's small set gives you "
+            "eight balanced genres, which is close to the classic teaching example.\n\n"
+            "Compare a nearest-neighbour model with logistic regression and look closely at "
+            "where they disagree. Rock and metal get mixed up, and so do pop and electronic, "
+            "for reasons you can hear once you know them. The project ends where it should: "
+            "with a chart of the mistakes and a short explanation of why the features cannot "
+            "separate those pairs."
+        ),
+        who_affected=(
+            "Students who want to work with sound but do not want to train a large model on a "
+            "laptop."
+        ),
+        why_matters=(
+            "Audio features are a good lesson in representation: the same clip becomes easy or "
+            "hard to classify depending on how you describe it. That idea returns in every "
+            "field, from text to images."
+        ),
+        field="aiml",
+        domain="ml",
+        difficulty="beginner",
+        est_hours=14,
+        tech_tags=["python", "librosa", "numpy", "scikit-learn", "matplotlib"],
+        datasets=[
+            {
+                "name": (
+                    "Free Music Archive small dataset (each track has its own Creative Commons "
+                    "licence, check before sharing clips)"
+                ),
+                "url": "https://github.com/mdeff/fma",
+            }
+        ],
+        approaches=[
+            "Slice each track into fixed clips and keep the genre label with every slice.",
+            "Extract a small, explainable set of audio features per clip.",
+            "Train two simple models with the same split and compare their errors.",
+            "Group the confusion by genre pair and explain each pair with what the features measure.",
+        ],
+        source_name="MANABI Curated",
+        source_note="Curated AI/ML learning project.",
+        original_text=(
+            "Predict a track's genre from 30-second clips by turning audio into features such "
+            "as MFCCs, then look at why rock and metal, or pop and electronic, get mixed up."
+        ),
+        ai_fields=_AI_FIELDS,
+        build_guide=[
+            {
+                "title": "Get the clips and their labels",
+                "summary": "A clean label table is half the project.",
+                "steps": [
+                    "Download the small audio set and its metadata table.",
+                    "Read the licence notes and keep the clips for personal study only.",
+                    "Cut each track into 30-second pieces and drop the ones that are mostly silence.",
+                    "Check that every genre has a similar number of clips.",
+                ],
+            },
+            {
+                "title": "Turn sound into numbers",
+                "summary": "You cannot classify a waveform; you classify a summary of it.",
+                "steps": [
+                    "Load each clip at a fixed sample rate and check the duration.",
+                    "Compute MFCCs, tempo, spectral contrast and a few zero-crossing statistics.",
+                    "Average each feature over the clip and store one row per clip.",
+                    "Listen to two clips with very different feature values and confirm the numbers match your ears.",
+                ],
+            },
+            {
+                "title": "Train two simple models",
+                "summary": "Two cheap models show more than one tuned model.",
+                "steps": [
+                    "Scale the features and make a single fixed train and test split.",
+                    "Train a nearest-neighbour classifier as the baseline.",
+                    "Train logistic regression on the same features and split.",
+                    "Record accuracy and per-genre precision and recall for both.",
+                ],
+            },
+            {
+                "title": "Study the confusion",
+                "summary": "The mixed-up genres tell you what the features miss.",
+                "steps": [
+                    "Print the confusion matrix for both models side by side.",
+                    "Name the three most confused genre pairs.",
+                    "Listen to two misclassified clips per pair and describe the overlap.",
+                    "Explain which feature fails to separate them and why.",
+                ],
+            },
+            {
+                "title": "Build a genre meter",
+                "summary": "A probability view makes the uncertainty visible.",
+                "steps": [
+                    "Add a small script that takes one clip and prints genre probabilities.",
+                    "Show the top three genres instead of only the best guess.",
+                    "Try a clip you recorded yourself and check the confidence.",
+                    "Write a short note on which genres this approach should never be trusted with.",
+                ],
+            },
+        ],
+    ),
 }
 
 LEARNING_CONCEPTS = {
@@ -1234,6 +1837,42 @@ LEARNING_CONCEPTS = {
         "Measuring uncertainty",
         "Morphology class imbalance",
     ],
+    46: [
+        "Reinforcement learning with no library",
+        "Rewards, penalties and exploration",
+        "Learning from games against a random player",
+        "Reading a learning curve",
+    ],
+    47: [
+        "Image classification from stroke drawings",
+        "Train, validation and test splits",
+        "Confusion matrices",
+        "Comparing a simple and a stronger model",
+    ],
+    48: [
+        "Classification with rare positive cases",
+        "Why accuracy misleads on imbalanced data",
+        "Precision, recall and F1",
+        "Reading a decision tree as rules",
+    ],
+    49: [
+        "Feature engineering from game records",
+        "k-means clustering",
+        "Judging clusters with the silhouette score",
+        "Naming clusters from real examples",
+    ],
+    50: [
+        "Exploratory data analysis on a small sample",
+        "Lag plots and timing",
+        "Correlation versus causation",
+        "Honest uncertainty in a write-up",
+    ],
+    51: [
+        "Audio features such as MFCCs",
+        "Nearest neighbours versus logistic regression",
+        "Reading errors by genre pair",
+        "Why a representation makes a task easy or hard",
+    ],
 }
 
 DIFFICULTIES = {
@@ -1277,6 +1916,12 @@ DIFFICULTIES = {
     43: "intermediate",
     44: "intermediate",
     45: "intermediate",
+    46: "beginner",
+    47: "beginner",
+    48: "beginner",
+    49: "beginner",
+    50: "beginner",
+    51: "beginner",
 }
 
 TITLES = {
@@ -1320,4 +1965,10 @@ TITLES = {
     43: "Physics Law Discovery from Data",
     44: "Bird Call Identifier (Bioacoustics)",
     45: "Galaxy Morphology Classifier with Uncertainty",
+    46: "Matchbox Machine: Teach Tic-Tac-Toe with Beads",
+    47: "Doodle Recognizer: Guess the Sketch",
+    48: "Is It Legendary? A Pokemon Stats Classifier",
+    49: "Which Chess Player Are You? Clustering Playing Styles",
+    50: "Analyse Your Own Life: A Small Personal Dashboard",
+    51: "Music Genre Detective: Guess the Genre from a Clip",
 }

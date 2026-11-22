@@ -15,13 +15,13 @@ from app.seed.seed_aiml_learning_projects import PROBLEMS
 
 
 def test_aiml_learning_pack_matches_schema():
-    assert len(PROBLEMS) == 40
-    assert len({p["source_id"] for p in PROBLEMS}) == 40
-    assert len({p["title"] for p in PROBLEMS}) == 40
-    assert len({p["summary"] for p in PROBLEMS}) == 40
+    assert len(PROBLEMS) == 46
+    assert len({p["source_id"] for p in PROBLEMS}) == 46
+    assert len({p["title"] for p in PROBLEMS}) == 46
+    assert len({p["summary"] for p in PROBLEMS}) == 46
     assert set(DIFFICULTIES) == set(LEARNING_CONCEPTS) == set(TITLES)
     assert Counter(p["difficulty"] for p in PROBLEMS) == {
-        "beginner": 9,
+        "beginner": 15,
         "intermediate": 18,
         "advanced": 13,
     }
@@ -58,7 +58,7 @@ def test_seed_inserts_then_updates_without_duplicates(monkeypatch):
     session = factory()
     try:
         count = session.scalar(select(func.count(Problem.id)))
-        assert count == 40
+        assert count == 46
         rows = session.scalars(select(Problem)).all()
         assert all(row.goal == "learning" for row in rows)
         assert all(row.field == "aiml" for row in rows)

@@ -1,9 +1,9 @@
-"""Seed the 40 AI/ML learning briefs from aiml_project.md.
+"""Seed the 46 AI/ML learning briefs from aiml_project.md.
 
 Thirty learning projects already exist as resume or hackathon briefs. This pack
 reuses their summaries, approaches and build guides, removes the track-specific
-kits, and adds learning concepts plus the documented difficulty. The other ten
-projects are defined in ``aiml_learning_details``.
+kits, and adds learning concepts plus the documented difficulty. The other
+sixteen projects are defined in ``aiml_learning_details``.
 """
 
 from copy import deepcopy
@@ -60,6 +60,12 @@ PROJECT_NUMBERS = [
     39,
     41,
     42,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
 ]
 
 _RESUME_BY_TITLE = {problem["title"]: problem for problem in RESUME_PROBLEMS}
