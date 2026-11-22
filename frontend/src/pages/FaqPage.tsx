@@ -52,7 +52,7 @@ const GROUPS = [
       },
       {
         q: 'What is in a brief?',
-        a: 'A summary, who is affected, why it matters, difficulty, an hour estimate, a suggested stack, approaches, datasets and the original source. Track briefs go further.',
+        a: 'A summary, who is affected, why it matters, difficulty, a suggested stack, approaches, datasets and the original source. Track briefs go further.',
       },
       {
         q: 'Which briefs are "quality"?',
