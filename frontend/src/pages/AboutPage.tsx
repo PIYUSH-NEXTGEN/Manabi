@@ -71,7 +71,7 @@ export function AboutPage() {
         </p>
         <ul className="list-disc space-y-1.5 pl-5">
           <li>A summary, who is affected and why the problem matters</li>
-          <li>Difficulty and an estimate of the hours involved</li>
+          <li>A difficulty label</li>
           <li>A suggested stack, approaches and useful datasets</li>
           <li>The original problem statement and its source</li>
         </ul>

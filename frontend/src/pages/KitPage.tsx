@@ -103,14 +103,12 @@ export function KitPage() {
             title="Crop disease triage"
             summary="Sample card for the design kit. Real cards come from the API."
             difficulty="beginner"
-            estHours={20}
           />
           <IndexCard
             sourceId="OGDC-04"
             field="aiml"
             title="Ambulance ETA board"
             difficulty="intermediate"
-            estHours={35}
           />
         </div>
       </Section>

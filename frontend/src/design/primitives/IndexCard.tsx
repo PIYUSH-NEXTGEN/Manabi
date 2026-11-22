@@ -14,7 +14,6 @@ interface IndexCardProps {
   title: string;
   summary?: string | null;
   difficulty?: Difficulty | null;
-  estHours?: number | null;
   className?: string;
 }
 
@@ -24,11 +23,9 @@ export function IndexCard({
   title,
   summary,
   difficulty,
-  estHours,
   className,
 }: IndexCardProps) {
   const filled = difficulty ? DIFFICULTY_FILL[difficulty] : 0;
-  const meta = estHours != null ? `${estHours} h` : '';
 
   return (
     <article
@@ -72,7 +69,7 @@ export function IndexCard({
           ) : (
             <span />
           )}
-          <span className="text-muted">{meta || 'open brief'}</span>
+          <span className="text-muted">open brief</span>
         </div>
       </div>
     </article>
