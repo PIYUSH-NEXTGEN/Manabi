@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "manabi-keepalive",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  // Render spins a free web service down after 15 idle minutes, so liveness is
+  // pinged every 10 minutes. The daily readiness ping runs a query, which keeps
+  // a free Supabase project from pausing.
+  "triggers": {
+    "crons": ["*/10 * * * *", "17 6 * * *"]
+  },
+  // Public entry point: the Pages Function forwards /api/* to Render.
+  "vars": {
+    "TARGET_URL": "https://manabi-bsh.pages.dev"
+  }
+}

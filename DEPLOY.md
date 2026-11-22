@@ -16,8 +16,11 @@ origin), but the cookie becomes third-party; login is only dependable when both
 hosts share a registrable domain. The same code still works as a single-service
 deploy when frontend and API share an origin.
 
-There are no background workers, queues, or scheduled jobs to deploy. GitHub
-and the LLM providers are called synchronously from request/verification code.
+The application itself has no background workers, queues, or scheduled jobs.
+GitHub and the LLM providers are called synchronously from
+request/verification code. A separate, optional Cloudflare Worker
+(`keepalive-worker/`) pings the health endpoints on a schedule so the free
+Render instance does not spin down; see section 1.3.
 
 ```text
 Browser
@@ -102,6 +105,34 @@ python -m pip install --no-cache-dir -r backend/requirements.txt
 The repository-root `build.sh` still installs the backend deps and builds
 `frontend/dist`; it is for single-service deploys and local verification, not
 for the split Render service.
+
+### 1.3 Keepalive Worker (optional)
+
+Render spins a free web service down after 15 minutes without inbound traffic
+and takes about a minute to wake. `keepalive-worker/` is a small Cloudflare
+Worker that resets that timer:
+
+| Cron | Request | Purpose |
+|---|---|---|
+| `*/10 * * * *` | `GET /api/health/live` | Keeps the Render instance awake |
+| `17 6 * * *` | `GET /api/health/ready` | Runs a query so free Supabase does not pause |
+
+The Worker targets `TARGET_URL` (default `https://manabi-bsh.pages.dev`, which
+the Pages Function proxies to Render). Change the `vars` block in
+`keepalive-worker/wrangler.jsonc` if your public origin differs.
+
+```sh
+cd keepalive-worker
+npm install
+npx wrangler deploy
+```
+
+**Render free-tier budget:** 750 instance hours per workspace per calendar
+month, shared by every free web service. Keeping one service awake 24/7 uses
+about 744 hours in a 31-day month, leaving roughly 6 hours. Exceeding the cap
+suspends all free web services until the next month, so keep this as the only
+free web service. The interval must stay below 15 minutes; 10 minutes leaves
+headroom for scheduler jitter.
 
 ## 2. Environment variables
 

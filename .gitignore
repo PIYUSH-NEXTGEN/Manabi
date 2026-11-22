@@ -69,6 +69,8 @@ backend/scripts/reverify_report.csv
 
 # Tool-local state
 /.freebuff/
+.wrangler/
+keepalive-worker/.dev.vars
 
 # ── Python ──
 backend/.venv/
