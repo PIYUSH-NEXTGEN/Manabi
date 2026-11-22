@@ -50,12 +50,11 @@ type Sponsor = {
 };
 
 const SPONSORS: Sponsor[] = [
-  // {
-  //   name: 'Acme',
-  //   href: 'https://acme.com',
-  //   icon: '/sponsors/acme.svg',
-  //   blurb: 'One or two lines about what Acme makes.',
-  // },
+  {
+    name: 'ANSIMUZ',
+    href: 'https://ansimuz.is-a.software/',
+    icon: '/ansimuz.png',
+  },
 ];
 
 export function Sponsors() {
@@ -117,13 +116,13 @@ export function Sponsors() {
                     rel="noreferrer noopener"
                     className="group flex flex-col"
                   >
-                    <span className="flex aspect-square items-center justify-center rounded-[1.2rem] border border-line bg-paper p-3 shadow-soft transition-colors group-hover:border-ink/25 group-hover:bg-tint">
+                    <span className="sponsor-tile flex aspect-square items-center justify-center overflow-hidden rounded-[1.2rem] border border-line bg-paper shadow-soft transition-colors group-hover:border-ink/25 group-hover:bg-tint dark:bg-white dark:group-hover:bg-white">
                       {sponsor.icon ? (
                         <img
                           src={sponsor.icon}
                           alt=""
                           loading="lazy"
-                          className="size-9 rounded-[0.6rem] object-contain"
+                          className="size-full scale-[1.35] object-contain"
                         />
                       ) : (
                         <span
