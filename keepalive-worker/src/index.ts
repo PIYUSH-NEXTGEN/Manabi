@@ -15,6 +15,16 @@ async function ping(base: string, path: string): Promise<void> {
 }
 
 export default {
+  // Cron triggers do not use this handler, but a Worker with no fetch handler
+  // throws Error 1101 when its URL is opened. Return a tiny status page so
+  // manual checks are clean.
+  async fetch(): Promise<Response> {
+    return new Response('manabi-keepalive: ok\n', {
+      status: 200,
+      headers: { 'content-type': 'text/plain; charset=utf-8' },
+    });
+  },
+
   async scheduled(
     controller: ScheduledController,
     env: Env,
