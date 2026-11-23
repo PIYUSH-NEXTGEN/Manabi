@@ -491,6 +491,9 @@ def star_problem(problem_id: int, user: CurrentUser, db: DB):
             status_code=409,
             detail={"code": "already_starred", "message": "You already starred this problem."},
         )
+    # Anonymous board payloads carry star_count; drop them so every viewer
+    # sees the new total instead of a payload cached before this star.
+    PUBLIC_CACHE.delete_prefix(LIST_KEY_PREFIX)
     return {"ok": True, "star_count": _problem_star_count(db, problem.id)}
 
 
@@ -508,3 +511,5 @@ def unstar_problem(problem_id: int, user: CurrentUser, db: DB):
     if star is not None:
         db.delete(star)
         db.commit()
+        # The board's public payload still counts the removed star otherwise.
+        PUBLIC_CACHE.delete_prefix(LIST_KEY_PREFIX)

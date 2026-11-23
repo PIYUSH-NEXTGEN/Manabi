@@ -172,3 +172,22 @@ def test_board_list_carries_star_counts(client, seeded, starer, db_session):
     row = [p for p in items if p["id"] == seeded["problem"].id][0]
     assert row["star_count"] == 1
     assert row["starred_by_me"] is True
+
+
+def test_new_star_reaches_anonymous_viewers_despite_the_list_cache(client, seeded):
+    """A board payload cached before a star must not hide the new total from
+    everyone else. The star endpoints drop the anonymous list entries."""
+    problem_id = seeded["problem"].id
+
+    logout()
+    before = client.get("/api/problems").json()["items"]
+    assert [p for p in before if p["id"] == problem_id][0]["star_count"] == 0
+
+    login_as(seeded["starer"])
+    assert client.post(f"/api/problems/{problem_id}/star").status_code == 201
+
+    logout()
+    after = client.get("/api/problems").json()["items"]
+    row = [p for p in after if p["id"] == problem_id][0]
+    assert row["star_count"] == 1
+    assert row["starred_by_me"] is False

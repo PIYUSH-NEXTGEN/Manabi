@@ -76,6 +76,17 @@ class TTLCache:
                     self._entries.pop(oldest, None)
             self._entries[key] = (now + ttl_seconds, value)
 
+    def delete_prefix(self, prefix: str) -> None:
+        """Drop entries whose key starts with prefix, keeping unrelated
+        aggregates warm. Keys are tuples whose first element names the kind."""
+        with self._lock:
+            for key in [
+                existing
+                for existing in self._entries
+                if isinstance(existing, tuple) and existing and existing[0] == prefix
+            ]:
+                self._entries.pop(key, None)
+
     def clear(self) -> None:
         with self._lock:
             self._entries.clear()
