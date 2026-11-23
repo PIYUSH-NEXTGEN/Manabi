@@ -1,24 +1,26 @@
 /**
- * MANABI mark: a solid geometric M cut from the same grid as the interface.
- * The accent square on the baseline is the record tab. The same orange
- * marker used across the UI to tag a record.
+ * MANABI mark: the minimal emblem from the favicon. A red brush stroke sits
+ * inside a ringed disc. The ring inherits the current text colour so the mark
+ * settles onto both the light footer card and dark surfaces.
  */
 export function Logo({ className }: { className?: string }) {
   return (
     <svg
       width="22"
       height="22"
-      viewBox="0 0 32 32"
+      viewBox="0 0 64 64"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`shrink-0 ${className ?? ''}`}
       aria-hidden
     >
+      <circle cx="32" cy="32" r="29" fill="var(--paper)" />
+      <circle cx="32" cy="32" r="29" stroke="currentColor" strokeWidth="5" />
       <path
-        fill="currentColor"
-        d="M3 26V6h4.4l8.6 8.4L24.6 6H29v20h-4.4V12l-8.6 8.8L7.4 12v14H3Z"
+        fill="var(--danger)"
+        transform="translate(-14.45 -14.45) scale(1.4)"
+        d="M22 22C30 24 38 30 44 38C46 41 45 45 41 45C37 45 33 41 30 36C27 31 24 27 22 22Z"
       />
-      <rect x="14.4" y="22.4" width="3.2" height="3.6" fill="var(--sky)" />
     </svg>
   );
 }
