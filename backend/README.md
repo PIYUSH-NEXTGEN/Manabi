@@ -71,7 +71,7 @@ On Windows, use `.\.venv\Scripts\python.exe` instead.
 | `BASE_URL` | Used for OAuth callback routing (localhost or deployed domain) |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | GitHub OAuth app for login |
 | `LLM_PROVIDER` | `gemini`, `anthropic`, or `mock` |
-| `GEMINI_API_KEY`, `GEMINI_MODEL` | Gemini (default model in code: `gemini-3.8-flash`) |
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | Gemini (default model in code: `gemini-flash-lite-latest`) |
 | `GEMINI_API_KEYS_EVAL`, `GEMINI_API_KEYS_CHAT` | Optional ordered, comma-separated key pools; exhausted keys rotate out until quota resets |
 | `GEMINI_API_KEY_CHAT`, `GEMINI_MODEL_CHAT` | Optional second Gemini project for the chat (default model: `gemini-3.5-flash-lite`); empty falls back to the shared key |
 | `ANTHROPIC_API_KEY`, `LLM_MODEL_FAST` | Optional Anthropic provider |

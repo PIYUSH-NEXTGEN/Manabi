@@ -157,7 +157,7 @@ def test_evaluation_keeps_the_shared_key(monkeypatch):
     chat("Sys", [{"role": "user", "content": "hi"}])
 
     assert used["key"] == "shared"
-    assert used["model"] == "gemini-3.8-flash"
+    assert used["model"] == "gemini-flash-lite-latest"
 
 
 def test_chat_only_key_configures_chat_but_not_evaluation(monkeypatch):

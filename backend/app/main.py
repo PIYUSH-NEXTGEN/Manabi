@@ -29,6 +29,28 @@ def _is_local_base_url(base_url: str) -> bool:
     return host in {"localhost", "127.0.0.1", "::1"}
 
 
+def allowed_cors_origins(settings) -> list[str]:
+    """Origins allowed to call the API with cookies.
+
+    `FRONTEND_URL` is always allowed and `CORS_ALLOW_ORIGINS` adds more. Its
+    default is the Vite dev origin, so loopback origins are dropped in
+    production: a development origin must never sit on a credentialled
+    allowlist in the deployed service.
+    """
+    raw = (getattr(settings, "CORS_ALLOW_ORIGINS", "") or "").split(",")
+    raw.append(getattr(settings, "FRONTEND_URL", "") or "")
+    is_production = getattr(settings, "APP_ENV", "development") == "production"
+    origins: list[str] = []
+    for origin in raw:
+        origin = origin.strip()
+        if not origin or origin in origins:
+            continue
+        if is_production and _is_local_base_url(origin):
+            continue
+        origins.append(origin)
+    return origins
+
+
 def guard_deploy_secrets(settings) -> None:
     """Fail fast on unsafe deploy settings (local dev keeps its defaults)."""
     app_env = getattr(settings, "APP_ENV", "development")
@@ -300,18 +322,9 @@ def create_app() -> FastAPI:
     app.add_exception_handler(OperationalError, database_unavailable_handler)
     app.add_exception_handler(SATimeoutError, database_unavailable_handler)
     app.add_exception_handler(Exception, unhandled_exception_handler)
-    # The split-deploy frontend origin is always allowed; CORS_ALLOW_ORIGINS
-    # stays available for additional custom domains.
-    allowed_origins: list[str] = []
-    for origin in (
-        settings.CORS_ALLOW_ORIGINS.split(",") + [settings.FRONTEND_URL]
-    ):
-        origin = origin.strip()
-        if origin and origin not in allowed_origins:
-            allowed_origins.append(origin)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=allowed_origins,
+        allow_origins=allowed_cors_origins(settings),
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],

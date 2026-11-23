@@ -25,8 +25,11 @@ services:
         sync: false # set to https://<your-service>.onrender.com after first deploy
       - key: FRONTEND_URL
         sync: false # set to your Cloudflare Pages origin, e.g. https://manabi.pages.dev
+      # Optional extra origins; FRONTEND_URL is always allowed. The dev default
+      # (http://localhost:5173) is dropped when APP_ENV=production, so leaving
+      # this empty does not weaken the deployed API.
       - key: CORS_ALLOW_ORIGINS
-        sync: false # optional extra origins; FRONTEND_URL is always allowed
+        sync: false
       - key: SESSION_SECRET
         generateValue: true
       # Required: a durable Postgres connection string (Neon/Supabase/Render).
@@ -42,6 +45,16 @@ services:
         sync: false
       - key: GEMINI_API_KEY
         sync: false
+      # Declared so a blueprint re-create keeps grading and chat working on the
+      # intended model instead of whatever the code happens to default to.
+      - key: GEMINI_MODEL
+        sync: false # e.g. gemini-flash-lite-latest; empty uses the code default
+      - key: GEMINI_API_KEY_CHAT
+        sync: false # optional second Gemini project for chat only
+      - key: GEMINI_API_KEYS_CHAT
+        sync: false # optional ordered chat key pool, comma-separated
+      - key: GEMINI_API_KEYS_EVAL
+        sync: false # optional ordered evaluation key pool, comma-separated
       - key: CHAT_RATE_LIMIT_PER_DAY
         value: "20"
       - key: ADMIN_GITHUB_USERNAMES

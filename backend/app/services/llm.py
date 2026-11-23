@@ -12,7 +12,11 @@ logger = logging.getLogger(__name__)
 
 ANTHROPIC_API_BASE = "https://api.anthropic.com/v1"
 ANTHROPIC_VERSION = "2023-06-01"
-DEFAULT_GEMINI_MODEL = "gemini-3.8-flash"
+# Flash-Lite carries the largest free daily quota and is far less likely to
+# return 503 UNAVAILABLE under load than the flagship model. A dead grading
+# model is invisible to users: the offline keyword fallback can never verify,
+# so every submission silently lands in needs_review.
+DEFAULT_GEMINI_MODEL = "gemini-flash-lite-latest"
 DEFAULT_GEMINI_CHAT_MODEL = "gemini-3.5-flash-lite"
 DEFAULT_ANTHROPIC_MODEL = "claude-sonnet-4-5"
 MAX_TOKENS_CHAT = 320

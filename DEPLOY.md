@@ -374,7 +374,9 @@ because Alembic and `.env` resolution use the backend working directory.
 - HSTS is sent on HTTPS responses. It deliberately omits `includeSubDomains`.
 - CORS allows exactly the origins in `CORS_ALLOW_ORIGINS` plus `FRONTEND_URL`,
   with credentials enabled. Nothing else can call the API with cookies. Local
-  development defaults to `http://localhost:5173` for the Vite server.
+  development defaults to `http://localhost:5173` for the Vite server; loopback
+  origins are dropped when `APP_ENV=production`, so the dev default never
+  reaches a deployed allowlist.
 - **Third-party cookie caveat:** `*.pages.dev` and `*.onrender.com` are
   different sites, so browsers with third-party cookie blocking (Safari/ITP,
   Chrome incognito) can drop the session cookie. For reliable login, put both
@@ -423,7 +425,7 @@ Render's health check alone is not proof that the API can serve data.
    `Strict-Transport-Security`.
 7. `curl -i https://<api>/api/stats -H 'Origin: https://<app>'` → response
    carries `access-control-allow-origin: https://<app>`.
-8. `alembic current` → `0017_integrity_constraints (head)`.
+8. `alembic current` → `0020_visitors (head)`.
 9. Open the app, log in with GitHub, submit a test project, and exercise the
    admin review path if those features are enabled. Check DevTools → Network
    that `/api/auth/me` returns 200 after login (a 401 there means the session

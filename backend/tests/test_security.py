@@ -6,7 +6,13 @@ from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from app.config import Settings, get_settings
-from app.main import DEFAULT_SESSION_SECRET, app, create_app, guard_deploy_secrets
+from app.main import (
+    DEFAULT_SESSION_SECRET,
+    allowed_cors_origins,
+    app,
+    create_app,
+    guard_deploy_secrets,
+)
 
 
 def settings(
@@ -88,6 +94,39 @@ def test_production_accepts_public_https_and_postgres():
 def test_base_url_must_be_a_plain_http_origin(base_url):
     with pytest.raises(ValidationError, match="BASE_URL"):
         Settings(BASE_URL=base_url, _env_file=None)
+
+
+def test_development_keeps_the_vite_cors_origin():
+    assert allowed_cors_origins(
+        SimpleNamespace(
+            APP_ENV="development",
+            CORS_ALLOW_ORIGINS="http://localhost:5173",
+            FRONTEND_URL="",
+        )
+    ) == ["http://localhost:5173"]
+
+
+def test_production_drops_loopback_cors_origins():
+    origins = allowed_cors_origins(
+        SimpleNamespace(
+            APP_ENV="production",
+            CORS_ALLOW_ORIGINS="http://localhost:5173,https://manabi.example.com",
+            FRONTEND_URL="https://manabi.example.com/",
+        )
+    )
+    assert "http://localhost:5173" not in origins
+    # FRONTEND_URL is de-duplicated against the explicit list.
+    assert origins.count("https://manabi.example.com") == 1
+
+
+def test_production_keeps_a_configured_public_origin():
+    assert allowed_cors_origins(
+        SimpleNamespace(
+            APP_ENV="production",
+            CORS_ALLOW_ORIGINS="http://127.0.0.1:8000",
+            FRONTEND_URL="https://manabi.pages.dev",
+        )
+    ) == ["https://manabi.pages.dev"]
 
 
 def test_security_headers_and_api_no_store():
