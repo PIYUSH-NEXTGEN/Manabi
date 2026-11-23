@@ -69,7 +69,7 @@ export function Footer() {
         className="pointer-events-none absolute -right-24 bottom-0 size-[22rem] rounded-full bg-lime/20 blur-3xl dark:bg-lime/5"
       />
 
-      <div className="relative mx-auto w-full max-w-[1280px] px-4 pb-24 pt-10 sm:px-6 sm:pt-14">
+      <div className="relative mx-auto w-full max-w-[1440px] px-4 pb-24 pt-10 sm:px-6 sm:pt-14 lg:px-8">
         <motion.div
           variants={reveal}
           initial="hidden"
@@ -77,7 +77,7 @@ export function Footer() {
           viewport={{ once: true, amount: 0.15 }}
           className="overflow-hidden rounded-[2rem] border border-line bg-paper shadow-lift"
         >
-          <div className="grid gap-10 p-6 sm:p-10 lg:grid-cols-[1.5fr_2fr] lg:gap-14 lg:p-12">
+          <div className="grid gap-10 p-6 sm:p-12 lg:grid-cols-[1.5fr_2fr] lg:gap-16 lg:p-16">
             <motion.div variants={item}>
               <Link to="/" className="group inline-flex items-center gap-3">
                 <Logo className="text-ink transition-colors group-hover:text-accent" />
@@ -134,7 +134,7 @@ export function Footer() {
 
           <motion.div
             variants={item}
-            className="grid gap-6 border-t border-line px-6 py-6 sm:px-10 lg:grid-cols-[1fr_auto] lg:items-center lg:px-12"
+            className="grid gap-6 border-t border-line px-6 py-6 sm:px-12 sm:py-8 lg:grid-cols-[1fr_auto] lg:items-center lg:px-16"
           >
             <div>
               <p className="font-mono text-label font-bold uppercase tracking-[0.16em] text-ink">
@@ -194,7 +194,7 @@ export function Footer() {
             )}
           </motion.div>
 
-          <div className="relative border-t border-line px-6 py-6 sm:px-10 lg:px-12">
+          <div className="relative border-t border-line px-6 py-6 sm:px-12 sm:py-8 lg:px-16">
             <div
               aria-hidden
               className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-sky/20 to-transparent dark:bg-none"
