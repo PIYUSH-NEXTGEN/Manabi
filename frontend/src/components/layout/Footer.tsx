@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { ArrowUpRight, Star } from 'lucide-react';
+import { ArrowUpRight, Mail, Star } from 'lucide-react';
 import { Logo } from './Logo';
 import { GithubMark } from '@/components/icons/GithubMark';
 import { XMark } from '@/components/icons/XMark';
@@ -10,6 +10,8 @@ import { X_URL } from '@/lib/socials';
 
 const REPO_URL = 'https://github.com/PIYUSH-NEXTGEN/Manabi';
 const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL;
+const MAIL_EMAIL =
+  import.meta.env.VITE_CONTACT_EMAIL || 'manabi.build@gmail.com';
 
 const FOOTER_COLUMNS = [
   {
@@ -102,6 +104,15 @@ export function Footer() {
                     <XMark size={13} />
                   </span>
                   @Piyush_NextGen
+                </a>
+                <a
+                  href={`mailto:${MAIL_EMAIL}`}
+                  className="group inline-flex w-fit items-center gap-2.5 transition-colors hover:text-ink"
+                >
+                  <span className="flex size-7 items-center justify-center rounded-full border border-line bg-tint text-ink">
+                    <Mail aria-hidden size={13} />
+                  </span>
+                  {MAIL_EMAIL}
                 </a>
               </div>
             </motion.div>
