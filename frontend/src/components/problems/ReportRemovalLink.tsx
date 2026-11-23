@@ -1,6 +1,4 @@
-import { Link } from 'react-router-dom';
-
-const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL as string | undefined;
+import { CONTACT_EMAIL } from '@/lib/contact';
 
 export function ReportRemovalLink({
   sourceName,
@@ -10,25 +8,15 @@ export function ReportRemovalLink({
   sourceId?: string | null;
 }) {
   const label = 'Report / request removal';
-  if (CONTACT_EMAIL) {
-    const subject = encodeURIComponent(
-      `Removal request: ${sourceName}${sourceId ? ` ${sourceId}` : ''}`,
-    );
-    return (
-      <a
-        href={`mailto:${CONTACT_EMAIL}?subject=${subject}`}
-        className="font-mono text-label font-bold uppercase tracking-widest text-accent underline underline-offset-4"
-      >
-        {label}
-      </a>
-    );
-  }
+  const subject = encodeURIComponent(
+    `Removal request: ${sourceName}${sourceId ? ` ${sourceId}` : ''}`,
+  );
   return (
-    <Link
-      to="/contact"
+    <a
+      href={`mailto:${CONTACT_EMAIL}?subject=${subject}`}
       className="font-mono text-label font-bold uppercase tracking-widest text-accent underline underline-offset-4"
     >
       {label}
-    </Link>
+    </a>
   );
 }

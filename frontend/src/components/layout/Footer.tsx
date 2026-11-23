@@ -7,9 +7,9 @@ import { GithubMark } from '@/components/icons/GithubMark';
 import { XMark } from '@/components/icons/XMark';
 import { EASE_SNAP } from '@/design/motion';
 import { X_URL } from '@/lib/socials';
+import { CONTACT_EMAIL } from '@/lib/contact';
 
 const REPO_URL = 'https://github.com/PIYUSH-NEXTGEN/Manabi';
-const CONTACT_EMAIL = import.meta.env.VITE_CONTACT_EMAIL;
 const MAIL_EMAIL =
   import.meta.env.VITE_CONTACT_EMAIL || 'manabi.build@gmail.com';
 

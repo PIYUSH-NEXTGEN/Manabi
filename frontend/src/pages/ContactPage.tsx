@@ -1,13 +1,12 @@
 import { ArrowUpRight } from 'lucide-react';
 import { GithubMark } from '@/components/icons/GithubMark';
 import { buttonClasses } from '@/design/primitives';
+import { CONTACT_EMAIL } from '@/lib/contact';
 import { ProsePage, ProseSection } from './staticParts';
 
 const REPO_URL = 'https://github.com/PIYUSH-NEXTGEN/Manabi';
 const GITHUB_ISSUES_URL =
   import.meta.env.VITE_GITHUB_ISSUES_URL || `${REPO_URL}/issues`;
-const CONTACT_EMAIL =
-  import.meta.env.VITE_CONTACT_EMAIL || 'manabi.build@gmail.com';
 const SECURITY_URL = `${REPO_URL}/blob/main/SECURITY.md`;
 
 const INCLUDED = [

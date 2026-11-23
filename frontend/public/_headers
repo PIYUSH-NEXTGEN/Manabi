@@ -1,0 +1,20 @@
+# Cloudflare Pages response headers. Copied into dist/ like _redirects.
+# https://developers.cloudflare.com/pages/configuration/headers/
+#
+# Vite fingerprints every build artifact (/assets/index-<hash>.js), so a new
+# build produces a new name and an old name is never requested again. Those
+# files can therefore be cached for a year instead of revalidated on every
+# visit, which is what Pages does by default (max-age=0).
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Everything else is the app shell or an un-fingerprinted file from public/.
+# The shell must be revalidated so a deploy is picked up on the next visit.
+# These also apply to the document itself, which the API's headers cannot
+# cover: it is the page, not the JSON, that gets framed.
+/*
+  Cache-Control: public, max-age=0, must-revalidate
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin

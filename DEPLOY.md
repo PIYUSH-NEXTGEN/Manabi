@@ -72,6 +72,27 @@ Create a Pages project connected to this repository and set:
 `*.pages.dev` origin, so the session cookie is first-party and login works.
 Point the API's `BASE_URL` at this Pages origin to match (see section 2).
 
+Two Pages settings have no repository file; set them in the dashboard:
+
+| Setting | Value | Why |
+|---|---|---|
+| Build watch paths → include | `frontend/*`, `.node-version` | A wildcard matches path separators, so `frontend/*` covers every nested file. The default `*` rebuilds the whole site for backend-only commits, and omitting `.node-version` would stop a Node pin change from rebuilding. |
+| Build cache | Enabled | Reuses npm's cache between builds; `npm ci` still installs from the lockfile. It remains a beta feature, so a corrupt cache shows up as a build that fails only on Pages. |
+
+`frontend/public/_headers` is copied into `dist/` next to `_redirects` and sets
+edge response headers. `/assets/*` is fingerprinted by Vite, so it is cached for
+a year as `immutable`; Pages otherwise serves everything with `max-age=0`, which
+revalidates the bundle on every visit. The app shell keeps revalidating and
+receives the framing rules (`X-Frame-Options: DENY`, `frame-ancestors 'none'`)
+that the API can only send for its own JSON. Header rules do not apply to Pages
+Function responses, so `/api/*` keeps the headers FastAPI sets.
+
+`frontend/public/favicon.ico` is packed from `favicon.svg` by
+`node frontend/scripts/render-favicon-png.mjs` plus Pillow, so a client that
+guesses `/favicon.ico` gets an icon instead of the SPA fallback's HTML.
+`VITE_APP_VERSION` is filled from `CF_PAGES_COMMIT_SHA` at build time by
+`vite.config.ts`; set it explicitly to override the commit stamp.
+
 If you prefer the direct cross-origin setup (no Function, `VITE_API_BASE_URL`
 set to the Render origin), expect the session cookie to be treated as a
 third-party cookie: browsing works, but login usually fails unless both hosts
@@ -218,8 +239,7 @@ and `https://` enables Secure session cookies and HSTS (`max-age=31536000`).
 
 ## 4. Database migrations
 
-Alembic is the source of truth for Postgres. Current head is
-`0017_integrity_constraints`. CI runs a migration smoke check on both SQLite
+Alembic is the source of truth for Postgres. Current head is `0020_visitors`. CI runs a migration smoke check on both SQLite
 and a disposable Postgres service; that is a schema check, not a restore or
 production migration.
 
