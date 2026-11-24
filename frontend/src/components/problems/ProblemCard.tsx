@@ -63,7 +63,7 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
         <h3 className="font-display text-[1.125rem] leading-snug tracking-[-0.015em] text-ink">
           {problem.title}
         </h3>
-        <p className="mt-3 line-clamp-3 text-body leading-relaxed text-ink-soft">
+        <p className="mt-3 line-clamp-5 text-body leading-relaxed text-ink-soft">
           {problem.summary}
         </p>
 
