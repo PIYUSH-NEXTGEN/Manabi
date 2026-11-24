@@ -117,7 +117,7 @@ const queryClient = new QueryClient({
 });
 
 const PAGE_TITLES: Record<string, string> = {
-  '/': 'MANABI — Pick a project. Ship it. Prove it.',
+  '/': 'MANABI — Stop Searching. Start Building.',
   '/problems': 'Projects · MANABI',
   '/me': 'Dashboard · MANABI',
   '/admin/review': 'Submissions · MANABI',

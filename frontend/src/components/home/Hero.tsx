@@ -2,11 +2,10 @@ import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { EASE_SNAP } from '@/design/motion';
-import { useStats } from '@/hooks/useStats';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import { HeroScene } from '@/components/home/HeroScene';
 
-const HEADLINE_LINES = ['Pick a project.', 'Ship it. Prove it.'];
+const HEADLINE_LINES = ['Stop Searching.', 'Start Building.'];
 const HEADLINE_STEP_MS = 700;
 
 /** Two-line centered headline, revealed without layout shift. */
@@ -44,12 +43,6 @@ function HeroHeadline() {
 
 export function Hero() {
   const reduced = usePrefersReducedMotion();
-  const stats = useStats();
-  const problemCount = stats.data?.problems;
-  const projectsLabel =
-    problemCount && problemCount > 0
-      ? `${problemCount.toLocaleString()} real project${problemCount === 1 ? '' : 's'}`
-      : 'real projects';
 
   return (
     <section className="relative isolate flex min-h-[100svh] flex-col overflow-hidden">
@@ -63,7 +56,7 @@ export function Hero() {
           />
           <HeroHeadline />
 
-          <motion.p
+          <motion.div
             initial={reduced ? false : { opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={
@@ -73,10 +66,14 @@ export function Hero() {
             }
             className="hero-sub mx-auto mt-7 max-w-2xl text-balance text-lead leading-relaxed font-medium text-ink/85"
           >
-            Stop Googling project ideas. Browse {projectsLabel} for learning,
-            resumes and hackathons. Build one, submit your repo, show your work
-            on Manabi.
-          </motion.p>
+            <p>
+              Tired of searching for the project to build? MANABI gives you
+              quality projects worth building. Pick a problem, build your
+              solution, connect your GitHub repo. Whether you're learning,
+              building resume, preparing for hackathons, find something worth
+              building with MANABI.
+            </p>
+          </motion.div>
 
           <motion.div
             initial={reduced ? false : { opacity: 0, y: 16 }}

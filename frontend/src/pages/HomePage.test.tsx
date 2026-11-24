@@ -9,14 +9,16 @@ describe('HomePage', () => {
 
     expect(
       screen.getByRole('heading', {
-        name: 'Pick a project. Ship it. Prove it.',
+        name: 'Stop Searching. Start Building.',
         level: 1,
       }),
     ).toBeInTheDocument();
     expect(
       await screen.findByText(/briefs curated/i),
     ).toBeInTheDocument();
-    expect(await screen.findByText(/5 real projects/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/quality projects worth building/i),
+    ).toBeInTheDocument();
     expect(await screen.findByText(/1 online now/i)).toBeInTheDocument();
     expect(
       await screen.findByText(/12 visitors all-time/i),
