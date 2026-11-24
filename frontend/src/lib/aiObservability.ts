@@ -1,13 +1,13 @@
-import type { ChatMessage, ChatOut } from '@/api/client';
-import { isPostHogConfigured, posthog } from '@/lib/posthog';
+import { track } from '@/lib/analytics';
 
 export interface ChatGeneration {
-  messages: ChatMessage[];
   sessionId: string;
   traceId: string;
   startedAt: number;
-  reply?: ChatOut;
+  outcome: 'success' | 'error';
   errorStatus?: number;
+  turnCount: number;
+  suggestionCount?: number;
 }
 
 /** Generates trace and conversation IDs accepted by AI Observability. */
@@ -28,44 +28,34 @@ export function createAiObservabilityId(): string {
 let fallbackSequence = 0;
 
 function nextFallbackSequence(): number {
-  fallbackSequence += 1;
-  return fallbackSequence;
+  return (fallbackSequence += 1);
 }
 
 /**
  * Records the existing backend-managed LLM call without delaying the chat UI.
- * The backend does not expose model or provider metadata, so those properties
- * are intentionally omitted instead of being guessed in the browser.
+ * Prompt and completion text is deliberately omitted: chat content stays
+ * between the browser and the API. Only shape, latency and outcome are sent,
+ * and the backend exposes no model/provider metadata to report either.
  */
 export function captureChatGeneration({
-  messages,
   sessionId,
   traceId,
   startedAt,
-  reply,
+  outcome,
   errorStatus,
+  turnCount,
+  suggestionCount,
 }: ChatGeneration): void {
-  if (!isPostHogConfigured) return;
-
-  try {
-    posthog.capture('$ai_generation', {
-      $ai_trace_id: traceId,
-      $ai_session_id: sessionId,
-      $ai_span_name: 'catalog_chat',
-      $ai_input: messages,
-      ...(reply
-        ? {
-            $ai_output_choices: [
-              { role: 'assistant', content: reply.reply },
-            ],
-          }
-        : {
-            $ai_is_error: true,
-            ...(errorStatus ? { $ai_http_status: errorStatus } : {}),
-          }),
-      $ai_latency: Math.max(0, (Date.now() - startedAt) / 1_000),
-    });
-  } catch {
-    // Analytics must never affect the chat request or its rendered response.
-  }
+  track('$ai_generation', {
+    $ai_trace_id: traceId,
+    $ai_session_id: sessionId,
+    $ai_span_name: 'catalog_chat',
+    $ai_is_error: outcome === 'error',
+    ...(errorStatus ? { $ai_http_status: errorStatus } : {}),
+    ...(suggestionCount !== undefined
+      ? { suggested_problem_count: suggestionCount }
+      : {}),
+    chat_turns: turnCount,
+    $ai_latency: Math.max(0, (Date.now() - startedAt) / 1_000),
+  });
 }

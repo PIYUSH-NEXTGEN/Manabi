@@ -217,8 +217,17 @@ Platform/build variables:
 | `VITE_GITHUB_ISSUES_URL` | Build | No | Public issue-tracker URL. |
 | `VITE_MASCOT_RIVE_SRC` | Build | No | Public Rive asset path; empty uses the PNG fallback. |
 | `VITE_APP_VERSION` | Build | No | Release stamp attached to browser error reports. |
+| `VITE_POSTHOG_KEY` | Build | No | PostHog project token (`phc_...`, public by design). Leave unset to ship with analytics off. |
+| `VITE_POSTHOG_HOST` | Build | No | `https://us.i.posthog.com` for a US project, `https://eu.i.posthog.com` for EU. The region cannot be changed later. |
 
 `VITE_*` values are compiled into the public bundle. Never put a secret in one.
+
+Analytics is consent-gated: `posthog-js` is a dynamic import that only runs
+after the visitor presses **Allow analytics** in the banner, and the SDK is
+never downloaded when `VITE_POSTHOG_KEY`/`VITE_POSTHOG_HOST` are unset. Session
+replay masks every input and anything marked `.ph-mask` (the chat log), and the
+chat prompt and reply are never sent as event properties. The Privacy page is
+the disclosure source of truth; update it with the same facts if this changes.
 
 ## 3. Production configuration guard
 

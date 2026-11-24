@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { logout } from '@/api/client';
-import { isPostHogConfigured, posthog } from '@/lib/posthog';
+import { resetAnalytics } from '@/lib/analytics';
 
 export function useLogout() {
   const queryClient = useQueryClient();
@@ -8,7 +8,7 @@ export function useLogout() {
   return useMutation<void, Error>({
     mutationFn: logout,
     onSuccess: () => {
-      if (isPostHogConfigured) posthog.reset();
+      resetAnalytics();
       queryClient.resetQueries({ queryKey: ['auth', 'me'] });
       // The dashboard list belongs to the signed-out user; never hand it to the
       // next session on a shared browser.

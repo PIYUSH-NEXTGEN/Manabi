@@ -1,7 +1,7 @@
 import { useToast } from '@/design/primitives';
 import { ApiError } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
-import { isPostHogConfigured, posthog } from '@/lib/posthog';
+import { track } from '@/lib/analytics';
 import {
   useStarProblem,
   useStarProject,
@@ -37,9 +37,7 @@ export function useStarToggle(kind: StarKind, id: number, starred: boolean) {
     if (starred) {
       unstar.mutate(undefined, {
         onSuccess: () => {
-          if (isPostHogConfigured) {
-            posthog.capture(STAR_EVENTS[kind].unstarred, { target_id: id });
-          }
+          track(STAR_EVENTS[kind].unstarred, { target_id: id });
         },
         onError: () => toast(`Could not un-star the ${noun}. Try again.`, 'error'),
       });
@@ -47,9 +45,7 @@ export function useStarToggle(kind: StarKind, id: number, starred: boolean) {
     }
     star.mutate(undefined, {
       onSuccess: () => {
-        if (isPostHogConfigured) {
-          posthog.capture(STAR_EVENTS[kind].starred, { target_id: id });
-        }
+        track(STAR_EVENTS[kind].starred, { target_id: id });
         toast('Starred. Thanks for the signal.');
       },
       onError: (error) => {
