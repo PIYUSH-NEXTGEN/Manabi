@@ -361,6 +361,12 @@ class PresenceOut(BaseModel):
     total: int
 
 
+class PageViewIn(BaseModel):
+    """Route path to count. No visitor identifier is sent or stored."""
+
+    path: str = Field(min_length=1, max_length=255, pattern=r"^/")
+
+
 class ProblemsListOut(BaseModel):
     items: list[ProblemSummary]
     total: int

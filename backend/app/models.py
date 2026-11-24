@@ -280,3 +280,23 @@ class Visitor(Base):
     user_id: Mapped[int | None] = mapped_column(
         ForeignKey("users.id", ondelete="SET NULL"), nullable=True
     )
+
+
+class PageView(Base):
+    """Aggregate page views: one row per route path per UTC day.
+
+    No visitor id, IP, cookie or account data is stored, only the running
+    count for a path. Nothing in the API reads this table: it exists so total
+    views live in the database (and therefore Supabase) without being shown
+    anywhere in the app.
+    """
+
+    __tablename__ = "page_views"
+    __table_args__ = (
+        UniqueConstraint("day", "path", name="uq_page_views_day_path"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    day: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    path: Mapped[str] = mapped_column(String(255), nullable=False)
+    count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)

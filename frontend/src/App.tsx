@@ -7,6 +7,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { ToastProvider } from '@/design/primitives';
 import { identifyUser, resetAnalytics, trackPageview } from '@/lib/analytics';
+import { recordPageview } from '@/api/client';
 import { useSmoothScroll } from '@/lib/useSmoothScroll';
 import { useMe } from '@/hooks/useMe';
 
@@ -180,6 +181,8 @@ function RoutePageview() {
 
   useEffect(() => {
     trackPageview(pathname);
+    // Aggregate row in the database only; the counter is never rendered.
+    void recordPageview(pathname).catch(() => {});
   }, [pathname]);
 
   return null;

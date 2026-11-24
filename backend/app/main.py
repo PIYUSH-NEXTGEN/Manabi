@@ -373,12 +373,14 @@ def create_app() -> FastAPI:
         recommendations,
         stats,
         visitors,
+        views,
     )
 
     auth.setup_oauth(app)
     app.include_router(problems.router)
     app.include_router(stats.router)
     app.include_router(visitors.router)
+    app.include_router(views.router)
     app.include_router(projects.router)
     app.include_router(admin.router)
     app.include_router(admin.problems_router)

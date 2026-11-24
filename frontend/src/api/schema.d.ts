@@ -168,6 +168,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/views": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Record View */
+        post: operations["record_view_api_views_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/problems/{problem_id}/projects": {
         parameters: {
             query?: never;
@@ -753,6 +770,14 @@ export interface components {
              * @default
              */
             answer: string;
+        };
+        /**
+         * PageViewIn
+         * @description Route path to count. No visitor identifier is sent or stored.
+         */
+        PageViewIn: {
+            /** Path */
+            path: string;
         };
         /**
          * PitchBeat
@@ -1650,6 +1675,37 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["PresenceOut"];
                 };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_view_api_views_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PageViewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description Validation Error */
             422: {

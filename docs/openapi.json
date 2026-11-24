@@ -648,6 +648,40 @@
         }
       }
     },
+    "/api/views": {
+      "post": {
+        "tags": [
+          "views"
+        ],
+        "summary": "Record View",
+        "operationId": "record_view_api_views_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PageViewIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/problems/{problem_id}/projects": {
       "post": {
         "tags": [
@@ -2218,6 +2252,23 @@
           "question"
         ],
         "title": "JudgeQuestion"
+      },
+      "PageViewIn": {
+        "properties": {
+          "path": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^/",
+            "title": "Path"
+          }
+        },
+        "type": "object",
+        "required": [
+          "path"
+        ],
+        "title": "PageViewIn",
+        "description": "Route path to count. No visitor identifier is sent or stored."
       },
       "PitchBeat": {
         "properties": {

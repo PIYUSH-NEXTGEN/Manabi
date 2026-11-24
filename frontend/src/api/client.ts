@@ -215,6 +215,15 @@ export function sendHeartbeat(visitorId: string): Promise<PresenceOut> {
   });
 }
 
+/** Counts one view of a route. Nothing is returned or shown to the user. */
+export function recordPageview(path: string): Promise<void> {
+  return apiFetch<void>('/api/views', {
+    method: 'POST',
+    body: JSON.stringify({ path }),
+    keepalive: true,
+  });
+}
+
 export function getProblems(query: ProblemsQuery = {}): Promise<ProblemsListOut> {
   const params = new URLSearchParams();
   if (query.q) params.set('q', query.q);
