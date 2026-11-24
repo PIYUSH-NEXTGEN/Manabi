@@ -16,7 +16,7 @@ import { fieldLabel } from '@/lib/fields';
 import { buttonClasses } from '@/design/primitives';
 import { EASE_SNAP } from '@/design/motion';
 import { useMe } from '@/hooks/useMe';
-import { isPostHogConfigured, posthog } from '@/lib/posthog';
+import { track } from '@/lib/analytics';
 import {
   captureChatGeneration,
   createAiObservabilityId,
@@ -161,18 +161,17 @@ export function ChatWidget() {
       }),
     onSuccess: (reply, turn) => {
       captureChatGeneration({
-        messages: turn.history,
         sessionId: turn.aiSessionId,
         traceId: turn.aiTraceId,
         startedAt: turn.startedAt,
-        reply,
+        outcome: 'success',
+        turnCount: turn.history.length,
+        suggestionCount: reply.problems.length,
       });
-      if (isPostHogConfigured) {
-        posthog.capture('chat_response_received', {
-          suggested_problem_count: reply.problems.length,
-          has_problem_context: Boolean(pageContext(location.pathname)),
-        });
-      }
+      track('chat_response_received', {
+        suggested_problem_count: reply.problems.length,
+        has_problem_context: Boolean(pageContext(location.pathname)),
+      });
       setEntries((current) => [
         ...current,
         {
@@ -185,10 +184,11 @@ export function ChatWidget() {
     },
     onError: (mutationError, turn) => {
       captureChatGeneration({
-        messages: turn.history,
         sessionId: turn.aiSessionId,
         traceId: turn.aiTraceId,
         startedAt: turn.startedAt,
+        outcome: 'error',
+        turnCount: turn.history.length,
         errorStatus:
           mutationError instanceof ApiError && mutationError.status > 0
             ? mutationError.status
@@ -367,7 +367,7 @@ export function ChatWidget() {
         <>
           <div
             ref={scrollRef}
-            className="chat-scroll flex-1 overflow-y-auto overscroll-contain bg-paper/45 px-4 py-4"
+            className="chat-scroll ph-mask flex-1 overflow-y-auto overscroll-contain bg-paper/45 px-4 py-4"
             role="log"
             aria-live="polite"
             aria-relevant="additions text"

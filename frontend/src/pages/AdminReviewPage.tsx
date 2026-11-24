@@ -10,7 +10,7 @@ import { useMe } from '@/hooks/useMe';
 import { ApiError, projectOwnerUsername } from '@/api/client';
 import { safeExternalUrl } from '@/lib/url';
 import { cx } from '@/lib/cx';
-import { isPostHogConfigured, posthog } from '@/lib/posthog';
+import { track } from '@/lib/analytics';
 
 const sectionHeading =
   'font-mono text-label font-bold uppercase tracking-widest';
@@ -80,7 +80,7 @@ export function AdminReviewPage() {
       { id },
       {
         onSuccess: () => {
-          if (isPostHogConfigured) posthog.capture('submission_approved', { submission_id: id });
+          track('submission_approved', { submission_id: id });
           toast('Submission verified.');
         },
         onError: (error) =>
@@ -96,7 +96,7 @@ export function AdminReviewPage() {
       { id },
       {
         onSuccess: () => {
-          if (isPostHogConfigured) posthog.capture('submission_rejected', { submission_id: id });
+          track('submission_rejected', { submission_id: id });
           toast('Submission rejected.');
         },
         onError: (error) =>

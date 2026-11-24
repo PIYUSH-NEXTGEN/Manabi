@@ -4,6 +4,7 @@ import { MotionConfig } from 'motion/react';
 import { Nav } from './Nav';
 import { Footer } from './Footer';
 import { ChatWidget } from '@/components/chat/ChatWidget';
+import { ConsentBanner } from '@/components/analytics/ConsentBanner';
 import { Mascot } from '@/components/mascot';
 import { clearDiscoverSeeds } from '@/lib/discoverSeed';
 import { usePresence } from '@/hooks/usePresence';
@@ -47,6 +48,7 @@ export function AppLayout() {
             </div>
           ) : null}
         </div>
+        <ConsentBanner />
         <ChatWidget />
       </div>
     </MotionConfig>

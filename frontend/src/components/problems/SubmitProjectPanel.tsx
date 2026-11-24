@@ -14,7 +14,7 @@ import { GITHUB_REPO_URL_PATTERN, stripGitSuffix } from '@/lib/repoUrl';
 import { SOLUTION_SUMMARY_MAX } from '@/lib/limits';
 import { SubmittingCard } from './SubmittingCard';
 import { RetryCountdown } from '@/components/common/RetryCountdown';
-import { isPostHogConfigured, posthog } from '@/lib/posthog';
+import { track } from '@/lib/analytics';
 
 const panelHeading =
   'font-mono text-label font-bold uppercase tracking-widest';
@@ -182,13 +182,11 @@ export function SubmitProjectPanel({ problemId }: { problemId: number }) {
       },
       {
         onSuccess: (project) => {
-          if (isPostHogConfigured) {
-            posthog.capture('project_submitted', {
-              problem_id: problemId,
-              verification_status: project.verification_status,
-              open_for_contributors: openForContributors,
-            });
-          }
+          track('project_submitted', {
+            problem_id: problemId,
+            verification_status: project.verification_status,
+            open_for_contributors: openForContributors,
+          });
           setSubmitted(project);
           setRepoUrl('');
           setSummary('');

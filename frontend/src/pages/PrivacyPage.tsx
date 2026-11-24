@@ -1,6 +1,36 @@
+import { useSyncExternalStore } from 'react';
 import { Link } from 'react-router-dom';
-import { buttonClasses } from '@/design/primitives';
+import { Button, buttonClasses } from '@/design/primitives';
+import {
+  getConsent,
+  setConsent,
+  subscribeConsent,
+} from '@/lib/analytics';
 import { ProsePage, ProseSection } from './staticParts';
+
+function AnalyticsChoice() {
+  const consent = useSyncExternalStore(
+    subscribeConsent,
+    getConsent,
+    () => null,
+  );
+  const granted = consent === 'granted';
+
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
+      <Button
+        size="small"
+        variant="secondary"
+        onClick={() => setConsent(granted ? 'denied' : 'granted')}
+      >
+        {granted ? 'Turn analytics off' : 'Turn analytics on'}
+      </Button>
+      <span className="text-sm text-muted">
+        Currently {consent === null ? 'not decided' : granted ? 'on' : 'off'}.
+      </span>
+    </div>
+  );
+}
 
 export function PrivacyPage() {
   return (
@@ -67,6 +97,17 @@ export function PrivacyPage() {
             <strong className="font-medium text-ink">Chat.</strong> Messages are
             used to produce a reply and are not stored in the database.
           </li>
+          <li>
+            <strong className="font-medium text-ink">
+              Optional analytics.
+            </strong>{' '}
+            Only if you allow it: pages visited, features used, your numeric
+            account id, errors, and a text-masked session recording. See{' '}
+            <a href="#analytics" className="underline underline-offset-4">
+              analytics and recording
+            </a>
+            .
+          </li>
         </ul>
       </ProseSection>
 
@@ -123,13 +164,61 @@ export function PrivacyPage() {
             Store the application database and may keep standard operational
             logs under their own policies.
           </li>
+          <li>
+            <strong className="font-medium text-ink">PostHog.</strong> Receives
+            the optional analytics and session recordings described below, and
+            nothing at all if you decline. Its servers are in the United
+            States.
+          </li>
         </ul>
+      </ProseSection>
+
+      <ProseSection id="analytics" title="Analytics and recording">
+        <p>
+          We use PostHog to understand which pages and features help people
+          find a project to build, and to reproduce bugs from short session
+          recordings. It is off until you choose. If you decline, the tool is
+          never downloaded and nothing is sent.
+        </p>
+        <ul className="list-disc space-y-2 pl-5">
+          <li>
+            <strong className="font-medium text-ink">Events.</strong> Pages
+            visited, filters and features used, stars, report and submission
+            outcomes, and your numeric account id once you log in.
+          </li>
+          <li>
+            <strong className="font-medium text-ink">Diagnostics.</strong>{' '}
+            Errors, plus a few operational lines such as app start and render
+            failure. Ordinary console output stays in your browser.
+          </li>
+          <li>
+            <strong className="font-medium text-ink">Session replay.</strong>{' '}
+            Clicks and page layout, kept for 30 days. Form inputs are masked and
+            the chat panel is masked before anything leaves your browser; the
+            text of a reply is never part of a recording.
+          </li>
+          <li>
+            <strong className="font-medium text-ink">AI metadata.</strong>{' '}
+            Latency, outcome and the number of turns in a chat. Your messages
+            and the reply are not sent to PostHog.
+          </li>
+          <li>
+            <strong className="font-medium text-ink">Storage.</strong> The
+            choice and the analytics identifier live in your browser&apos;s
+            local storage. Analytics sets no cookie.
+          </li>
+        </ul>
+        <p>
+          Your choice is remembered until you change it here. Turning analytics
+          off deletes the stored identifier and stops all capture immediately.
+        </p>
+        <AnalyticsChoice />
       </ProseSection>
 
       <ProseSection id="never" title="What we never do">
         <ul className="list-disc space-y-1.5 pl-5">
           <li>Sell, rent or trade your data.</li>
-          <li>Run ads or third-party tracking cookies.</li>
+          <li>Run ads or load analytics without asking you first.</li>
           <li>
             Use your GitHub token to read private repositories. MANABI works
             from public repository data.

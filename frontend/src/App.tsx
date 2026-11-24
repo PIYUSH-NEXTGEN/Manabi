@@ -6,7 +6,7 @@ import { RequireAuth } from '@/components/auth/RequireAuth';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { ToastProvider } from '@/design/primitives';
-import { isPostHogConfigured, posthog } from '@/lib/posthog';
+import { identifyUser, resetAnalytics, trackPageview } from '@/lib/analytics';
 import { useSmoothScroll } from '@/lib/useSmoothScroll';
 import { useMe } from '@/hooks/useMe';
 
@@ -149,12 +149,11 @@ function RouteTitle() {
   return null;
 }
 
-function PostHogUserIdentification() {
+function AnalyticsIdentity() {
   const me = useMe();
   const identifiedUserId = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!isPostHogConfigured) return;
     if (!me.data) {
       identifiedUserId.current = null;
       return;
@@ -163,15 +162,25 @@ function PostHogUserIdentification() {
 
     // A changed session without an explicit logout must not retain the prior
     // account's analytics identity.
-    if (identifiedUserId.current !== null) posthog.reset();
+    if (identifiedUserId.current !== null) resetAnalytics();
 
-    posthog.identify(String(me.data.id), {
+    identifyUser(me.data.id, {
       username: me.data.username,
       name: me.data.name ?? undefined,
       is_admin: Boolean(me.data.is_admin),
     });
     identifiedUserId.current = me.data.id;
   }, [me.data]);
+
+  return null;
+}
+
+function RoutePageview() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    trackPageview(pathname);
+  }, [pathname]);
 
   return null;
 }
@@ -195,11 +204,12 @@ export function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PostHogUserIdentification />
+      <AnalyticsIdentity />
       <MotionConfig reducedMotion="user">
         <ToastProvider>
           <BrowserRouter>
             <RouteTitle />
+            <RoutePageview />
             <ScrollToTop />
             <Suspense fallback={<RouteFallback />}>
               <Routes>
