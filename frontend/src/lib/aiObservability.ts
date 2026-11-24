@@ -15,7 +15,21 @@ export function createAiObservabilityId(): string {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
-  return `ai-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  // `randomUUID` is only exposed in secure contexts, so keep a CSPRNG fallback
+  // rather than a predictable Math.random() suffix.
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+    return `ai-${Date.now()}-${hex}`;
+  }
+  return `ai-${Date.now()}-${nextFallbackSequence()}`;
+}
+
+let fallbackSequence = 0;
+
+function nextFallbackSequence(): number {
+  fallbackSequence += 1;
+  return fallbackSequence;
 }
 
 /**
