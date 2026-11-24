@@ -10,6 +10,7 @@ import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ProjectProgressBadge } from "@/components/problems/ProjectProgressBadge";
 import { SubmitProjectPanel } from "@/components/problems/SubmitProjectPanel";
 import { GithubMark } from "@/components/icons/GithubMark";
+import { GlossaryText } from "@/components/glossary/GlossaryText";
 import { useProblem } from "@/hooks/useProblem";
 import { useStarToggle } from "@/hooks/useStarToggle";
 import { fieldLabel } from "@/lib/fields";
@@ -290,7 +291,9 @@ function DetailView({ problemId }: { problemId: number }) {
                   <p className={cx(microLabel, "text-accent")}>The problem</p>
                   <div className="mt-2 space-y-3">
                     {summaryParagraphs(data.summary).map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
+                      <p key={paragraph}>
+                        <GlossaryText text={paragraph} />
+                      </p>
                     ))}
                   </div>
                 </div>
@@ -299,8 +302,12 @@ function DetailView({ problemId }: { problemId: number }) {
                     Who has this problem
                   </p>
                   <div className="mt-2 space-y-2">
-                    <p>{data.who_affected}</p>
-                    <p>{data.why_matters}</p>
+                    <p>
+                      <GlossaryText text={data.who_affected} />
+                    </p>
+                    <p>
+                      <GlossaryText text={data.why_matters} />
+                    </p>
                   </div>
                 </div>
                 {data.approaches.length > 0 ? (
@@ -315,7 +322,7 @@ function DetailView({ problemId }: { problemId: number }) {
                             aria-hidden
                             className="mt-[0.7em] block size-1.5 shrink-0 bg-accent/70"
                           />
-                          {approach}
+                          <GlossaryText text={approach} />
                         </li>
                       ))}
                     </ul>
@@ -328,7 +335,9 @@ function DetailView({ problemId }: { problemId: number }) {
                   <p className={cx(microLabel, "text-accent")}>The project</p>
                   <div className="mt-2 space-y-3">
                     {summaryParagraphs(data.summary).map((paragraph) => (
-                      <p key={paragraph}>{paragraph}</p>
+                      <p key={paragraph}>
+                        <GlossaryText text={paragraph} />
+                      </p>
                     ))}
                   </div>
                 </div>
@@ -336,19 +345,25 @@ function DetailView({ problemId }: { problemId: number }) {
                   <p className={cx(microLabel, "text-accent")}>
                     Who it is for
                   </p>
-                  <p className="mt-2">{data.who_affected}</p>
+                  <p className="mt-2">
+                    <GlossaryText text={data.who_affected} />
+                  </p>
                 </div>
                 <div>
                   <p className={cx(microLabel, "text-accent")}>
                     Why it matters
                   </p>
-                  <p className="mt-2">{data.why_matters}</p>
+                  <p className="mt-2">
+                    <GlossaryText text={data.why_matters} />
+                  </p>
                 </div>
               </div>
             ) : (
               <div className="mt-6 max-w-3xl space-y-4 border-l-2 border-accent/50 pl-5 text-body leading-relaxed text-ink-soft ">
                 {paragraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
+                  <p key={paragraph}>
+                    <GlossaryText text={paragraph} />
+                  </p>
                 ))}
               </div>
             )}
@@ -382,7 +397,7 @@ function DetailView({ problemId }: { problemId: number }) {
             {isHackathon || isResume || isLearning ? null : (
               <Section number={nextSectionNumber()} title="Why it matters">
                 <p className="max-w-3xl border-l-2 border-line pl-5 text-body leading-relaxed text-ink-soft">
-                  {data.why_matters}
+                  <GlossaryText text={data.why_matters} />
                 </p>
               </Section>
             )}
@@ -399,7 +414,7 @@ function DetailView({ problemId }: { problemId: number }) {
                         aria-hidden
                         className="mt-2 block size-1.5 shrink-0 bg-accent"
                       />
-                      {concept}
+                      <GlossaryText text={concept} />
                     </li>
                   ))}
                 </ul>
@@ -409,14 +424,16 @@ function DetailView({ problemId }: { problemId: number }) {
             {isResume ? null : (
               <Section number={nextSectionNumber()} title="Tech stack">
                 <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
-                  These tools are a suggestion. Swap the language, database or
-                  frontend for whatever you work with best. The project matters
-                  more than the exact stack.
+                  <GlossaryText
+                    text="These tools are a suggestion. Swap the language, database or frontend for whatever you work with best. The project matters more than the exact stack."
+                  />
                 </p>
                 {data.tech_tags.length > 0 ? (
                   <div className="mt-4 flex flex-wrap gap-1.5">
                     {data.tech_tags.map((tag) => (
-                      <Tag key={tag}>{tag}</Tag>
+                      <Tag key={tag}>
+                        <GlossaryText text={tag} />
+                      </Tag>
                     ))}
                   </div>
                 ) : (
@@ -442,7 +459,7 @@ function DetailView({ problemId }: { problemId: number }) {
                           {scopeLevel.level}
                         </p>
                         <p className="mt-2.5 text-body leading-relaxed text-ink-soft">
-                          {scopeLevel.text}
+                          <GlossaryText text={scopeLevel.text} />
                         </p>
                         {(scopeLevel.checks ?? []).length > 0 ? (
                           <ul className="mt-4 max-w-2xl space-y-2">
@@ -455,7 +472,7 @@ function DetailView({ problemId }: { problemId: number }) {
                                   aria-hidden
                                   className="mt-2 block size-1.5 shrink-0 bg-accent"
                                 />
-                                {check}
+                                <GlossaryText text={check} />
                               </li>
                             ))}
                           </ul>
@@ -476,7 +493,7 @@ function DetailView({ problemId }: { problemId: number }) {
                           {targetRole.role}
                         </dt>
                         <dd className="mt-2 text-body leading-relaxed text-ink-soft">
-                          {targetRole.how_it_helps}
+                          <GlossaryText text={targetRole.how_it_helps} />
                         </dd>
                       </div>
                     ))}
@@ -499,7 +516,7 @@ function DetailView({ problemId }: { problemId: number }) {
                         className="rounded-panel border border-line bg-sheet p-4"
                       >
                         <p className="font-mono text-body leading-relaxed text-ink">
-                          {resumeBullet.bullet}
+                          <GlossaryText text={resumeBullet.bullet} />
                         </p>
                         {resumeBullet.example ? (
                           <p className="mt-2.5 text-body leading-relaxed text-ink-soft">
@@ -508,7 +525,7 @@ function DetailView({ problemId }: { problemId: number }) {
                             >
                               Example
                             </span>
-                            {resumeBullet.example}
+                            <GlossaryText text={resumeBullet.example} />
                           </p>
                         ) : null}
                       </li>
@@ -527,10 +544,10 @@ function DetailView({ problemId }: { problemId: number }) {
                         className="border-t border-line pt-4 first:border-t-0 first:pt-0"
                       >
                         <p className="text-body font-bold leading-snug text-ink">
-                          {interviewPoint.question}
+                          <GlossaryText text={interviewPoint.question} />
                         </p>
                         <p className="mt-1.5 text-body leading-relaxed text-ink-soft">
-                          {interviewPoint.answer}
+                          <GlossaryText text={interviewPoint.answer} />
                         </p>
                       </li>
                     ))}
@@ -543,7 +560,7 @@ function DetailView({ problemId }: { problemId: number }) {
               <Section number={nextSectionNumber()} title="Pitch guide">
                 {pitchGuide.one_liner ? (
                   <p className="max-w-3xl border-l-2 border-accent/60 pl-5 text-body font-bold leading-relaxed ">
-                    {pitchGuide.one_liner}
+                    <GlossaryText text={pitchGuide.one_liner} />
                   </p>
                 ) : null}
                 {(pitchGuide.beats ?? []).length > 0 ? (
@@ -558,11 +575,11 @@ function DetailView({ problemId }: { problemId: number }) {
                             {String(index + 1).padStart(2, "0")}
                           </span>
                           <span className="font-display text-[1.0625rem] tracking-[-0.01em] text-ink">
-                            {beat.heading}
+                            <GlossaryText text={beat.heading} />
                           </span>
                         </p>
                         <p className="mt-2.5 max-w-2xl text-body leading-relaxed text-ink-soft">
-                          {beat.text}
+                          <GlossaryText text={beat.text} />
                         </p>
                       </li>
                     ))}
@@ -579,10 +596,10 @@ function DetailView({ problemId }: { problemId: number }) {
                             className="border-t border-line pt-4 first:border-t-0 first:pt-0"
                           >
                             <p className="text-body font-bold leading-snug text-ink">
-                              {judgeQuestion.question}
+                              <GlossaryText text={judgeQuestion.question} />
                             </p>
                             <p className="mt-1.5 text-body leading-relaxed text-ink-soft">
-                              {judgeQuestion.answer}
+                              <GlossaryText text={judgeQuestion.answer} />
                             </p>
                           </li>
                         ),
@@ -595,9 +612,9 @@ function DetailView({ problemId }: { problemId: number }) {
 
             <Section number={nextSectionNumber()} title="Build guide">
               <p className="max-w-3xl text-body leading-relaxed text-ink-soft">
-                Work through the phases in order. Each one should leave you with
-                something that works. Use any language, framework or database,
-                and swap tools whenever you want.
+                <GlossaryText
+                  text="Work through the phases in order. Each one should leave you with something that works. Use any language, framework or database, and swap tools whenever you want."
+                />
               </p>
               {guide.length > 0 ? (
                 <ol className="mt-5 flex list-none flex-col gap-6">
@@ -610,12 +627,12 @@ function DetailView({ problemId }: { problemId: number }) {
                           {String(index + 1).padStart(2, "0")}
                         </span>
                         <span className="font-display text-[1.0625rem] tracking-[-0.01em] text-ink">
-                          {phase.title}
+                          <GlossaryText text={phase.title} />
                         </span>
                       </p>
                       {phase.summary ? (
                         <p className="mt-2.5 max-w-2xl text-body leading-relaxed text-ink-soft">
-                          {phase.summary}
+                          <GlossaryText text={phase.summary} />
                         </p>
                       ) : null}
                       {(phase.steps ?? []).length > 0 ? (
@@ -628,7 +645,7 @@ function DetailView({ problemId }: { problemId: number }) {
                               <span className="shrink-0 font-mono text-label font-bold leading-relaxed text-accent">
                                 {index + 1}.{stepIndex + 1}
                               </span>
-                              {step}
+                              <GlossaryText text={step} />
                             </li>
                           ))}
                         </ol>

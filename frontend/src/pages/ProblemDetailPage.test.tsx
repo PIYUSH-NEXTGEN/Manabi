@@ -19,6 +19,21 @@ function renderDetail(route: string) {
   );
 }
 
+function textContent(text: string | RegExp) {
+  return (_content: string, element: Element | null) => {
+    if (!element) return false;
+    const value = element.textContent ?? '';
+    const matches = typeof text === 'string' ? value === text : text.test(value);
+    if (!matches) return false;
+    return !Array.from(element.children).some((child) => {
+      const childValue = child.textContent ?? '';
+      return typeof text === 'string'
+        ? childValue === text
+        : text.test(childValue);
+    });
+  };
+}
+
 describe('ProblemDetailPage', () => {
   const TECH_SECTION_TITLES = new Set([
     'Why it matters',
@@ -59,7 +74,7 @@ describe('ProblemDetailPage', () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Swap the language, database or frontend/i),
+      screen.getByText(textContent(/Swap the language, database or frontend/i)),
     ).toBeInTheDocument();
   });
 
@@ -71,10 +86,14 @@ describe('ProblemDetailPage', () => {
       await screen.findByRole('heading', { name: 'Build guide' }),
     ).toBeInTheDocument();
     expect(
-      await screen.findByText('Fine-tune a small CNN on public leaf datasets'),
+      await screen.findByText(
+        textContent('Fine-tune a small CNN on public leaf datasets'),
+      ),
     ).toBeInTheDocument();
     expect(
-      screen.getByText('Build an offline-first mobile capture flow'),
+      screen.getByText(
+        textContent('Build an offline-first mobile capture flow'),
+      ),
     ).toBeInTheDocument();
   });
 
@@ -123,7 +142,9 @@ describe('ProblemDetailPage', () => {
     expect(
       await screen.findByRole('heading', { name: 'Build guide' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Model the data')).toBeInTheDocument();
+    expect(
+      screen.getByText(textContent('Model the data')),
+    ).toBeInTheDocument();
     expect(
       screen.getByText('Decide what a report and a case look like.'),
     ).toBeInTheDocument();
@@ -230,7 +251,9 @@ describe('ProblemDetailPage', () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        /Wire the capture flow to the officer queue so nothing is retryped\./,
+        textContent(
+          /Wire the capture flow to the officer queue so nothing is retryped\./,
+        ),
       ),
     ).toBeInTheDocument();
     expect(
@@ -296,7 +319,9 @@ describe('ProblemDetailPage', () => {
       ),
     ).toBeInTheDocument();
     expect(
-      screen.getAllByText('Blend last-known GPS with road speeds').length,
+      screen.getAllByText(
+        textContent('Blend last-known GPS with road speeds'),
+      ).length,
     ).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText(/This project is for/)).not.toBeInTheDocument();
     expect(
@@ -674,7 +699,9 @@ describe('ProblemDetailPage', () => {
     expect(
       screen.queryByRole('heading', { name: 'Pitch guide' }),
     ).not.toBeInTheDocument();
-    expect(screen.getByText('Model the data')).toBeInTheDocument();
+    expect(
+      screen.getByText(textContent('Model the data')),
+    ).toBeInTheDocument();
   });
 
   it('rejects non-GitHub URLs on the client without a network call', async () => {
