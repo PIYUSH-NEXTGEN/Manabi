@@ -158,11 +158,6 @@ _anthropic_client = None
 _anthropic_client_key: str | None = None
 
 
-def _key_label(key: str) -> str:
-    """Short, non-reversible hint for logs (never log a full key)."""
-    return f"...{key[-4:]}" if len(key) >= 4 else "..."
-
-
 def _available_keys(keys: list[str]) -> list[str]:
     now = time.monotonic()
     with _key_lock:
@@ -308,7 +303,7 @@ def _call_gemini(
 
     last_exc: Exception | None = None
     saw_exhausted = False
-    for key in available:
+    for position, key in enumerate(available, start=1):
         try:
             return _gemini_attempt(
                 key,
@@ -324,16 +319,16 @@ def _call_gemini(
                 saw_exhausted = True
                 _cooldown_key(key, _next_quota_reset_seconds())
                 logger.warning(
-                    "Gemini key %s is out of daily quota; trying the next key",
-                    _key_label(key),
+                    "Gemini key #%d is out of daily quota; trying the next key",
+                    position,
                 )
                 last_exc = exc
                 continue
             if kind == "invalid":
                 _cooldown_key(key, _INVALID_KEY_COOLDOWN)
                 logger.warning(
-                    "Gemini key %s was rejected; trying the next key",
-                    _key_label(key),
+                    "Gemini key #%d was rejected; trying the next key",
+                    position,
                 )
                 last_exc = exc
                 continue
