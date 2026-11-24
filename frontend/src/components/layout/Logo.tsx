@@ -3,11 +3,17 @@
  * inside a ringed disc. The ring inherits the current text colour so the mark
  * settles onto both the light footer card and dark surfaces.
  */
-export function Logo({ className }: { className?: string }) {
+export function Logo({
+  className,
+  size = 22,
+}: {
+  className?: string;
+  size?: number;
+}) {
   return (
     <svg
-      width="22"
-      height="22"
+      width={size}
+      height={size}
       viewBox="0 0 64 64"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
