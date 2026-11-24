@@ -6,8 +6,16 @@ interface Env {
 const LIVE_PATH = '/api/health/live';
 const READY_PATH = '/api/health/ready';
 
+function stripTrailingSlashes(value: string): string {
+  let end = value.length;
+  while (end > 0 && value[end - 1] === '/') {
+    end -= 1;
+  }
+  return value.slice(0, end);
+}
+
 async function ping(base: string, path: string): Promise<void> {
-  const url = `${base.replace(/\/+$/, '')}${path}`;
+  const url = `${stripTrailingSlashes(base)}${path}`;
   const response = await fetch(url, {
     headers: { 'user-agent': 'manabi-keepalive/1.0' },
   });
