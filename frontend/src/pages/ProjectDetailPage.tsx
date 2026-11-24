@@ -13,6 +13,7 @@ import { useRefreshProgress } from '@/hooks/useRefreshProgress';
 import { useMe } from '@/hooks/useMe';
 import { useReportProject } from '@/hooks/useMyProjects';
 import { useStarToggle } from '@/hooks/useStarToggle';
+import { isPostHogConfigured, posthog } from '@/lib/posthog';
 import {
   asCommitSummary,
   asIssueSummary,
@@ -89,6 +90,7 @@ function ReportRow({ projectId, isOwner }: { projectId: number; isOwner?: boolea
     setError(null);
     report.mutate(reason.trim(), {
       onSuccess: () => {
+        if (isPostHogConfigured) posthog.capture('project_report_submitted', { project_id: projectId });
         toast('Report sent. Thanks. A maintainer will take a look.');
         setReason('');
       },

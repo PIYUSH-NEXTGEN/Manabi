@@ -9,6 +9,7 @@ import { useMe } from '@/hooks/useMe';
 import { playRainWipe } from '@/lib/rainThemeWipe';
 import { useTheme } from '@/lib/useTheme';
 import { cx } from '@/lib/cx';
+import { isPostHogConfigured, posthog } from '@/lib/posthog';
 
 const NAV_LINKS = [
   { to: '/problems', label: 'Projects' },
@@ -113,6 +114,7 @@ export function Nav({ overlay = false }: { overlay?: boolean }) {
             <button
               type="button"
               onClick={() => {
+                if (isPostHogConfigured) posthog.capture('login_started');
                 window.location.assign(loginUrl());
               }}
               className="press inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-ink px-3 py-2.5 text-[0.8125rem] font-semibold leading-none text-paper transition-colors hover:bg-ink/90 min-[360px]:px-4"

@@ -14,6 +14,7 @@ import {
 import { useProjectProgress } from '@/hooks/useProjectProgress';
 import { cx } from '@/lib/cx';
 import { SOLUTION_SUMMARY_MAX } from '@/lib/limits';
+import { isPostHogConfigured, posthog } from '@/lib/posthog';
 
 const STATUS_TAGS: Record<ProjectOut['verification_status'], { label: string; tone: string }> = {
   verified: { label: 'Verified', tone: 'text-ink' },
@@ -60,6 +61,12 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
     }
     patch.mutate(body, {
       onSuccess: () => {
+        if (isPostHogConfigured) {
+          posthog.capture('project_updated', {
+            project_id: project.id,
+            updated_fields: Object.keys(body),
+          });
+        }
         setOpen(false);
         toast('Project saved.');
       },
@@ -69,6 +76,12 @@ function EditProjectDialog({ project }: { project: ProjectOut }) {
         const savedAnyway =
           error instanceof ApiError && error.status === 503;
         if (savedAnyway) {
+          if (isPostHogConfigured) {
+            posthog.capture('project_updated', {
+              project_id: project.id,
+              updated_fields: Object.keys(body),
+            });
+          }
           setOpen(false);
           toast(`${error.detail} Your changes were saved.`);
           return;
@@ -168,6 +181,7 @@ function RemoveProjectDialog({ project }: { project: ProjectOut }) {
           onClick={() =>
             remove.mutate(project.id, {
               onSuccess: () => {
+                if (isPostHogConfigured) posthog.capture('project_deleted', { project_id: project.id });
                 setOpen(false);
                 toast(`${project.repo_name} removed.`);
               },

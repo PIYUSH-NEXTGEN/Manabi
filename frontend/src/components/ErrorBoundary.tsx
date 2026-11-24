@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react';
 import { reportClientError } from '@/lib/errorReporting';
+import { posthogLogs } from '@/lib/posthogLogs';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -28,6 +29,7 @@ export class ErrorBoundary extends Component<
     // In production the same error is sent to the backend so it is visible
     // after the tab is closed.
     console.error('Unhandled UI error', error, info.componentStack);
+    posthogLogs.uiRenderFailed();
     reportClientError('react_error_boundary', error, {
       component_stack: info.componentStack ?? undefined,
     });

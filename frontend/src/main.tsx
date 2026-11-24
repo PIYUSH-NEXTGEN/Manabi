@@ -11,6 +11,8 @@ import './index.css';
 import { App } from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { installGlobalErrorReporting } from './lib/errorReporting';
+import { posthogLogs } from './lib/posthogLogs';
+import './lib/posthog';
 
 installGlobalErrorReporting();
 
@@ -34,6 +36,7 @@ async function start(): Promise<void> {
     // Mock-worker startup is development-only; a failure must not blank the
     // whole app. The real API will still be used if it is reachable.
     console.error('App preparation failed; rendering without mocks', error);
+    posthogLogs.preparationFailed();
   }
   createRoot(root).render(
     <StrictMode>
@@ -42,6 +45,7 @@ async function start(): Promise<void> {
       </ErrorBoundary>
     </StrictMode>,
   );
+  posthogLogs.applicationStarted();
 }
 
 void start();
