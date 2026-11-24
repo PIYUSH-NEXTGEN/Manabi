@@ -16,6 +16,10 @@ vi.mock('posthog-js', () => {
   return { default: client };
 });
 
+// The real recorder is a browser bundle that defines globals on import; the
+// tests only care that it is requested before init and sent nothing itself.
+vi.mock('posthog-js/dist/posthog-recorder', () => ({}));
+
 /** Reloads the module so the env snapshot and consent state start clean. */
 async function loadAnalytics() {
   vi.resetModules();
