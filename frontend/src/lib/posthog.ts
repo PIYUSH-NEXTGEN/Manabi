@@ -23,8 +23,21 @@ export function loadPosthog(): Promise<PostHog | null> {
   if (client) return Promise.resolve(client);
   if (loading) return loading;
 
-  loading = import('posthog-js')
-    .then(({ default: posthog }) => {
+  // posthog-js fetches its session-recording recorder as a separate script from
+  // PostHog's CDN. Ad blockers and strict network policies kill that request,
+  // and the SDK then reports `$sdk_debug_recording_script_not_loaded` with no
+  // replay captured. Shipping the recorder ourselves defines the globals the
+  // SDK checks for, which is its "recorder already loaded" path, so no external
+  // script is ever requested. A failure here must not cost us analytics.
+  const recorder = import('posthog-js/dist/posthog-recorder').catch(
+    (error: unknown) => {
+      console.warn('PostHog recorder could not be bundled', error);
+      return null;
+    },
+  );
+
+  loading = Promise.all([import('posthog-js'), recorder])
+    .then(([{ default: posthog }]) => {
       posthog.init(projectToken as string, {
         api_host: apiHost as string,
         defaults: '2026-08-30',
