@@ -1,6 +1,7 @@
 import { useToast } from '@/design/primitives';
 import { ApiError } from '@/api/client';
 import { useMe } from '@/hooks/useMe';
+import { isPostHogConfigured, posthog } from '@/lib/posthog';
 import {
   useStarProblem,
   useStarProject,
@@ -9,6 +10,11 @@ import {
 } from '@/hooks/useMyProjects';
 
 export type StarKind = 'problem' | 'project';
+
+const STAR_EVENTS = {
+  problem: { starred: 'problem_starred', unstarred: 'problem_unstarred' },
+  project: { starred: 'project_starred', unstarred: 'project_unstarred' },
+} as const;
 
 /**
  * Star/unstar behavior shared by the problem, project and mini star buttons.
@@ -30,12 +36,22 @@ export function useStarToggle(kind: StarKind, id: number, starred: boolean) {
   function toggle() {
     if (starred) {
       unstar.mutate(undefined, {
+        onSuccess: () => {
+          if (isPostHogConfigured) {
+            posthog.capture(STAR_EVENTS[kind].unstarred, { target_id: id });
+          }
+        },
         onError: () => toast(`Could not un-star the ${noun}. Try again.`, 'error'),
       });
       return;
     }
     star.mutate(undefined, {
-      onSuccess: () => toast('Starred. Thanks for the signal.'),
+      onSuccess: () => {
+        if (isPostHogConfigured) {
+          posthog.capture(STAR_EVENTS[kind].starred, { target_id: id });
+        }
+        toast('Starred. Thanks for the signal.');
+      },
       onError: (error) => {
         if (error instanceof ApiError && error.status === 409) {
           toast(`You already starred this ${noun}.`, 'error');

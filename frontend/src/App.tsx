@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MotionConfig } from 'motion/react';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
@@ -6,7 +6,9 @@ import { RequireAuth } from '@/components/auth/RequireAuth';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { ToastProvider } from '@/design/primitives';
+import { isPostHogConfigured, posthog } from '@/lib/posthog';
 import { useSmoothScroll } from '@/lib/useSmoothScroll';
+import { useMe } from '@/hooks/useMe';
 
 const AboutPage = lazy(() =>
   import('@/pages/AboutPage').then((m) => ({ default: m.AboutPage })),
@@ -147,6 +149,33 @@ function RouteTitle() {
   return null;
 }
 
+function PostHogUserIdentification() {
+  const me = useMe();
+  const identifiedUserId = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isPostHogConfigured) return;
+    if (!me.data) {
+      identifiedUserId.current = null;
+      return;
+    }
+    if (identifiedUserId.current === me.data.id) return;
+
+    // A changed session without an explicit logout must not retain the prior
+    // account's analytics identity.
+    if (identifiedUserId.current !== null) posthog.reset();
+
+    posthog.identify(String(me.data.id), {
+      username: me.data.username,
+      name: me.data.name ?? undefined,
+      is_admin: Boolean(me.data.is_admin),
+    });
+    identifiedUserId.current = me.data.id;
+  }, [me.data]);
+
+  return null;
+}
+
 function RouteFallback() {
   return (
     <div className="mx-auto w-full max-w-[1140px] animate-pulse space-y-4 px-5 py-16 sm:px-6" aria-hidden>
@@ -166,6 +195,7 @@ export function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <PostHogUserIdentification />
       <MotionConfig reducedMotion="user">
         <ToastProvider>
           <BrowserRouter>

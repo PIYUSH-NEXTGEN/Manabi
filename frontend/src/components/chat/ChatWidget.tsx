@@ -16,6 +16,11 @@ import { fieldLabel } from '@/lib/fields';
 import { buttonClasses } from '@/design/primitives';
 import { EASE_SNAP } from '@/design/motion';
 import { useMe } from '@/hooks/useMe';
+import { isPostHogConfigured, posthog } from '@/lib/posthog';
+import {
+  captureChatGeneration,
+  createAiObservabilityId,
+} from '@/lib/aiObservability';
 import {
   ApiError,
   loginUrl,
@@ -50,6 +55,13 @@ export function openChatWidget() {
 interface ChatEntry {
   message: ChatMessage;
   problems?: ChatProblemItem[];
+}
+
+interface ChatTurn {
+  history: ChatMessage[];
+  aiSessionId: string;
+  aiTraceId: string;
+  startedAt: number;
 }
 
 export function pageContext(pathname: string) {
@@ -96,6 +108,9 @@ export function ChatWidget() {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const wasOpen = useRef(false);
+  // The widget remains mounted for the app lifetime, which is this chat's
+  // conversation boundary because the API does not return a conversation ID.
+  const aiSessionId = useRef<string | null>(null);
 
   useEffect(() => {
     function handleOpen() {
@@ -138,13 +153,26 @@ export function ChatWidget() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [open]);
 
-  const chat = useMutation<ChatOut, Error, ChatMessage[]>({
-    mutationFn: (history) =>
+  const chat = useMutation<ChatOut, Error, ChatTurn>({
+    mutationFn: ({ history }) =>
       postChat({
-        messages: history.slice(-MAX_HISTORY),
+        messages: history,
         page_context: pageContext(location.pathname),
       }),
-    onSuccess: (reply) => {
+    onSuccess: (reply, turn) => {
+      captureChatGeneration({
+        messages: turn.history,
+        sessionId: turn.aiSessionId,
+        traceId: turn.aiTraceId,
+        startedAt: turn.startedAt,
+        reply,
+      });
+      if (isPostHogConfigured) {
+        posthog.capture('chat_response_received', {
+          suggested_problem_count: reply.problems.length,
+          has_problem_context: Boolean(pageContext(location.pathname)),
+        });
+      }
       setEntries((current) => [
         ...current,
         {
@@ -155,7 +183,17 @@ export function ChatWidget() {
       setError(null);
       setRetryAfter(null);
     },
-    onError: (mutationError) => {
+    onError: (mutationError, turn) => {
+      captureChatGeneration({
+        messages: turn.history,
+        sessionId: turn.aiSessionId,
+        traceId: turn.aiTraceId,
+        startedAt: turn.startedAt,
+        errorStatus:
+          mutationError instanceof ApiError && mutationError.status > 0
+            ? mutationError.status
+            : undefined,
+      });
       // A server-supplied Retry-After means the outage has a known reset time
       // (e.g. the AI's daily quota). Show that exact message and countdown.
       if (
@@ -204,9 +242,18 @@ export function ChatWidget() {
       ...entries.map((entry) => entry.message),
       { role: 'user', content },
     ];
+    const recentHistory = history.slice(-MAX_HISTORY);
+    const sessionId = aiSessionId.current ?? createAiObservabilityId();
+    aiSessionId.current = sessionId;
+
     setEntries([...entries, { message: { role: 'user', content } }]);
     setDraft('');
-    chat.mutate(history);
+    chat.mutate({
+      history: recentHistory,
+      aiSessionId: sessionId,
+      aiTraceId: createAiObservabilityId(),
+      startedAt: Date.now(),
+    });
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

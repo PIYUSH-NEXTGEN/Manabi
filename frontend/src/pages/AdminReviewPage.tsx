@@ -10,6 +10,7 @@ import { useMe } from '@/hooks/useMe';
 import { ApiError, projectOwnerUsername } from '@/api/client';
 import { safeExternalUrl } from '@/lib/url';
 import { cx } from '@/lib/cx';
+import { isPostHogConfigured, posthog } from '@/lib/posthog';
 
 const sectionHeading =
   'font-mono text-label font-bold uppercase tracking-widest';
@@ -78,7 +79,10 @@ export function AdminReviewPage() {
     approve.mutate(
       { id },
       {
-        onSuccess: () => toast('Submission verified.'),
+        onSuccess: () => {
+          if (isPostHogConfigured) posthog.capture('submission_approved', { submission_id: id });
+          toast('Submission verified.');
+        },
         onError: (error) =>
           toast(error instanceof ApiError ? error.detail : error.message, 'error'),
         onSettled: finishAction,
@@ -91,7 +95,10 @@ export function AdminReviewPage() {
     reject.mutate(
       { id },
       {
-        onSuccess: () => toast('Submission rejected.'),
+        onSuccess: () => {
+          if (isPostHogConfigured) posthog.capture('submission_rejected', { submission_id: id });
+          toast('Submission rejected.');
+        },
         onError: (error) =>
           toast(error instanceof ApiError ? error.detail : error.message, 'error'),
         onSettled: finishAction,
