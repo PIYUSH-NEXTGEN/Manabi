@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight, GitBranch, Star } from 'lucide-react';
+import { GitBranch, Star } from 'lucide-react';
 import { cx } from '@/lib/cx';
 import { fieldLabel } from '@/lib/fields';
 import { goalLabel } from '@/lib/goals';
@@ -29,7 +29,7 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
     <Link
       to={`/problems/${problem.id}`}
       className={cx(
-        'group relative flex h-full flex-col overflow-hidden rounded-card border border-line bg-sheet shadow-soft transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-ink/20 hover:shadow-lift focus-visible:-translate-y-1 focus-visible:border-accent/50 focus-visible:shadow-lift',
+        'group relative flex h-full min-h-[19rem] flex-col overflow-hidden rounded-card border border-line bg-sheet shadow-soft transition-[transform,box-shadow,border-color] duration-300 ease-out hover:-translate-y-1 hover:border-ink/20 hover:shadow-lift focus-visible:-translate-y-1 focus-visible:border-accent/50 focus-visible:shadow-lift',
         className,
       )}
     >
@@ -67,36 +67,25 @@ function ProblemCardComponent({ problem, className }: ProblemCardProps) {
           {problem.summary}
         </p>
 
-        <div className="mt-auto flex items-center justify-between gap-3 border-t border-line pt-3.5 font-mono text-label font-bold uppercase tracking-[0.12em]">
-          <span className="flex items-center gap-2.5">
-            <span className="flex items-center gap-1 text-muted">
-              <GitBranch aria-hidden size={11} strokeWidth={2.4} />
-              {projectLabel}
+        <div className="mt-auto flex items-center gap-2.5 border-t border-line pt-3.5 font-mono text-label font-bold uppercase tracking-[0.12em]">
+          <span className="flex items-center gap-1 text-muted">
+            <GitBranch aria-hidden size={11} strokeWidth={2.4} />
+            {projectLabel}
+          </span>
+          {starCount > 0 ? (
+            <span
+              title={`${starCount} star${starCount === 1 ? '' : 's'}`}
+              className="flex items-center gap-1 text-accent"
+            >
+              <Star
+                aria-hidden
+                size={11}
+                strokeWidth={2.4}
+                className="fill-accent"
+              />
+              {starCount}
             </span>
-            {starCount > 0 ? (
-              <span
-                title={`${starCount} star${starCount === 1 ? '' : 's'}`}
-                className="flex items-center gap-1 text-accent"
-              >
-                <Star
-                  aria-hidden
-                  size={11}
-                  strokeWidth={2.4}
-                  className="fill-accent"
-                />
-                {starCount}
-              </span>
-            ) : null}
-          </span>
-          <span className="flex items-center gap-1 text-ink transition-colors group-hover:text-accent">
-            Open brief
-            <ArrowUpRight
-              aria-hidden
-              size={12}
-              strokeWidth={2.6}
-              className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-            />
-          </span>
+          ) : null}
         </div>
       </div>
     </Link>

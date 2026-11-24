@@ -5,7 +5,7 @@ import { EASE_SNAP } from '@/design/motion';
 import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import { HeroScene } from '@/components/home/HeroScene';
 
-const HEADLINE_LINES = ['Stop Searching.', 'Start Building.'];
+const HEADLINE_LINES = ['Stop Searching', 'Start Building'];
 const HEADLINE_STEP_MS = 700;
 
 /** Two-line centered headline, revealed without layout shift. */
