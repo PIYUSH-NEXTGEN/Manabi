@@ -1,7 +1,7 @@
 /**
  * MANABI mark: the minimal emblem from the favicon. A red brush stroke sits
  * inside a ringed disc. The ring inherits the current text colour so the mark
- * settles onto both the light footer card and dark surfaces.
+ * settles onto both light and dark surfaces.
  */
 export function Logo({
   className,

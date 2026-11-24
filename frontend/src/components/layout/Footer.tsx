@@ -17,7 +17,7 @@ type FooterColumn = {
   heading: string;
   links: FooterLink[];
   portalsHeading?: string;
-  portals?: Array<FooterLink & { brand: 'github' | 'sponsors' }>;
+  portals?: FooterLink[];
 };
 
 const FOOTER_COLUMNS: FooterColumn[] = [
@@ -61,8 +61,8 @@ const FOOTER_COLUMNS: FooterColumn[] = [
     ],
     portalsHeading: 'Our portals',
     portals: [
-      { label: 'MANABI', href: REPO_URL, brand: 'github' },
-      { label: 'Sponsors', to: '/sponsors', brand: 'sponsors' },
+      { label: 'MANABI', href: REPO_URL },
+      { label: 'Sponsors', to: '/sponsors' },
     ],
   },
 ];

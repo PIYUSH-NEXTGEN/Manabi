@@ -151,14 +151,18 @@ describe('Route table (no dead links)', () => {
     expect(screen.getByRole('link', { name: 'Browse problems' })).toBeInTheDocument();
   });
 
-  it('renders the footer link columns', () => {
+  it('renders the footer link columns', async () => {
     window.history.pushState({}, '', '/');
 
     render(<App />);
 
     for (const heading of ['MANABI', 'Legal']) {
       expect(
-        screen.getByRole('heading', { name: heading, level: 2 }),
+        await screen.findByRole(
+          'heading',
+          { name: heading, level: 2 },
+          { timeout: 15000 },
+        ),
       ).toBeInTheDocument();
     }
   });

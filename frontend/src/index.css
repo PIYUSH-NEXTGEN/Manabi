@@ -822,26 +822,6 @@ body {
   }
 }
 
-/*
- * The footer is a light-on-dark band by design. Night mode swaps --ink and
- * --paper globally, which would flip it to dark-on-light; rebind the derived
- * theme colours here so it keeps its intended night treatment.
- */
-.dark .inverted-surface {
-  --color-ink: #17150f;
-  --color-ink-soft: #2d2a22;
-  --color-paper: #f4f0e7;
-  --color-sheet: #eae5db;
-  --color-tint: #d9d3c4;
-  --color-olive: #4e4d3c;
-  --color-accent: #c2451c;
-  --color-accent-soft: #e4d5c6;
-  --color-danger: #9f2c14;
-  --color-danger-soft: #efdcd2;
-  --color-muted: #6f695b;
-  --color-line: rgba(23, 21, 15, 0.22);
-}
-
 /* Submission-progress card: a small arcade screen. The game itself is drawn in
    SVG; these layers only add the CRT scanlines and corner falloff on top.
    Night mode dims the sprites and frame so they do not glare inside the dark
@@ -987,60 +967,6 @@ body {
 }
 
 /*
- * Footer GitHub button: black fill with a solid white outline that becomes a
- * single white line travelling around the edge on hover.
- */
-@property --github-star-angle {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: 0deg;
-}
-
-@keyframes github-star-orbit {
-  to {
-    --github-star-angle: 360deg;
-  }
-}
-
-.github-star {
-  position: relative;
-  isolation: isolate;
-  border: 1px solid var(--color-paper);
-  transition: border-color 200ms var(--ease-snap);
-}
-
-.github-star::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  padding: 1px;
-  background: conic-gradient(
-    from var(--github-star-angle),
-    transparent 0turn 0.78turn,
-    var(--color-paper) 0.84turn 0.92turn,
-    transparent 0.98turn
-  );
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 200ms var(--ease-snap);
-}
-
-.github-star:hover,
-.github-star:focus-visible {
-  border-color: color-mix(in srgb, var(--color-paper) 22%, transparent);
-}
-
-.github-star:hover::after,
-.github-star:focus-visible::after {
-  opacity: 1;
-  animation: github-star-orbit 1.6s linear infinite;
-}
-
-/*
  * Sponsor tile: a glowing line travels around the rounded border on hover.
  */
 @property --sponsor-beam-angle {
@@ -1139,14 +1065,8 @@ body {
     animation: none;
   }
 
-  .github-star::after,
   .sponsor-tile::after {
     display: none;
-  }
-
-  .github-star:hover,
-  .github-star:focus-visible {
-    border-color: var(--color-paper);
   }
 
   .thinking-dot {
