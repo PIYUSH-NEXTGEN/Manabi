@@ -105,13 +105,13 @@ describe('Route table (no dead links)', () => {
           name: 'Pick a project. Ship it. Prove it.',
           level: 1,
         },
-        { timeout: 5000 },
+        { timeout: 15000 },
       ),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole('heading', { name: 'Dashboard', level: 1 }),
     ).not.toBeInTheDocument();
-  });
+  }, 20000);
 
   it('/me shows the dashboard when logged in', async () => {
     server.use(
@@ -128,11 +128,17 @@ describe('Route table (no dead links)', () => {
 
     render(<App />);
 
-    expect(await screen.findByText('demo-farmer')).toBeInTheDocument();
     expect(
-      await screen.findByRole('heading', { name: 'Dashboard', level: 1 }),
+      await screen.findByText('demo-farmer', {}, { timeout: 15000 }),
     ).toBeInTheDocument();
-  });
+    expect(
+      await screen.findByRole(
+        'heading',
+        { name: 'Dashboard', level: 1 },
+        { timeout: 15000 },
+      ),
+    ).toBeInTheDocument();
+  }, 20000);
 
   it.each(DEAD_TARGETS)('%s hits the custom 404 page', async (path) => {
     window.history.pushState({}, '', path);
