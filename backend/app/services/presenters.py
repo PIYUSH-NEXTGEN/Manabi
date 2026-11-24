@@ -5,9 +5,38 @@ profiles, recommendations, admin); keeping the single construction point
 here stops the response shape from drifting between endpoints.
 """
 
+import re
+
 from app import schemas
 from app.models import Problem, Project, User
 from app.services.verification import OFFLINE_NOTICE
+
+# Roughly five lines at the board's column width. The list projection keeps
+# whole sentences inside this budget so a card never ends mid-thought.
+_CARD_SUMMARY_MAX_CHARS = 260
+_SENTENCE_BREAK = re.compile(r"(?<=[.!?])\s+")
+
+
+def _card_summary(text: str) -> str:
+    """A complete, card-sized overview excerpted from the curated summary.
+
+    Sentences are kept verbatim and only whole ones are included, so the card
+    never invents details and never stops in the middle of a sentence. The
+    detail endpoint still returns the full multi-paragraph summary.
+    """
+    collapsed = " ".join(text.split())
+    if len(collapsed) <= _CARD_SUMMARY_MAX_CHARS:
+        return collapsed
+
+    picked: list[str] = []
+    for sentence in _SENTENCE_BREAK.split(collapsed):
+        candidate = " ".join([*picked, sentence])
+        if picked and len(candidate) > _CARD_SUMMARY_MAX_CHARS:
+            break
+        picked.append(sentence)
+        if len(candidate) >= _CARD_SUMMARY_MAX_CHARS:
+            break
+    return " ".join(picked)
 
 
 def _validated(model, raw):
@@ -51,7 +80,7 @@ def problem_to_summary(
     return schemas.ProblemSummary(
         id=problem.id,
         title=problem.title,
-        summary=problem.summary,
+        summary=_card_summary(problem.summary),
         field=problem.field,
         domain=problem.domain,
         difficulty=problem.difficulty,

@@ -127,9 +127,11 @@ class ProblemCard(BaseModel):
 class ProblemSummary(BaseModel):
     """Card-sized projection for list endpoints.
 
-    The board and the home carousel only render these fields; the curated
-    build guide, datasets and pitch/resume material belong to the detail
-    response. Shipping them per card made a 24-item list 116 KB.
+    `summary` is shortened to whole sentences that fit a card (the detail
+    endpoint keeps the full brief). The board and the home carousel only render
+    these fields; the curated build guide, datasets and pitch/resume material
+    belong to the detail response. Shipping them per card made a 24-item list
+    116 KB.
     """
 
     id: int

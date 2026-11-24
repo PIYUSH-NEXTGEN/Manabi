@@ -115,6 +115,50 @@ def test_list_never_exposes_secret_fields(client, seed):
     assert "original_text" not in keys
 
 
+def test_list_summary_is_a_complete_sentence_overview(client, db_session: Session):
+    long_summary = (
+        "Build a tool that helps a small team track shared work. "
+        "The tool shows what changed, keeps a short history and sends one daily summary. "
+        "It is meant for people who plan their week together and lose time asking for updates. "
+        "A working demo needs a simple list, a detail view and a way to mark work as done. "
+        "Store changes so the team can see who edited what and when. "
+        "Add a filter for open and finished items so the list stays useful as it grows."
+    )
+    problem = Problem(
+        title="Shared work tracker",
+        summary=long_summary,
+        who_affected="Small teams",
+        why_matters="Updates get lost",
+        field="web-dev",
+        domain="other",
+        difficulty="beginner",
+        est_hours=20,
+        tech_tags=["typescript"],
+        datasets=[],
+        approaches=[],
+        source_name="MANABI Curated",
+        source_id="test-card-summary",
+        original_text="Shared work tracker.",
+        created_by=None,
+    )
+    db_session.add(problem)
+    db_session.commit()
+
+    item = next(
+        it
+        for it in client.get("/api/problems").json()["items"]
+        if it["id"] == problem.id
+    )
+    card = item["summary"]
+    assert len(card) < len(long_summary)
+    assert card.endswith(".")
+    assert long_summary.startswith(card)
+    assert "\n" not in card
+
+    detail = client.get(f"/api/problems/{problem.id}").json()
+    assert detail["summary"] == long_summary
+
+
 def test_q_search_title_summary_and_source_id(client, seed):
     assert {it["id"] for it in client.get("/api/problems", params={"q": "onion"}).json()["items"]} == {seed["new"].id}
     assert {it["id"] for it in client.get("/api/problems", params={"q": "flood"}).json()["items"]} == {seed["old"].id}
