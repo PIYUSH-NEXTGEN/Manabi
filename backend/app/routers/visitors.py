@@ -16,6 +16,7 @@ Nothing here is exposed per visitor, only two aggregate numbers.
 """
 
 import hashlib
+import ipaddress
 from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Request
@@ -48,6 +49,26 @@ _OS_HINTS = (
 
 
 def _client_ip(request: Request) -> str:
+    """Real client address, which is never the immediate peer in production.
+
+    Behind the Cloudflare Pages proxy and Render's edge, `request.client.host`
+    is whatever internal hop handled that one request, and it rotates. Hashing
+    that would mint a new visitor on every visit, so read the forwarded headers
+    the proxy chain sets (`cf-connecting-ip` first, then the leftmost
+    `x-forwarded-for`) and fall back to the peer address for direct calls.
+    """
+    for header in ("cf-connecting-ip", "x-forwarded-for"):
+        value = request.headers.get(header)
+        if not value:
+            continue
+        candidate = value.split(",")[0].strip()
+        try:
+            ipaddress.ip_address(candidate)
+        except ValueError:
+            # Some other proxy chain wrote something unparseable; ignore it
+            # rather than folding junk into the identity.
+            continue
+        return candidate
     return request.client.host if request.client else "unknown"
 
 

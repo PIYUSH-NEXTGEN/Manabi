@@ -46,11 +46,18 @@ def _heartbeat(
     user_agent: str = WINDOWS,
     language: str = "en-US",
     hints: dict | None = HINTS,
+    forwarded_for: str | None = None,
+    cf_connecting_ip: str | None = None,
 ):
+    headers = {"user-agent": user_agent, "accept-language": language}
+    if forwarded_for is not None:
+        headers["x-forwarded-for"] = forwarded_for
+    if cf_connecting_ip is not None:
+        headers["cf-connecting-ip"] = cf_connecting_ip
     return client.post(
         "/api/visitors/heartbeat",
         json={"visitor_id": visitor_id, **(hints if hints is not None else {})},
-        headers={"user-agent": user_agent, "accept-language": language},
+        headers=headers,
     )
 
 
@@ -173,3 +180,26 @@ def test_invalid_device_hints_are_rejected(client):
         client, "visitor-jjjjjjjj", hints={"screen": "1920x1080", "cores": 9999}
     )
     assert too_many_cores.status_code == 422
+
+
+def test_forwarded_client_address_identifies_the_visitor(client):
+    """The proxy hop in `request.client.host` must not become the identity."""
+    first = _heartbeat(
+        client, "visitor-kkkkkkkk", forwarded_for="203.0.113.7, 10.0.0.4"
+    )
+    assert first.json() == {"online": 1, "total": 1}
+
+    # Same visitor, different internal hop and a different browser id.
+    again = _heartbeat(
+        client, "visitor-llllllll", cf_connecting_ip="203.0.113.7"
+    )
+    assert again.json() == {"online": 1, "total": 1}
+
+    other = _heartbeat(client, "visitor-mmmmmmmm", forwarded_for="198.51.100.9")
+    assert other.json() == {"online": 2, "total": 2}
+
+
+def test_unparseable_forwarded_address_falls_back_to_the_peer(client):
+    res = _heartbeat(client, "visitor-nnnnnnnn", forwarded_for="not-an-address")
+    assert res.status_code == 200
+    assert res.json() == {"online": 1, "total": 1}
