@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
-import { Heart, Star } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Logo } from './Logo';
 import { GithubMark } from '@/components/icons/GithubMark';
+import { XMark } from '@/components/icons/XMark';
 import { X_URL } from '@/lib/socials';
 import { CONTACT_EMAIL } from '@/lib/contact';
 
@@ -11,13 +12,12 @@ type FooterLink = {
   label: string;
   to?: string;
   href?: string;
+  icon?: 'x' | 'github';
 };
 
 type FooterColumn = {
   heading: string;
   links: FooterLink[];
-  portalsHeading?: string;
-  portals?: FooterLink[];
 };
 
 const FOOTER_COLUMNS: FooterColumn[] = [
@@ -56,42 +56,56 @@ const FOOTER_COLUMNS: FooterColumn[] = [
   {
     heading: 'Social Media',
     links: [
-      { label: 'X (Twitter)', href: X_URL },
-      { label: 'GitHub', href: REPO_URL },
-    ],
-    portalsHeading: 'Our portals',
-    portals: [
-      { label: 'MANABI', href: REPO_URL },
-      { label: 'Sponsors', to: '/sponsors' },
+      { label: '@Piyush_NextGen', href: X_URL, icon: 'x' },
+      { label: 'manabi', href: REPO_URL, icon: 'github' },
     ],
   },
 ];
 
 const LINK_CLASS =
-  'inline-block rounded-[3px] text-[0.9375rem] leading-none text-[#22242a] transition-[color,transform] duration-200 hover:translate-x-0.5 hover:text-[#0a0b0d] hover:underline hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#15161a] focus-visible:ring-offset-2 focus-visible:ring-offset-white';
-
-const PORTAL_CLASS =
-  'group inline-flex items-center gap-2.5 rounded-md text-[0.9375rem] font-medium text-[#22242a] transition-colors hover:text-[#0a0b0d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#15161a] focus-visible:ring-offset-2 focus-visible:ring-offset-white';
+  'rounded-[3px] text-[0.9375rem] leading-none text-[#22242a] transition-[color,transform] duration-200 hover:translate-x-0.5 hover:text-[#0a0b0d] hover:underline hover:underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#15161a] focus-visible:ring-offset-2 focus-visible:ring-offset-white';
 
 function FooterLinkItem({ link }: { link: FooterLink }) {
+  const className = link.icon
+    ? `group inline-flex items-center gap-2.5 ${LINK_CLASS}`
+    : `inline-block ${LINK_CLASS}`;
+
+  const content = (
+    <>
+      {link.icon === 'x' ? (
+        <XMark
+          size={14}
+          className="shrink-0 text-[#15161a] transition-transform duration-200 group-hover:scale-110"
+        />
+      ) : null}
+      {link.icon === 'github' ? (
+        <GithubMark
+          size={16}
+          className="shrink-0 text-[#15161a] transition-transform duration-200 group-hover:scale-110"
+        />
+      ) : null}
+      {link.label}
+    </>
+  );
+
   if (link.to) {
     return (
-      <Link to={link.to} className={LINK_CLASS}>
-        {link.label}
+      <Link to={link.to} className={className}>
+        {content}
       </Link>
     );
   }
 
   return (
-    <a href={link.href} target="_blank" rel="noreferrer" className={LINK_CLASS}>
-      {link.label}
+    <a href={link.href} target="_blank" rel="noreferrer" className={className}>
+      {content}
     </a>
   );
 }
 
 export function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-[#eceae3] bg-white [--paper:#ffffff]">
+    <footer className="relative overflow-hidden border-t border-[#eceae3] bg-white [--paper:#ffffff] [--danger:#b42318]">
       <div className="mx-auto w-full max-w-[1360px] px-6 pt-12 sm:px-10 sm:pt-14 lg:px-16 lg:pt-16">
         <div className="flex flex-col gap-3">
           <Link
@@ -128,45 +142,6 @@ export function Footer() {
                   </li>
                 ))}
               </ul>
-
-              {column.portalsHeading && column.portals ? (
-                <div className="mt-8">
-                  <h3 className="text-[0.8125rem] font-normal text-[#a6a49b]">
-                    {column.portalsHeading}
-                  </h3>
-                  <ul className="mt-4 flex flex-col gap-3">
-                    {column.portals.map((portal) => (
-                      <li key={`${column.heading}-${portal.label}`}>
-                        {portal.to ? (
-                          <Link to={portal.to} className={PORTAL_CLASS}>
-                            <Star
-                              aria-hidden
-                              size={16}
-                              fill="currentColor"
-                              strokeWidth={0}
-                              className="text-[#d8a92e] transition-transform duration-200 group-hover:scale-110"
-                            />
-                            {portal.label}
-                          </Link>
-                        ) : (
-                          <a
-                            href={portal.href}
-                            target="_blank"
-                            rel="noreferrer"
-                            className={PORTAL_CLASS}
-                          >
-                            <GithubMark
-                              size={18}
-                              className="text-[#15161a] transition-transform duration-200 group-hover:scale-110"
-                            />
-                            {portal.label}
-                          </a>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
             </div>
           ))}
         </nav>
