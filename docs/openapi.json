@@ -2157,6 +2157,45 @@
             "minLength": 16,
             "pattern": "^[A-Za-z0-9_-]+$",
             "title": "Visitor Id"
+          },
+          "screen": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 11,
+                "pattern": "^\\d{2,5}x\\d{2,5}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Screen"
+          },
+          "cores": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 256.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cores"
+          },
+          "timezone": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9_+\\-/]+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timezone"
           }
         },
         "type": "object",
@@ -2164,7 +2203,7 @@
           "visitor_id"
         ],
         "title": "HeartbeatIn",
-        "description": "Anonymous browser id from localStorage: random, bounded, no PII."
+        "description": "Presence heartbeat.\n\n`visitor_id` is the browser's old localStorage id: still accepted so an\nexisting row can be adopted instead of double-counted, but no longer used\nas the identity. The three device hints are coarse and version-free; they\nonly separate devices that share one IP address, and the server hashes\nthem together with the request's IP and User-Agent."
       },
       "HeatmapDay": {
         "properties": {
@@ -3264,7 +3303,7 @@
           "project_count"
         ],
         "title": "ProblemSummary",
-        "description": "Card-sized projection for list endpoints.\n\nThe board and the home carousel only render these fields; the curated\nbuild guide, datasets and pitch/resume material belong to the detail\nresponse. Shipping them per card made a 24-item list 116 KB."
+        "description": "Card-sized projection for list endpoints.\n\n`summary` is shortened to whole sentences that fit a card (the detail\nendpoint keeps the full brief). The board and the home carousel only render\nthese fields; the curated build guide, datasets and pitch/resume material\nbelong to the detail response. Shipping them per card made a 24-item list\n116 KB."
       },
       "ProblemsListOut": {
         "properties": {

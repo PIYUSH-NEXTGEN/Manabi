@@ -86,12 +86,14 @@ export function PrivacyPage() {
           </li>
           <li>
             <strong className="font-medium text-ink">
-              Anonymous presence id.
+              Device signature.
             </strong>{' '}
-            A random id kept in your browser&apos;s local storage and used only
-            to count how many people are online and how many unique browsers
-            have visited. It is not linked to your account unless you log in,
-            and we do not store your IP address for this.
+            A salted hash of your IP address, browser type, language, screen
+            size, number of CPU cores and timezone, used only to count how many
+            devices are online and how many unique devices have visited. The
+            hash is stored, not the IP address itself, and clearing your
+            browser data does not create a new visitor. It is not linked to
+            your account unless you log in.
           </li>
           <li>
             <strong className="font-medium text-ink">Chat.</strong> Messages are
@@ -241,11 +243,12 @@ export function PrivacyPage() {
         <p>
           Review notes may be kept where they are needed to explain a moderation
           decision. Rate-limit rows expire with their window. Presence rows keep
-          the random browser id and the last time it was seen so the all-time
-          count stays accurate; they contain no IP address or account link
-          unless you logged in. MANABI is a prototype, so data may also be reset
-          during development. Do not store anything here that you cannot afford
-          to lose.
+          the device hash, an older random browser id where one still exists,
+          and the last time the device was seen, so the all-time count stays
+          accurate; they contain no raw IP address or account link unless you
+          logged in. MANABI is a prototype, so data may also be reset during
+          development. Do not store anything here that you cannot afford to
+          lose.
         </p>
       </ProseSection>
 

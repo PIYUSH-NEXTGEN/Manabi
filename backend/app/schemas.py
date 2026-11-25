@@ -351,10 +351,24 @@ class StatsOut(BaseModel):
 
 
 class HeartbeatIn(BaseModel):
-    """Anonymous browser id from localStorage: random, bounded, no PII."""
+    """Presence heartbeat.
+
+    `visitor_id` is the browser's old localStorage id: still accepted so an
+    existing row can be adopted instead of double-counted, but no longer used
+    as the identity. The three device hints are coarse and version-free; they
+    only separate devices that share one IP address, and the server hashes
+    them together with the request's IP and User-Agent.
+    """
 
     visitor_id: str = Field(
         min_length=16, max_length=64, pattern=r"^[A-Za-z0-9_-]+$"
+    )
+    screen: str | None = Field(
+        default=None, max_length=11, pattern=r"^\d{2,5}x\d{2,5}$"
+    )
+    cores: int | None = Field(default=None, ge=0, le=256)
+    timezone: str | None = Field(
+        default=None, max_length=64, pattern=r"^[A-Za-z0-9_+\-/]+$"
     )
 
 

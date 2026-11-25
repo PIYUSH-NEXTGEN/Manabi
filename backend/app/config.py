@@ -129,6 +129,10 @@ class Settings(BaseSettings):
     # Per-IP cap is deliberately generous: a campus or office NAT can hold many
     # legitimate visitors, while a scripted flood still stops early.
     PRESENCE_IP_RATE_LIMIT_PER_HOUR: int = 3000
+    # Salt for the device key (see routers/visitors.py). Empty falls back to
+    # SESSION_SECRET, but setting a dedicated value avoids every visitor
+    # changing identity whenever the session secret is rotated.
+    PRESENCE_HASH_SALT: str = ""
     # Aggregate page views are recorded per (day, path) with no identifiers;
     # this per-IP cap keeps a single client from inflating the counts.
     VIEWS_IP_RATE_LIMIT_PER_HOUR: int = 6000

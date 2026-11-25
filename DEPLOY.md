@@ -248,7 +248,7 @@ and `https://` enables Secure session cookies and HSTS (`max-age=31536000`).
 
 ## 4. Database migrations
 
-Alembic is the source of truth for Postgres. Current head is `0020_visitors`. CI runs a migration smoke check on both SQLite
+Alembic is the source of truth for Postgres. Current head is `0022_presence_device_key`. CI runs a migration smoke check on both SQLite
 and a disposable Postgres service; that is a schema check, not a restore or
 production migration.
 
@@ -454,7 +454,7 @@ Render's health check alone is not proof that the API can serve data.
    `Strict-Transport-Security`.
 7. `curl -i https://<api>/api/stats -H 'Origin: https://<app>'` → response
    carries `access-control-allow-origin: https://<app>`.
-8. `alembic current` → `0020_visitors (head)`.
+8. `alembic current` → `0022_presence_device_key (head)`.
 9. Open the app, log in with GitHub, submit a test project, and exercise the
    admin review path if those features are enabled. Check DevTools → Network
    that `/api/auth/me` returns 200 after login (a 401 there means the session

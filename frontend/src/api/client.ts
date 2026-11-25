@@ -11,6 +11,13 @@ export type Facet = Schemas['Facet'];
 export type StatsOut = Schemas['StatsOut'];
 export type PresenceOut = Schemas['PresenceOut'];
 
+/** Coarse, version-free device hints the server folds into its device key. */
+export type DeviceHints = {
+  screen?: string;
+  cores?: number;
+  timezone?: string;
+};
+
 export class ApiError extends Error {
   readonly status: number;
   readonly detail: string;
@@ -208,10 +215,13 @@ export function getStats(): Promise<StatsOut> {
   return apiFetch<StatsOut>('/api/stats');
 }
 
-export function sendHeartbeat(visitorId: string): Promise<PresenceOut> {
+export function sendHeartbeat(
+  visitorId: string,
+  hints?: DeviceHints,
+): Promise<PresenceOut> {
   return apiFetch<PresenceOut>('/api/visitors/heartbeat', {
     method: 'POST',
-    body: JSON.stringify({ visitor_id: visitorId }),
+    body: JSON.stringify({ visitor_id: visitorId, ...hints }),
   });
 }
 

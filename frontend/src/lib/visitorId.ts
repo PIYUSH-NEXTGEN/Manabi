@@ -22,10 +22,34 @@ function randomId(): string {
 }
 
 /**
- * Anonymous id used only to de-duplicate presence heartbeats. It is random,
- * lives in localStorage, and is never linked to an account unless the visitor
- * logs in (handled server-side). Storage can be unavailable in private mode,
- * so the id falls back to memory for the current page load.
+ * Coarse device hints sent with the heartbeat. They contain nothing unique:
+ * screen size, CPU cores and timezone only separate devices that share one IP.
+ */
+export function getDeviceHints() {
+  const screen =
+    typeof window !== 'undefined' && window.screen
+      ? `${window.screen.width}x${window.screen.height}`
+      : '';
+  const cores =
+    typeof navigator !== 'undefined' ? navigator.hardwareConcurrency || 0 : 0;
+  let timezone = '';
+  try {
+    timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+  } catch {
+    timezone = '';
+  }
+  return { screen, cores, timezone };
+}
+
+/**
+ * Legacy id used only to adopt this browser's existing presence row.
+ *
+ * Identity itself is derived on the server (see routers/visitors.py), so
+ * clearing storage no longer creates a new visitor; this value is sent so an
+ * old row is upgraded instead of duplicated. It is random, lives in
+ * localStorage, and is never linked to an account unless the visitor logs in
+ * (handled server-side). Storage can be unavailable in private mode, so the
+ * id falls back to memory for the current page load.
  */
 export function getVisitorId(): string {
   if (memoryId) return memoryId;

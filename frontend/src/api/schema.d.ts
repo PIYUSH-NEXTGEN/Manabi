@@ -726,11 +726,23 @@ export interface components {
         };
         /**
          * HeartbeatIn
-         * @description Anonymous browser id from localStorage: random, bounded, no PII.
+         * @description Presence heartbeat.
+         *
+         *     `visitor_id` is the browser's old localStorage id: still accepted so an
+         *     existing row can be adopted instead of double-counted, but no longer used
+         *     as the identity. The three device hints are coarse and version-free; they
+         *     only separate devices that share one IP address, and the server hashes
+         *     them together with the request's IP and User-Agent.
          */
         HeartbeatIn: {
             /** Visitor Id */
             visitor_id: string;
+            /** Screen */
+            screen?: string | null;
+            /** Cores */
+            cores?: number | null;
+            /** Timezone */
+            timezone?: string | null;
         };
         /**
          * HeatmapDay
@@ -1073,9 +1085,11 @@ export interface components {
          * ProblemSummary
          * @description Card-sized projection for list endpoints.
          *
-         *     The board and the home carousel only render these fields; the curated
-         *     build guide, datasets and pitch/resume material belong to the detail
-         *     response. Shipping them per card made a 24-item list 116 KB.
+         *     `summary` is shortened to whole sentences that fit a card (the detail
+         *     endpoint keeps the full brief). The board and the home carousel only render
+         *     these fields; the curated build guide, datasets and pitch/resume material
+         *     belong to the detail response. Shipping them per card made a 24-item list
+         *     116 KB.
          */
         ProblemSummary: {
             /** Id */

@@ -263,16 +263,22 @@ class RateLimitHit(Base):
 
 
 class Visitor(Base):
-    """One anonymous browser/device seen by the presence heartbeat.
+    """One anonymous visitor seen by the presence heartbeat.
 
-    visitor_id is a random id minted in the browser and kept in localStorage;
-    no IP, cookie or account identifier is stored here. A row is the all-time
-    unique visitor, while last_seen decides whether it counts as online.
+    Rows are identified by `device_key`, a salted hash of the requesting
+    device's coarse signature computed server-side (see routers/visitors.py),
+    so clearing browser storage does not create a new visitor. `device_key` is
+    NULL on rows written before that change; those still count individually,
+    which keeps the all-time total intact. No raw IP, cookie or account
+    identifier is stored. `last_seen` decides whether a visitor is online.
     """
 
     __tablename__ = "visitors"
 
     visitor_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    device_key: Mapped[str | None] = mapped_column(
+        String(64), nullable=True, unique=True, index=True
+    )
     first_seen: Mapped[datetime] = mapped_column(DateTime, default=utcnow, nullable=False)
     last_seen: Mapped[datetime] = mapped_column(
         DateTime, default=utcnow, nullable=False, index=True
