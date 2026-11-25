@@ -178,9 +178,15 @@ function AnalyticsIdentity() {
 
 function RoutePageview() {
   const { pathname } = useLocation();
+  const recorded = useRef<string | null>(null);
 
   useEffect(() => {
     trackPageview(pathname);
+    // React StrictMode re-runs effects on mount in development, so guard by
+    // path: one navigation is one row. A reload starts from a fresh app, and
+    // leaving and returning to a path still records each visit.
+    if (recorded.current === pathname) return;
+    recorded.current = pathname;
     // Aggregate row in the database only; the counter is never rendered.
     void recordPageview(pathname).catch(() => {});
   }, [pathname]);

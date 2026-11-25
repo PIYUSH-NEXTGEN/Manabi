@@ -1,3 +1,4 @@
+import { StrictMode } from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
@@ -43,6 +44,33 @@ describe('Route table (no dead links)', () => {
         { timeout: 15000 },
       ),
     ).toBeInTheDocument();
+  }, 20000);
+
+  it('records one page view per navigation under StrictMode', async () => {
+    window.history.pushState({}, '', '/');
+
+    const paths: string[] = [];
+    server.use(
+      http.post('*/api/views', async ({ request }) => {
+        const body = (await request.json()) as { path: string };
+        paths.push(body.path);
+        return new HttpResponse(null, { status: 204 });
+      }),
+    );
+
+    render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    );
+
+    await screen.findByRole(
+      'heading',
+      { name: 'Stop Searching Start Building', level: 1 },
+      { timeout: 15000 },
+    );
+    await waitFor(() => expect(paths).toContain('/'));
+    expect(paths.filter((path) => path === '/')).toHaveLength(1);
   }, 20000);
 
   it('sets a route-specific document title', async () => {
