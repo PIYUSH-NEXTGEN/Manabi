@@ -145,15 +145,20 @@ export function Sponsors() {
                 ) : (
                   <Link
                     to="/sponsors"
-                    aria-label={`Sponsor slot ${index + 1}, open`}
-                    className="group flex aspect-square items-center justify-center rounded-[1.2rem] border border-dashed border-line bg-tint/40 text-muted transition-colors hover:border-sky-strong hover:bg-sky/20 hover:text-ink dark:bg-sheet"
+                    aria-label={`Sponsor slot ${index + 1}, open, ${SPONSOR_PRICE}/month`}
+                    className="group flex flex-col"
                   >
-                    <Plus
-                      aria-hidden
-                      size={22}
-                      strokeWidth={2}
-                      className="transition-transform duration-200 group-hover:scale-110"
-                    />
+                    <span className="flex aspect-square items-center justify-center rounded-[1.2rem] border border-dashed border-line bg-tint/40 text-muted transition-colors group-hover:border-sky-strong group-hover:bg-sky/20 group-hover:text-ink dark:bg-sheet">
+                      <Plus
+                        aria-hidden
+                        size={22}
+                        strokeWidth={2}
+                        className="transition-transform duration-200 group-hover:scale-110"
+                      />
+                    </span>
+                    <span className="mt-2 block text-center font-mono text-label font-bold uppercase tracking-[0.12em] text-muted transition-colors group-hover:text-ink">
+                      {SPONSOR_PRICE}/M
+                    </span>
                   </Link>
                 )}
               </li>
