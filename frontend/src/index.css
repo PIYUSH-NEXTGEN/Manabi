@@ -812,6 +812,52 @@ body {
   );
 }
 
+/* Presence strip: three bars rising and falling in sequence, so "N online now"
+   reads as live without a glowing dot. */
+.presence-bars {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 9px;
+}
+
+.presence-bars > span {
+  width: 2px;
+  height: 100%;
+  border-radius: 1px;
+  background-color: color-mix(in srgb, var(--ink) 50%, transparent);
+  transform-origin: bottom;
+  animation: presence-bar 1.5s ease-in-out infinite;
+}
+
+.presence-bars > span:nth-child(2) {
+  animation-delay: 0.17s;
+}
+
+.presence-bars > span:nth-child(3) {
+  animation-delay: 0.34s;
+}
+
+@keyframes presence-bar {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+    opacity: 0.5;
+  }
+
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .presence-bars > span {
+    animation: none;
+    transform: scaleY(0.7);
+  }
+}
+
 @keyframes marquee-scroll {
   from {
     transform: translateX(0);

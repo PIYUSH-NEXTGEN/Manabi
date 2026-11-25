@@ -114,16 +114,17 @@ function PresenceLine() {
       className="flex flex-wrap items-center gap-x-5 gap-y-1.5 font-mono text-label font-bold uppercase tracking-[0.12em] text-muted sm:justify-end"
     >
       <span className="inline-flex items-center gap-2">
-        <span aria-hidden className="relative flex size-2">
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-lime opacity-60 motion-reduce:hidden" />
-          <span className="relative inline-flex size-2 rounded-full bg-lime" />
+        <span aria-hidden className="presence-bars shrink-0">
+          <span />
+          <span />
+          <span />
         </span>
         {online == null ? 'Checking who is here' : `${online} online now`}
       </span>
       <span>
         {total == null
-          ? 'Visitors all-time'
-          : `${total.toLocaleString()} visitors all-time`}
+          ? 'Unique visitors'
+          : `${total.toLocaleString()} unique visitors`}
       </span>
     </p>
   );

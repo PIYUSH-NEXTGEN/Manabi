@@ -21,7 +21,7 @@ describe('HomePage', () => {
     ).toBeInTheDocument();
     expect(await screen.findByText(/1 online now/i)).toBeInTheDocument();
     expect(
-      await screen.findByText(/12 visitors all-time/i),
+      await screen.findByText(/12 unique visitors/i),
     ).toBeInTheDocument();
 
     expect(

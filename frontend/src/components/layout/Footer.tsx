@@ -107,23 +107,18 @@ export function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-[#eceae3] bg-white [--paper:#ffffff] [--danger:#b42318]">
       <div className="mx-auto w-full max-w-[1360px] px-6 pt-12 sm:px-10 sm:pt-14 lg:px-16 lg:pt-16">
-        <div className="flex flex-col gap-3">
-          <Link
-            to="/"
-            className="group inline-flex w-fit items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#15161a] focus-visible:ring-offset-4 focus-visible:ring-offset-white"
-          >
-            <Logo
-              size={38}
-              className="text-[#15161a] transition-colors group-hover:text-[#4a7fb5]"
-            />
-            <span className="font-brand text-[1.25rem] uppercase leading-none tracking-[-0.01em] text-[#15161a]">
-              MANABI
-            </span>
-          </Link>
-          <p className="text-[0.8125rem] leading-relaxed text-[#8b897f]">
-            Real problems, built in public.
-          </p>
-        </div>
+        <Link
+          to="/"
+          className="group inline-flex w-fit items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#15161a] focus-visible:ring-offset-4 focus-visible:ring-offset-white"
+        >
+          <Logo
+            size={38}
+            className="text-[#15161a] transition-colors group-hover:text-[#4a7fb5]"
+          />
+          <span className="font-brand text-[1.25rem] uppercase leading-none tracking-[-0.01em] text-[#15161a]">
+            MANABI
+          </span>
+        </Link>
 
         <nav
           aria-label="Footer"
