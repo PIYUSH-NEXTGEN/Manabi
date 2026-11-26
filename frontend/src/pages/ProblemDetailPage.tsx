@@ -10,6 +10,7 @@ import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ProjectProgressBadge } from "@/components/problems/ProjectProgressBadge";
 import { SubmitProjectPanel } from "@/components/problems/SubmitProjectPanel";
 import { GithubMark } from "@/components/icons/GithubMark";
+import { GlossaryHint } from "@/components/glossary/GlossaryHint";
 import { GlossaryText } from "@/components/glossary/GlossaryText";
 import { useProblem } from "@/hooks/useProblem";
 import { useStarToggle } from "@/hooks/useStarToggle";
@@ -377,19 +378,22 @@ function DetailView({ problemId }: { problemId: number }) {
             </div>
           </div>
 
-          <dl className="self-start rounded-card border border-line bg-sheet px-5 py-4 shadow-soft">
-            <div className="flex items-center justify-between border-b border-line pb-2.5">
-              <dt className={microLabel}>File no.</dt>
-              <dd className="font-mono text-body font-bold tracking-[0.08em]">
-                M-{String(data.id).padStart(3, "0")}
-              </dd>
-            </div>
-            <SpecRow label="Field">{fieldLabel(data.field)}</SpecRow>
-            {isLearning ? (
-              <SpecRow label="Difficulty">{data.difficulty}</SpecRow>
-            ) : null}
-            {track ? <SpecRow label="Track">{track}</SpecRow> : null}
-          </dl>
+          <div className="flex flex-col gap-4 self-start">
+            <dl className="rounded-card border border-line bg-sheet px-5 py-4 shadow-soft">
+              <div className="flex items-center justify-between border-b border-line pb-2.5">
+                <dt className={microLabel}>File no.</dt>
+                <dd className="font-mono text-body font-bold tracking-[0.08em]">
+                  M-{String(data.id).padStart(3, "0")}
+                </dd>
+              </div>
+              <SpecRow label="Field">{fieldLabel(data.field)}</SpecRow>
+              {isLearning ? (
+                <SpecRow label="Difficulty">{data.difficulty}</SpecRow>
+              ) : null}
+              {track ? <SpecRow label="Track">{track}</SpecRow> : null}
+            </dl>
+            <GlossaryHint />
+          </div>
         </motion.header>
 
         <div className="mt-10 grid gap-12 md:grid-cols-[minmax(0,1fr)_320px] lg:gap-16">
