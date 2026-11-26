@@ -1,4 +1,10 @@
-import { useState, type MouseEvent, type ReactNode } from 'react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent,
+  type ReactNode,
+} from 'react';
 import { ArrowDown, ArrowUpRight, Check, Plus } from 'lucide-react';
 import { buttonClasses } from '@/design/primitives';
 import { useStats } from '@/hooks/useStats';
@@ -7,6 +13,7 @@ import { usePrefersReducedMotion } from '@/lib/usePrefersReducedMotion';
 import {
   AUDIENCE,
   FAQ,
+  GMAIL_COMPOSE_URL,
   HERO,
   HOW_IT_WORKS,
   MAILTO_URL,
@@ -149,6 +156,7 @@ export function SponsorsPage() {
               {OFFER.cta}
               <ArrowUpRight aria-hidden size={13} strokeWidth={2.6} />
             </a>
+            <SponsorEmailFallback />
           </div>
 
           <div className="mt-8">
@@ -289,6 +297,58 @@ export function SponsorsPage() {
         </Section>
       </div>
     </main>
+  );
+}
+
+/**
+ * Laptops without a registered mail app ignore the mailto CTA with no error,
+ * so keep a visible address (click to copy) and a pre-filled Gmail compose
+ * link next to it. Mobile users simply never need this line.
+ */
+function SponsorEmailFallback() {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<number | undefined>(undefined);
+
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  const copyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(SPONSOR_EMAIL);
+      setCopied(true);
+      window.clearTimeout(timer.current);
+      timer.current = window.setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Clipboard access blocked: the address is printed right here anyway.
+    }
+  };
+
+  const linkClass =
+    'font-semibold underline decoration-paper/45 underline-offset-4 transition-colors hover:text-paper dark:decoration-line dark:hover:text-ink';
+
+  return (
+    <p className="mt-4 max-w-md rounded-xl border border-paper/15 bg-paper/10 px-4 py-3 text-[0.875rem] leading-relaxed text-paper/80 dark:border-line dark:bg-tint/70 dark:text-ink-soft">
+      Button not opening your mail app? Email{' '}
+      <button
+        type="button"
+        onClick={copyEmail}
+        title="Copy email address"
+        className={linkClass}
+      >
+        <span aria-live="polite">
+          {copied ? 'address copied' : SPONSOR_EMAIL}
+        </span>
+      </button>{' '}
+      or{' '}
+      <a
+        href={GMAIL_COMPOSE_URL}
+        target="_blank"
+        rel="noreferrer"
+        className={linkClass}
+      >
+        compose in Gmail
+      </a>
+      .
+    </p>
   );
 }
 

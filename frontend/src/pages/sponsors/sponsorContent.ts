@@ -23,6 +23,16 @@ export const MAILTO_URL = `mailto:${SPONSOR_EMAIL}?subject=${encodeURIComponent(
   SPONSOR_EMAIL_SUBJECT,
 )}&body=${encodeURIComponent(SPONSOR_EMAIL_BODY)}`;
 
+/**
+ * Desktop browsers with no default mail app silently ignore `mailto:` links,
+ * so offer the same pre-filled message inside Gmail instead.
+ */
+export const GMAIL_COMPOSE_URL = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(
+  SPONSOR_EMAIL,
+)}&su=${encodeURIComponent(SPONSOR_EMAIL_SUBJECT)}&body=${encodeURIComponent(
+  SPONSOR_EMAIL_BODY,
+)}`;
+
 export const HERO = {
   title: 'Partner with MANABI.',
   subline:
