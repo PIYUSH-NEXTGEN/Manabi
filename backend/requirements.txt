@@ -9,7 +9,7 @@ psycopg2-binary==2.9.13
 httpx==0.28.1
 Authlib==1.9.9
 itsdangerous==2.2.0
-google-genai==2.31.0
+google-genai==3.6.1
 alembic==1.20.1
 
 # Security-pinned transitive dependencies. Keep these explicit so a fresh
