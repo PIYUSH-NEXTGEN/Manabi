@@ -2,12 +2,12 @@
 # Dev/test extras live in requirements-dev.txt.
 fastapi==0.165.0
 uvicorn==0.54.0
-pydantic==2.14.3
+pydantic==2.14.4
 pydantic-settings==2.16.3
 SQLAlchemy==2.1.9
 psycopg2-binary==2.9.13
 httpx==0.28.1
-Authlib==1.9.9
+Authlib==1.9.10
 itsdangerous==2.2.0
 google-genai==2.31.0
 alembic==1.20.1
@@ -15,7 +15,7 @@ alembic==1.20.1
 # Security-pinned transitive dependencies. Keep these explicit so a fresh
 # install cannot resolve back to an advisory-affected version.
 starlette==1.10.0
-certifi==2026.10.23
+certifi==2026.11.20
 joserfc==1.8.0
 pyasn1==0.6.5
 opentelemetry-api==1.45.2
